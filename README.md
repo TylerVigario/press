@@ -48,7 +48,7 @@ one pins the version it uses.
 Add it to a project:
 
 ```sh
-git submodule add https://github.com/Vigario-Technology-Solutions/press vendor/press
+git submodule add https://github.com/TylerVigario/press vendor/press
 ```
 
 Clone a project that already uses it:

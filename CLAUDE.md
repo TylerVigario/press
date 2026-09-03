@@ -47,7 +47,7 @@ him appears, or digital consumption genuinely displaces paper. Neither has happe
 ## Installing press into a repo
 
 ```sh
-git submodule add https://github.com/Vigario-Technology-Solutions/press vendor/press
+git submodule add https://github.com/TylerVigario/press vendor/press
 ```
 
 Then one line in the consuming repo's `justfile`. **Which line depends on whether that
