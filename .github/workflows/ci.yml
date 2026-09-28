@@ -39,6 +39,10 @@ on:
   pull_request:
   push:
     branches: [main]
+  # The release workflow calls this as its gate, so nothing is released that a
+  # merge would have refused. Concurrency below still keys on the caller's name and
+  # ref, and only a pull request cancels an earlier run.
+  workflow_call:
 
 permissions:
   contents: read
