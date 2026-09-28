@@ -1,0 +1,295 @@
+name: Release
+
+# One manual run releases press: cocogitto derives the next version from the commits
+# since the last tag, the commits are linted, CI runs as the gate, CHANGELOG.md is
+# recorded on main, and the GitHub release is published, which creates the tag.
+#
+# THE VERSION COMES FROM THE COMMITS. cocogitto's default bump rules decide it: a
+# breaking change bumps major, `feat` minor, `fix` patch, and every other type
+# (docs, ci, chore, refactor, release) bumps nothing. When nothing since the last tag
+# bumps, the run says so and releases nothing. Which types bump is cog.toml's to
+# change, not this file's.
+#
+# EVERY TAG NAMES ITS PACKAGE DIRECTORY. v<version> freezes
+# packages/vts/press/<version>/, and CI's "Released versions are unchanged" refuses
+# any later change to it. A package change is made in a new directory by pull
+# request, named for the version its commits will derive; the release checks that
+# the name and the commits agree. Where the derived version has no directory — a
+# release of tooling fixes, say — the release creates it as a copy of the newest
+# released one, so the version a consumer imports always exists.
+#
+# THE ORDER.
+#   decide   derives the version, checks it against the tree, runs cog check over
+#            the commits the changelog is built from, and previews the entry. No
+#            credentials.
+#   gate     ci.yml, called: nothing is released that a merge would refuse.
+#   publish  skipped on a dry run. Creates the version directory if it is missing,
+#            writes the changelog, mints the App token, asks the forge for the
+#            commit that records both (repo standard rule 15: it does not push
+#            one), then publishes the release on that commit. Publishing is what
+#            creates the tag, so a failure before it leaves no tag, and a rerun
+#            carries on from where it stopped.
+#
+# WHY AN APP. main takes no direct push (rule 6), and recording the release writes
+# main. The one exemption is a GitHub App installed on this repository alone (rule
+# 16). Its credentials are environment secrets on `release`, not repository secrets,
+# so only the publish job can reach them, and only after a required reviewer
+# approves the run (rule 20).
+#
+# SETUP, once, by the owner — recorded so it can be rebuilt:
+#   1. A GitHub App owned by @TylerVigario, `press-release`. Repository permissions:
+#      Contents read and write, nothing else. Webhook off.
+#   2. Installed on press only. An installation does not follow a repository
+#      transfer; re-install after one.
+#   3. A `release` environment with a required reviewer, deployments limited to
+#      main, holding RELEASE_APP_CLIENT_ID (the Iv23li... Client ID, not the numeric
+#      App ID) and RELEASE_APP_PRIVATE_KEY as environment secrets.
+#   4. The App added to bypass_actors in .github/rulesets/main.json by its numeric
+#      App ID, and that payload re-applied.
+#
+# A dry run needs none of that: decide and the gate run, and the entry goes to the
+# run summary. Nothing is written anywhere.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Derive, lint and gate; publish nothing"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  decide:
+    name: Decide the version
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.decide.outputs.release }}
+      version: ${{ steps.decide.outputs.version }}
+      tag: ${{ steps.decide.outputs.tag }}
+      source: ${{ steps.decide.outputs.source }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Every tag: the derivation starts from the newest one.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up cocogitto
+        run: sh .github/setup-cog.sh
+
+      - name: Decide
+        id: decide
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+          fail() { echo "::error::$*"; exit 1; }
+          [ "$REF" = refs/heads/main ] || fail "releases are cut from main, not $REF"
+          semver='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
+          tagged() { git rev-parse -q --verify "refs/tags/v$1" >/dev/null; }
+          newest=$(git tag --list 'v*' | sed 's/^v//' | { grep -E "$semver" || true; } | sort -V | tail -1)
+
+          # cocogitto prints the next version, or a sentence when nothing bumps.
+          # Both exit 0, so the version is read from the output, not the status.
+          out=$(cog bump --auto --dry-run 2>&1) || { printf '%s\n' "$out"; fail "cocogitto could not derive the next version"; }
+          next=$(printf '%s\n' "$out" | { grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' || true; } | tail -1)
+          if [ -z "$next" ]; then
+            printf '%s\n' "$out"
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "Nothing since ${newest:+v}${newest:-the first commit} bumps a version. No release." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          version=${next#v}
+          [[ "$version" =~ $semver ]] || fail "cocogitto derived something that is not a version: $next"
+          ! tagged "$version" || fail "v$version is already released, and a tag here is create-once"
+
+          dir="packages/vts/press/$version"
+          source=""
+          if [ -d "$dir" ]; then
+            manifest=$(sed -n 's/^version *= *"\(.*\)"$/\1/p' "$dir/typst.toml")
+            [ "$manifest" = "$version" ] || fail "$dir/typst.toml says ${manifest:-nothing}, not $version"
+          else
+            # Created at publish from the newest directory, which must already be
+            # released: an unreleased directory under another number means the
+            # tree and the commits disagree about what this release is.
+            source=$(find packages/vts/press -mindepth 1 -maxdepth 1 -type d -printf '%f\n' \
+                       | { grep -E "$semver" || true; } | sort -V | tail -1)
+            [ -n "$source" ] || fail "no package directory to create $dir/ from"
+            tagged "$source" || fail "the commits derive $version, but packages/vts/press/$source/ is not released. Name that directory $version, or check the commit types since ${newest:+v}${newest:-the first commit}."
+          fi
+
+          if [ -n "$source" ]; then where="created from $source"; else where="already in the tree"; fi
+          echo "releasing $version; newest release so far: ${newest:-none}; directory $where"
+          {
+            echo "release=true"
+            echo "version=$version"
+            echo "tag=v$version"
+            echo "newest=$newest"
+            echo "source=$source"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Every commit the changelog is built from follows the convention
+        if: steps.decide.outputs.release == 'true'
+        env:
+          NEWEST: ${{ steps.decide.outputs.newest }}
+        run: |
+          set -euo pipefail
+          # The changelog is these commits grouped by type, and one that does not
+          # parse is left out of it without a word. So it is refused here instead.
+          if [ -n "$NEWEST" ]; then
+            cog check --ignore-merge-commits "v$NEWEST..HEAD"
+          else
+            cog check --ignore-merge-commits
+          fi
+
+      - name: Preview the changelog entry
+        if: steps.decide.outputs.release == 'true'
+        env:
+          TAG: ${{ steps.decide.outputs.tag }}
+          SOURCE: ${{ steps.decide.outputs.source }}
+        run: |
+          set -euo pipefail
+          # cocogitto names a section only after a tag, so one is set here, in this
+          # clone only, and never pushed. The entry is cut from the whole-file
+          # render: `cog changelog --at` gets a later release's compare link wrong.
+          git tag "$TAG"
+          {
+            echo "### $TAG, as it will be recorded"
+            echo
+            [ -z "$SOURCE" ] || { echo "packages/vts/press/${TAG#v}/ will be created from $SOURCE/."; echo; }
+            cog changelog | awk '/^## /{n++} n==1'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  gate:
+    needs: decide
+    if: needs.decide.outputs.release == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    name: Publish ${{ needs.decide.outputs.tag }}
+    needs: [decide, gate]
+    if: needs.decide.outputs.release == 'true' && !inputs.dry-run
+    runs-on: ubuntu-latest
+    # The App's secrets live here, behind a required reviewer and limited to main.
+    environment: release
+    permissions:
+      # The App token does every write; GITHUB_TOKEN stays read-only.
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up cocogitto
+        run: sh .github/setup-cog.sh
+
+      - name: Create the version directory
+        if: needs.decide.outputs.source != ''
+        env:
+          VERSION: ${{ needs.decide.outputs.version }}
+          SOURCE: ${{ needs.decide.outputs.source }}
+        run: |
+          set -euo pipefail
+          # A copy of the newest released version with its own number, so the
+          # version a consumer imports exists. Nothing else in it changes.
+          dir="packages/vts/press/$VERSION"
+          cp -r "packages/vts/press/$SOURCE" "$dir"
+          sed -i "s/^version *= *\".*\"$/version = \"$VERSION\"/" "$dir/typst.toml"
+          [ "$(sed -n 's/^version *= *"\(.*\)"$/\1/p' "$dir/typst.toml")" = "$VERSION" ] \
+            || { echo "::error::could not set the version in $dir/typst.toml"; exit 1; }
+
+      - name: Write the changelog and the release notes
+        env:
+          TAG: ${{ needs.decide.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git tag "$TAG"   # local only, as in decide
+          {
+            printf '# Changelog\n\n'
+            cog changelog
+          } > CHANGELOG.md
+          cog changelog | awk '/^## /{n++} n==1' > "$RUNNER_TEMP/notes.md"
+          git tag -d "$TAG"
+          [ -s "$RUNNER_TEMP/notes.md" ] || { echo "::error::the changelog has no entry for $TAG"; exit 1; }
+
+      - name: Mint a token for the release App
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ secrets.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
+      - name: Ask the forge for the commit that records the release
+        id: commit
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          TAG: ${{ needs.decide.outputs.tag }}
+          VERSION: ${{ needs.decide.outputs.version }}
+        run: |
+          set -euo pipefail
+          head=$(git rev-parse HEAD)
+          dir="packages/vts/press/$VERSION"
+          changed=$(git status --porcelain --untracked-files=all -- CHANGELOG.md "$dir" | sed 's/^...//')
+          if [ -z "$changed" ]; then
+            # A rerun after a failed publish: main already records this release.
+            echo "main already records $TAG"
+            oid=$head
+          else
+            # One addition per changed file, contents base64-encoded so any file
+            # survives. The forge builds and signs the commit; nothing here
+            # supplies an author, a committer or a signature. expectedHeadOid
+            # refuses it if main has moved since the gate passed.
+            while IFS= read -r f; do
+              jq -n --arg path "$f" --arg contents "$(base64 -w0 "$f")" '{path: $path, contents: $contents}'
+            done <<< "$changed" | jq -s '.' > "$RUNNER_TEMP/additions.json"
+            jq -n \
+              --arg repo "$GITHUB_REPOSITORY" \
+              --arg head "$head" \
+              --arg msg "release: $TAG" \
+              --slurpfile additions "$RUNNER_TEMP/additions.json" \
+              '{query: "mutation($input:CreateCommitOnBranchInput!){createCommitOnBranch(input:$input){commit{oid}}}",
+                variables: {input: {
+                  branch: {repositoryNameWithOwner: $repo, branchName: "main"},
+                  expectedHeadOid: $head,
+                  message: {headline: $msg},
+                  fileChanges: {additions: $additions[0]}}}}' \
+              > "$RUNNER_TEMP/mutation.json"
+            oid=$(gh api graphql --input "$RUNNER_TEMP/mutation.json" --jq '.data.createCommitOnBranch.commit.oid')
+            [ -n "$oid" ] || { echo "::error::createCommitOnBranch returned no commit"; exit 1; }
+          fi
+          echo "release commit: $oid"
+          echo "oid=$oid" >> "$GITHUB_OUTPUT"
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          TAG: ${{ needs.decide.outputs.tag }}
+          OID: ${{ steps.commit.outputs.oid }}
+        run: |
+          set -euo pipefail
+          # A draft left by a failed run holds no tag yet; replace it.
+          if [ "$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft 2>/dev/null)" = true ]; then
+            gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --yes
+          fi
+          # Draft first, publish last: publication is where the tag is created, on
+          # the commit that records the release, and where immutability falls.
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --draft \
+            --target "$OID" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md"
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false
+
+          draft=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)
+          [ "$draft" = false ] || { echo "::error::$TAG is still a draft"; exit 1; }
+          named=$(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" --jq .sha)
+          [ "$named" = "$OID" ] || { echo "::error::$TAG names $named, not $OID"; exit 1; }
+          echo "Published $TAG on $OID." >> "$GITHUB_STEP_SUMMARY"
