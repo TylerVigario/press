@@ -24,6 +24,9 @@ name: CI
 #                            job needs, action inputs, and shellcheck on each run:
 #                            block. A workflow's own mistakes surface only when it
 #                            runs, and the release workflow runs rarely.
+#   Markdown lint            markdownlint over every tracked *.md. README.md and
+#                            CLAUDE.md are how press is learned, by people and by
+#                            agents, and a broken fence or table misleads both.
 #
 # press is vendored as a submodule by every repository that builds a document, so
 # a bad commit on main reaches all of them before anyone notices. That is why this
@@ -216,3 +219,17 @@ jobs:
         # the hosted runner, so every run: block is checked as a shell script
         # too, not only as YAML.
         run: actionlint
+
+  markdown:
+    name: Markdown lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: markdownlint-cli2
+        # The CLI through npx at an exact version, not the markdownlint action:
+        # only GitHub-owned actions may run here (rule 10), and the node on the
+        # hosted runner is enough. Rules and ignores are .markdownlint-cli2.jsonc.
+        # Dependabot does not see this pin; a bump is a deliberate edit.
+        run: npx --yes markdownlint-cli2@0.23.3

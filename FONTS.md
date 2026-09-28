@@ -52,7 +52,7 @@ there is no second monospace face vendored to fall back to, and losing a glyph o
 worse than losing alignment on one character. If a mono document ever depends on column
 alignment for meaning, `check` it and consider vendoring a wider mono.
 
-### The stacks narrow this hole. They do not seal it.
+### The stacks narrow this hole; they do not seal it
 
 A codepoint absent from **every** vendored face still comes from Typst's own bundled
 fonts, and `--ignore-system-fonts` does not touch those. Measured on this package:
