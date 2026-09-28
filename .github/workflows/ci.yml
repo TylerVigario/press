@@ -20,6 +20,10 @@ name: CI
 #                            guard that asserted existence where ancestry was the
 #                            question — so the script that judges every document is
 #                            worth judging.
+#   Workflows lint           actionlint over every workflow: expressions, contexts,
+#                            job needs, action inputs, and shellcheck on each run:
+#                            block. A workflow's own mistakes surface only when it
+#                            runs, and the release workflow runs rarely.
 #
 # press is vendored as a submodule by every repository that builds a document, so
 # a bad commit on main reaches all of them before anyone notices. That is why this
@@ -183,3 +187,32 @@ jobs:
           # width of whatever was added last.
           find . -path ./.git -prune -o -name '*.sh' -print0 \
             | xargs -0 --no-run-if-empty shellcheck --severity=warning
+
+  workflows:
+    name: Workflows lint
+    runs-on: ubuntu-latest
+    env:
+      # One job uses it, so it is installed here rather than by a shared script;
+      # the version and its digest sit together, and a bump changes both.
+      ACTIONLINT_VERSION: "1.7.12"
+      ACTIONLINT_SHA256: "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up actionlint
+        run: |
+          set -euo pipefail
+          tmp=$(mktemp -d)
+          curl --fail --silent --show-error --location \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz" \
+            --output "$tmp/actionlint.tar.gz"
+          echo "${ACTIONLINT_SHA256}  $tmp/actionlint.tar.gz" | sha256sum -c -
+          tar -xzf "$tmp/actionlint.tar.gz" -C "$tmp" actionlint
+          sudo install -m 0755 "$tmp/actionlint" /usr/local/bin/actionlint
+          actionlint --version
+      - name: actionlint
+        # With no arguments it finds .github/workflows itself. shellcheck is on
+        # the hosted runner, so every run: block is checked as a shell script
+        # too, not only as YAML.
+        run: actionlint
