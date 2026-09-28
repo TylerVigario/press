@@ -2,8 +2,7 @@
 //
 //   #import "@vts/press:0.1.0": *
 //
-// 0.1.0 is the first and only published version; this directory has never held
-// another. It carries the composition vocabulary — `unit`, `chip`,
+// 0.1.0 is the first version; this directory has never held another. It carries the composition vocabulary — `unit`, `chip`,
 // `band-strong`, `dbadge`, `decision` — which had been copy-pasted between
 // documents while the pipeline was still a prototype inside server-admin. None
 // of them was ever document-specific; they lived in the documents only because
@@ -11,9 +10,10 @@
 // byte-identical across three files. That is the same drift this pipeline
 // exists to prevent, one level down.
 //
-// Published versions are immutable. A change goes in a NEW directory with a
+// Released versions are immutable. A change goes in a NEW directory with a
 // bumped `typst.toml` — consumers pin an exact version, and a silent edit
-// underneath them is the failure packaging exists to prevent.
+// underneath them is the failure packaging exists to prevent. Until a version's
+// first release its directory takes additions: `updated()` came into 0.1.0 that way.
 //
 // What deliberately did NOT move: composition. Section order, page choice,
 // which diagrams exist, how deep a document layers — that stays local. The
@@ -282,6 +282,17 @@
   text(size: sz.micro, fill: ink-faint, style: "italic")[#body]
 }
 
+
+// When the page's content last changed, as press's `build` stamps it (tools/stamp.sh).
+// A rebuild that changes nothing on the page keeps the old time, so a newer time than the
+// copy on the shelf means reprint, and the same time means that copy is current. Put it in
+// the footer, where every page carries it: a page parted from its stack still says which
+// edition it is. Outside `just build` -- typst watch, a bare typst compile -- there is no
+// stamp, and it says so rather than inventing one.
+#let updated() = {
+  let s = sys.inputs.at("press-updated", default: none)
+  if s == none { [not stamped (built outside just build)] } else { [updated #s] }
+}
 
 // ----------------------------------------------------------- composition ---
 // Promoted out of individual documents while this was still a prototype.

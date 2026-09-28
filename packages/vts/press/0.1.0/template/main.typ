@@ -33,7 +33,7 @@
   set text(size: sz.micro, fill: ink-faint)
   grid(columns: (1fr, auto),
     align(left)[Document title · status],
-    align(right)[#counter(page).display("1 / 1", both: true)])
+    align(right)[#updated() · #counter(page).display("1 / 1", both: true)])
 })
 #set text(font: face-text, size: sz.small, fill: ink, lang: "en")
 #set par(leading: 0.52em, spacing: 0.55em)

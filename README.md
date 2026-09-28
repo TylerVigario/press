@@ -116,7 +116,9 @@ to learn per system.
   direction for cross-platform recipes (casey/just#531) is to select on shell *availability*
   rather than OS, which makes those attributes a workaround rather than the destination.
 
-Underneath, `build` is just this, run from the repo root:
+Underneath, `build` compiles like this, run from the repo root — and adds a stamp of when the
+document's content last changed (`tools/stamp.sh`; a document shows it with `updated()`),
+keeping the previous time when a rebuild changes nothing on the page. By hand, unstamped:
 
 ```sh
 mkdir -p print/docs
@@ -261,9 +263,10 @@ fails silently.
 ## Versioning
 
 Versions live side by side under `packages/vts/press/<version>/`, so a document keeps
-compiling against the version it was written for. **Published versions are immutable** — a
+compiling against the version it was written for. **Released versions are immutable** — a
 change adds a directory rather than editing one, because consumers pin an exact version and
-a silent edit underneath them is the failure packaging exists to prevent.
+a silent edit underneath them is the failure packaging exists to prevent. Until a version's
+first release, its directory takes additions.
 
 ## Why not Typst Universe
 
