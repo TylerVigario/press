@@ -51,6 +51,10 @@ a setting drifting back.
 | `Documents build` | typst compiles every document |
 | `Documents pass the audit` | the warning, font and printable-area passes |
 | `No invisible characters` | no soft hyphens or zero-width characters in any tracked file |
+| `Released versions are unchanged` | every tagged package version directory still matches its tag |
+| `JSON parses` | every tracked `*.json`, including these payloads, parses |
+| `Markdown lint` | every tracked `*.md` passes markdownlint |
+| `Workflows lint` | every workflow passes actionlint, with shellcheck on each `run:` block |
 | `Shell scripts lint` | every `*.sh` in the tree passes shellcheck |
 | `Validate PR title` | the pull request title parses as a Conventional Commit |
 
