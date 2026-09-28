@@ -1,0 +1,86 @@
+name: CodeQL
+
+# Static analysis of the workflows and of the two Python tools `check` runs.
+#
+#   actions   the workflows, which run holding this repository's token. The live
+#             case is commit-convention.yml, which reads the pull request title,
+#             whatever its author typed, and must only ever hand it to a shell
+#             through env.
+#   python    tools/ink-margin.py and tools/line-overlap.py, which run on every
+#             consumer's machine against the PDFs their documents build to.
+#
+# WHAT THIS DOES NOT SEE. Stated first, because a comment claiming a check exists is
+# what stops anyone checking by hand.
+#
+# - tools/check.sh, tools/stamp.sh and press.just. CodeQL has no shell extractor;
+#   Shell scripts lint (shellcheck) is what covers them.
+# - The Typst package. Nothing analyses Typst; its gate is that the documents build
+#   and pass the audit.
+# - workflow_dispatch inputs. The actions queries treat data an outsider controls
+#   as untrusted, not inputs a collaborator dispatches.
+
+on:
+  # No paths filter on push. CodeQL compares each analysis with the previous
+  # commit's, and a commit it skipped reads as a missing analysis, not as nothing
+  # to see.
+  push:
+    branches: [main]
+  # Only when code it analyses changes. Otherwise a workflow is live on main before
+  # its analysis exists. Not a required check, so nothing waits on it.
+  pull_request:
+    paths:
+      - ".github/**"
+      - "tools/**"
+  schedule:
+    # Weekly, because the queries change and unchanged code is re-examined against
+    # rules that did not exist when it was written. GitHub disables a public
+    # repository's scheduled workflows after 60 days without activity; re-enable
+    # from the Actions tab if press goes that quiet.
+    - cron: "41 6 * * 0"
+  workflow_dispatch:
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze ${{ matrix.language }}
+    runs-on: ubuntu-latest
+    # A repository this size analyses in minutes. A hung upload should fail rather
+    # than hold a runner for six hours.
+    timeout-minutes: 15
+    permissions:
+      # The SARIF upload needs it; without it the upload is refused.
+      security-events: write
+      # No `actions: read`: CodeQL needs it only in private repositories.
+      contents: read
+    strategy:
+      # One leg failing must not cancel the other's analysis.
+      fail-fast: false
+      matrix:
+        language: [actions, python]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Nothing after checkout uses git credentials; CodeQL is given its token.
+          persist-credentials: false
+
+      - name: Initialise CodeQL
+        uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          languages: ${{ matrix.language }}
+          # Both extractors read source directly; neither needs a build.
+          build-mode: none
+          # security-extended over the default suite, which is tuned for low noise
+          # on large codebases. This one is small enough that the extra queries
+          # cost little.
+          queries: security-extended
+
+      - name: Analyse
+        uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        with:
+          category: /language:${{ matrix.language }}
