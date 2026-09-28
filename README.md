@@ -268,6 +268,12 @@ change adds a directory rather than editing one, because consumers pin an exact 
 a silent edit underneath them is the failure packaging exists to prevent. Until a version's
 first release, its directory takes additions.
 
+A release is the tag `v<version>`, and it names exactly one directory: `v0.1.0` releases
+`packages/vts/press/0.1.0/`. From that tag on, CI's *Released versions are unchanged* fails
+any pull request that edits or removes the directory, so the promise above is checked
+rather than remembered. That is also what makes moving the submodule pointer safe: a newer
+commit can bring tooling and fonts, never different bits under a version you import.
+
 ## Why not Typst Universe
 
 Universe publishes into the `@preview` namespace, which would cost the `@vts` identity, and

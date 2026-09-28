@@ -319,6 +319,11 @@ Copy `packages/vts/press/0.1.0/` to the new version, edit there, bump `version` 
 release: until then its directory takes additions, which is how `updated()` came into
 0.1.0. From the release on it holds without exception.
 
+**The release is the tag, and CI holds it.** `v<version>` names one directory, and the
+*Released versions are unchanged* job compares every such directory with its tag on each
+pull request. An edit fails the check, and so does a removal or a tag whose directory
+does not exist, so the rule above is refused at merge rather than trusted.
+
 **Committing back from a submodule.** A submodule checks out a **detached HEAD**, so
 committing there and pushing appears to work and then loses the commit. Always:
 
