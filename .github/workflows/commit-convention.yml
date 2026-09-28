@@ -58,13 +58,6 @@ permissions:
   # pull request API, so nothing here needs pull-requests: read.
   contents: read
 
-env:
-  # Pinned by version AND by digest. The binary comes from a third-party release
-  # page, a tag can be moved, and this runs on every pull request — a version alone
-  # is a pin against accident, not against substitution.
-  COG_VERSION: "7.0.0"
-  COG_SHA256: "e03938ff2c4c86d71c00c0f3284dbbe95c5ca76fe34a51f33e945c23010d59bb"
-
 jobs:
   validate:
     name: Validate PR title
