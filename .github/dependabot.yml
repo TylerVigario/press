@@ -10,8 +10,8 @@
 # .github/actions/typst-toolchain, which are the one thing here that moves without
 # anyone editing this repository.
 #
-# It does NOT watch the cocogitto pin in commit-convention.yml. That is a version
-# and a digest in an `env:` block, not a dependency declaration, so a bump is a
+# It does NOT watch the cocogitto pin in .github/setup-cog.sh. That is a version
+# and a digest assigned in a shell script, not a dependency declaration, so a bump is a
 # deliberate edit: change both, and CI proves the digest matches before the change
 # can merge.
 version: 2
