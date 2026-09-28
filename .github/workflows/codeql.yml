@@ -25,12 +25,10 @@ on:
   # to see.
   push:
     branches: [main]
-  # Only when code it analyses changes. Otherwise a workflow is live on main before
-  # its analysis exists. Not a required check, so nothing waits on it.
+  # Every pull request, with no paths filter. Its findings gate the merge, and a
+  # required result from a workflow that a paths filter skipped never arrives: the
+  # pull request waits on it forever. Both legs finish in about a minute.
   pull_request:
-    paths:
-      - ".github/**"
-      - "tools/**"
   schedule:
     # Weekly, because the queries change and unchanged code is re-examined against
     # rules that did not exist when it was written. GitHub disables a public
