@@ -1,8 +1,13 @@
 name: CI
 
-# Public repository, so minutes are free and uncapped — rule 5. That is the case
-# rule 12 is derived for, and one job per assertion is the shape here.
+# Public repository, so minutes are free and uncapped, and rule 9 fans out to one
+# job per assertion rather than grouping them to save minutes.
 #
+#   Released versions are unchanged
+#                            a package version directory that differs from the tag
+#                            that released it. Consumers pin the version in their
+#                            import and move the submodule pointer freely, which is
+#                            safe only while a released version names fixed bits.
 #   Documents build          typst compile errors.
 #   Documents pass the audit press's own passes, run against its own document:
 #                            typst warnings that exit 0 and ship, fonts that are
@@ -33,11 +38,66 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  released:
+    name: Released versions are unchanged
+    runs-on: ubuntu-latest
+    steps:
+      # Reads refs and trees and nothing else: no toolchain, no fonts.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Every tag and the commit it names. The default shallow clone has
+          # neither, and a comparison against a tag that was never fetched cannot
+          # run at all.
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Compare each released version with its tag
+        run: |
+          set -euo pipefail
+          # A tag here names a package version: v0.1.0 releases
+          # packages/vts/press/0.1.0/, and from that tag on the directory is
+          # frozen. A change adds packages/vts/press/<next>/ instead.
+          #
+          # HEAD is what would land: the merge result on a pull request, the new
+          # tip on a push to main. So an edit to a released directory is refused
+          # before it merges, not reported after it has reached every submodule.
+          #
+          # `if git diff --quiet` fails closed: an error exits non-zero exactly as
+          # a difference does, so a comparison that could not run reads as a
+          # change rather than as a clean tree.
+          released=0
+          bad=0
+          for tag in $(git tag --list 'v*'); do
+            # Tags carry the v; the directory and typst.toml do not (rule 17).
+            [[ "$tag" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || continue
+            version=${tag#v}
+            dir="packages/vts/press/$version"
+            released=$((released + 1))
+            if ! git cat-file -e "$tag:$dir/typst.toml" 2>/dev/null; then
+              echo "::error::$tag does not contain $dir/ — a tag here names a package version"
+              bad=1
+              continue
+            fi
+            if [ ! -f "$dir/typst.toml" ]; then
+              echo "::error::$dir/ was released as $tag and has been removed"
+              bad=1
+              continue
+            fi
+            if git diff --quiet "$tag" HEAD -- "$dir"; then
+              echo "$version: unchanged since $tag"
+            else
+              git diff --stat "$tag" HEAD -- "$dir"
+              echo "::error::$dir/ differs from $tag. A released version is immutable — add the change under a new version directory."
+              bad=1
+            fi
+          done
+          [ "$released" -gt 0 ] || echo "no released versions yet, so nothing is frozen"
+          exit "$bad"
+
   build:
     name: Documents build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/typst-toolchain
       - run: just all
 
@@ -45,7 +105,7 @@ jobs:
     name: Documents pass the audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/typst-toolchain
         with:
           poppler: "true"
@@ -63,7 +123,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Reads the tree and nothing else: no toolchain, no fonts.
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # git grep reads the index, so the whole tracked tree must be present.
           fetch-depth: 1
@@ -111,7 +171,7 @@ jobs:
     name: Shell scripts lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: shellcheck
         run: |
           set -euo pipefail
