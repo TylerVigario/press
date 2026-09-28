@@ -69,6 +69,14 @@ Conventional Commits calls the text after the colon the description and commitli
 that the subject. What the gate reads is the entire title string. Under squash that title
 becomes the commit subject in git's sense, which is rule 9.
 
+**`code_scanning`, CodeQL** — findings, not jobs, are what gate here. *Analyze actions* and
+*Analyze python* pass whenever the analysis ran, whatever it found, so requiring them as
+contexts would assert only that CodeQL executed. This rule refuses the merge when the pull
+request introduces a security alert of medium severity or higher, or any alert at error level,
+and waits for CodeQL's result, which is why CodeQL runs on every pull request with no paths
+filter. A false positive is dismissed in the Security tab, with a reason, rather than by
+loosening the threshold.
+
 `Lint main` is deliberately **not** required. It runs on `push` and cannot report on a
 `pull_request` event, so requiring it would leave every pull request waiting on a
 context that never arrives.
