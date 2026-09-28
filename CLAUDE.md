@@ -112,6 +112,18 @@ just's normal convention, restored deliberately: press's recipes carry `[no-cd]`
 work under both `import` and `mod`, and without an explicit anchor that flag would make
 output land wherever you happened to be standing.
 
+**`build` stamps every document with when its content last changed.** It passes
+`sys.inputs.press-updated`, and a document shows it with `updated()` --
+in its footer, so every page carries it and a shelf copy can be checked against the
+latest build. A rebuild that changes nothing on the page keeps the old time: the source is
+first compiled at the previous stamp, read back from the PDF's own `/CreationDate`, and a
+byte-identical result means nothing changed. The mechanism is `tools/stamp.sh`, shared with
+`check` -- whose recompile would otherwise overwrite the stamped PDF with an unstamped one.
+A different typst or new fonts can change an unchanged page's bytes, which re-stamps it:
+that errs toward reprinting. `watch` and a bare `typst compile` pass no stamp, and
+`updated()` says so rather than inventing a time. The stamp needs nothing beyond `sh`'s own
+company — `date`, `grep`, `awk`, `cmp` — so `build` still needs no poppler.
+
 **Run `check` before calling a document done.** It is not part of `build` — building must
 not require poppler — so it is a separate step you have to take. `just all` does not run it
 either. Five checks, each named for what it asks:
@@ -162,7 +174,8 @@ order.
 `No such file or directory`), or carry `--root`, `--package-path`, `--font-path` and
 `--ignore-system-fonts`.
 
-Without `just`, the equivalent by hand — note `mkdir` is not optional:
+Without `just`, the equivalent by hand — note `mkdir` is not optional, and there is no stamp
+(`updated()` then says so):
 
 ```sh
 mkdir -p print/docs
@@ -271,6 +284,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `decision(n, q, note, color: bad)` / `dbadge(n, color:)` | Open question needing an answer. |
 | `seedepth(label)` | Pointer from the act layer to the depth layer. |
 | `stamp(body)` | Closing line — provenance, or "the host is right". |
+| `updated()` | When the content last changed, as `build` stamps it. For the footer. |
 
 **Tokens.** Colours `ink`, `ink-soft`, `ink-faint`, `rule-hair`, `rule-mid`,
 `paper-tint`, `slate`, `slate-tint`, `steel`, and `ok`/`warn`/`bad` each with a `-tint`.
@@ -298,11 +312,12 @@ afterwards, not a bar cleared beforehand.
 
 ## Changing press itself
 
-**Do not edit a published version directory in place.** Consumers pin `@vts/press:0.1.0`
+**Do not edit a released version directory in place.** Consumers pin `@vts/press:0.1.0`
 and a silent change under them is the whole failure mode packages exist to prevent.
 Copy `packages/vts/press/0.1.0/` to the new version, edit there, bump `version` in its
-`typst.toml`, and let consumers move when they choose. Early history predates lockdown and
-is not licence to amend a version now.
+`typst.toml`, and let consumers move when they choose. The rule starts at a version's first
+release: until then its directory takes additions, which is how `updated()` came into
+0.1.0. From the release on it holds without exception.
 
 **Committing back from a submodule.** A submodule checks out a **detached HEAD**, so
 committing there and pushing appears to work and then loses the commit. Always:
@@ -370,8 +385,8 @@ one in press, one recording the new pointer.
   Measured: a 140-row table showed its column labels on page 1 and bare rows on pages 2
   and 3. On paper there is no scrolling back, so the reader gets numbers with no idea
   what column they are in.
-- **`typst` will not create the output directory.** Hence `mkdir -p` in `build` and
-  `watch`, the two recipes that write a PDF.
+- **`typst` will not create the output directory.** Hence `mkdir -p` in `watch` and in
+  `tools/stamp.sh`, which `build` and `check` run — everything that writes a PDF.
 - **The two directory functions mean opposite things here, and both are used.**
   `source_directory()` resolves relative to `press.just` itself — that is `press_root`,
   how the package and fonts are found wherever press is vendored. `justfile_directory()`
@@ -407,7 +422,9 @@ one in press, one recording the new pointer.
   `.typ`. The only markdown that stays is the git conventions — `README`, `LICENSE`,
   `CLAUDE.md`, and this file.
 - **Do not add a wrapper script.** A `build.sh` and a `print-doc` were both written and
-  both deleted. `just` is the invocation: one file instead of a POSIX and a PowerShell
+  both deleted. (`tools/check.sh` and `tools/stamp.sh` are not wrappers: each is a recipe's
+  mechanism, in a file only so it runs from PowerShell. Nobody invokes them instead of
+  `just`.) `just` is the invocation: one file instead of a POSIX and a PowerShell
   twin that would inevitably drift, identical arguments on every platform, with recipe
   listing and dependencies for free.
 - **Do not move whole-page composition into the library.** A helper that lays out an

@@ -102,7 +102,10 @@ rc=0
 # into grep hands $? to grep, so a source that did not compile at all left the old
 # PDF in place, produced error: lines that no warning: filter matched, and every
 # pass then passed the stale artifact — `build` failing while `check` said clean.
-out=$(typst compile "$@" "$src" "$pdf" 2>&1) || {
+#
+# Through stamp.sh, as `build` does: a bare typst compile here would overwrite the
+# stamped PDF with an unstamped one, and every check would wipe the edition off the page.
+out=$(sh "$press_root/tools/stamp.sh" "$src" "$pdf" "$@" 2>&1) || {
     echo "press: $src does not compile —" >&2
     printf '%s\n' "$out" | sed 's/^/  /' >&2
     exit 1

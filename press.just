@@ -34,7 +34,8 @@
 #     rather than by every author remembering the convention;
 #   · creates that directory — typst refuses to write into one that does not
 #     exist and fails with a bare "No such file or directory";
-#   · carries --root, --package-path, --font-path and --ignore-system-fonts.
+#   · carries --root, --package-path, --font-path and --ignore-system-fonts;
+#   · stamps the document with when its content last changed (tools/stamp.sh).
 
 # Where press itself lives, resolved from THIS file rather than the consumer's
 # root justfile — so press may be vendored at any path and nothing here
@@ -73,10 +74,14 @@ default:
 # Compile one document → print/<same path>.pdf
 #
 # The path is relative to the repo root, from whichever directory you invoke it.
+#
+# Through tools/stamp.sh, which stamps the document with when its content last changed
+# (sys.inputs.press-updated, shown by the package's updated()) and keeps that time when a
+# rebuild changes nothing on the page. The reasoning is at the top of that file.
 [doc("Compile one document -> print/<same path>.pdf")]
 [no-cd]
 build doc:
-    @cd {{ quote(root) }} && mkdir -p {{ quote(parent_directory("print" / doc)) }} && typst compile {{ typst_flags }} {{ quote(doc) }} {{ quote("print" / without_extension(doc) + ".pdf") }} && echo {{ quote("print" / without_extension(doc) + ".pdf") }}
+    @cd {{ quote(root) }} && sh {{ quote(press_root / "tools" / "stamp.sh") }} {{ quote(doc) }} {{ quote("print" / without_extension(doc) + ".pdf") }} {{ typst_flags }} && echo {{ quote("print" / without_extension(doc) + ".pdf") }}
 
 # Recompile one document on every save
 [doc("Recompile one document on every save")]
