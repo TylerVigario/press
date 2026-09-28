@@ -27,6 +27,9 @@ name: CI
 #   Markdown lint            markdownlint over every tracked *.md. README.md and
 #                            CLAUDE.md are how press is learned, by people and by
 #                            agents, and a broken fence or table misleads both.
+#   JSON parses              every tracked *.json. The ruleset payloads are applied
+#                            by hand with gh api, and a payload that does not parse
+#                            is found at the moment protection is being changed.
 #
 # press is vendored as a submodule by every repository that builds a document, so
 # a bad commit on main reaches all of them before anyone notices. That is why this
@@ -233,3 +236,30 @@ jobs:
         # hosted runner is enough. Rules and ignores are .markdownlint-cli2.jsonc.
         # Dependabot does not see this pin; a bump is a deliberate edit.
         run: npx --yes markdownlint-cli2@0.23.3
+
+  json:
+    name: JSON parses
+    runs-on: ubuntu-latest
+    steps:
+      # Reads the tree and nothing else.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Parse every tracked JSON file
+        run: |
+          set -euo pipefail
+          # Found rather than listed, like the shell lint: a payload added under
+          # .github/rulesets/ is covered the day it lands. jq is on the hosted
+          # runner. .jsonc is left to the tool that reads it, since jq does not
+          # accept comments.
+          n=0
+          bad=0
+          while IFS= read -r -d '' f; do
+            n=$((n + 1))
+            if ! err=$(jq empty "$f" 2>&1); then
+              echo "::error file=$f::$err"
+              bad=1
+            fi
+          done < <(git ls-files -z '*.json')
+          echo "$n JSON file(s) checked"
+          exit "$bad"
