@@ -243,7 +243,7 @@ Faces are vendored, and the package exports them as **constants** (`face-sans`, 
 
 Typst does not perform metric substitution the way fontconfig does:
 
-```
+```text
 fc-match Arial          -> Liberation Sans   (fontconfig substitutes)
 typst, system fonts on  -> warning: unknown font family: arial
 ```

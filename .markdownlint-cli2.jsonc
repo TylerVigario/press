@@ -1,0 +1,16 @@
+{
+  // markdownlint-cli2, run by CI's "Markdown lint" job over every tracked *.md.
+  "config": {
+    // Prose here is hard-wrapped near 90 columns, loosely: the bound is 100 so a
+    // paragraph left unwrapped is caught without re-flowing every line that
+    // landed at 91. Tables and code keep their natural width.
+    "MD013": { "line_length": 100, "tables": false, "code_blocks": false },
+    // table-column-style asks for aligned pipes, which cannot be auto-fixed and
+    // only nags; the tables here are written compact on purpose.
+    "MD060": false
+  },
+  "globs": ["**/*.md"],
+  // CHANGELOG.md is written by cocogitto at release. Linting it would lint the
+  // generator's output, which nobody can fix by hand.
+  "ignores": ["CHANGELOG.md"]
+}
