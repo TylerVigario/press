@@ -1,2 +1,5 @@
 # Rendered output — regenerate with typst
 print/
+
+# Python bytecode, written beside tools/*.py whenever check runs them
+__pycache__/
