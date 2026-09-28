@@ -55,6 +55,18 @@
             "context": "No invisible characters"
           },
           {
+            "context": "Released versions are unchanged"
+          },
+          {
+            "context": "JSON parses"
+          },
+          {
+            "context": "Markdown lint"
+          },
+          {
+            "context": "Workflows lint"
+          },
+          {
             "context": "Shell scripts lint"
           },
           {
