@@ -314,15 +314,26 @@ afterwards, not a bar cleared beforehand.
 
 **Do not edit a released version directory in place.** Consumers pin `@vts/press:0.1.0`
 and a silent change under them is the whole failure mode packages exist to prevent.
-Copy `packages/vts/press/0.1.0/` to the new version, edit there, bump `version` in its
-`typst.toml`, and let consumers move when they choose. The rule starts at a version's first
-release: until then its directory takes additions, which is how `updated()` came into
-0.1.0. From the release on it holds without exception.
+Copy the newest version directory to the next version, edit there, set `version` in its
+`typst.toml`, and let consumers move when they choose. Name it for the version the commits
+will derive, and ask rather than work it out: `cog bump --auto --dry-run`, or a dry run of the
+Release workflow, prints it. The release refuses a directory whose name disagrees. The
+rule starts at a version's first release: until then its directory takes additions, which is
+how `updated()` came into 0.1.0. From the release on it holds without exception.
 
 **The release is the tag, and CI holds it.** `v<version>` names one directory, and the
 *Released versions are unchanged* job compares every such directory with its tag on each
 pull request. An edit fails the check, and so does a removal or a tag whose directory
 does not exist, so the rule above is refused at merge rather than trusted.
+
+**Releasing is one workflow run, and nothing is tagged by hand.** Actions, then Release, then
+*Run workflow*, with *dry run* ticked first. It derives the version from the commits since the
+last tag (cocogitto's rules, which `cog.toml` controls), refuses any commit that does not
+parse, runs CI as the gate and previews the changelog entry. The real run records
+`CHANGELOG.md` in one `release:` commit made by the `press-release` App, together with the
+version directory when the release has to create one (a release of tooling fixes, say). It
+then publishes the GitHub release, which is what creates the tag. When nothing since the
+last tag bumps a version, it says so and releases nothing.
 
 **Committing back from a submodule.** A submodule checks out a **detached HEAD**, so
 committing there and pushing appears to work and then loses the commit. Always:
