@@ -1,0 +1,22 @@
+# cocogitto: one tool for the commit convention and the changelog it produces.
+#
+# The changelog is written from the commits at release time, never by hand, so it can
+# only say what the history says. `tag_prefix` because tags carry the `v` and version
+# fields do not (repo standard rule 17).
+
+tag_prefix = "v"
+ignore_merge_commits = true
+branch_whitelist = ["main"]
+
+[changelog]
+path = "CHANGELOG.md"
+template = "remote"
+remote = "github.com"
+owner = "TylerVigario"
+repository = "press"
+
+# The release writes CHANGELOG.md in a commit of its own, typed `release`. It is
+# bookkeeping about a release rather than a change to press, and without this line
+# every regeneration lists it under the release it records.
+[commit_types]
+release = { changelog_title = "", omit_from_changelog = true }
