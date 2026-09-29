@@ -439,3 +439,5 @@
          stack(left), stack(right))
   })
 }
+
+// probe: this edit must be refused
