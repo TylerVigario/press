@@ -82,11 +82,24 @@ loosening the threshold.
 `pull_request` event, so requiring it would leave every pull request waiting on a
 context that never arrives.
 
-**`bypass_actors: []`** — an actor-based exemption is inherited by anything
-authenticating as that actor. On a single-owner repository "repository admin" exempts
-the owner *and* every automation acting on the owner's behalf, which is the entire
-population the rule exists to constrain. To push directly, set `enforcement` to
-`disabled` first — a deliberate, visible act with a record.
+**`bypass_actors`: one App, `vigario-press-release` (App ID 5116805), and nothing else** —
+recording a release writes main, which no pull request does, so the Release workflow needs
+exactly one exemption. It is an App installed on press alone, never an actor *type*: an
+exemption by role is inherited by everything acting in that role, and on a single-owner
+repository "repository admin" exempts the owner *and* every automation acting for them,
+which is the whole population the rule exists to constrain. Only the Release workflow's
+publish job can authenticate as the App, because its credentials are environment secrets on
+`release`, which only a job running on main can read.
+
+The honest cost: a bypass reaches the whole ruleset, not one rule, so the App could in
+principle force-push or delete main as well as skip the pull request. What contains it is
+the environment's main-only restriction and the App's own permissions, Contents and nothing
+else, which
+also keep it out of `.github/workflows/`. A person who must push directly sets `enforcement`
+to `disabled` first — a deliberate, visible act with a record.
+
+The bypass can only be applied once the App is installed on the repository. GitHub rejects a
+bypass actor it cannot resolve, and the whole update fails, not just that entry.
 
 ## tag.json
 
