@@ -33,8 +33,11 @@ name: Release
 # WHY AN APP. main takes no direct push (rule 6), and recording the release writes
 # main. The one exemption is a GitHub App installed on this repository alone (rule
 # 16). Its credentials are environment secrets on `release`, not repository secrets,
-# so only the publish job can reach them, and only after a required reviewer
-# approves the run (rule 20).
+# and the environment admits only main, so only the publish job running on main can
+# reach them: a workflow on any other branch cannot read them, however it is changed
+# (rule 20). There is no required reviewer. With one maintainer it would confirm only
+# what that maintainer already decided by dispatching the run, and the token that can
+# dispatch a run can approve it.
 #
 # SETUP, once, by the owner — recorded so it can be rebuilt:
 #   1. A GitHub App owned by @TylerVigario, `vigario-press-release` (App ID 5116805;
@@ -42,9 +45,9 @@ name: Release
 #      Repository permissions: Contents read and write, nothing else. Webhook off.
 #   2. Installed on press only. An installation does not follow a repository
 #      transfer; re-install after one.
-#   3. A `release` environment with a required reviewer, deployments limited to
-#      main, holding RELEASE_APP_CLIENT_ID (the Iv23li... Client ID, not the numeric
-#      App ID) and RELEASE_APP_PRIVATE_KEY as environment secrets.
+#   3. A `release` environment with deployments limited to main and no required
+#      reviewer, holding RELEASE_APP_CLIENT_ID (the Iv23li... Client ID, not the
+#      numeric App ID) and RELEASE_APP_PRIVATE_KEY as environment secrets.
 #   4. The App added to bypass_actors in .github/rulesets/main.json by its numeric
 #      App ID, and that payload re-applied.
 #
@@ -183,7 +186,7 @@ jobs:
     needs: [decide, gate]
     if: needs.decide.outputs.release == 'true' && !inputs.dry-run
     runs-on: ubuntu-latest
-    # The App's secrets live here, behind a required reviewer and limited to main.
+    # The App's secrets live here, readable only by a job running on main.
     environment: release
     permissions:
       # The App token does every write; GITHUB_TOKEN stays read-only.
