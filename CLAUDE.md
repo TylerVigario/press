@@ -330,7 +330,7 @@ does not exist, so the rule above is refused at merge rather than trusted.
 *Run workflow*, with *dry run* ticked first. It derives the version from the commits since the
 last tag (cocogitto's rules, which `cog.toml` controls), refuses any commit that does not
 parse, runs CI as the gate and previews the changelog entry. The real run records
-`CHANGELOG.md` in one `release:` commit made by the `press-release` App, together with the
+`CHANGELOG.md` in one `release:` commit made by the `vigario-press-release` App, with the
 version directory when the release has to create one (a release of tooling fixes, say). It
 then publishes the GitHub release, which is what creates the tag. When nothing since the
 last tag bumps a version, it says so and releases nothing.

@@ -37,8 +37,9 @@ name: Release
 # approves the run (rule 20).
 #
 # SETUP, once, by the owner — recorded so it can be rebuilt:
-#   1. A GitHub App owned by @TylerVigario, `press-release`. Repository permissions:
-#      Contents read and write, nothing else. Webhook off.
+#   1. A GitHub App owned by @TylerVigario, `vigario-press-release` (App ID 5116805;
+#      `press-release` is taken, since App names share one namespace with accounts).
+#      Repository permissions: Contents read and write, nothing else. Webhook off.
 #   2. Installed on press only. An installation does not follow a repository
 #      transfer; re-install after one.
 #   3. A `release` environment with a required reviewer, deployments limited to
