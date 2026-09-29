@@ -176,7 +176,9 @@ jobs:
     uses: ./.github/workflows/ci.yml
 
   publish:
-    name: Publish ${{ needs.decide.outputs.tag }}
+    # A plain name: a skipped job's name is never evaluated, so an expression here
+    # showed as literal `${{ ... }}` on every dry run. The tag is in the run summary.
+    name: Publish the release
     needs: [decide, gate]
     if: needs.decide.outputs.release == 'true' && !inputs.dry-run
     runs-on: ubuntu-latest
