@@ -88,6 +88,10 @@ for spec in "PRESS_PDFTOTEXT $PDFTOTEXT" "PRESS_PDFFONTS $PDFFONTS"; do
 done
 allow=$(ls "$press_root/fonts" | sed 's/-[A-Za-z]*\.[to]tf$//;s/\.[to]tf$//' | sort -u | paste -sd'|')
 rc=0
+# One temporary directory for every pass, made before any of them and removed however the
+# run ends.
+tmp=$(mktemp -d "${TMPDIR:-/tmp}/press.XXXXXX")
+trap 'rm -rf "$tmp"' EXIT INT TERM
 # Recompile FIRST, and keep the compiler's own status.
 #
 # Every check below reads $pdf, so the recompile has to happen before any of them or
@@ -215,14 +219,9 @@ chars=$(grep -v '^[[:space:]]*//' "$src" \
         | sort -u || true)
 if [ -n "$chars" ]; then
     fontdir="$press_root/fonts"
-    fams=$(comm -13 "$(typst fonts --ignore-system-fonts | sort > /tmp/press-embedded.$$; echo /tmp/press-embedded.$$)" \
-                    "$(typst fonts --font-path "$fontdir" --ignore-system-fonts | sort > /tmp/press-all.$$; echo /tmp/press-all.$$)" \
-           | sed 's/.*/"&"/' | paste -sd,)
-    rm -f /tmp/press-embedded.$$ /tmp/press-all.$$
-    # Templated on purpose: a bare `mktemp -d` is a GNU extension and BSD/macOS
-    # rejects it with "too few X's in template".
-    tmp=$(mktemp -d "${TMPDIR:-/tmp}/press.XXXXXX")
-    trap 'rm -rf "$tmp"' EXIT INT TERM
+    typst fonts --ignore-system-fonts | sort > "$tmp/embedded"
+    typst fonts --font-path "$fontdir" --ignore-system-fonts | sort > "$tmp/all"
+    fams=$(comm -13 "$tmp/embedded" "$tmp/all" | sed 's/.*/"&"/' | paste -sd,)
     for ch in $chars; do
         printf '#set page(width: 6cm, height: 2cm)\n#set text(font: (%s))\nX%sX\n' "$fams" "$ch" > "$tmp/probe.typ"
         typst compile --root "$tmp" --font-path "$fontdir" --ignore-system-fonts "$tmp/probe.typ" "$tmp/probe.pdf" 2>/dev/null || true
