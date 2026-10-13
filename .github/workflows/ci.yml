@@ -6,8 +6,9 @@ name: CI
 #   Released versions are unchanged
 #                            a package version directory that differs from the tag
 #                            that released it. Consumers pin the version in their
-#                            import and move the submodule pointer freely, which is
-#                            safe only while a released version names fixed bits.
+#                            import and move their submodule only to a later
+#                            release, which must leave the version they import as
+#                            it was.
 #   Documents build          typst compile errors.
 #   Documents pass the audit press's own passes, run against its own document:
 #                            typst warnings that exit 0 and ship, fonts that are
