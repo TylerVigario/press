@@ -1,11 +1,12 @@
 {% import "macros" as macros %}
-{#- cocogitto 7.0.0's built-in "remote" template, but the first release says only
-    "Initial release." instead of listing every commit before it. The first release is
-    the one with no tag before it: only there is from.tag unset while version.tag is set. -#}
+{#- cocogitto 7.0.0's built-in "remote" template, except for the first release. It has no
+    earlier version to differ from, so it lists no commits and links no comparison: it says
+    "Initial release." and links its own release. The first release is the one with no tag
+    before it: only there is from.tag unset while version.tag is set. -#}
 {% if version.tag and from.tag -%}
     ## [{{ version.tag }}]({{repository_url ~ "/compare/" ~ from.tag ~ ".." ~ version.tag}}) - {{ date | date(format="%Y-%m-%d") }}
 {% elif version.tag and from.id -%}
-    ## [{{ version.tag }}]({{repository_url ~ "/compare/" ~ from.id ~ ".." ~ version.tag}}) - {{ date | date(format="%Y-%m-%d") }}
+    ## [{{ version.tag }}]({{repository_url ~ "/releases/tag/" ~ version.tag}}) - {{ date | date(format="%Y-%m-%d") }}
 Initial release.
 {% else -%}
     {% set from = from.id -%}
