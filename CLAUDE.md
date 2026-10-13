@@ -339,7 +339,9 @@ does not exist, so the rule above is refused at merge rather than trusted.
 last tag (cocogitto's rules, which `cog.toml` controls), refuses any commit that does not
 parse, runs CI as the gate and previews the changelog entry. The real run records
 `CHANGELOG.md` in one `release:` commit made by the `vigario-press-release` App, with the
-version directory when the release has to create one (a release of tooling fixes, say). It
+version directory when the release has to create one (a release of tooling fixes, say).
+`CHANGELOG.md` is cog's full changelog with the hand-written first release kept, "Initial
+release." (`.github/write-changelog.sh`, as greenroom-win does, until cocogitto/cocogitto#580). It
 then publishes the GitHub release, which is what creates the tag. When nothing since the
 last tag bumps a version, it says so and releases nothing.
 

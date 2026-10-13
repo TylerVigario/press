@@ -221,10 +221,9 @@ jobs:
         run: |
           set -euo pipefail
           git tag "$TAG"   # local only, as in decide
-          {
-            printf '# Changelog\n\n'
-            cog changelog
-          } > CHANGELOG.md
+          # cog's full changelog, with the hand-written first release kept: cog renders a
+          # first release as the whole history (cocogitto/cocogitto#580).
+          sh .github/write-changelog.sh CHANGELOG.md
           cog changelog | awk '/^## /{n++} n==1' > "$RUNNER_TEMP/notes.md"
           git tag -d "$TAG"
           [ -s "$RUNNER_TEMP/notes.md" ] || { echo "::error::the changelog has no entry for $TAG"; exit 1; }
