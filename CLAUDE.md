@@ -158,13 +158,14 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 
 | Call | For |
 |---|---|
-| `unit(label, tone, lead, body, caps:)` | The workhorse. One idea: label, bold lead, body. |
+| `unit(label, tone, lead, body, caps:, breakable: false)` | The workhorse. One idea: label, bold lead, body. |
+| `units(..items, pack: "stacks", gutter:, spacing:)` | Lays out a group of units. `"stacks"`: two columns balanced by measured height, nothing padded. `"grid"`: row-major, rows aligned — when the pairing means something. `"single"`: one column. |
 | `band-strong(title, role, color:, caps:)` | Section header carrying its role. |
 | `band(label, color: slate)` | Lighter section header. |
 | `titlebar(title, meta, color:, face:, size:)` | Document head with right-aligned meta. |
 | `eyebrow(body, color:, caps:)` | Small tracked-out uppercase label. |
 | `chip(label, tone)` | Inline state pill — build legends from these. |
-| `callout(body, tone: "note", label: none)` | Aside that must not be missed. |
+| `callout(body, tone: "note", label: none, size:)` | Aside that must not be missed. |
 | `panel(body, label: none, color: slate)` | Boxed block, no tone semantics. |
 | `code(body, breakable: false)` | Code-block treatment. **The document installs it**: `#show raw.where(block: true): code`. |
 | `item(n, title, body, color:, size:)` | Numbered step. |
