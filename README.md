@@ -271,8 +271,11 @@ first release, its directory takes additions.
 A release is the tag `v<version>`, and it names exactly one directory: `v0.1.0` releases
 `packages/vts/press/0.1.0/`. From that tag on, CI's *Released versions are unchanged* fails
 any pull request that edits or removes the directory, so the promise above is checked
-rather than remembered. That is also what makes moving the submodule pointer safe: a newer
-commit can bring tooling and fonts, never different bits under a version you import.
+rather than remembered.
+
+A consuming repo moves its submodule only to a release tag, never to a commit on `main`
+between releases. Tooling and fonts merged since the last release reach consumers with the
+next one.
 
 ## Why not Typst Universe
 

@@ -322,8 +322,9 @@ afterwards, not a bar cleared beforehand.
 **Do not edit a released version directory in place.** Consumers pin `@vts/press:0.1.0`
 and a silent change under them is the whole failure mode packages exist to prevent.
 Copy the newest version directory to the next version, edit there, set `version` in its
-`typst.toml`, and let consumers move when they choose. Name it for the version the commits
-will derive, and ask rather than work it out: `cog bump --auto --dry-run`, or a dry run of the
+`typst.toml`, and let consumers move when they choose, once it is released. Name it for
+the version the commits will derive, and ask rather than work it out:
+`cog bump --auto --dry-run`, or a dry run of the
 Release workflow, prints it. The release refuses a directory whose name disagrees. The
 rule starts at a version's first release: until then its directory takes additions, which is
 how `updated()` came into 0.1.0. From the release on it holds without exception.
@@ -349,12 +350,18 @@ committing there and pushing appears to work and then loses the commit. Always:
 cd vendor/press
 git checkout main       # <- the step that is forgotten
 # edit, commit, push
-cd ../..
-git add vendor/press && git commit -m "chore: bump press"
+git checkout v0.1.0     # <- back to the release this repo is on
 ```
 
-The consuming repo stores a **commit pointer**, not the files. Both commits are needed:
-one in press, one recording the new pointer.
+**Consumers move only to releases.** The consuming repo stores a **commit pointer**, not the
+files, and that pointer is always a release tag, never a commit on `main` between releases.
+A change made in press reaches a consumer with the next release:
+
+```sh
+git -C vendor/press fetch --tags
+git -C vendor/press checkout v<version>
+git add vendor/press && git commit -m "chore: bump press to v<version>"
+```
 
 ---
 
