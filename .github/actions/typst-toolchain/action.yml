@@ -17,12 +17,29 @@ runs:
         # Release binaries rather than apt. Ubuntu's `just` is old enough to lack
         # source_directory(), which press.just needs to locate itself when
         # vendored. Pin to what the host that prints these documents runs.
+        #
+        # Pinned by version AND by digest, as cocogitto and actionlint are: a
+        # version alone is a pin against accident, not against substitution, and
+        # this runs on every pull request and in the release's gate. Dependabot does
+        # not see these; a bump changes a version and its digest together.
         TYPST_VERSION=0.15.1
+        TYPST_SHA256=a6d077d0a95eed5a2eba715b2dae06be954f624ccbf85758a03f389ded33118c
         JUST_VERSION=1.57.0
-        curl -fsSL "https://github.com/typst/typst/releases/download/v${TYPST_VERSION}/typst-x86_64-unknown-linux-musl.tar.xz" \
-          | sudo tar -xJ --strip-components=1 -C /usr/local/bin typst-x86_64-unknown-linux-musl/typst
-        curl -fsSL "https://github.com/casey/just/releases/download/${JUST_VERSION}/just-${JUST_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
-          | sudo tar -xz -C /usr/local/bin just
+        JUST_SHA256=45b548094283cb9739af8f13273b8cddeee869f5b4ef2bb631b1f311cb566155
+        tmp=$(mktemp -d)
+        curl --fail --silent --show-error --location \
+          "https://github.com/typst/typst/releases/download/v${TYPST_VERSION}/typst-x86_64-unknown-linux-musl.tar.xz" \
+          --output "$tmp/typst.tar.xz"
+        curl --fail --silent --show-error --location \
+          "https://github.com/casey/just/releases/download/${JUST_VERSION}/just-${JUST_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
+          --output "$tmp/just.tar.gz"
+        # Verified before extraction: an archive checked after unpacking has already
+        # chosen its own paths.
+        printf '%s  %s\n' "$TYPST_SHA256" "$tmp/typst.tar.xz" "$JUST_SHA256" "$tmp/just.tar.gz" \
+          | sha256sum -c -
+        sudo tar -xJf "$tmp/typst.tar.xz" --strip-components=1 -C /usr/local/bin \
+          typst-x86_64-unknown-linux-musl/typst
+        sudo tar -xzf "$tmp/just.tar.gz" -C /usr/local/bin just
         typst --version
         just --version
 
