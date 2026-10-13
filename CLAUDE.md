@@ -214,7 +214,9 @@ takes additions.
 **Releasing is one run of the Release workflow, dry run first.** It derives the version from
 the commits, gates on CI, writes `CHANGELOG.md` in a `release:` commit by the
 `vigario-press-release` App (with the version directory, when a tooling-only release needs
-one), and publishes the GitHub release, which creates the tag. Never tag by hand.
+one), and publishes the GitHub release, which creates the tag. Never tag by hand. If it fails
+after the `release:` commit has landed, start a new run rather than re-running the failed one:
+a re-run checks out the old commit and the forge refuses its commit.
 `CHANGELOG.md` is generated except for its hand-written first release, "Initial release.",
 which `.github/write-changelog.sh` keeps (until cocogitto/cocogitto#580 is fixed).
 
