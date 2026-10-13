@@ -80,7 +80,7 @@ failure, and its symptom (`justfile does not exist`) does not point at submodule
 ## Building
 
 ```sh
-just build docs/services.typ     # -> print/docs/services.pdf
+just build docs/services.typ     # -> print/docs/services.pdf, and a line saying what it made
 just watch docs/services.typ     # recompile on save
 just all                         # every .typ under docs/ (fails if there are none)
 just all recipes protocols pcp   # any directories — docs/ is a default, not a layout
@@ -123,6 +123,13 @@ A different typst or new fonts can change an unchanged page's bytes, which re-st
 that errs toward reprinting. `watch` and a bare `typst compile` pass no stamp, and
 `updated()` says so rather than inventing a time. The stamp needs nothing beyond `sh`'s own
 company — `date`, `grep`, `awk`, `cmp` — so `build` still needs no poppler.
+
+**`build` then says what it made**, one line per document (`tools/report.sh`): new, changed
+or unchanged, pages, words, size and the stamp, so the stamp is seen even where a document
+never calls `updated()`. Pages are read from the PDF's page tree. Words come from poppler's
+`pdftotext` and are left out without it, so `build` still needs no poppler. `all` ends with
+a count; each document builds in its own `just`, so each appends its status to a file named
+by `PRESS_TALLY` and `all` counts them.
 
 **Run `check` before calling a document done.** It is not part of `build` — building must
 not require poppler — so it is a separate step you have to take. `just all` does not run it
@@ -438,9 +445,9 @@ one in press, one recording the new pointer.
   `.typ`. The only markdown that stays is the git conventions — `README`, `LICENSE`,
   `CLAUDE.md`, and this file.
 - **Do not add a wrapper script.** A `build.sh` and a `print-doc` were both written and
-  both deleted. (`tools/check.sh` and `tools/stamp.sh` are not wrappers: each is a recipe's
-  mechanism, in a file only so it runs from PowerShell. Nobody invokes them instead of
-  `just`.) `just` is the invocation: one file instead of a POSIX and a PowerShell
+  both deleted. (`tools/check.sh`, `tools/stamp.sh` and `tools/report.sh` are not wrappers:
+  each is a recipe's mechanism, in a file only so it runs from PowerShell. Nobody invokes
+  them instead of `just`.) `just` is the invocation: one file instead of a POSIX and a PowerShell
   twin that would inevitably drift, identical arguments on every platform, with recipe
   listing and dependencies for free.
 - **Do not move whole-page composition into the library.** A helper that lays out an

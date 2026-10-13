@@ -6,6 +6,10 @@
 #
 #   sh <press_root>/tools/stamp.sh <doc> <pdf> <typst flags...>
 #
+# On success it prints one line, which `build` hands to report.sh: what happened -- new (no
+# stamped PDF was there), changed or unchanged -- then the time the page now carries.
+# typst's own output goes to stderr.
+#
 # NOT A WRAPPER. `just build` stays the one way to build; this file is to the build recipe
 # what check.sh is to check -- its mechanism, kept in a file for the cygpath reason below.
 #
@@ -71,6 +75,7 @@ if [ -n "$old" ]; then
         if cmp -s "$tmp" "$pdf"; then
             rm -f "$tmp"
             [ -n "$out" ] && printf '%s\n' "$out" >&2
+            printf 'unchanged %s\n' "$(when "$old")"
             exit 0
         fi
     else
@@ -83,6 +88,7 @@ fi
 
 if out=$(at "$now" "$pdf" "$@"); then
     [ -n "$out" ] && printf '%s\n' "$out" >&2
+    printf '%s %s\n' "$( [ -n "$old" ] && echo changed || echo new )" "$(when "$now")"
     exit 0
 fi
 printf '%s\n' "$out" >&2

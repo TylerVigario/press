@@ -84,10 +84,13 @@ default:
 # Through tools/stamp.sh, which stamps the document with when its content last changed
 # (sys.inputs.press-updated, shown by the package's updated()) and keeps that time when a
 # rebuild changes nothing on the page. The reasoning is at the top of that file.
+#
+# Then tools/report.sh says what was made, in one line: new, changed or unchanged, pages,
+# words (where poppler is installed), size, and the stamp the page carries.
 [doc("Compile one document -> print/<same path>.pdf")]
 [no-cd]
 build doc:
-    @cd {{ quote(root) }} && sh {{ quote(press_root / "tools" / "stamp.sh") }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / without_extension(trim_start_match(replace(doc, '\', '/'), './')) + ".pdf") }} {{ typst_flags }} && echo {{ quote("print" / without_extension(trim_start_match(replace(doc, '\', '/'), './')) + ".pdf") }}
+    @cd {{ quote(root) }} && st=$(sh {{ quote(press_root / "tools" / "stamp.sh") }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / without_extension(trim_start_match(replace(doc, '\', '/'), './')) + ".pdf") }} {{ typst_flags }}) && sh {{ quote(press_root / "tools" / "report.sh") }} {{ quote("print" / without_extension(trim_start_match(replace(doc, '\', '/'), './')) + ".pdf") }} $st
 
 # Recompile one document on every save
 [doc("Recompile one document on every save")]
@@ -122,12 +125,17 @@ watch doc:
 # so justfile_directory() would resolve to press's own directory and every
 # document path would be looked up there. Passing the consumer root down keeps
 # the anchor correct through the recursion.
+#
+# It ends with a count of what the run did (changed, new, unchanged, failed). Each document
+# is built in its own `just`, so report.sh appends each status to a file named by
+# PRESS_TALLY, and the count is read from that once xargs is done. The exit status is still
+# xargs's.
 [doc("Compile every document under the given directories (default docs/)")]
 [no-cd]
 all +dirs='docs':
     @cd {{ quote(root) }} && for d in {{ dirs }}; do test -d "$d" || { echo "press: no such directory: $d" >&2; exit 1; }; done
     @cd {{ quote(root) }} && test "$(find {{ dirs }} -name '*.typ' | wc -l)" -gt 0 || { echo 'press: no .typ files in: {{ dirs }}' >&2; exit 1; }
-    @cd {{ quote(root) }} && find {{ dirs }} -name '*.typ' -print0 | sort -z | xargs -0 -n1 just --justfile {{ quote(press_root / "press.just") }} --set root {{ quote(root) }} build
+    @cd {{ quote(root) }} && export PRESS_TALLY="$(mktemp)" && n=$(find {{ dirs }} -name '*.typ' | wc -l) && { find {{ dirs }} -name '*.typ' -print0 | sort -z | xargs -0 -n1 just --justfile {{ quote(press_root / "press.just") }} --set root {{ quote(root) }} build; rc=$?; sh {{ quote(press_root / "tools" / "report.sh") }} --summary "$PRESS_TALLY" "$n"; rm -f "$PRESS_TALLY"; exit $rc; }
 
 # Scaffold a new document from the press skeleton
 #
