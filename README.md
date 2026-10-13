@@ -1,8 +1,8 @@
 # press
 
-The house apparatus for Vigario Technology Solutions printed documents: the
-`@vts/press` Typst package, the fonts it depends on, and the conventions that make a
-document scannable.
+A Typst package and build recipes for documents meant to be printed and read on paper: the
+`@vts/press` package, the fonts it depends on, and the conventions that make a printed sheet
+scannable. Anyone can use it, under the AGPL (see [Licence](#licence)).
 
 > **Working on this with an agent?** Point it at [`CLAUDE.md`](CLAUDE.md) — install,
 > build, authoring vocabulary, how to version the package, and the traps that have

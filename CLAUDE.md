@@ -1,6 +1,6 @@
 # press — instructions for an agent
 
-`press` is a Typst package plus build recipes that VTS repos vendor as a submodule. It gives
+`press` is a Typst package plus build recipes that repos vendor as a submodule. It gives
 a repo a **shared vocabulary and a reproducible build**, and nothing else — the page layout
 stays in the document.
 
@@ -149,7 +149,7 @@ treatment.
 machine — an ATS résumé, parsed with `pdftotext -layout` — must stay single-column:
 `unit`, `chip` and two-column grids break its reading order. It takes press's **tokens and
 fonts** and none of its layout conventions, and that is correct. Before "improving" a
-document into house style, establish who reads it first; if a parser, leave it
+document into press's style, establish who reads it first; if a parser, leave it
 single-column and say so in a comment at the top of the file.
 
 ### Vocabulary
