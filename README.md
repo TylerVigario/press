@@ -53,6 +53,13 @@ or, if it already has recipes of its own:
 mod press 'vendor/press/press.just'   # -> just press build docs/example.typ
 ```
 
+Name the time zone `updated()` prints in, once per repo: an IANA name, or `"UTC"` for documents
+read across time zones. Unset, it is the zone of whichever machine builds.
+
+```just
+export PRESS_TZ := "America/Los_Angeles"
+```
+
 and then, identically on Linux and Windows:
 
 ```sh

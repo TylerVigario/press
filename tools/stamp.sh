@@ -41,9 +41,26 @@ shift 2
 
 now=$(date +%s)
 
-# Local time, readable on paper. GNU date (Linux, Git for Windows) takes -d @N; BSD and
-# macOS take -r N.
-when() { date -d "@$1" '+%Y-%m-%d %H:%M %Z' 2>/dev/null || date -r "$1" '+%Y-%m-%d %H:%M %Z'; }
+# The stamp is kept and compared in UTC -- the PDF's /CreationDate -- and printed in the
+# DOCUMENT's time zone: PRESS_TZ, an IANA name the consuming repo exports from its justfile,
+#
+#   export PRESS_TZ := "America/Los_Angeles"     ("UTC" for documents read across zones)
+#
+# so every machine prints the same text for the same moment, and an unchanged page stays
+# unchanged wherever it is built. Unset, it is the building machine's own zone, and a build
+# under another zone re-stamps a page that did not change.
+#
+# A name date does not know is not an error to date: it prints UTC under the name's first
+# word ("Mars" for Mars/Base). So the zone must exist in the tz database before it is used.
+if [ -n "${PRESS_TZ:-}" ] && [ ! -f "${TZDIR:-/usr/share/zoneinfo}/$PRESS_TZ" ]; then
+    echo "press: PRESS_TZ is not a time zone this machine knows: $PRESS_TZ" >&2
+    echo "       expected ${TZDIR:-/usr/share/zoneinfo}/$PRESS_TZ (an IANA name, or UTC)" >&2
+    exit 1
+fi
+tz() { if [ -n "${PRESS_TZ:-}" ]; then TZ=$PRESS_TZ "$@"; else "$@"; fi; }
+
+# Readable on paper. GNU date (Linux, Git for Windows) takes -d @N; BSD and macOS take -r N.
+when() { tz date -d "@$1" '+%Y-%m-%d %H:%M %Z' 2>/dev/null || tz date -r "$1" '+%Y-%m-%d %H:%M %Z'; }
 
 # The previous stamp, in Unix seconds, from the PDF's own /CreationDate; empty if none.
 # awk does the calendar arithmetic (days from civil, Hinnant) because GNU and BSD date
