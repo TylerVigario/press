@@ -9,7 +9,8 @@ name: CI
 #                            import and move their submodule only to a later
 #                            release, which must leave the version they import as
 #                            it was.
-#   Documents build          typst compile errors.
+#   Documents build          typst compile errors, and a rebuild that re-stamps a
+#                            document whose page did not change.
 #   Documents pass the audit press's own passes, run against its own document:
 #                            typst warnings that exit 0 and ship, fonts that are
 #                            not vendored, and ink inside the unprintable band.
@@ -119,6 +120,18 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/typst-toolchain
       - run: just all
+      - name: A rebuild leaves every document unchanged
+        run: |
+          set -euo pipefail
+          # An unchanged page keeps its stamp: build reads the old one back from the PDF.
+          # A second build of the same tree must therefore report every document
+          # unchanged. One it cannot read back re-stamps every page, and shows here.
+          out=$(just all)
+          printf '%s\n' "$out"
+          if printf '%s\n' "$out" | grep '^print/' | grep -v ': unchanged,'; then
+            echo "::error::a rebuild of an unchanged tree re-stamped the documents above"
+            exit 1
+          fi
 
   audit:
     name: Documents pass the audit
@@ -165,6 +178,18 @@ jobs:
           set -euo pipefail
           just all
           for f in docs/*.typ; do just check "$f"; done
+      - name: A rebuild leaves every document unchanged
+        run: |
+          set -euo pipefail
+          # An unchanged page keeps its stamp: build reads the old one back from the PDF.
+          # A second build of the same tree must therefore report every document
+          # unchanged. One it cannot read back re-stamps every page, and shows here.
+          out=$(just all)
+          printf '%s\n' "$out"
+          if printf '%s\n' "$out" | grep '^print/' | grep -v ': unchanged,'; then
+            echo "::error::a rebuild of an unchanged tree re-stamped the documents above"
+            exit 1
+          fi
 
   invisible:
     name: No invisible characters

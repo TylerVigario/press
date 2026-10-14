@@ -45,10 +45,11 @@ status=$2
 shift 2
 updated="$*"
 
-# The page count from the PDF's page tree, which typst writes uncompressed
-# (/Type/Pages/Count N). Only the root's Count is the whole document; a nested node's is
+# The page count from the PDF's page tree, which typst writes uncompressed: on one line
+# from 0.15 (/Type/Pages/Count N), one key to a line before. Line ends become spaces so
+# both read the same. Only the root's Count is the whole document; a nested node's is
 # smaller, so the largest is taken. Left out if a future typst writes it otherwise.
-pages=$(grep -a -o '/Type */Pages */Count *[0-9]*' "$pdf" | sed 's/.*Count *//' | sort -n | tail -n 1)
+pages=$(tr '\r\n' '  ' < "$pdf" | grep -a -o '/Type */Pages */Count *[0-9]*' | sed 's/.*Count *//' | sort -n | tail -n 1)
 
 bytes=$(wc -c < "$pdf" | tr -d ' ')
 size=$(awk -v b="$bytes" 'BEGIN {

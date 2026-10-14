@@ -76,10 +76,11 @@ tz() { if [ -n "$zone" ]; then TZ=":$zone" "$@"; else "$@"; fi; }
 when() { tz date -d "@$1" '+%Y-%m-%d %H:%M %Z' 2>/dev/null || tz date -r "$1" '+%Y-%m-%d %H:%M %Z'; }
 
 # The previous stamp, in Unix seconds, from the PDF's own /CreationDate; empty if none.
+# typst 0.14 writes a space before the date's parenthesis and 0.15 none, so either is read.
 # awk does the calendar arithmetic (days from civil, Hinnant) because GNU and BSD date
 # disagree on how to parse a date, and this must run on both.
 stamp_of() {
-    grep -a -o '/CreationDate(D:[0-9]\{14\}Z)' "$1" 2>/dev/null | head -n 1 | awk '{
+    grep -a -o '/CreationDate *(D:[0-9]\{14\}Z)' "$1" 2>/dev/null | head -n 1 | awk '{
         s = substr($0, index($0, "D:") + 2, 14)
         y = substr(s, 1, 4) + 0; m = substr(s, 5, 2) + 0; d = substr(s, 7, 2) + 0
         if (m <= 2) { y -= 1; m += 12 }
