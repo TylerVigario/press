@@ -40,6 +40,14 @@ def pages(pdf, tmp):
         # neither the missing tool nor the remedy.
         sys.exit(f"press: printable-area check needs poppler; {PDFTOPPM} not found\n"
                  f"       set PRESS_PDFTOPPM to poppler's binary if it is not on PATH")
+    except OSError as e:
+        # Found but not runnable, as line-overlap.py handles for PRESS_PDFTOTEXT: on
+        # Windows a script raises WinError 193, and the bare traceback names CreateProcess
+        # instead of the variable that caused it.
+        sys.exit(f"press: {PDFTOPPM} could not be run ({e})\n"
+                 f"       PRESS_PDFTOPPM must name an executable, not a script")
+    except subprocess.CalledProcessError:
+        sys.exit(f"press: {PDFTOPPM} could not render {pdf}")
     return sorted(pathlib.Path(tmp).glob("p-*.pgm"))
 
 def read_pgm(path):
