@@ -294,6 +294,11 @@
   if s == none { [not stamped (built outside just build)] } else { [updated #s] }
 }
 
+// The version of press a document was set with, read from this package's own typst.toml,
+// so a page that prints it always names the package it imported. Not `version`: that is
+// typst's own, and `import *` would shadow it.
+#let press-version = toml("typst.toml").package.version
+
 // ----------------------------------------------------------- composition ---
 // Promoted out of individual documents while this was still a prototype.
 // Generic by nature — a labelled bounded block, a state chip, a reversed band,
