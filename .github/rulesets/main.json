@@ -34,26 +34,11 @@
         "dismiss_stale_reviews_on_push": true,
         "required_reviewers": [],
         "require_code_owner_review": false,
-        "dismissal_restriction": {
-          "enabled": false,
-          "allowed_actors": []
-        },
         "require_last_push_approval": false,
         "required_review_thread_resolution": false,
+        "require_extra_approval_for_unattributed_changes": true,
         "allowed_merge_methods": [
           "squash"
-        ]
-      }
-    },
-    {
-      "type": "code_scanning",
-      "parameters": {
-        "code_scanning_tools": [
-          {
-            "tool": "CodeQL",
-            "security_alerts_threshold": "medium_or_higher",
-            "alerts_threshold": "errors"
-          }
         ]
       }
     },
@@ -68,9 +53,6 @@
           },
           {
             "context": "Documents pass the audit"
-          },
-          {
-            "context": "Documents pass on the oldest toolchain"
           },
           {
             "context": "No invisible characters"
@@ -92,6 +74,21 @@
           },
           {
             "context": "Validate PR title"
+          },
+          {
+            "context": "Documents pass on the oldest toolchain"
+          }
+        ]
+      }
+    },
+    {
+      "type": "code_scanning",
+      "parameters": {
+        "code_scanning_tools": [
+          {
+            "tool": "CodeQL",
+            "security_alerts_threshold": "medium_or_higher",
+            "alerts_threshold": "errors"
           }
         ]
       }

@@ -33,6 +33,11 @@ someone to edit a value the API ignores.
 so requiring one deadlocks the repository outright. The pull request is the record; the
 approval count adds nothing where there is one reviewer.
 
+Two of its fields are as GitHub holds them rather than chosen here.
+`require_extra_approval_for_unattributed_changes` is `true` on the live ruleset, which the REST
+reference does not document (checked 2026-10-14); it is kept at that value so applying this file
+changes nothing. `dismissal_restriction` is left out: it was disabled, and the API omits it.
+
 **`allowed_merge_methods: squash`** — no merge commits, and no rebase either. A second
 parent buys nothing merging into linear history; rebase is excluded because it replays
 branch commits onto main verbatim, so a check validating the pull request title never
