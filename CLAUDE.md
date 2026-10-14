@@ -88,11 +88,11 @@ rebuild that changes nothing on the page keeps the old time. A new typst or new 
 re-stamp an unchanged page. `watch` and a bare `typst compile` pass no stamp, and
 `updated()` says so.
 
-**The stamp prints in `PRESS_TZ`**, which the consuming repo exports from its justfile:
-`export PRESS_TZ := "America/Los_Angeles"`, or `"UTC"` for documents read across time zones.
-Every machine then prints the same text, so an unchanged page stays unchanged wherever it is
-built. Unset, it is the building machine's zone, and a build under another zone re-stamps.
-A name not in the machine's tz database fails the build rather than printing UTC mislabelled.
+**The stamp prints in the building machine's zone**, or in UTC when the consuming repo's
+justfile has `export PRESS_UTC := "true"` (documents read across time zones). It takes
+`true`/`1` or `false`/`0`; anything else fails the build. There is no naming another zone: that
+needs the tz database, which Git for Windows lacks. A build under another zone than the one
+that stamped a page re-stamps it.
 
 **`build` then prints one line per document** — new, changed or unchanged, pages, words
 (with poppler), size and the stamp — and `all` ends with a count.

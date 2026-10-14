@@ -42,25 +42,27 @@ shift 2
 now=$(date +%s)
 
 # The stamp is kept and compared in UTC -- the PDF's /CreationDate -- and printed in the
-# DOCUMENT's time zone: PRESS_TZ, an IANA name the consuming repo exports from its justfile,
+# building machine's own zone, or in UTC when the consuming repo's justfile says so:
 #
-#   export PRESS_TZ := "America/Los_Angeles"     ("UTC" for documents read across zones)
+#   export PRESS_UTC := "true"
 #
-# so every machine prints the same text for the same moment, and an unchanged page stays
-# unchanged wherever it is built. Unset, it is the building machine's own zone, and a build
-# under another zone re-stamps a page that did not change.
-#
-# A name date does not know is not an error to date: it prints UTC under the name's first
-# word ("Mars" for Mars/Base). So the zone must exist in the tz database before it is used.
-if [ -n "${PRESS_TZ:-}" ] && [ ! -f "${TZDIR:-/usr/share/zoneinfo}/$PRESS_TZ" ]; then
-    echo "press: PRESS_TZ is not a time zone this machine knows: $PRESS_TZ" >&2
-    echo "       expected ${TZDIR:-/usr/share/zoneinfo}/$PRESS_TZ (an IANA name, or UTC)" >&2
-    exit 1
-fi
-tz() { if [ -n "${PRESS_TZ:-}" ]; then TZ=$PRESS_TZ "$@"; else "$@"; fi; }
+# for documents read across time zones. true or 1 prints UTC; false, 0 or unset, the
+# machine's zone; anything else fails rather than guess. There is no naming another zone:
+# that needs the tz database, and Git for Windows ships none -- date prints UTC under the
+# zone's name instead. A page built under another zone than the one that stamped it
+# re-stamps, because the printed time differs.
+case ${PRESS_UTC:-} in
+    true | 1) utc=true ;;
+    false | 0 | '') utc=false ;;
+    *)
+        echo "press: PRESS_UTC is true or false, not $PRESS_UTC" >&2
+        exit 1
+        ;;
+esac
+zdate() { if [ "$utc" = true ]; then date -u "$@"; else date "$@"; fi; }
 
 # Readable on paper. GNU date (Linux, Git for Windows) takes -d @N; BSD and macOS take -r N.
-when() { tz date -d "@$1" '+%Y-%m-%d %H:%M %Z' 2>/dev/null || tz date -r "$1" '+%Y-%m-%d %H:%M %Z'; }
+when() { zdate -d "@$1" '+%Y-%m-%d %H:%M %Z' 2>/dev/null || zdate -r "$1" '+%Y-%m-%d %H:%M %Z'; }
 
 # The previous stamp, in Unix seconds, from the PDF's own /CreationDate; empty if none.
 # awk does the calendar arithmetic (days from civil, Hinnant) because GNU and BSD date
