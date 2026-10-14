@@ -288,8 +288,8 @@ git add vendor/press && git commit -m "chore: bump press to v<version>"
     the consuming repo's root (`root`). Swapping them sends output into press's tree. Under
     `--justfile`, as `all` reaches `build`, `justfile_directory()` becomes press's directory,
     which is why `all` passes `--set root`.
-  - `[no-cd]` on every public recipe is required: without it a `mod` consumer resolves every
-    path against press's directory.
+  - `[working-directory(root)]` on every recipe is required: without it a `mod` consumer
+    resolves every path against press's directory.
 
 ## Do not
 

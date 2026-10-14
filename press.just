@@ -11,9 +11,9 @@
 #
 #   mod press 'vendor/press/press.just'   ->  just press build docs/x.typ
 #
-# Every recipe carries [no-cd] so both forms behave identically: a module
-# would otherwise run with press's own directory as the working directory,
-# and every document path would resolve against the wrong tree.
+# Every recipe runs in the consumer's root, [working-directory(root)], so both forms
+# behave identically: a module would otherwise run with press's own directory as the
+# working directory, and every document path would resolve against the wrong tree.
 #
 # WHY A JUSTFILE, not a wrapper script: one file instead of a POSIX and a
 # PowerShell twin that would inevitably drift — the same argument that moved
@@ -53,20 +53,17 @@ typst_minimum := '0.14.0'
 press_root := source_directory()
 
 # The CONSUMER's root — where print/ belongs and where document paths are
-# resolved from. Every recipe cds here first.
+# resolved from. Every recipe runs here: [working-directory(root)].
 #
-# [no-cd] is what lets press work under both `import` and `mod`, but it opts out
-# of just's own convention that a recipe runs at the project root no matter
-# which subdirectory you invoke it from. Left alone, that convention loss is a
-# silent-wrong-output bug: `just press build one.typ` from inside recipes/ exits
-# 0, prints print/one.pdf, and writes recipes/print/one.pdf — a second output
-# tree nested in the source. `clean` then deletes THAT one and reports nothing
-# while the real print/ survives untouched.
+# Under `mod`, a recipe would otherwise run in press's own directory. Running from
+# wherever just was invoked instead, [no-cd], is a silent-wrong-output bug:
+# `just press build one.typ` from inside recipes/ exits 0, prints print/one.pdf, and
+# writes recipes/print/one.pdf — a second output tree nested in the source. `clean`
+# then deletes THAT one and reports nothing while the real print/ survives untouched.
 #
-# So: keep [no-cd] to escape press's own directory, then cd deliberately to the
-# consumer root. Verified stable in all four cases — mod and import, invoked
-# from the root and from a subdirectory. Paths are root-relative, exactly as in
-# any ordinary justfile.
+# So every recipe names its directory, and it is this one, in all four cases — mod and
+# import, invoked from the root and from a subdirectory — and under `all`'s --set root.
+# Paths are root-relative, exactly as in any ordinary justfile.
 root := justfile_directory()
 
 # --ignore-system-fonts removes the MACHINE's fonts, so output cannot vary by
@@ -98,7 +95,7 @@ default:
 # fails on the first flag it lacks, as "unexpected argument '--deps'". Every recipe that
 # runs typst depends on it.
 [script]
-[no-cd]
+[working-directory(root)]
 _typst-version:
     v=$(typst --version) || { echo 'press: typst is not on PATH' >&2; exit 1; }
     v=${v#typst }
@@ -120,10 +117,9 @@ _typst-version:
 # words (where poppler is installed), size, and the stamp the page carries.
 [doc("Compile one document -> print/<same path>.pdf")]
 [script]
-[no-cd]
+[working-directory(root)]
 [arg('doc', pattern='.+\.typ', help='a .typ file, relative to the repo root')]
 build doc: _typst-version
-    cd {{ quote(root) }}
     src={{ quote(trim_start_match(replace(doc, '\', '/'), './')) }}
     pdf="print/${src%.typ}.pdf"
     st=$(sh {{ quote(press_root / "tools" / "stamp.sh") }} "$src" "$pdf" {{ typst_flags }})
@@ -132,10 +128,9 @@ build doc: _typst-version
 # Recompile one document on every save
 [doc("Recompile one document on every save")]
 [script]
-[no-cd]
+[working-directory(root)]
 [arg('doc', pattern='.+\.typ', help='a .typ file, relative to the repo root')]
 watch doc: _typst-version
-    cd {{ quote(root) }}
     src={{ quote(trim_start_match(replace(doc, '\', '/'), './')) }}
     pdf="print/${src%.typ}.pdf"
     mkdir -p "$(dirname "$pdf")"
@@ -162,7 +157,7 @@ watch doc: _typst-version
 # because under `mod press` the recipe is `press build` and a bare call does not
 # resolve — it looks in the CONSUMER's justfile and fails with "does not contain
 # recipe `build`". Naming this file explicitly makes `all` behave the same under
-# both consumption forms, which is the whole point of the [no-cd] treatment.
+# both consumption forms, which is the whole point of running every recipe in root.
 #
 # --set root is not optional. Under --justfile THIS file becomes the justfile,
 # so justfile_directory() would resolve to press's own directory and every
@@ -178,11 +173,10 @@ watch doc: _typst-version
 # one string of every name joined by spaces, so a name with a space in it would split.
 [doc("Compile every document under the given directories (default docs/)")]
 [script]
-[no-cd]
+[working-directory(root)]
 [positional-arguments]
 [arg('dirs', help='directories to search for .typ files, relative to the repo root')]
 all +dirs='docs': _typst-version
-    cd {{ quote(root) }}
     for d in "$@"; do
         test -d "$d" || { echo "press: no such directory: $d" >&2; exit 1; }
     done
@@ -209,7 +203,7 @@ all +dirs='docs': _typst-version
 # makes print/.
 [doc("Scaffold a new document from the press skeleton")]
 [script]
-[no-cd]
+[working-directory(root)]
 [arg('name', help='the directory to create, holding main.typ; no .typ of its own')]
 new name: _typst-version
     n={{ quote(replace(name, '\', '/')) }}
@@ -217,7 +211,6 @@ new name: _typst-version
         *.typ) echo "press: new makes a directory holding main.typ, so name it without .typ: ${n%.typ}" >&2
                exit 1 ;;
     esac
-    cd {{ quote(root) }}
     mkdir -p "$(dirname "$n")"
     typst init --package-path {{ quote(press_root / "packages") }} @vts/press:0.1.0 "$n"
 
@@ -325,10 +318,9 @@ new name: _typst-version
 # is how it should be exercised when changing it.
 [doc("Audit a built PDF for the font failures typst does not report")]
 [script]
-[no-cd]
+[working-directory(root)]
 [arg('doc', pattern='.+\.typ', help='a .typ file, relative to the repo root')]
 check doc: _typst-version
-    cd {{ quote(root) }}
     src={{ quote(trim_start_match(replace(doc, '\', '/'), './')) }}
     pdf="print/${src%.typ}.pdf"
     sh {{ quote(press_root / "tools" / "check.sh") }} "$src" "$pdf" {{ quote(press_root) }} {{ typst_flags }}
@@ -339,7 +331,6 @@ check doc: _typst-version
 # stray print/ there and left the real one intact, reporting success either way.
 [doc("Delete rendered output")]
 [script]
-[no-cd]
+[working-directory(root)]
 clean:
-    cd {{ quote(root) }}
     rm -rf print
