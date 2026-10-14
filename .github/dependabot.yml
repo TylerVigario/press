@@ -26,6 +26,13 @@ updates:
       # Conventional Commits, because Lint main checks whatever reaches the branch
       # and a Dependabot subject is not exempt from it.
       prefix: chore
+    groups:
+      # CodeQL's init and analyze steps must run the same version: analyze refuses a
+      # configuration written by another. Bumped one per pull request, each fails CodeQL
+      # against the other's old version and neither can merge, so they move as one.
+      codeql-action:
+        patterns:
+          - "github/codeql-action*"
 
   # The composite action needs its own entry. `directory: /` covers
   # .github/workflows/, and a composite lives at .github/actions/<name>/action.yml,
