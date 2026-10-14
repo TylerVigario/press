@@ -37,6 +37,14 @@
 #   · carries --root, --package-path, --font-path and --ignore-system-fonts;
 #   · stamps the document with when its content last changed (tools/stamp.sh).
 
+# The oldest just and typst press works with. A just that knows the setting refuses this
+# file with "requires just 1.55.0 or later"; one older still stops at this line with
+# "unknown setting", and the line it shows names the version. The typst guard is the
+# _typst-version recipe below.
+set minimum-version := '1.55.0'
+
+typst_minimum := '0.14.0'
+
 # Where press itself lives, resolved from THIS file rather than the consumer's
 # root justfile — so press may be vendored at any path and nothing here
 # hardcodes one. justfile_directory() would resolve to the importing repo's
@@ -79,6 +87,13 @@ typst_flags := "--root . --package-path " + quote(press_root / "packages") + \
 default:
     @just --list --unsorted
 
+# Refuse a typst older than typst_minimum, naming both versions. Without it an old typst
+# fails on the first flag it lacks, as "unexpected argument '--deps'". Every recipe that
+# runs typst depends on it.
+[no-cd]
+_typst-version:
+    @v=$(typst --version) || { echo 'press: typst is not on PATH' >&2; exit 1; }; v=${v#typst }; v=${v%% *}; echo "$v" | awk -F. -v min={{ typst_minimum }} '{ split(min, m, "."); for (i = 1; i <= 3; i++) { if ($i + 0 > m[i] + 0) exit 0; if ($i + 0 < m[i] + 0) exit 1 } }' || { echo "press: needs typst {{ typst_minimum }} or newer; this is typst $v" >&2; exit 1; }
+
 # Compile one document → print/<same path>.pdf
 #
 # The path is relative to the repo root, from whichever directory you invoke it.
@@ -91,13 +106,13 @@ default:
 # words (where poppler is installed), size, and the stamp the page carries.
 [doc("Compile one document -> print/<same path>.pdf")]
 [no-cd]
-build doc:
+build doc: _typst-version
     @cd {{ quote(root) }} && st=$(sh {{ quote(press_root / "tools" / "stamp.sh") }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }} {{ typst_flags }}) && sh {{ quote(press_root / "tools" / "report.sh") }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }} $st
 
 # Recompile one document on every save
 [doc("Recompile one document on every save")]
 [no-cd]
-watch doc:
+watch doc: _typst-version
     @cd {{ quote(root) }} && mkdir -p {{ quote(parent_directory("print" / trim_start_match(replace(doc, '\', '/'), './'))) }} && typst watch {{ typst_flags }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }}
 
 # Compile every document under the given directories (default docs/)
@@ -138,7 +153,7 @@ watch doc:
 [doc("Compile every document under the given directories (default docs/)")]
 [no-cd]
 [positional-arguments]
-all +dirs='docs':
+all +dirs='docs': _typst-version
     @cd {{ quote(root) }} && for d in "$@"; do test -d "$d" || { echo "press: no such directory: $d" >&2; exit 1; }; done
     @cd {{ quote(root) }} && test "$(find "$@" -name '*.typ' | wc -l)" -gt 0 || { echo "press: no .typ files in: $*" >&2; exit 1; }
     @cd {{ quote(root) }} && export PRESS_TALLY="$(mktemp)" && n=$(find "$@" -name '*.typ' | wc -l) && { find "$@" -name '*.typ' -print0 | sort -z | xargs -0 -n1 just --justfile {{ quote(press_root / "press.just") }} --set root {{ quote(root) }} build; rc=$?; sh {{ quote(press_root / "tools" / "report.sh") }} --summary "$PRESS_TALLY" "$n"; rm -f "$PRESS_TALLY"; exit $rc; }
@@ -154,7 +169,7 @@ all +dirs='docs':
 # makes print/.
 [doc("Scaffold a new document from the press skeleton")]
 [no-cd]
-new name:
+new name: _typst-version
     @cd {{ quote(root) }} && mkdir -p "$(dirname {{ quote(replace(name, '\', '/')) }})" && typst init --package-path {{ quote(press_root / "packages") }} @vts/press:0.1.0 {{ quote(name) }}
 
 # Audit a built document for the font failures typst does not report
@@ -261,7 +276,7 @@ new name:
 # is how it should be exercised when changing it.
 [doc("Audit a built PDF for the font failures typst does not report")]
 [no-cd]
-check doc:
+check doc: _typst-version
     @cd {{ quote(root) }} && sh {{ quote(press_root / "tools" / "check.sh") }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }} {{ quote(press_root) }} {{ typst_flags }}
 
 # Delete rendered output
