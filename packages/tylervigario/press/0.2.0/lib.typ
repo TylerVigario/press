@@ -245,6 +245,34 @@
   body,
 )
 
+// Links that work on a screen and on paper, in the one PDF. A document installs it, as it
+// installs `code`:
+//
+//   #show link: link-note
+//
+// The text is coloured AND underlined, so it still reads as a link from a greyscale printer,
+// and it still clicks. Where the page would hide the address, it goes in a footnote, as books
+// print it: unobtrusive on a screen, and on paper the reader can still type it. The scheme
+// (https://, http://, mailto:) and a trailing slash are left off, since a browser supplies
+// them. No footnote when the text already is the address, or when the link goes to a place
+// in the same document.
+//
+// Keep links out of headings once a document has an outline: the contents repeat the
+// heading, and its footnote with it, so the address is noted twice.
+#let link-note(it) = {
+  let shown = underline(stroke: 0.5pt + slate, offset: 1.6pt, text(fill: slate, it))
+  if type(it.dest) != str { return shown }
+  let address = it.dest
+  for prefix in ("mailto:", "https://", "http://") {
+    address = address.trim(prefix, at: start, repeat: false)
+  }
+  address = address.trim("/", at: end, repeat: false)
+  let body = if it.body.has("text") { it.body.text.trim("/", at: end, repeat: false) }
+  if body in (it.dest.trim("/", at: end, repeat: false), address) { shown } else {
+    shown + footnote(address)
+  }
+}
+
 // Numbered entry: marker, title, explanation.
 #let item(n, title, body, color: slate, size: sz.small) = block(
   width: 100%, breakable: false, inset: (bottom: 6pt),

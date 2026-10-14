@@ -21,6 +21,7 @@
 #set text(font: face-text, size: sz.small, fill: ink, lang: "en")
 #set par(leading: 0.52em, spacing: 0.55em)
 #show raw: set text(font: face-mono, size: sz.micro)
+#show link: link-note
 
 #grid(columns: (auto, 1fr), align: (left + bottom, right + bottom),
   text(font: face-display, size: sz.title, weight: 700)[Print calibration],
@@ -124,3 +125,9 @@
   text(size: sz.small, fill: white)[
     Solid field for the show-through test. Turn back to page 1 and look at the dashed window.
   ])
+#v(14pt)
+#text(size: sz.small)[
+  A link, as `link-note` prints it: #link("https://github.com/TylerVigario/press")[the press
+  source]. On a screen it clicks; on paper its address is in the footnote. Check that the
+  underline survives economy mode, since it, not the colour, is what marks a link in greyscale.
+]

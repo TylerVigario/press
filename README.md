@@ -33,6 +33,8 @@ prints true, so every part is made for both:
 
 - **Text is real text:** searchable, copyable, and set in vendored fonts, so it renders the
   same on every machine.
+- **Links work on both:** they click on screen, and `link-note` footnotes their address for
+  paper.
 - **Colour is never the only carrier of meaning,** so a greyscale printer or a colour-blind
   reader loses nothing.
 - **Commands are short and unwrapped,** so they copy cleanly from the screen and can be typed
@@ -128,7 +130,7 @@ parts serve it.
 | | lives in |
 |---|---|
 | tokens — palette, type scale, faces, page presets | the package |
-| vocabulary — `unit`, `chip`, `band-strong`, `decision`, `matrix`, `flow`, `callout`, `code` | the package |
+| vocabulary — `unit`, `chip`, `band-strong`, `decision`, `matrix`, `flow`, `callout`, `code`, `link-note` | the package |
 | composition — section order, page choice, diagrams, depth layering | the document |
 | fonts | `fonts/`, a build input rather than styling API |
 
