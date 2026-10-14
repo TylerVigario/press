@@ -132,12 +132,16 @@ watch doc:
 # is built in its own `just`, so report.sh appends each status to a file named by
 # PRESS_TALLY, and the count is read from that once xargs is done. The exit status is still
 # xargs's.
+#
+# The directories reach the shell as its own arguments, "$@", not as {{ dirs }}: that is
+# one string of every name joined by spaces, so a name with a space in it would split.
 [doc("Compile every document under the given directories (default docs/)")]
 [no-cd]
+[positional-arguments]
 all +dirs='docs':
-    @cd {{ quote(root) }} && for d in {{ dirs }}; do test -d "$d" || { echo "press: no such directory: $d" >&2; exit 1; }; done
-    @cd {{ quote(root) }} && test "$(find {{ dirs }} -name '*.typ' | wc -l)" -gt 0 || { echo 'press: no .typ files in: {{ dirs }}' >&2; exit 1; }
-    @cd {{ quote(root) }} && export PRESS_TALLY="$(mktemp)" && n=$(find {{ dirs }} -name '*.typ' | wc -l) && { find {{ dirs }} -name '*.typ' -print0 | sort -z | xargs -0 -n1 just --justfile {{ quote(press_root / "press.just") }} --set root {{ quote(root) }} build; rc=$?; sh {{ quote(press_root / "tools" / "report.sh") }} --summary "$PRESS_TALLY" "$n"; rm -f "$PRESS_TALLY"; exit $rc; }
+    @cd {{ quote(root) }} && for d in "$@"; do test -d "$d" || { echo "press: no such directory: $d" >&2; exit 1; }; done
+    @cd {{ quote(root) }} && test "$(find "$@" -name '*.typ' | wc -l)" -gt 0 || { echo "press: no .typ files in: $*" >&2; exit 1; }
+    @cd {{ quote(root) }} && export PRESS_TALLY="$(mktemp)" && n=$(find "$@" -name '*.typ' | wc -l) && { find "$@" -name '*.typ' -print0 | sort -z | xargs -0 -n1 just --justfile {{ quote(press_root / "press.just") }} --set root {{ quote(root) }} build; rc=$?; sh {{ quote(press_root / "tools" / "report.sh") }} --summary "$PRESS_TALLY" "$n"; rm -f "$PRESS_TALLY"; exit $rc; }
 
 # Scaffold a new document from the press skeleton
 #
