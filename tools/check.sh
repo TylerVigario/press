@@ -109,7 +109,8 @@ trap 'rm -rf "$tmp"' EXIT INT TERM
 #
 # Through stamp.sh, as `build` does: a bare typst compile here would overwrite the
 # stamped PDF with an unstamped one, and every check would wipe the edition off the page.
-out=$(sh "$press_root/tools/stamp.sh" "$src" "$pdf" "$@" 2>&1) || {
+# It also writes the files the compile read, for the glyph check at the end.
+out=$(sh "$press_root/tools/stamp.sh" "$src" "$pdf" "$@" --deps "$tmp/deps" --deps-format zero 2>&1) || {
     echo "press: $src does not compile —" >&2
     printf '%s\n' "$out" | sed 's/^/  /' >&2
     exit 1
@@ -213,7 +214,32 @@ fi
 # pdftotext gives back a plain space for U+00A0, so probing them fails a document
 # that is correct. Stray invisible characters in source are a real concern and a
 # different one; the check that owns that concern should own it.
-chars=$(grep -v '^[[:space:]]*//' "$src" \
+#
+# The characters come from every .typ the document is made of, not only $src: text in a
+# file it #includes or #imports is on the page too. typst lists what the compile read; a
+# package lists its typst.toml with its files, so anything under a directory holding one
+# is a package's, not the document's, and is left to that package. Files read as data
+# (yaml, csv, ...) are not scanned.
+#
+# The paths are typst's own, separators turned to /. On Linux they are relative to the
+# root. typst on Windows writes a package's files relative with mixed separators, and the
+# document's own as \\?\C:\... verbatim paths, which reach grep as //?/C:/... and Git's sh
+# reads as they are. A package's files and its typst.toml come in the same form, so the
+# prefix that drops them lines up. Nothing compares a path with the root or the cwd.
+tr '\000\\' '\n/' < "$tmp/deps" | awk '
+    { f[++n] = $0 }
+    /\/typst\.toml$/ { p = $0; sub(/typst\.toml$/, "", p); pkg[p] = 1 }
+    END {
+        for (i = 1; i <= n; i++) {
+            if (f[i] !~ /\.typ$/) continue
+            inpkg = 0
+            for (p in pkg) if (index(f[i], p) == 1) inpkg = 1
+            if (!inpkg) print f[i]
+        }
+    }' > "$tmp/sources"
+# At least $src itself; an empty list would skip the check and report the document clean.
+test -s "$tmp/sources" || { echo "press: typst listed no sources for $src" >&2; exit 1; }
+chars=$(while IFS= read -r f; do grep -v '^[[:space:]]*//' "$f" || true; done < "$tmp/sources" \
         | grep -oP '(*UTF)[^\x00-\x7F]' \
         | grep -vP '(*UTF)^[\p{Z}\p{Cf}]$' \
         | sort -u || true)
