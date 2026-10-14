@@ -75,7 +75,10 @@ jobs:
           set -euo pipefail
           # A tag here names a package version: v0.1.0 releases
           # packages/vts/press/0.1.0/, and from that tag on the directory is
-          # frozen. A change adds packages/vts/press/<next>/ instead.
+          # frozen. A change adds packages/tylervigario/press/<next>/ instead.
+          # The namespace is whichever one the tag holds the version under: vts
+          # for 0.1.0, tylervigario from 0.2.0. A released version lives in
+          # exactly one, so another namespace may not grow a copy of it either.
           #
           # HEAD is what would land: the merge result on a pull request, the new
           # tip on a push to main. So an edit to a released directory is refused
@@ -90,15 +93,23 @@ jobs:
             # Tags carry the v; the directory and typst.toml do not (rule 17).
             [[ "$tag" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || continue
             version=${tag#v}
-            dir="packages/vts/press/$version"
             released=$((released + 1))
-            if ! git cat-file -e "$tag:$dir/typst.toml" 2>/dev/null; then
-              echo "::error::$tag does not contain $dir/ — a tag here names a package version"
+            found=$(git ls-tree -r --name-only "$tag" -- packages \
+                      | { grep -E "^packages/[^/]+/press/${version//./\\.}/typst\.toml$" || true; })
+            if [ "$(printf '%s' "$found" | grep -c .)" -ne 1 ]; then
+              echo "::error::$tag must contain exactly one packages/<namespace>/press/$version/ — a tag here names a package version; it has ${found:-none}"
               bad=1
               continue
             fi
+            dir=${found%/typst.toml}
             if [ ! -f "$dir/typst.toml" ]; then
               echo "::error::$dir/ was released as $tag and has been removed"
+              bad=1
+              continue
+            fi
+            here=$(find packages -mindepth 3 -maxdepth 3 -type d -path "packages/*/press/$version" | sort)
+            if [ "$here" != "$dir" ]; then
+              echo "::error::$version was released as $dir/, but the tree has: $(printf '%s' "$here" | tr '\n' ' ')"
               bad=1
               continue
             fi

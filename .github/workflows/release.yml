@@ -11,8 +11,9 @@ name: Release
 # change, not this file's.
 #
 # EVERY TAG NAMES ITS PACKAGE DIRECTORY. v<version> freezes
-# packages/vts/press/<version>/, and CI's "Released versions are unchanged" refuses
-# any later change to it. A package change is made in a new directory by pull
+# packages/<namespace>/press/<version>/, and CI's "Released versions are unchanged"
+# refuses any later change to it. 0.1.0 was released under vts; every version from
+# 0.2.0 is made under tylervigario. A package change is made in a new directory by pull
 # request, named for the version its commits will derive; the release checks that
 # the name and the commits agree. Where the derived version has no directory — a
 # release of tooling fixes, say — the release creates it as a copy of the newest
@@ -120,19 +121,22 @@ jobs:
           [[ "$version" =~ $semver ]] || fail "cocogitto derived something that is not a version: $next"
           ! tagged "$version" || fail "v$version is already released, and a tag here is create-once"
 
-          dir="packages/vts/press/$version"
+          dir="packages/tylervigario/press/$version"
+          elsewhere=$(find packages -mindepth 3 -maxdepth 3 -type d -path "packages/*/press/$version" ! -path "$dir")
+          [ -z "$elsewhere" ] || fail "$version is released under $dir/, but the tree also has $elsewhere/"
           source=""
           if [ -d "$dir" ]; then
             manifest=$(sed -n 's/^version *= *"\(.*\)"$/\1/p' "$dir/typst.toml")
             [ "$manifest" = "$version" ] || fail "$dir/typst.toml says ${manifest:-nothing}, not $version"
           else
-            # Created at publish from the newest directory, which must already be
-            # released: an unreleased directory under another number means the
-            # tree and the commits disagree about what this release is.
-            source=$(find packages/vts/press -mindepth 1 -maxdepth 1 -type d -printf '%f\n' \
-                       | { grep -E "$semver" || true; } | sort -V | tail -1)
+            # Created at publish from the newest directory in any namespace, which
+            # must already be released: an unreleased directory under another number
+            # means the tree and the commits disagree about what this release is.
+            source=$(find packages -mindepth 3 -maxdepth 3 -type d -path 'packages/*/press/*' \
+                       | awk -F/ '{ print $4 "\t" $0 }' \
+                       | { grep -E "${semver%\$}"$'\t' || true; } | sort -V | tail -1 | cut -f2)
             [ -n "$source" ] || fail "no package directory to create $dir/ from"
-            tagged "$source" || fail "the commits derive $version, but packages/vts/press/$source/ is not released. Name that directory $version, or check the commit types since ${newest:+v}${newest:-the first commit}."
+            tagged "${source##*/}" || fail "the commits derive $version, but $source/ is not released. Name that directory $version, or check the commit types since ${newest:+v}${newest:-the first commit}."
           fi
 
           if [ -n "$source" ]; then where="created from $source"; else where="already in the tree"; fi
@@ -173,7 +177,7 @@ jobs:
           {
             echo "### $TAG, as it will be recorded"
             echo
-            [ -z "$SOURCE" ] || { echo "packages/vts/press/${TAG#v}/ will be created from $SOURCE/."; echo; }
+            [ -z "$SOURCE" ] || { echo "packages/tylervigario/press/${TAG#v}/ will be created from $SOURCE/."; echo; }
             cog changelog | awk '/^## /{n++} n==1'
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -214,8 +218,9 @@ jobs:
           set -euo pipefail
           # A copy of the newest released version with its own number, so the
           # version a consumer imports exists. Nothing else in it changes.
-          dir="packages/vts/press/$VERSION"
-          cp -r "packages/vts/press/$SOURCE" "$dir"
+          dir="packages/tylervigario/press/$VERSION"
+          mkdir -p "${dir%/*}"
+          cp -r "$SOURCE" "$dir"
           sed -i "s/^version *= *\".*\"$/version = \"$VERSION\"/" "$dir/typst.toml"
           [ "$(sed -n 's/^version *= *"\(.*\)"$/\1/p' "$dir/typst.toml")" = "$VERSION" ] \
             || { echo "::error::could not set the version in $dir/typst.toml"; exit 1; }
@@ -249,7 +254,7 @@ jobs:
         run: |
           set -euo pipefail
           head=$(git rev-parse HEAD)
-          dir="packages/vts/press/$VERSION"
+          dir="packages/tylervigario/press/$VERSION"
           changed=$(git status --porcelain --untracked-files=all -- CHANGELOG.md "$dir" | sed 's/^...//')
           if [ -z "$changed" ]; then
             # A new run after a failed publish: main already records this release.

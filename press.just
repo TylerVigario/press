@@ -212,7 +212,7 @@ new name: _typst-version
                exit 1 ;;
     esac
     mkdir -p "$(dirname "$n")"
-    typst init --package-path {{ quote(press_root / "packages") }} @vts/press:0.1.0 "$n"
+    typst init --package-path {{ quote(press_root / "packages") }} @tylervigario/press:0.2.0 "$n"
 
 # Audit a built document for the font failures typst does not report
 #

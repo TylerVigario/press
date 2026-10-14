@@ -122,7 +122,7 @@ the rest.
 **Import the vocabulary, then compose the page yourself:**
 
 ```typ
-#import "@vts/press:0.1.0": *
+#import "@tylervigario/press:0.2.0": *
 ```
 
 `just new docs/thing` scaffolds a skeleton at `docs/thing/main.typ`, built with
@@ -210,12 +210,13 @@ them; the weekly Pins workflow opens an issue for each release a pin is behind
 (`sh .github/pins.sh` shows the same comparison).
 
 **Never edit a released version directory.** `v<version>` releases
-`packages/vts/press/<version>/`, and CI's *Released versions are unchanged* fails any PR that
-edits or removes it. For a change to the package, copy the newest version directory to the
-next version, set `version` in its `typst.toml`, and edit there. Name it for the version the
-commits will derive — ask `cog bump --auto --dry-run` or a dry run of the Release workflow;
-the release refuses a name that disagrees. Until a version's first release its directory
-takes additions.
+`packages/<namespace>/press/<version>/`: `vts` for 0.1.0, `tylervigario` from 0.2.0. CI's
+*Released versions are unchanged* fails any PR that edits or removes one. For a change to the
+package, copy the newest version directory to the next version under
+`packages/tylervigario/press/`, set `version` in its `typst.toml`, and edit there. Name it for
+the version the commits will derive — ask `cog bump --auto --dry-run` or a dry run of the
+Release workflow; the release refuses a name that disagrees. Until a version's first release
+its directory takes additions.
 
 **Releasing is one run of the Release workflow, dry run first.** It derives the version from
 the commits, gates on CI, writes `CHANGELOG.md` in a `release:` commit by the
@@ -226,7 +227,7 @@ a re-run checks out the old commit and the forge refuses its commit.
 `CHANGELOG.md` is generated except for its hand-written first release, "Initial release.",
 which `.github/write-changelog.sh` keeps (until cocogitto/cocogitto#580 is fixed).
 
-**`just new` scaffolds from the version named in `press.just`** (`@vts/press:0.1.0` today).
+**`just new` scaffolds from the version named in `press.just`** (`@tylervigario/press:0.2.0` today).
 Move it when a new version is released.
 
 **Editing press from inside a consuming repo.** A submodule is a **detached HEAD**; a commit
@@ -299,7 +300,7 @@ git add vendor/press && git commit -m "chore: bump press to v<version>"
   of `just`.
 - **Do not move whole-page composition into the library.** A helper that lays out an entire
   page belongs in the document. A styling helper a document opts into is fine to offer.
-- **Do not publish to Typst Universe.** It would cost the `@vts` namespace and local
+- **Do not publish to Typst Universe.** It would cost the `@tylervigario` namespace and local
   editability.
 - **Do not treat a suggestion as a decision.** A name, structure or convention you proposed
   and nobody explicitly answered is **not** approved. Ask, or leave it unbuilt.
