@@ -8,7 +8,8 @@ name: CI
 #                            that released it. Consumers pin the version in their
 #                            import and move their submodule only to a later
 #                            release, which must leave the version they import as
-#                            it was.
+#                            it was, unless that version is retired: 0.1.0, the
+#                            old @vts namespace, lives on only in its tag.
 #   Documents build          typst compile errors, and a rebuild that re-stamps a
 #                            document whose page did not change.
 #   Documents pass the audit press's own passes, run against its own document:
@@ -80,6 +81,12 @@ jobs:
           # for 0.1.0, tylervigario from 0.2.0. A released version lives in
           # exactly one, so another namespace may not grow a copy of it either.
           #
+          # A RETIRED version is one later releases no longer carry. It lives on
+          # in its tag, which every consumer pinned to it still builds from, and
+          # the tree must not hold it at all. Only 0.1.0, the @vts namespace, is
+          # retired; removing any other released version still fails here.
+          retired=" 0.1.0 "
+          #
           # HEAD is what would land: the merge result on a pull request, the new
           # tip on a push to main. So an edit to a released directory is refused
           # before it merges, not reported after it has reached every submodule.
@@ -102,12 +109,22 @@ jobs:
               continue
             fi
             dir=${found%/typst.toml}
+            if [ "${retired#* "$version" }" != "$retired" ]; then
+              here=$([ ! -d packages ] || find packages -mindepth 3 -maxdepth 3 -type d -path "packages/*/press/$version")
+              if [ -n "$here" ]; then
+                echo "::error::$version is retired and lives only in $tag, but the tree has: $(printf '%s' "$here" | tr '\n' ' ')"
+                bad=1
+              else
+                echo "$version: retired; it lives in $tag, and the tree no longer carries it"
+              fi
+              continue
+            fi
             if [ ! -f "$dir/typst.toml" ]; then
               echo "::error::$dir/ was released as $tag and has been removed"
               bad=1
               continue
             fi
-            here=$(find packages -mindepth 3 -maxdepth 3 -type d -path "packages/*/press/$version" | sort)
+            here=$([ ! -d packages ] || find packages -mindepth 3 -maxdepth 3 -type d -path "packages/*/press/$version" | sort)
             if [ "$here" != "$dir" ]; then
               echo "::error::$version was released as $dir/, but the tree has: $(printf '%s' "$here" | tr '\n' ' ')"
               bad=1

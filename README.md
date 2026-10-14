@@ -125,7 +125,8 @@ all; **read [`FONTS.md`](FONTS.md) before using any symbol**, and run `just chec
 ## Versioning
 
 A document imports one version, `@tylervigario/press:<version>`, and a released version
-never changes. 0.1.0 was released as `@vts/press:0.1.0` and stays importable under that name.
+never changes. 0.1.0 was released as `@vts/press:0.1.0` and lives on in its tag, v0.1.0;
+later releases do not carry it, so a repo moving past it changes the import in the same commit.
 A consuming repo moves its submodule only to a release tag, never to a commit on `main`
 between releases.
 

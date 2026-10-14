@@ -210,8 +210,10 @@ them; the weekly Pins workflow opens an issue for each release a pin is behind
 (`sh .github/pins.sh` shows the same comparison).
 
 **Never edit a released version directory.** `v<version>` releases
-`packages/<namespace>/press/<version>/`: `vts` for 0.1.0, `tylervigario` from 0.2.0. CI's
-*Released versions are unchanged* fails any PR that edits or removes one. For a change to the
+`packages/tylervigario/press/<version>/`, and CI's *Released versions are unchanged* fails any
+PR that edits or removes one. The one exception is 0.1.0, released as
+`packages/vts/press/0.1.0/` and retired: it lives in its tag, and the tree no longer carries
+it. For a change to the
 package, copy the newest version directory to the next version under
 `packages/tylervigario/press/`, set `version` in its `typst.toml`, and edit there. Name it for
 the version the commits will derive — ask `cog bump --auto --dry-run` or a dry run of the
@@ -248,6 +250,10 @@ git -C vendor/press fetch --tags
 git -C vendor/press checkout v<version>
 git add vendor/press && git commit -m "chore: bump press to v<version>"
 ```
+
+A repo moving off v0.1.0 changes every `@vts/press:0.1.0` import to
+`@tylervigario/press:<version>` in the same commit: later releases do not carry the `@vts`
+namespace.
 
 ---
 
