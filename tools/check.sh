@@ -188,7 +188,10 @@ if [ -n "$warns" ]; then
     echo "$warns" | sed 's/^/  /' >&2
     rc=1
 fi
-leaks=$("$PDFFONTS" "$pdf" | tail -n +3 | awk '{print $1}' | sed 's/^[A-Z]*+//' | grep -vE "^($allow)" || true)
+# A face is vendored when its name, past the subset prefix, is a vendored family alone or
+# followed by -: OpenSans, OpenSans-Bold, Montserrat-Bold-Identity-H. Without the - a family
+# that only begins with a vendored one, like LiberationSansNarrow, would pass as it.
+leaks=$("$PDFFONTS" "$pdf" | tail -n +3 | awk '{print $1}' | sed 's/^[A-Z]*+//' | grep -vE "^($allow)(-|\$)" || true)
 if [ -n "$leaks" ]; then
     echo "press: $pdf draws from fonts that are NOT vendored here —" >&2
     echo "$leaks" | sort -u | sed 's/^/  /' >&2
