@@ -70,8 +70,9 @@ just clean                       # delete print/
 `sh` comes from Git for Windows. `press.just` refuses an older typst or just, naming the
 version it needs; raising either floor is a deliberate edit there. `check` also needs poppler
 (`pdffonts`, `pdftotext`, `pdftoppm`) and a Python. Where PATH finds the wrong one, name it
-with `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`, `PRESS_PDFTOPPM` or `PRESS_PYTHON`. On Windows, Git's `sh` puts its bundled Xpdf `pdftotext` first inside
-every recipe, so set `PRESS_PDFTOTEXT` there; `check` refuses anything that is not poppler.
+with `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`, `PRESS_PDFTOPPM` or `PRESS_PYTHON`. On Windows,
+Git's `sh` puts its bundled Xpdf `pdftotext` first inside every recipe, so set
+`PRESS_PDFTOTEXT` there; `check` refuses anything that is not poppler.
 
 **Paths are relative to the repo root**, from whichever directory you invoke.
 
