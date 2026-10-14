@@ -76,13 +76,15 @@ typst_flags := "--root . --package-path " + quote(press_root / "packages") + \
                " --font-path " + quote(press_root / "fonts") + \
                " --ignore-system-fonts"
 
-# Every recipe that takes a document path writes it with forward slashes first, and
-# drops a leading ./ — because just's / always joins with a forward slash. Given
-# .\docs\x.typ, which is what PowerShell's tab completion produces, "print" / doc would
-# print print/.\docs\x.pdf: two separators in one path. Typst takes / on Windows too,
-# and a backslash is never sensibly part of a document's name. without_extension is
-# normalized again after: on Windows it rejoins the directory and the name with a
-# backslash, print/docs/t\main.pdf.
+# The recipes are scripts ([script]), run by just's default script interpreter, sh -eu: a
+# failing command ends the recipe, as the && chains they replaced did.
+#
+# Every recipe that takes a document path writes it with forward slashes first, as src, and
+# drops a leading ./. Given .\docs\x.typ, which is what PowerShell's tab completion
+# produces, the PDF would otherwise be print/.\docs\x.pdf: two separators in one path.
+# Typst takes / on Windows too, and a backslash is never sensibly part of a document's
+# name. The PDF is then print/${src%.typ}.pdf, made in the shell from src, so no path
+# function of just's can rejoin it with a backslash.
 #
 # build, watch and check take only a path ending in .typ, and new only a name that does
 # not end in one. A directory, a PDF or a markdown file is refused by name before typst
@@ -95,9 +97,16 @@ default:
 # Refuse a typst older than typst_minimum, naming both versions. Without it an old typst
 # fails on the first flag it lacks, as "unexpected argument '--deps'". Every recipe that
 # runs typst depends on it.
+[script]
 [no-cd]
 _typst-version:
-    @v=$(typst --version) || { echo 'press: typst is not on PATH' >&2; exit 1; }; v=${v#typst }; v=${v%% *}; echo "$v" | awk -F. -v min={{ typst_minimum }} '{ split(min, m, "."); for (i = 1; i <= 3; i++) { if ($i + 0 > m[i] + 0) exit 0; if ($i + 0 < m[i] + 0) exit 1 } }' || { echo "press: needs typst {{ typst_minimum }} or newer; this is typst $v" >&2; exit 1; }
+    v=$(typst --version) || { echo 'press: typst is not on PATH' >&2; exit 1; }
+    v=${v#typst }
+    v=${v%% *}
+    echo "$v" | awk -F. -v min={{ typst_minimum }} '{
+        split(min, m, ".")
+        for (i = 1; i <= 3; i++) { if ($i + 0 > m[i] + 0) exit 0; if ($i + 0 < m[i] + 0) exit 1 }
+    }' || { echo "press: needs typst {{ typst_minimum }} or newer; this is typst $v" >&2; exit 1; }
 
 # Compile one document → print/<same path>.pdf
 #
@@ -110,17 +119,27 @@ _typst-version:
 # Then tools/report.sh says what was made, in one line: new, changed or unchanged, pages,
 # words (where poppler is installed), size, and the stamp the page carries.
 [doc("Compile one document -> print/<same path>.pdf")]
+[script]
 [no-cd]
 [arg('doc', pattern='.+\.typ', help='a .typ file, relative to the repo root')]
 build doc: _typst-version
-    @cd {{ quote(root) }} && st=$(sh {{ quote(press_root / "tools" / "stamp.sh") }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }} {{ typst_flags }}) && sh {{ quote(press_root / "tools" / "report.sh") }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }} $st
+    cd {{ quote(root) }}
+    src={{ quote(trim_start_match(replace(doc, '\', '/'), './')) }}
+    pdf="print/${src%.typ}.pdf"
+    st=$(sh {{ quote(press_root / "tools" / "stamp.sh") }} "$src" "$pdf" {{ typst_flags }})
+    sh {{ quote(press_root / "tools" / "report.sh") }} "$pdf" $st
 
 # Recompile one document on every save
 [doc("Recompile one document on every save")]
+[script]
 [no-cd]
 [arg('doc', pattern='.+\.typ', help='a .typ file, relative to the repo root')]
 watch doc: _typst-version
-    @cd {{ quote(root) }} && mkdir -p {{ quote(parent_directory("print" / trim_start_match(replace(doc, '\', '/'), './'))) }} && typst watch {{ typst_flags }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }}
+    cd {{ quote(root) }}
+    src={{ quote(trim_start_match(replace(doc, '\', '/'), './')) }}
+    pdf="print/${src%.typ}.pdf"
+    mkdir -p "$(dirname "$pdf")"
+    typst watch {{ typst_flags }} "$src" "$pdf"
 
 # Compile every document under the given directories (default docs/)
 #
@@ -158,13 +177,26 @@ watch doc: _typst-version
 # The directories reach the shell as its own arguments, "$@", not as {{ dirs }}: that is
 # one string of every name joined by spaces, so a name with a space in it would split.
 [doc("Compile every document under the given directories (default docs/)")]
+[script]
 [no-cd]
 [positional-arguments]
 [arg('dirs', help='directories to search for .typ files, relative to the repo root')]
 all +dirs='docs': _typst-version
-    @cd {{ quote(root) }} && for d in "$@"; do test -d "$d" || { echo "press: no such directory: $d" >&2; exit 1; }; done
-    @cd {{ quote(root) }} && test "$(find "$@" -name '*.typ' | wc -l)" -gt 0 || { echo "press: no .typ files in: $*" >&2; exit 1; }
-    @cd {{ quote(root) }} && export PRESS_TALLY="$(mktemp)" && n=$(find "$@" -name '*.typ' | wc -l) && { find "$@" -name '*.typ' -print0 | sort -z | xargs -0 -n1 just --justfile {{ quote(press_root / "press.just") }} --set root {{ quote(root) }} build; rc=$?; sh {{ quote(press_root / "tools" / "report.sh") }} --summary "$PRESS_TALLY" "$n"; rm -f "$PRESS_TALLY"; exit $rc; }
+    cd {{ quote(root) }}
+    for d in "$@"; do
+        test -d "$d" || { echo "press: no such directory: $d" >&2; exit 1; }
+    done
+    n=$(find "$@" -name '*.typ' | wc -l)
+    test "$n" -gt 0 || { echo "press: no .typ files in: $*" >&2; exit 1; }
+    PRESS_TALLY=$(mktemp)
+    export PRESS_TALLY
+    rc=0
+    find "$@" -name '*.typ' -print0 | sort -z \
+        | xargs -0 -n1 just --justfile {{ quote(press_root / "press.just") }} --set root {{ quote(root) }} build \
+        || rc=$?
+    sh {{ quote(press_root / "tools" / "report.sh") }} --summary "$PRESS_TALLY" "$n"
+    rm -f "$PRESS_TALLY"
+    exit "$rc"
 
 # Scaffold a new document from the press skeleton
 #
@@ -176,11 +208,18 @@ all +dirs='docs': _typst-version
 # typst init will not make the directory's parent, so it is made first, as build
 # makes print/.
 [doc("Scaffold a new document from the press skeleton")]
+[script]
 [no-cd]
 [arg('name', help='the directory to create, holding main.typ; no .typ of its own')]
 new name: _typst-version
-    @n={{ quote(replace(name, '\', '/')) }}; case $n in *.typ) echo "press: new makes a directory holding main.typ, so name it without .typ: ${n%.typ}" >&2; exit 1;; esac
-    @cd {{ quote(root) }} && mkdir -p "$(dirname {{ quote(replace(name, '\', '/')) }})" && typst init --package-path {{ quote(press_root / "packages") }} @vts/press:0.1.0 {{ quote(name) }}
+    n={{ quote(replace(name, '\', '/')) }}
+    case $n in
+        *.typ) echo "press: new makes a directory holding main.typ, so name it without .typ: ${n%.typ}" >&2
+               exit 1 ;;
+    esac
+    cd {{ quote(root) }}
+    mkdir -p "$(dirname "$n")"
+    typst init --package-path {{ quote(press_root / "packages") }} @vts/press:0.1.0 "$n"
 
 # Audit a built document for the font failures typst does not report
 #
@@ -285,16 +324,22 @@ new name: _typst-version
 # translation. It also means the script can be run directly, without just, which
 # is how it should be exercised when changing it.
 [doc("Audit a built PDF for the font failures typst does not report")]
+[script]
 [no-cd]
 [arg('doc', pattern='.+\.typ', help='a .typ file, relative to the repo root')]
 check doc: _typst-version
-    @cd {{ quote(root) }} && sh {{ quote(press_root / "tools" / "check.sh") }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }} {{ quote(press_root) }} {{ typst_flags }}
+    cd {{ quote(root) }}
+    src={{ quote(trim_start_match(replace(doc, '\', '/'), './')) }}
+    pdf="print/${src%.typ}.pdf"
+    sh {{ quote(press_root / "tools" / "check.sh") }} "$src" "$pdf" {{ quote(press_root) }} {{ typst_flags }}
 
 # Delete rendered output
 #
 # Anchored like the rest: without it, running this from a subdirectory deleted a
 # stray print/ there and left the real one intact, reporting success either way.
 [doc("Delete rendered output")]
+[script]
 [no-cd]
 clean:
-    @cd {{ quote(root) }} && rm -rf print
+    cd {{ quote(root) }}
+    rm -rf print
