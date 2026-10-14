@@ -9,7 +9,8 @@
 # These are the pins Dependabot cannot see: a version assigned in a shell script or an env:
 # block, or named on an npx command line, declares no dependency for it to match. They stay
 # pinned by version and digest; this only says when upstream has moved. A tool pinned by
-# hand anywhere else needs a line at the bottom.
+# hand anywhere else needs a line at the bottom. The toolchain action's OLDEST_ pins are
+# press's floors, old on purpose, and are left out.
 #
 # Needs gh (authenticated: GH_TOKEN in a workflow), curl and jq. A pin it cannot read, or a
 # release it cannot fetch, fails the run: a tool left out would read as one that is current.

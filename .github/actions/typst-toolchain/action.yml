@@ -1,17 +1,22 @@
 name: Typst toolchain
 description: >
   Install typst, just and optionally poppler, pinned to the versions the host
-  that prints these documents runs.
+  that prints these documents runs, or to the oldest press.just accepts.
 
 inputs:
   poppler:
     description: Install poppler-utils, needed only by check's audit passes.
+    default: "false"
+  oldest:
+    description: Install the oldest typst and just press.just accepts instead.
     default: "false"
 
 runs:
   using: composite
   steps:
     - shell: bash
+      env:
+        OLDEST: ${{ inputs.oldest }}
       run: |
         set -euo pipefail
         # Release binaries rather than apt. Ubuntu's `just` is old enough to lack
@@ -26,16 +31,31 @@ runs:
         TYPST_SHA256=a6d077d0a95eed5a2eba715b2dae06be954f624ccbf85758a03f389ded33118c
         JUST_VERSION=1.57.0
         JUST_SHA256=45b548094283cb9739af8f13273b8cddeee869f5b4ef2bb631b1f311cb566155
+        # The floors press.just declares: typst_minimum, and set minimum-version. CI's
+        # oldest-toolchain job installs these and refuses to run if press.just names
+        # others, so raising a floor is an edit here too. Old on purpose, so the Pins
+        # workflow leaves them out.
+        OLDEST_TYPST_VERSION=0.14.0
+        OLDEST_TYPST_SHA256=99816d2982de08d2b091bac56b59b2faa523a10e1378ad3cdd68e35b8eb74b3d
+        OLDEST_JUST_VERSION=1.55.0
+        OLDEST_JUST_SHA256=978178d9b20d2017ae7efdd29b204afc2ba75d103b4ab9d2c4e1a6407bbd648a
+        if [ "$OLDEST" = true ]; then
+          typst_version=$OLDEST_TYPST_VERSION typst_sha256=$OLDEST_TYPST_SHA256
+          just_version=$OLDEST_JUST_VERSION just_sha256=$OLDEST_JUST_SHA256
+        else
+          typst_version=$TYPST_VERSION typst_sha256=$TYPST_SHA256
+          just_version=$JUST_VERSION just_sha256=$JUST_SHA256
+        fi
         tmp=$(mktemp -d)
         curl --fail --silent --show-error --location \
-          "https://github.com/typst/typst/releases/download/v${TYPST_VERSION}/typst-x86_64-unknown-linux-musl.tar.xz" \
+          "https://github.com/typst/typst/releases/download/v${typst_version}/typst-x86_64-unknown-linux-musl.tar.xz" \
           --output "$tmp/typst.tar.xz"
         curl --fail --silent --show-error --location \
-          "https://github.com/casey/just/releases/download/${JUST_VERSION}/just-${JUST_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
+          "https://github.com/casey/just/releases/download/${just_version}/just-${just_version}-x86_64-unknown-linux-musl.tar.gz" \
           --output "$tmp/just.tar.gz"
         # Verified before extraction: an archive checked after unpacking has already
         # chosen its own paths.
-        printf '%s  %s\n' "$TYPST_SHA256" "$tmp/typst.tar.xz" "$JUST_SHA256" "$tmp/just.tar.gz" \
+        printf '%s  %s\n' "$typst_sha256" "$tmp/typst.tar.xz" "$just_sha256" "$tmp/just.tar.gz" \
           | sha256sum -c -
         sudo tar -xJf "$tmp/typst.tar.xz" --strip-components=1 -C /usr/local/bin \
           typst-x86_64-unknown-linux-musl/typst

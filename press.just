@@ -40,7 +40,8 @@
 # The oldest just and typst press works with. A just that knows the setting refuses this
 # file with "requires just 1.55.0 or later"; one older still stops at this line with
 # "unknown setting", and the line it shows names the version. The typst guard is the
-# _typst-version recipe below.
+# _typst-version recipe below. CI builds and checks at both floors, installed by the
+# toolchain action's OLDEST_ pins, so raising one is an edit there too.
 set minimum-version := '1.55.0'
 
 typst_minimum := '0.14.0'
