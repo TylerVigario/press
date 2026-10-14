@@ -27,8 +27,13 @@ name: Release
 #            writes the changelog, mints the App token, asks the forge for the
 #            commit that records both (repo standard rule 15: it does not push
 #            one), then publishes the release on that commit. Publishing is what
-#            creates the tag, so a failure before it leaves no tag, and a rerun
-#            carries on from where it stopped.
+#            creates the tag, so a failure before it leaves no tag.
+#
+# RECOVERING FROM A FAILED PUBLISH. Once the release commit has landed, start a new
+# run; do not re-run the failed one. A re-run checks out the commit the original run
+# started from, main has since moved past it, and the forge refuses the commit
+# (expectedHeadOid). A new run starts from main, finds the release already recorded,
+# and goes on to publish. Before the commit lands, a re-run is fine.
 #
 # WHY AN APP. main takes no direct push (rule 6), and recording the release writes
 # main. The one exemption is a GitHub App installed on this repository alone (rule
@@ -247,7 +252,7 @@ jobs:
           dir="packages/vts/press/$VERSION"
           changed=$(git status --porcelain --untracked-files=all -- CHANGELOG.md "$dir" | sed 's/^...//')
           if [ -z "$changed" ]; then
-            # A rerun after a failed publish: main already records this release.
+            # A new run after a failed publish: main already records this release.
             echo "main already records $TAG"
             oid=$head
           else
