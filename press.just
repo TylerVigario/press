@@ -144,10 +144,14 @@ all +dirs='docs':
 # typst init makes a DIRECTORY project. For a single file — which is what most
 # documents here are — copy template/main.typ and delete down instead; the
 # skeleton's own header says so.
+#
+# The name is that directory, so it takes no .typ: docs/thing -> docs/thing/main.typ.
+# typst init will not make the directory's parent, so it is made first, as build
+# makes print/.
 [doc("Scaffold a new document from the press skeleton")]
 [no-cd]
 new name:
-    @cd {{ quote(root) }} && typst init --package-path {{ quote(press_root / "packages") }} @vts/press:0.1.0 {{ quote(name) }}
+    @cd {{ quote(root) }} && mkdir -p "$(dirname {{ quote(replace(name, '\', '/')) }})" && typst init --package-path {{ quote(press_root / "packages") }} @vts/press:0.1.0 {{ quote(name) }}
 
 # Audit a built document for the font failures typst does not report
 #
