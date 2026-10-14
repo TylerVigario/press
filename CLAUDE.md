@@ -62,7 +62,7 @@ just watch docs/services.typ     # recompile on save
 just all                         # every .typ under docs/ (fails if there are none)
 just all recipes protocols pcp   # any directories — docs/ is a default, not a layout
 just check docs/services.typ     # audit the built PDF
-just new docs/thing.typ          # scaffold from the skeleton
+just new docs/thing              # -> docs/thing/main.typ, from the skeleton
 just clean                       # delete print/
 ```
 
@@ -122,8 +122,9 @@ the rest.
 #import "@vts/press:0.1.0": *
 ```
 
-`just new` scaffolds a skeleton. **Copy it, do not import it** — composition belongs to the
-document.
+`just new docs/thing` scaffolds a skeleton at `docs/thing/main.typ`, built with
+`just build docs/thing/main.typ`. The name is a directory, so it takes no `.typ`. **Copy the
+skeleton, do not import it** — composition belongs to the document.
 
 **Show rules are the document's to install.** Nothing takes effect until the document asks.
 A document with commands in it wants both:
