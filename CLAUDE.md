@@ -66,11 +66,13 @@ just new docs/thing              # -> docs/thing/main.typ, from the skeleton
 just clean                       # delete print/
 ```
 
-**Requirements:** `typst`, `just` and `sh` on PATH; on Windows `sh` comes from Git for
-Windows. `check` also needs poppler (`pdffonts`, `pdftotext`, `pdftoppm`) and a Python. Where
-PATH finds the wrong one, name it with `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`, `PRESS_PDFTOPPM`
-or `PRESS_PYTHON`. On Windows, Git's `sh` puts its bundled Xpdf `pdftotext` first inside
-every recipe, so set `PRESS_PDFTOTEXT` there; `check` refuses anything that is not poppler.
+**Requirements:** `typst` 0.14 or newer, `just` 1.55 or newer and `sh` on PATH; on Windows
+`sh` comes from Git for Windows. `press.just` refuses an older typst or just, naming the
+version it needs; raising either floor is a deliberate edit there. `check` also needs poppler
+(`pdffonts`, `pdftotext`, `pdftoppm`) and a Python. Where PATH finds the wrong one, name it
+with `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`, `PRESS_PDFTOPPM` or `PRESS_PYTHON`. On Windows,
+Git's `sh` puts its bundled Xpdf `pdftotext` first inside every recipe, so set
+`PRESS_PDFTOTEXT` there; `check` refuses anything that is not poppler.
 
 **Paths are relative to the repo root**, from whichever directory you invoke.
 
