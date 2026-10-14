@@ -186,6 +186,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `seedepth(label)` | Pointer from the act layer to the depth layer. |
 | `stamp(body)` | Closing line — provenance, or "the host is right". |
 | `updated()` | When the content last changed, as `build` stamps it. For the footer. |
+| `press-version` | The version of press imported, read from its `typst.toml`. Never typed by hand. |
 
 **Tokens.** Colours `ink`, `ink-soft`, `ink-faint`, `rule-hair`, `rule-mid`,
 `paper-tint`, `slate`, `slate-tint`, `steel`, and `ok`/`warn`/`bad` each with a `-tint`.

@@ -16,7 +16,7 @@
   set text(size: sz.micro, fill: ink-faint)
   grid(columns: (1fr, auto),
     align(left)[press calibration · print at Actual size, duplex, both quality modes],
-    align(right)[#counter(page).display("1 / 1", both: true)])
+    align(right)[#updated() · #counter(page).display("1 / 1", both: true)])
 })
 #set text(font: face-text, size: sz.small, fill: ink, lang: "en")
 #set par(leading: 0.52em, spacing: 0.55em)
@@ -24,7 +24,7 @@
 
 #grid(columns: (auto, 1fr), align: (left + bottom, right + bottom),
   text(font: face-display, size: sz.title, weight: 700)[Print calibration],
-  text(size: sz.fine, fill: ink-soft)[press 0.1.0 · US Letter · actual size])
+  text(size: sz.fine, fill: ink-soft)[press #press-version · US Letter · actual size])
 #v(-3pt)
 #line(length: 100%, stroke: 2pt + slate)
 #v(4pt)
