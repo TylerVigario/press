@@ -50,14 +50,27 @@ now=$(date +%s)
 # unchanged wherever it is built. Unset, it is the building machine's own zone, and a build
 # under another zone re-stamps a page that did not change.
 #
-# A name date does not know is not an error to date: it prints UTC under the name's first
-# word ("Mars" for Mars/Base). So the zone must exist in the tz database before it is used.
-if [ -n "${PRESS_TZ:-}" ] && [ ! -f "${TZDIR:-/usr/share/zoneinfo}/$PRESS_TZ" ]; then
-    echo "press: PRESS_TZ is not a time zone this machine knows: $PRESS_TZ" >&2
-    echo "       expected ${TZDIR:-/usr/share/zoneinfo}/$PRESS_TZ (an IANA name, or UTC)" >&2
-    exit 1
+# date is handed the zone's FILE, not its name. Git for Windows' date knows no names: its
+# database is /mingw64/share/zoneinfo, where its date neither looks nor follows TZDIR, but it
+# reads a zone file given by path, as glibc, the BSDs and macOS do. A name or path date
+# cannot read is no error to date either: it prints UTC under a made-up name. So the file is
+# found first, and a name with none fails the build.
+zone=
+if [ -n "${PRESS_TZ:-}" ]; then
+    for dir in ${TZDIR:+"$TZDIR"} /usr/share/zoneinfo /mingw64/share/zoneinfo; do
+        if [ -f "$dir/$PRESS_TZ" ]; then
+            zone=$dir/$PRESS_TZ
+            break
+        fi
+    done
+    if [ -z "$zone" ]; then
+        echo "press: PRESS_TZ is not a time zone this machine knows: $PRESS_TZ" >&2
+        echo "       looked in ${TZDIR:+$TZDIR, }/usr/share/zoneinfo and /mingw64/share/zoneinfo;" >&2
+        echo "       set TZDIR if this machine keeps its zones elsewhere" >&2
+        exit 1
+    fi
 fi
-tz() { if [ -n "${PRESS_TZ:-}" ]; then TZ=$PRESS_TZ "$@"; else "$@"; fi; }
+tz() { if [ -n "$zone" ]; then TZ=":$zone" "$@"; else "$@"; fi; }
 
 # Readable on paper. GNU date (Linux, Git for Windows) takes -d @N; BSD and macOS take -r N.
 when() { tz date -d "@$1" '+%Y-%m-%d %H:%M %Z' 2>/dev/null || tz date -r "$1" '+%Y-%m-%d %H:%M %Z'; }
