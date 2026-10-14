@@ -12,8 +12,9 @@ name: Release
 #
 # EVERY TAG NAMES ITS PACKAGE DIRECTORY. v<version> freezes
 # packages/<namespace>/press/<version>/, and CI's "Released versions are unchanged"
-# refuses any later change to it. 0.1.0 was released under vts; every version from
-# 0.2.0 is made under tylervigario. A package change is made in a new directory by pull
+# refuses any later change to it. 0.1.0 was released under vts and is retired: it
+# lives in its tag, and later releases do not carry it. Every version from 0.2.0 is
+# made under tylervigario. A package change is made in a new directory by pull
 # request, named for the version its commits will derive; the release checks that
 # the name and the commits agree. Where the derived version has no directory — a
 # release of tooling fixes, say — the release creates it as a copy of the newest
