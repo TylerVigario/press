@@ -10,7 +10,7 @@
 //
 //   just build docs/calibration.typ
 
-#import "@vts/press:0.1.0": *
+#import "@tylervigario/press:0.2.0": *
 
 #set page(..card, footer: context {
   set text(size: sz.micro, fill: ink-faint)

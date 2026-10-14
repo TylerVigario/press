@@ -1,0 +1,16 @@
+[package]
+name = "press"
+version = "0.2.0"
+entrypoint = "lib.typ"
+authors = ["Tyler Vigario"]
+license = "AGPL-3.0-or-later"
+description = "Shared vocabulary for documents printed and read on paper — tokens and parts, never a template that owns the page."
+categories = ["utility"]
+
+# Declaring a template makes `typst init` scaffold a new document from the
+# skeleton below. The skeleton is COPIED into the new project, not imported —
+# which is the point: composition stays local and editable, while the
+# vocabulary is imported and shared.
+[template]
+path = "template"
+entrypoint = "main.typ"

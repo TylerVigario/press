@@ -1,7 +1,7 @@
 # press
 
 A Typst package and build recipes for documents meant to be printed and read on paper: the
-`@vts/press` package, the fonts it depends on, and the conventions that make a printed sheet
+`@tylervigario/press` package, the fonts it depends on, and the conventions that make a printed sheet
 scannable. Anyone can use it, under the AGPL (see [Licence](#licence)).
 
 > **Working on this with an agent?** Point it at [`CLAUDE.md`](CLAUDE.md) — install,
@@ -38,7 +38,7 @@ git submodule update --init --recursive
 Import it:
 
 ```typst
-#import "@vts/press:0.1.0": *
+#import "@tylervigario/press:0.2.0": *
 ```
 
 Build it. A consuming repo carries a one-line `justfile`:
@@ -124,9 +124,10 @@ all; **read [`FONTS.md`](FONTS.md) before using any symbol**, and run `just chec
 
 ## Versioning
 
-A document imports one version, `@vts/press:<version>`, and a released version never
-changes. A consuming repo moves its submodule only to a release tag, never to a commit on
-`main` between releases.
+A document imports one version, `@tylervigario/press:<version>`, and a released version
+never changes. 0.1.0 was released as `@vts/press:0.1.0` and stays importable under that name.
+A consuming repo moves its submodule only to a release tag, never to a commit on `main`
+between releases.
 
 ## Licence
 
