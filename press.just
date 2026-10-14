@@ -71,7 +71,9 @@ typst_flags := "--root . --package-path " + quote(press_root / "packages") + \
 # drops a leading ./ — because just's / always joins with a forward slash. Given
 # .\docs\x.typ, which is what PowerShell's tab completion produces, "print" / doc would
 # print print/.\docs\x.pdf: two separators in one path. Typst takes / on Windows too,
-# and a backslash is never sensibly part of a document's name.
+# and a backslash is never sensibly part of a document's name. without_extension is
+# normalized again after: on Windows it rejoins the directory and the name with a
+# backslash, print/docs/t\main.pdf.
 
 [private]
 default:
@@ -90,13 +92,13 @@ default:
 [doc("Compile one document -> print/<same path>.pdf")]
 [no-cd]
 build doc:
-    @cd {{ quote(root) }} && st=$(sh {{ quote(press_root / "tools" / "stamp.sh") }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / without_extension(trim_start_match(replace(doc, '\', '/'), './')) + ".pdf") }} {{ typst_flags }}) && sh {{ quote(press_root / "tools" / "report.sh") }} {{ quote("print" / without_extension(trim_start_match(replace(doc, '\', '/'), './')) + ".pdf") }} $st
+    @cd {{ quote(root) }} && st=$(sh {{ quote(press_root / "tools" / "stamp.sh") }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }} {{ typst_flags }}) && sh {{ quote(press_root / "tools" / "report.sh") }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }} $st
 
 # Recompile one document on every save
 [doc("Recompile one document on every save")]
 [no-cd]
 watch doc:
-    @cd {{ quote(root) }} && mkdir -p {{ quote(parent_directory("print" / trim_start_match(replace(doc, '\', '/'), './'))) }} && typst watch {{ typst_flags }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / without_extension(trim_start_match(replace(doc, '\', '/'), './')) + ".pdf") }}
+    @cd {{ quote(root) }} && mkdir -p {{ quote(parent_directory("print" / trim_start_match(replace(doc, '\', '/'), './'))) }} && typst watch {{ typst_flags }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }}
 
 # Compile every document under the given directories (default docs/)
 #
@@ -252,7 +254,7 @@ new name:
 [doc("Audit a built PDF for the font failures typst does not report")]
 [no-cd]
 check doc:
-    @cd {{ quote(root) }} && sh {{ quote(press_root / "tools" / "check.sh") }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / without_extension(trim_start_match(replace(doc, '\', '/'), './')) + ".pdf") }} {{ quote(press_root) }} {{ typst_flags }}
+    @cd {{ quote(root) }} && sh {{ quote(press_root / "tools" / "check.sh") }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }} {{ quote(press_root) }} {{ typst_flags }}
 
 # Delete rendered output
 #
