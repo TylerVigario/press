@@ -8,20 +8,26 @@ Read this whole file before changing anything. Every trap listed has already hap
 
 ---
 
-## The constraint everything follows from
+## What a press document is
 
-**These documents are read as printed sheets, off-system** — when the system they describe
-may be down. Apply this to every document:
+**One PDF, read on a screen or printed.** press serves anything from a one-page sheet to a
+book, and every part it offers must work in both media: a part that works in only one is not
+finished. Apply this to every document:
 
-- **Self-contained.** No "see the other doc" carrying load, no link doing work, no step that
-  assumes a shell or browser. If a fact is needed to act, it is on the sheet.
-- **The act layer is the first section, and it runs as long as the work does.** One page is
-  a goal, not a budget: when the two conflict, content wins.
-- **Commands are typed by hand off paper.** Short, unwrapped, no fragile quoting. A plainer
-  command carrying the same information beats a precise one that wraps mid-token — and say
-  so when you make that trade.
-- **Whitespace on the act page is a feature.** It is where the reader writes what happened.
-- **No colour-only meaning, no search, no copy-paste.**
+- **Self-contained.** No "see the other doc" carrying load, and nothing the reader can only
+  follow by clicking. If a fact is needed to act, it is in the document. A runbook kept beside
+  the machine it describes is read exactly when that machine is down.
+- **For a document someone acts on, the act layer is the first section, and it runs as long
+  as the work does.** One page is a goal, not a budget: when the two conflict, content wins.
+- **Commands are short and unwrapped,** so they copy cleanly from the screen and can be typed
+  from paper. No fragile quoting. A plainer command carrying the same information beats a
+  precise one that wraps mid-token — and say so when you make that trade.
+- **Colour is never the only carrier of meaning.** A greyscale printer or a colour-blind reader
+  must lose nothing.
+- **Text stays real text,** searchable and copyable: never an image of text.
+
+press grows from the documents that use it. A template or part is added when a real document
+needs it, built for both media, and offered to every document from the next release.
 
 ---
 

@@ -1,4 +1,4 @@
-// Starter skeleton for a printable. COPY this — do not import it.
+// Starter skeleton for a document. COPY this — do not import it.
 // Composition belongs to the document; only the vocabulary is shared.
 //
 //   typst init --package-path vendor/press/packages @tylervigario/press:0.2.0 <name>

@@ -1,4 +1,4 @@
-// press — shared vocabulary for documents printed and read on paper.
+// press — ready-made parts and page presets for Typst documents, read on screen or on paper.
 //
 //   #import "@tylervigario/press:0.2.0": *
 //
@@ -50,8 +50,8 @@
 
 // Ink & rules
 //
-// Contrast on white, measured, because these are read on PAPER and a screen
-// flatters grey that toner does not. Toner also gains — small type prints
+// Contrast on white, measured, because a page must read on PAPER too, and a
+// screen flatters grey that toner does not. Toner also gains — small type prints
 // slightly heavier and lighter in colour than it renders — so screen-legible is
 // the floor here, not the target.
 //

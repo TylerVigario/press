@@ -1,4 +1,4 @@
-# press — build recipes for Typst printables.
+# press — build recipes for Typst documents, read on screen or on paper.
 #
 # A consuming repo carries a one-line justfile. If it has no recipes of its
 # own:
