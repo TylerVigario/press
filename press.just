@@ -83,6 +83,10 @@ typst_flags := "--root . --package-path " + quote(press_root / "packages") + \
 # and a backslash is never sensibly part of a document's name. without_extension is
 # normalized again after: on Windows it rejoins the directory and the name with a
 # backslash, print/docs/t\main.pdf.
+#
+# build, watch and check take only a path ending in .typ, and new only a name that does
+# not end in one. A directory, a PDF or a markdown file is refused by name before typst
+# sees it, rather than failing inside it.
 
 [private]
 default:
@@ -107,12 +111,14 @@ _typst-version:
 # words (where poppler is installed), size, and the stamp the page carries.
 [doc("Compile one document -> print/<same path>.pdf")]
 [no-cd]
+[arg('doc', pattern='.+\.typ', help='a .typ file, relative to the repo root')]
 build doc: _typst-version
     @cd {{ quote(root) }} && st=$(sh {{ quote(press_root / "tools" / "stamp.sh") }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }} {{ typst_flags }}) && sh {{ quote(press_root / "tools" / "report.sh") }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }} $st
 
 # Recompile one document on every save
 [doc("Recompile one document on every save")]
 [no-cd]
+[arg('doc', pattern='.+\.typ', help='a .typ file, relative to the repo root')]
 watch doc: _typst-version
     @cd {{ quote(root) }} && mkdir -p {{ quote(parent_directory("print" / trim_start_match(replace(doc, '\', '/'), './'))) }} && typst watch {{ typst_flags }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }}
 
@@ -154,6 +160,7 @@ watch doc: _typst-version
 [doc("Compile every document under the given directories (default docs/)")]
 [no-cd]
 [positional-arguments]
+[arg('dirs', help='directories to search for .typ files, relative to the repo root')]
 all +dirs='docs': _typst-version
     @cd {{ quote(root) }} && for d in "$@"; do test -d "$d" || { echo "press: no such directory: $d" >&2; exit 1; }; done
     @cd {{ quote(root) }} && test "$(find "$@" -name '*.typ' | wc -l)" -gt 0 || { echo "press: no .typ files in: $*" >&2; exit 1; }
@@ -170,7 +177,9 @@ all +dirs='docs': _typst-version
 # makes print/.
 [doc("Scaffold a new document from the press skeleton")]
 [no-cd]
+[arg('name', help='the directory to create, holding main.typ; no .typ of its own')]
 new name: _typst-version
+    @n={{ quote(replace(name, '\', '/')) }}; case $n in *.typ) echo "press: new makes a directory holding main.typ, so name it without .typ: ${n%.typ}" >&2; exit 1;; esac
     @cd {{ quote(root) }} && mkdir -p "$(dirname {{ quote(replace(name, '\', '/')) }})" && typst init --package-path {{ quote(press_root / "packages") }} @vts/press:0.1.0 {{ quote(name) }}
 
 # Audit a built document for the font failures typst does not report
@@ -277,6 +286,7 @@ new name: _typst-version
 # is how it should be exercised when changing it.
 [doc("Audit a built PDF for the font failures typst does not report")]
 [no-cd]
+[arg('doc', pattern='.+\.typ', help='a .typ file, relative to the repo root')]
 check doc: _typst-version
     @cd {{ quote(root) }} && sh {{ quote(press_root / "tools" / "check.sh") }} {{ quote(trim_start_match(replace(doc, '\', '/'), './')) }} {{ quote("print" / replace(without_extension(trim_start_match(replace(doc, '\', '/'), './')), '\', '/') + ".pdf") }} {{ quote(press_root) }} {{ typst_flags }}
 
