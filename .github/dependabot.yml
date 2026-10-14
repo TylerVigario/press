@@ -10,10 +10,12 @@
 # .github/actions/typst-toolchain, which are the one thing here that moves without
 # anyone editing this repository.
 #
-# It does NOT watch the cocogitto pin in .github/setup-cog.sh. That is a version
-# and a digest assigned in a shell script, not a dependency declaration, so a bump is a
-# deliberate edit: change both, and CI proves the digest matches before the change
-# can merge.
+# It does NOT watch the tools CI installs at a hand-pinned version: typst and just in the
+# toolchain action, cocogitto in .github/setup-cog.sh, actionlint and markdownlint-cli2 in
+# ci.yml. Each is a version written into a script, an env: block or an npx command, not a
+# dependency declaration, so a bump is a deliberate edit. Where a digest sits beside the
+# version, change both, and CI proves the digest matches before the change can merge. The
+# Pins workflow opens an issue when one falls behind its latest release.
 version: 2
 updates:
   - package-ecosystem: github-actions

@@ -202,7 +202,9 @@ may also be proposed for press; nothing has to clear a bar first.
 PR title as the commit, so the title must be a conventional commit (CI validates it); the
 type decides the next version. CI also builds and checks `docs/`, and runs shellcheck,
 markdownlint (lines ≤ 100), actionlint, a JSON parse, an invisible-character scan and
-CodeQL.
+CodeQL. The tools CI installs are pinned by hand, with digests, and Dependabot cannot see
+them; the weekly Pins workflow opens an issue for each release a pin is behind
+(`sh .github/pins.sh` shows the same comparison).
 
 **Never edit a released version directory.** `v<version>` releases
 `packages/vts/press/<version>/`, and CI's *Released versions are unchanged* fails any PR that

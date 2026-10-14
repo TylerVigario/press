@@ -80,7 +80,8 @@ loosening the threshold.
 
 `Lint main` is deliberately **not** required. It runs on `push` and cannot report on a
 `pull_request` event, so requiring it would leave every pull request waiting on a
-context that never arrives.
+context that never arrives. The Pins workflow's job is not required for the same reason: it
+runs weekly and by hand, never on a pull request.
 
 **`bypass_actors`: one App, `vigario-press-release` (App ID 5116805), and nothing else** —
 recording a release writes main, which no pull request does, so the Release workflow needs

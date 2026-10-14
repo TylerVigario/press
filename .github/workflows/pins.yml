@@ -1,0 +1,48 @@
+name: Pins
+
+# The tools CI installs at a version pinned by hand: typst and just in the toolchain action,
+# cocogitto in setup-cog.sh, actionlint and markdownlint-cli2 in ci.yml. Dependabot cannot
+# see them, so nothing reported a new release; just was two minors behind before anyone
+# looked.
+#
+# Each week .github/pins.sh compares every pin with its upstream's latest release and opens
+# an issue for each release a pin is behind. It keeps that issue's numbers current, closes it
+# when the pin catches up or a later release supersedes it, and leaves one closed by hand
+# closed. The pins themselves are unchanged: a bump is still a deliberate edit of a version
+# and its digest, which CI proves before it can merge.
+#
+# The job fails only when the comparison could not run. A pin that is behind is the issue's
+# to report, not a red run's.
+
+on:
+  schedule:
+    # GitHub disables a public repository's scheduled workflows after 60 days without
+    # activity; re-enable from the Actions tab if press goes that quiet.
+    - cron: "23 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pins
+  cancel-in-progress: false
+
+jobs:
+  pins:
+    name: Compare pins with their latest releases
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      # The issues it opens, edits and closes. Nothing else is written.
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Compare, and report each pin that is behind
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: sh .github/pins.sh --issues
