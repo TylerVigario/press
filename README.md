@@ -1,8 +1,10 @@
 # press
 
-A Typst package and build recipes for documents meant to be printed and read on paper: the
-`@tylervigario/press` package, the fonts it depends on, and the conventions that make a printed sheet
-scannable. Anyone can use it, under the AGPL (see [Licence](#licence)).
+A Typst package and build recipes for making documents: page presets, a type and colour
+system, ready-made parts, and a build that stamps and checks what it makes. It serves anything
+from a one-page information sheet to a conversation piece, a manual or a book, and one PDF
+serves both the screen and the printer. Anyone can use it, under the AGPL (see
+[Licence](#licence)).
 
 > **Working on this with an agent?** Point it at [`CLAUDE.md`](CLAUDE.md) — install,
 > build, authoring vocabulary, how to version the package, and the traps that have
@@ -10,14 +12,41 @@ scannable. Anyone can use it, under the AGPL (see [Licence](#licence)).
 
 ## Why this exists
 
-**These documents are read on paper, not on a screen.** A document that lives only in a
-repository is least available exactly when the system it describes is down. A printed sheet
-has no such dependency, so:
+**Every document should start from decisions already made well**, so its author spends the
+effort on what it says. The page, the type, the colours and the parts a reader learns to
+recognise are decided once, not again in every document.
 
-- **Self-contained.** If a fact is needed to act, it is on the sheet.
-- **Commands are typed by hand off paper** — short, unwrapped, no fragile quoting.
-- **Whitespace is a feature**: it is where the reader writes what actually happened.
-- **No copy-paste, no search, no hyperlinks, no colour-only meaning.**
+Typst makes a good document easy to write and hard to keep consistent. Left alone, each one
+re-decides its page, its type scale and how a warning looks, and the copies of those decisions
+drift apart. press holds them in one place that every repository making documents vendors, so
+a new document starts from a ready-made template and ready-made parts, and a fix made for one
+document reaches all of them at the next release. It offers rather than governs: a document
+takes the parts it wants and composes its own page.
+
+It is more than styling. `just build` stamps each document with when its content last changed
+and says what it made, so a printed copy can be checked against the current one. `just check`
+catches the font and glyph failures typst lets through without a word. A document is built the
+same way on every machine, from fonts that ship with press.
+
+**One output, read anywhere.** A press document is a single PDF that reads on a screen and
+prints true, so every part is made for both:
+
+- **Text is real text:** searchable, copyable, and set in vendored fonts, so it renders the
+  same on every machine.
+- **Colour is never the only carrier of meaning,** so a greyscale printer or a colour-blind
+  reader loses nothing.
+- **Commands are short and unwrapped,** so they copy cleanly from the screen and can be typed
+  from paper.
+- **Pages keep all ink 0.5in from the edge,** so printing at actual size never clips; on
+  screen it is simply margin.
+- **Self-contained.** If a fact is needed to act, it is in the document. A runbook kept beside
+  the machine it describes is read exactly when that machine is down.
+
+**From a sheet to a book.** The same tokens and parts carry a one-page reference card, a
+proposal, a manual and a book. Short documents are best served today. press grows from the
+documents that use it: a template or part is added when a real document needs it, and from
+the next release every document can use it. Long-form parts (contents, figures, book trim
+sizes and facing pages) are among the next.
 
 ## Using it
 
