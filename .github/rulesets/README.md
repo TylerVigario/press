@@ -51,6 +51,7 @@ a setting drifting back.
 | --- | --- |
 | `Documents build` | typst compiles every document |
 | `Documents pass the audit` | the warning, font and printable-area passes |
+| `Documents pass on the oldest toolchain` | the same build and audit at the oldest typst and just `press.just` accepts |
 | `No invisible characters` | no soft hyphens or zero-width characters in any tracked file |
 | `Released versions are unchanged` | every tagged package version directory still matches its tag |
 | `JSON parses` | every tracked `*.json`, including these payloads, parses |

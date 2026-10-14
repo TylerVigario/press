@@ -13,6 +13,10 @@ name: CI
 #   Documents pass the audit press's own passes, run against its own document:
 #                            typst warnings that exit 0 and ship, fonts that are
 #                            not vendored, and ink inside the unprintable band.
+#   Documents pass on the oldest toolchain
+#                            the same build and audit at the oldest typst and just
+#                            press.just accepts, so a change that needs a newer one
+#                            fails here, not on a machine still at the floor.
 #   No invisible characters  soft hyphens and zero-width characters in any tracked
 #                            file, which reach paper unseen and survive review.
 #   Shell scripts lint       every *.sh in the tree. tools/check.sh is the audit
@@ -130,6 +134,35 @@ jobs:
           # check refuses to audit a document that was never built, and this is a
           # separate job with no artifact between them. The build is a precondition
           # here, not the assertion — a compile failure is Documents build's to report.
+          just all
+          for f in docs/*.typ; do just check "$f"; done
+
+  oldest:
+    name: Documents pass on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/typst-toolchain
+        with:
+          poppler: "true"
+          oldest: "true"
+      - name: Confirm these are the floors press.just declares
+        run: |
+          set -euo pipefail
+          # The toolchain action pins the floors by digest and press.just declares them.
+          # They must name the same versions, or this job tests a floor nobody declared.
+          want_typst=$(sed -n "s/^typst_minimum := '\(.*\)'$/\1/p" press.just)
+          want_just=$(sed -n "s/^set minimum-version := '\(.*\)'$/\1/p" press.just)
+          have_typst=$(typst --version | cut -d' ' -f2)
+          have_just=$(just --version | cut -d' ' -f2)
+          if [ "$want_typst" != "$have_typst" ] || [ "$want_just" != "$have_just" ]; then
+            echo "::error::press.just declares typst ${want_typst:-?} and just ${want_just:-?}; the toolchain action's oldest pins are typst $have_typst and just $have_just"
+            exit 1
+          fi
+          echo "typst $have_typst and just $have_just, the floors press.just declares"
+      - name: Build, then audit
+        run: |
+          set -euo pipefail
           just all
           for f in docs/*.typ; do just check "$f"; done
 
