@@ -21,9 +21,10 @@
 #
 # The build recipe appends "audit" for a document that failed its audit, which the summary
 # counts apart; a document with no status at all did not build.
-#   press: 12 documents: 2 changed, 9 unchanged, 1 failed
+#   press: 12 documents: 2 changed, 9 unchanged, 1 failed the audit, 1 did not build
 #
-# A document that fails to build never reaches report.sh, so failed is found minus tallied.
+# A document that fails to build never reaches report.sh, so "did not build" is found minus
+# tallied.
 #
 # A file of its own because build and all both run it, and it can be run by hand.
 set -eu

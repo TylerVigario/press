@@ -1,5 +1,6 @@
 #!/bin/sh
-# check.sh — audit a built document for the font failures typst does not report.
+# check.sh — audit a built document for what typst lets through without a word: warnings that
+# exit 0, fonts that are not vendored, glyphs that vanish, ink too near the edge, text on text.
 #
 # Run from the consumer root by whatever runs the repo's builds, press.just's `check`
 # among them:
