@@ -125,6 +125,15 @@ are missing, the build says the audit was skipped and why, and succeeds: buildin
 depends on them. `check.sh` is the same audit for when it must run, as in CI: without its tools
 it refuses.
 
+**An unchanged document is not built again.** One file in press's folder, `.build-record`,
+records what each document's last build read — every file typst lists, the fonts, typst's
+version, press's tools, the flags and the zone — each with a checksum, and what its audit said.
+When all of it still matches, the build says unchanged at once, without compiling or auditing,
+and repeats what the audit said. Only a build whose audit ran in full and passed is recorded,
+so a failing document, or one built without the audit's tools, is built and audited every time.
+The kit's own `.gitignore` keeps the record out of git, an update replaces it with press's
+folder, and deleting it costs one full build per document, never a wrong answer.
+
 **A page the document did not set** — a scanned form it fills in, an embedded PDF page — is
 marked with `scan(...)`. The audit then reads a copy with every scan hidden, so the scan's own
 fonts, text layer and edge-to-edge ink are not findings, and what the document sets over it is

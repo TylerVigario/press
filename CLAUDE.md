@@ -46,6 +46,7 @@ needs it, built for both media, and offered to every document from the next rele
 | `tools/` | `new.sh`, `stamp.sh`, `check.sh`, `report.sh`, and the audit's two Python passes |
 | `press.just` | recipes for repositories that use just |
 | `README.md`, `FONTS.md`, `LICENSE` | the consumer guide, the font account, the AGPL |
+| `.gitignore` | ships in the kit, so a repository that commits press's folder ignores the build record in it |
 | `install.sh`, `install.ps1` | the installers each release attaches beside the kit, not inside it |
 | `.github/`, `CLAUDE.md`, `CHANGELOG.md`, `cog.toml`, `justfile` | press's own machinery |
 
@@ -126,6 +127,12 @@ repository has.
   in README's list, or a document can never accept it. Only the document's own file accepts.
   The Python passes exit 1 for a finding and 2 when they cannot run (`die()`); keep that
   apart, or a missing tool reads as a finding a document has accepted.
+- **The build record is one file, `.build-record`, in press's folder**, kept out of git by the
+  kit's `.gitignore`; nothing goes beside a document or its PDF.
+- **The build record keys on everything typst does not list.** `stamp.sh`'s `key()` holds the
+  fonts in each font path, typst's version, press's tools, the flags, the zone and typst's
+  environment; typst's `--deps` lists the rest. A new thing a build depends on goes into
+  `key()`, or an unchanged record hides its change from every build after.
 - **The page passes read a copy with every scan hidden** when the document reads an image file
   (`lib.typ`'s `scan()`, `--input press-scans=hidden`). `stamp.sh` compiles that copy at the
   document PDF's own stamp (`PRESS_STAMP_AS`), so it lays out exactly as the document does; the

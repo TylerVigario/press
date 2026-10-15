@@ -9,10 +9,14 @@
 #
 # Each document's own report line must say unchanged. A run that printed no line for one
 # fails too, rather than passing for want of anything to object to.
+#
+# Its build record goes first: with it, an unchanged document is not compiled at all, and this
+# is the proof that compiling it again at its stamp gives the same bytes.
 set -eu
 [ $# -gt 0 ] || { echo "::error::rebuild-unchanged.sh needs at least one document"; exit 1; }
 bad=0
 for doc in "$@"; do
+    rm -f .build-record
     out=$(just build "$doc")
     printf '%s\n' "$out"
     case $out in
