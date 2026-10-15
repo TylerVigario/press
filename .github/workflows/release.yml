@@ -171,15 +171,16 @@ jobs:
           SOURCE: ${{ steps.decide.outputs.source }}
         run: |
           set -euo pipefail
-          # cocogitto names a section only after a tag, so one is set here, in this
-          # clone only, and never pushed. The entry is cut from the whole-file
-          # render: `cog changelog --at` gets a later release's compare link wrong.
-          git tag "$TAG"
+          # The same script publish runs, so the dry run proves it, and the entry
+          # previewed is the one that will be recorded: dated the day it runs, and
+          # cut from the whole-file render, since `cog changelog --at` gets a later
+          # release's compare link wrong (cocogitto/cocogitto#579).
+          notes=$(sh .github/write-changelog.sh "$TAG" CHANGELOG.md)
           {
             echo "### $TAG, as it will be recorded"
             echo
             [ -z "$SOURCE" ] || { echo "packages/tylervigario/press/${TAG#v}/ will be created from $SOURCE/."; echo; }
-            cog changelog | awk '/^## /{n++} n==1'
+            printf '%s\n' "$notes"
           } >> "$GITHUB_STEP_SUMMARY"
 
   gate:
@@ -231,12 +232,9 @@ jobs:
           TAG: ${{ needs.decide.outputs.tag }}
         run: |
           set -euo pipefail
-          git tag "$TAG"   # local only, as in decide
-          # cog's full changelog, with the hand-written first release kept: cog renders a
-          # first release as the whole history (cocogitto/cocogitto#580).
-          sh .github/write-changelog.sh CHANGELOG.md
-          cog changelog | awk '/^## /{n++} n==1' > "$RUNNER_TEMP/notes.md"
-          git tag -d "$TAG"
+          # cog's full changelog, dated the day this runs, with the hand-written first
+          # release kept (cocogitto/cocogitto#579 and #580; see the script).
+          sh .github/write-changelog.sh "$TAG" CHANGELOG.md > "$RUNNER_TEMP/notes.md"
           [ -s "$RUNNER_TEMP/notes.md" ] || { echo "::error::the changelog has no entry for $TAG"; exit 1; }
 
       - name: Mint a token for the release App
