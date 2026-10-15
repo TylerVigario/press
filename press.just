@@ -125,14 +125,19 @@ build doc: _typst-version
     st=$(sh {{ quote(press_root / "tools" / "stamp.sh") }} "$src" "$pdf" {{ typst_flags }})
     sh {{ quote(press_root / "tools" / "report.sh") }} "$pdf" $st
 
-# Recompile one document on every save
-[doc("Recompile one document on every save")]
+# Recompile one document on every save -> print/<same path>.watch.pdf
+#
+# A preview, beside the PDF build makes rather than over it. typst watch passes no stamp, so
+# writing over print/<doc>.pdf would leave a PDF whose date stamp.sh cannot read, and the next
+# build would re-stamp a page that never changed, saying "reprint" about it. The preview's
+# footer says it is not stamped; build makes the copy to print.
+[doc("Recompile one document on every save -> print/<same path>.watch.pdf")]
 [script]
 [working-directory(root)]
 [arg('doc', pattern='.+\.typ', help='a .typ file, relative to the repo root')]
 watch doc: _typst-version
     src={{ quote(trim_start_match(replace(doc, '\', '/'), './')) }}
-    pdf="print/${src%.typ}.pdf"
+    pdf="print/${src%.typ}.watch.pdf"
     mkdir -p "$(dirname "$pdf")"
     typst watch {{ typst_flags }} "$src" "$pdf"
 
