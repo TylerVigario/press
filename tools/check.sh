@@ -337,7 +337,33 @@ fi
 # that is correct. Stray invisible characters in source are a real concern and a
 # different one; the check that owns that concern should own it. The characters come from
 # the document's own sources, listed above.
-chars=$(while IFS= read -r f; do grep -v '^[[:space:]]*//' "$f" || true; done < "$tmp/sources" \
+#
+# Comments never reach the page, so their characters are not probed: a // comment that starts
+# a line or follows a space, and a /* */ comment over any number of lines. A // inside a URL
+# (https://) follows no space and stays. Text in a raw block that holds " //" loses what
+# follows, a rare miss taken over the false findings a comment's characters gave. A string
+# the document never places is still read; a document that keeps one accepts glyphs.
+uncommented() {
+    awk '{
+        s = $0; out = ""
+        while (length(s) > 0) {
+            if (inblock) {
+                e = index(s, "*/")
+                if (!e) { s = ""; break }
+                s = substr(s, e + 2); inblock = 0
+                continue
+            }
+            b = index(s, "/*"); lc = 0
+            if (substr(s, 1, 2) == "//") lc = 1
+            else if (match(s, /[ \t]\/\//)) lc = RSTART + 1
+            if (lc && (!b || lc < b)) { out = out substr(s, 1, lc - 1); break }
+            if (b) { out = out substr(s, 1, b - 1); s = substr(s, b + 2); inblock = 1; continue }
+            out = out s; s = ""
+        }
+        print out
+    }' "$1"
+}
+chars=$(while IFS= read -r f; do uncommented "$f"; done < "$tmp/sources" \
         | "$GREP" -oP '(*UTF)[^\x00-\x7F]' \
         | grep -vP '(*UTF)^[\p{Z}\p{Cf}]$' \
         | sort -u || true)
