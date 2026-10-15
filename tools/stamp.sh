@@ -1,21 +1,20 @@
 #!/bin/sh
 # stamp.sh — compile a document, stamped with when its content last changed.
 #
-# Invoked by press's `build` recipe, and by check.sh for its recompile, from the
-# consumer root:
+# Run from the consumer root by whatever runs the repo's builds, press.just's `build`
+# among them, and by check.sh for its recompile:
 #
 #   sh <press_root>/tools/stamp.sh <doc> <pdf> <typst flags...>
 #
-# On success it prints one line, which `build` hands to report.sh: what happened -- new (no
-# stamped PDF was there), changed or unchanged -- then the time the page now carries.
-# typst's own output goes to stderr.
+# On success it prints one line, which press.just's `build` hands to report.sh: what
+# happened -- new (no stamped PDF was there), changed or unchanged -- then the time the page
+# now carries. typst's own output goes to stderr.
 #
-# NOT A WRAPPER. `just build` stays the one way to build; this file is to the build recipe
-# what check.sh is to check -- its mechanism, kept in a file because check compiles through it
-# too, so the audited PDF is built exactly as build builds it.
+# IT IS THE BUILD, not a wrapper around one: every runner calls it, and check.sh compiles
+# through it too, so the audit reads a PDF built exactly as the build makes it.
 #
 # WHY A STAMP. A printed sheet goes stale without saying so. The stamp is passed in as
-# sys.inputs.press-updated, and a document shows it with the package's updated() — in
+# sys.inputs.press-updated, and a document shows it with lib.typ's updated() — in
 # its footer, so every page carries it. Comparing the shelf copy with the latest build
 # then answers "reprint?" at a glance.
 #
@@ -37,7 +36,7 @@ set -eu
 src=$1
 pdf=$2
 shift 2
-# What remains in "$@" is typst_flags, as in check.sh.
+# What remains in "$@" is the typst flags, as in check.sh.
 
 # The oldest typst press works with, from press.toml. lib.typ asserts it too, but build and
 # check pass --creation-timestamp and --deps first, and an older typst stops on a flag it

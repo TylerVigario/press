@@ -40,9 +40,9 @@ name: CI
 #                            by hand with gh api, and a payload that does not parse
 #                            is found at the moment protection is being changed.
 #
-# press is vendored as a submodule by every repository that builds a document, so
-# a bad commit on main reaches all of them before anyone notices. That is why this
-# exists at all, and why it fans out rather than reporting one aggregate answer.
+# Every repository that builds a document holds a copy of press, so a bad commit on
+# main reaches all of them with the next release, before anyone notices. That is why
+# this exists at all, and why it fans out rather than reporting one aggregate answer.
 
 on:
   pull_request:

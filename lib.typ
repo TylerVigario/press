@@ -13,7 +13,7 @@
 // Its composition vocabulary — `unit`, `chip`, `band-strong`, `dbadge`, `decision` — had
 // been copy-pasted between documents before press held it. None of it was ever
 // document-specific, and `unit` and `chip` had already gone byte-identical across three
-// files: the drift this package exists to prevent, one level down.
+// files: the drift press exists to prevent, one level down.
 //
 // The oldest typst press works with, from press.toml. Read as files rather than as a package,
 // nothing else would refuse an older typst, which would instead fail on whatever it lacks.
@@ -35,10 +35,10 @@
 // "Not governing" limits what this library ENFORCES, never what it may OFFER. A
 // styling helper a document opts into enforces nothing. Treating styling as out
 // of scope leaves every document inventing its own, which is the copy-paste
-// drift this package exists to end. It is a helper, not a governor: documents
+// drift press exists to end. It is a helper, not a governor: documents
 // vary too much for it to be anything else.
 //
-// Fonts are vendored in press's fonts/ directory, which `just build` hands to typst with
+// Fonts are vendored in press's fonts/ directory, which every build hands to typst with
 // --font-path, rather than named from the system.
 // Typst does NOT perform metric substitution the way fontconfig does: on a box
 // without Arial, `#set text(font: "Arial")` emits only `warning: unknown font
@@ -52,7 +52,7 @@
 // --ignore-system-fonts does not help because typst's own embedded fonts stay
 // reachable. See the face block below, and FONTS.md for the full account. The
 // constants are stacks rather than single names for that reason, and
-// `just check` is what turns the silent two into something readable.
+// the audit, tools/check.sh, is what turns the silent two into something readable.
 
 // ---------------------------------------------------------------- tokens ---
 
@@ -320,7 +320,7 @@
 }
 
 
-// When the page's content last changed, as press's `build` stamps it (tools/stamp.sh).
+// When the page's content last changed, as tools/stamp.sh stamps it.
 // A rebuild that changes nothing on the page keeps the old time, so a newer time than the
 // copy on the shelf means reprint, and the same time means that copy is current. Put it in
 // the footer, where every page carries it: a page parted from its stack still says which
@@ -458,7 +458,7 @@
 #let units(..items, pack: "stacks", gutter: 9pt, spacing: 6pt) = {
   // Fail on an unknown value rather than falling through. `pack: "stack"` would
   // otherwise render the default and look deliberate, which is the failure mode
-  // this whole package is meant to make loud.
+  // press is meant to make loud.
   assert(pack in ("stacks", "grid", "single"),
          message: "units(pack:) expects \"stacks\", \"grid\" or \"single\"; got \"" + pack + "\"")
   let us = items.pos()

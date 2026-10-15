@@ -14,8 +14,8 @@ name: CodeQL
 #
 # - The shell: tools/*.sh, .github/*.sh and press.just. CodeQL has no shell extractor;
 #   Shell scripts lint (shellcheck) and Workflows lint (actionlint) cover them.
-# - The Typst package. Nothing analyses Typst; its gate is that the documents build
-#   and pass the audit.
+# - lib.typ and the documents. Nothing analyses Typst; its gate is that the documents
+#   build and pass the audit.
 # - workflow_dispatch inputs. The actions queries treat data an outsider controls
 #   as untrusted, not inputs a collaborator dispatches.
 

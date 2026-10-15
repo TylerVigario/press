@@ -55,7 +55,7 @@ a setting drifting back.
 | context | asserts |
 | --- | --- |
 | `Documents build` | typst compiles every document |
-| `The release bundle installs and works` | the bundle holds the kit and nothing else, installs as the README says, and works with no just |
+| `The release bundle installs and works` | the bundle holds the kit and nothing else, installs as the README says and works with no just, and its installers install, update and refuse as they should |
 | `Documents pass the audit` | the warning, font and printable-area passes |
 | `Documents pass on the oldest toolchain` | the same build and audit at the oldest typst and just `press.just` accepts |
 | `No invisible characters` | no soft hyphens or zero-width characters in any tracked file |
@@ -115,10 +115,10 @@ bypass actor it cannot resolve, and the whole update fails, not just that entry.
 
 ## tag.json
 
-A tag here names a released package version, and consumers pin that version in their
-imports. One version must never name two sets of bits, so a tag is create-once. It was
-applied before the first tag, `v0.1.0`, because a rule guarding a namespace that is
-already written to has arrived late.
+A tag here names a release, and a repository holds the kit that release attaches, its
+version in `press.toml`. One version must never name two sets of bits, so a tag is
+create-once. It was applied before the first tag, `v0.1.0`, because a rule guarding a
+namespace that is already written to has arrived late.
 
 **`deletion`, `non_fast_forward`, `update`** — all three, because the first two read as
 complete tag protection and are not. They stop a tag being removed or pointed backward,
@@ -151,6 +151,6 @@ which is a visible act with a record, and re-enabling it at once.
 
 ## Why this repository is worth protecting more than most
 
-Every repository that builds a document vendors `press` as a submodule. A bad commit on
-`main` here reaches all of them, and their own pointer checks only assert that the pin is
-*reachable* on this branch — not that this branch is any good.
+Every repository that builds a document holds a copy of press from a release. A bad commit
+on `main` here reaches all of them with the next release, and nothing in them checks it
+again: what they install is what this branch was.
