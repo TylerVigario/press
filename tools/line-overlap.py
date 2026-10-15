@@ -48,6 +48,12 @@ import os, re, subprocess, sys, tempfile, pathlib
 # shapes was 2.72pt. The floor sits in the middle of a gap with nothing in it.
 EPSILON_PT = 0.5
 
+def die(msg):
+    """The pass could not run: exit 2, apart from 1 for a finding, so check never takes a
+    missing or broken tool for a finding a document has accepted."""
+    print(msg, file=sys.stderr)
+    sys.exit(2)
+
 PDFTOTEXT = os.environ.get("PRESS_PDFTOTEXT", "pdftotext")
 
 # Poppler escapes &, < and > in word text, so a parser is correct here and a
@@ -63,17 +69,17 @@ def layout(pdf, tmp):
     except FileNotFoundError:
         # Same reasoning as ink-margin.py: without this the failure is a bare
         # traceback naming neither the missing tool nor the remedy.
-        sys.exit(f"press: overlap check needs poppler; {PDFTOTEXT} not found\n"
+        die(f"press: overlap check needs poppler; {PDFTOTEXT} not found\n"
                  f"       set PRESS_PDFTOTEXT to poppler's binary if it is not on PATH")
     except OSError as e:
         # FOUND but not runnable. Aiming PRESS_PDFTOTEXT at a shell script on
         # Windows raises WinError 193 rather than FileNotFoundError, and the bare
         # traceback for that names CreateProcess instead of the variable that
         # caused it. Measured while testing the branch above.
-        sys.exit(f"press: {PDFTOTEXT} could not be run ({e})\n"
+        die(f"press: {PDFTOTEXT} could not be run ({e})\n"
                  f"       PRESS_PDFTOTEXT must name an executable, not a script")
     except subprocess.CalledProcessError:
-        sys.exit(f"press: {PDFTOTEXT} could not read {pdf}")
+        die(f"press: {PDFTOTEXT} could not read {pdf}")
     return out.read_text(encoding="utf-8", errors="replace")
 
 
@@ -94,7 +100,7 @@ def lines_by_page(xml):
         # -bbox-layout should, which is a tooling fault rather than a document
         # one. Same reasoning as the FileNotFoundError branch above: a bare
         # ParseError traceback names neither the cause nor the remedy.
-        sys.exit(f"press: {PDFTOTEXT} did not return usable -bbox-layout XML ({e})\n"
+        die(f"press: {PDFTOTEXT} did not return usable -bbox-layout XML ({e})\n"
                  f"       set PRESS_PDFTOTEXT to poppler's pdftotext if it is not on PATH")
     for page in root.iter("page"):
         rows = []
@@ -164,4 +170,9 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except SystemExit:
+        raise
+    except Exception as e:                    # a crash is the pass failing to run, never a finding
+        die(f"press: {pathlib.Path(sys.argv[0]).name} failed: {e!r}")

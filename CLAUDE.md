@@ -122,7 +122,9 @@ repository has.
   is its one status line, which `press.just` hands to `report.sh`; findings go to stderr.
 - **Every pass reports through `found <pass>`** in `check.sh`, so a document's
   `// press: accept <pass> — <why>` can apply to it. A new pass gets a name in `$passes` and
-  in README's list, or a document can never accept it.
+  in README's list, or a document can never accept it. Only the document's own file accepts.
+  The Python passes exit 1 for a finding and 2 when they cannot run (`die()`); keep that
+  apart, or a missing tool reads as a finding a document has accepted.
 - **The page passes read a copy with every scan hidden** when the document reads an image file
   (`lib.typ`'s `scan()`, `--input press-scans=hidden`). `stamp.sh` compiles that copy at the
   document PDF's own stamp (`PRESS_STAMP_AS`), so it lays out exactly as the document does; the

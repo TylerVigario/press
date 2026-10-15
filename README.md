@@ -131,7 +131,8 @@ fonts, text layer and edge-to-edge ink are not findings, and what the document s
 audited as usual. The copy costs a second compile, only for a document that reads an image.
 
 **A finding a document keeps on purpose** — a sent record that will not be restyled — is
-accepted in its own source, naming the pass and why:
+accepted in the document's own file, naming the pass and why; a file it imports or includes
+cannot accept for it, since a finding a shared file causes is that file's to fix:
 
 ```typst
 // press: accept ink-margin — sent 2026-03-02, kept as sent
@@ -140,7 +141,8 @@ accepted in its own source, naming the pass and why:
 Its findings still print, then a line saying they are accepted and why, and they do not fail
 the build. The passes are `warnings`, `fonts`, `glyphs`, `ink-margin` and `text-on-text`. An
 acceptance with no reason fails, and so does one its pass finds nothing for: left standing, it
-would hide that pass's next real finding.
+would hide that pass's next real finding. A pass that cannot run, for a missing or broken tool,
+fails the audit whatever the document accepts.
 
 The stamp prints in **`PRESS_TZ`**, an IANA zone name set for every build
 (`PRESS_TZ=America/Los_Angeles`, or `UTC` for documents read across zones), so every machine
