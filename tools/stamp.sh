@@ -11,7 +11,8 @@
 # typst's own output goes to stderr.
 #
 # NOT A WRAPPER. `just build` stays the one way to build; this file is to the build recipe
-# what check.sh is to check -- its mechanism, kept in a file for the cygpath reason below.
+# what check.sh is to check -- its mechanism, kept in a file because check compiles through it
+# too, so the audited PDF is built exactly as build builds it.
 #
 # WHY A STAMP. A printed sheet goes stale without saying so. The stamp is passed in as
 # sys.inputs.press-updated, and a document shows it with the package's updated() — in
@@ -30,8 +31,7 @@
 # dictionary as plain text, /CreationDate(D:YYYYMMDDHHMMSSZ), in UTC. No side file to lose
 # or leave behind. A PDF without one -- or built before this -- simply gets a new stamp.
 #
-# A plain file handed to sh, like check.sh, and for the same reason: a recipe with a
-# shebang goes through cygpath on Windows and does not run from PowerShell.
+# typst 0.14 writes a space before the date's parenthesis, and stamp_of reads either.
 set -eu
 
 src=$1

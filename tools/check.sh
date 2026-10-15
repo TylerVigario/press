@@ -1,20 +1,16 @@
 #!/bin/sh
 # check.sh — audit a built document for the font failures typst does not report.
 #
-# Invoked by press's `check` recipe, which cds to the consumer root first:
+# Invoked by press's `check` recipe, which runs in the consumer root:
 #
 #   sh <press_root>/tools/check.sh <doc> <pdf> <press_root> <typst flags...>
 #
-# Paths are relative to the consumer root, which is why the recipe cds there and
+# Paths are relative to the consumer root, which is why the recipe runs there and
 # passes press_root separately — the two are the same directory only when press
 # is being used on itself.
 #
-# It lives here rather than inline in press.just because a `just` recipe carrying
-# a #!/bin/sh shebang is translated through `cygpath` on Windows, and cygpath is
-# absent from PowerShell's PATH even where Git for Windows is installed — so the
-# only recipe with a shebang was the only recipe that would not run from pwsh.
-# A plain recipe handing a file to sh needs no translation and behaves the same
-# from either shell.
+# It lives in a file rather than inline in press.just so it can be run directly,
+# without just, which is how it should be exercised when changing it.
 #
 # The rationale for what each pass does, and the limits of each, is in press.just
 # above the recipe. This file is the mechanism; that comment is the argument.
@@ -28,7 +24,6 @@ shift 3
 # re-parses into separate arguments here. Passing it through rather than
 # rebuilding it keeps this file from drifting away from build and watch.
 
-test -f "$pdf" || { echo "press: not built yet — run build first: $pdf" >&2; exit 1; }
 # The glyph check needs a grep that speaks PCRE, honours the (*UTF) verb, and knows
 # \p{...} properties. Assert it here rather than relying on the pipeline to complain:
 # $? in `a | b | sort` belongs to sort, so a grep that rejects any of the three leaves

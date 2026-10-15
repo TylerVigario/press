@@ -166,13 +166,11 @@ jobs:
       - uses: ./.github/actions/typst-toolchain
         with:
           poppler: "true"
-      - name: Build, then audit
+      - name: Audit
         run: |
           set -euo pipefail
-          # check refuses to audit a document that was never built, and this is a
-          # separate job with no artifact between them. The build is a precondition
-          # here, not the assertion — a compile failure is Documents build's to report.
-          just all
+          # check compiles each document through stamp.sh, as build does, so it needs
+          # no build ahead of it. A compile failure is Documents build's to report.
           for f in docs/*.typ; do just check "$f"; done
 
   oldest:

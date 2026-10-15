@@ -302,11 +302,12 @@ new name: _typst-version
 # LIMITS, stated because a check trusted past its reach is worse than none:
 #   · `#sym.checkmark` and friends carry no source codepoint, so the glyph check
 #     cannot see them — the font check still catches the substitution they cause.
-#   · Non-ASCII inside a comment is not rendered and will report as vanished.
-#     Full-line `//` comments are skipped; trailing ones are not.
-#   · A probe asks "can any vendored face draw this", not "does THIS document's
-#     face draw it". A glyph present only in the mono face still substitutes in
-#     body text — the font check is what catches that.
+#   · A probe asks whether a character survives at all — drawn by a vendored face
+#     or by one of typst's own embedded faces — not whether THIS document's face
+#     draws it, and it never looks at the document's page. So a character in a
+#     trailing comment is probed like any other, and reported only if nothing can
+#     draw it (full-line `//` comments are skipped). A glyph drawn from an embedded
+#     face, or present only in the mono face, is the font check's to report.
 #   · Space separators and format characters are not probed at all. Nothing is
 #     drawn for them, so "did it survive" has no answer, and pdftotext hands
 #     back a plain space for U+00A0 — which read as vanished and failed correct
@@ -315,9 +316,9 @@ new name: _typst-version
 #   · Needs poppler — pdffonts, pdftotext AND pdftoppm, all three — and poppler
 #     specifically for the first two: Xpdf and mupdf ship programs of those names
 #     that disagree about which glyphs a PDF contains, so the recipe asserts the
-#     implementation rather than the name. pdftoppm carries no such assertion
-#     because nothing else ships one; it is an absence problem, not a wrong-
-#     implementation one.
+#     implementation rather than the name. pdftoppm carries no such assertion:
+#     Git for Windows bundles no pdftoppm at all, so on Windows it is an absence
+#     problem. Xpdf ships one too, and press has not been run against it.
 #     That is also why this is a separate recipe rather than part of build:
 #     building must not require any of it.
 #     Set PRESS_PDFTOTEXT / PRESS_PDFFONTS to point at them directly where PATH
@@ -358,13 +359,9 @@ new name: _typst-version
 # line drawn once are the same pixels. It reads pdftotext's line geometry, where
 # that information survives.
 #
-# The passes themselves live in tools/check.sh. They were inline here until a
-# `just` recipe carrying a #!/bin/sh shebang turned out to be translated through
-# `cygpath` on Windows, which is absent from PowerShell's PATH even with Git for
-# Windows installed — so the only recipe with a shebang was the only recipe that
-# would not run from pwsh. A plain recipe handing a file to sh needs no
-# translation. It also means the script can be run directly, without just, which
-# is how it should be exercised when changing it.
+# The passes themselves live in tools/check.sh, which can be run directly, without
+# just — how it should be exercised when changing it. It compiles through
+# tools/stamp.sh, as build does, so a document that was never built is built first.
 [doc("Audit a built PDF for the font failures typst does not report")]
 [script]
 [working-directory(root)]

@@ -52,10 +52,7 @@ PDFTOTEXT = os.environ.get("PRESS_PDFTOTEXT", "pdftotext")
 
 # Poppler escapes &, < and > in word text, so a parser is correct here and a
 # naive split is not. ElementTree is stdlib, which keeps this dependency-free.
-try:
-    import xml.etree.ElementTree as ET
-except ImportError:                                  # pragma: no cover
-    ET = None
+import xml.etree.ElementTree as ET
 
 
 def layout(pdf, tmp):
@@ -85,6 +82,12 @@ def lines_by_page(xml):
     # Namespaced by poppler; strip it rather than carry a prefix everywhere.
     try:
         root = ET.fromstring(re.sub(r'\sxmlns="[^"]+"', "", xml, count=1))
+    except ImportError:
+        # Importing ElementTree always succeeds; a Python built without expat fails here,
+        # at the first parse, and its traceback would name neither the check nor a remedy.
+        print("press: skipping the line-overlap check (this python has no XML parser)",
+              file=sys.stderr)
+        return
     except ET.ParseError as e:
         # A truncated or non-XML answer means the binary is not producing what
         # -bbox-layout should, which is a tooling fault rather than a document
@@ -130,10 +133,6 @@ def collisions(rows):
 
 
 def main():
-    if ET is None:
-        print("press: skipping the line-overlap check (no xml parser in this python)",
-              file=sys.stderr)
-        return 0
     pdf = sys.argv[1]
     rc = 0
     with tempfile.TemporaryDirectory() as tmp:

@@ -23,8 +23,7 @@
 #
 # A document that fails to build never reaches report.sh, so failed is found minus tallied.
 #
-# A plain file handed to sh, like stamp.sh and check.sh: a recipe with a shebang goes
-# through cygpath on Windows and does not run from PowerShell.
+# A file of its own because build and all both run it, and it can be run by hand.
 set -eu
 
 if [ "$1" = --summary ]; then

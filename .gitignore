@@ -1,5 +1,6 @@
 # Rendered output — regenerate with typst
 print/
 
-# Python bytecode, written beside tools/*.py whenever check runs them
+# Python bytecode, written beside tools/*.py if one is ever imported rather than run
+# (running a script, as check does, writes none)
 __pycache__/

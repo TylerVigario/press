@@ -18,7 +18,7 @@ rather than failing, because the font checks are worth having on their own.
 PRESS_PYTHON and PRESS_PDFTOPPM name either executable directly, for the same
 reason PRESS_PDFTOTEXT exists: on Windows PATH is not the contributor's to order.
 """
-import os, subprocess, sys, tempfile, pathlib
+import os, re, subprocess, sys, tempfile, pathlib
 
 DPI = 150
 
@@ -30,9 +30,21 @@ DPI = 150
 # something to find.
 PDFTOPPM = os.environ.get("PRESS_PDFTOPPM") or "pdftoppm"
 
-def pages(pdf, tmp):
+# Pages are rendered BATCH at a time and each raster is deleted once measured, so the
+# temporary space stays flat: at 150 dpi a Letter page is about 2 MB, and rendering a
+# 300-page book in one call took over 600 MB before the first page was looked at.
+BATCH = 25
+
+def page_count(pdf):
+    """The root page tree's /Count, as report.sh reads it; None if it cannot be found."""
+    counts = re.findall(rb"/Type\s*/Pages\s*/Count\s*(\d+)", pathlib.Path(pdf).read_bytes())
+    return max(int(c) for c in counts) if counts else None
+
+def render(pdf, tmp, first=None, last=None):
+    """Render pages first..last (all of them without a range) to tmp, in page order."""
+    span = ["-f", str(first), "-l", str(last)] if first else []
     try:
-        subprocess.run([PDFTOPPM, "-r", str(DPI), "-gray", pdf, f"{tmp}/p"],
+        subprocess.run([PDFTOPPM, "-r", str(DPI), "-gray", *span, pdf, f"{tmp}/p"],
                        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except FileNotFoundError:
         # Without this the failure is a bare Python traceback ending in
@@ -48,7 +60,19 @@ def pages(pdf, tmp):
                  f"       PRESS_PDFTOPPM must name an executable, not a script")
     except subprocess.CalledProcessError:
         sys.exit(f"press: {PDFTOPPM} could not render {pdf}")
-    return sorted(pathlib.Path(tmp).glob("p-*.pgm"))
+    # pdftoppm numbers files by page, padded to the document's page count.
+    return sorted(pathlib.Path(tmp).glob("p-*.pgm"),
+                  key=lambda f: int(re.search(r"(\d+)\.pgm$", f.name).group(1)))
+
+def pages(pdf, tmp):
+    """(page number, raster) for every page, each raster removed once the caller is done."""
+    count = page_count(pdf)
+    spans = ([(a, min(a + BATCH - 1, count)) for a in range(1, count + 1, BATCH)]
+             if count else [(None, None)])
+    for first, last in spans:
+        for f in render(pdf, tmp, first, last):
+            yield int(re.search(r"(\d+)\.pgm$", f.name).group(1)), f
+            f.unlink()
 
 def read_pgm(path):
     d = path.read_bytes()
@@ -81,7 +105,7 @@ def main():
     pdf, floor = sys.argv[1], float(sys.argv[2])
     rc = 0
     with tempfile.TemporaryDirectory() as tmp:
-        for n, page in enumerate(pages(pdf, tmp), 1):
+        for n, page in pages(pdf, tmp):
             c = clearance(page)
             if c is None:
                 continue
