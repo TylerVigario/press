@@ -13,6 +13,13 @@
 # IT IS THE BUILD, not a wrapper around one: every runner calls it, and check.sh compiles
 # through it too, so the audit reads a PDF built exactly as the build makes it.
 #
+# EVERY BUILD IS AUDITED. Once the PDF is written, check.sh's passes read it, with the files
+# this compile read and the warnings it printed, so nothing compiles twice. A finding prints
+# and fails the build, and the PDF stays written, so a runner, CI or `all` sees it and the page
+# can still be looked at. Where the audit's tools are missing, the build says the audit was
+# skipped and why, and succeeds: building never depends on them. check.sh's own compile is not
+# audited again (PRESS_IN_CHECK).
+#
 # WHY A STAMP. A printed sheet goes stale without saying so. The stamp is passed in as
 # sys.inputs.press-updated, and a document shows it with lib.typ's updated() — in
 # its footer, so every page carries it. Comparing the shelf copy with the latest build
@@ -102,6 +109,29 @@ stamp_of() {
     }'
 }
 
+# The audit's working files: the files the compile read, and what typst printed.
+work=$(mktemp -d "${TMPDIR:-/tmp}/press-build.XXXXXX")
+trial=
+trap 'rm -rf "$work"; if [ -n "$trial" ]; then rm -f "$trial"; fi' EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+[ -n "${PRESS_IN_CHECK:-}" ] || set -- "$@" --deps "$work/deps" --deps-format zero
+
+# finish <status> <typst flags...>: say what typst printed and what the build made, then audit
+# it, and exit with the audit's answer.
+finish() {
+    st=$1
+    shift
+    [ -n "$out" ] && printf '%s\n' "$out" >&2
+    printf '%s\n' "$st"
+    [ -z "${PRESS_IN_CHECK:-}" ] || exit 0
+    printf '%s\n' "$out" > "$work/log"
+    here=$(dirname "$0")
+    PRESS_AUDIT=optional PRESS_BUILT_DEPS="$work/deps" PRESS_BUILT_LOG="$work/log" \
+        sh "$here/check.sh" "$src" "$pdf" "$here/.." "$@"
+    exit $?
+}
+
 # Compile $src at stamp $1 into $2; typst's own output goes to stdout for the caller.
 at() {
     e=$1; o=$2; shift 2
@@ -114,29 +144,22 @@ old=$( [ -f "$pdf" ] && stamp_of "$pdf" || true )
 if [ -n "$old" ]; then
     # typst takes the format from the extension, so the trial build keeps .pdf. It sits in
     # print/, so an interrupt mid-compile removes it rather than leaving it there.
-    tmp="${pdf%.pdf}.press-trial.$$.pdf"
-    trap 'rm -f "$tmp"' EXIT
-    trap 'exit 130' INT
-    trap 'exit 143' TERM
-    if out=$(at "$old" "$tmp" "$@"); then
-        if cmp -s "$tmp" "$pdf"; then
-            rm -f "$tmp"
-            [ -n "$out" ] && printf '%s\n' "$out" >&2
-            printf 'unchanged %s\n' "$(when "$old")"
-            exit 0
+    trial="${pdf%.pdf}.press-trial.$$.pdf"
+    if out=$(at "$old" "$trial" "$@"); then
+        if cmp -s "$trial" "$pdf"; then
+            rm -f "$trial"
+            finish "unchanged $(when "$old")" "$@"
         fi
     else
-        rm -f "$tmp"
+        rm -f "$trial"
         printf '%s\n' "$out" >&2
         exit 1
     fi
-    rm -f "$tmp"
+    rm -f "$trial"
 fi
 
 if out=$(at "$now" "$pdf" "$@"); then
-    [ -n "$out" ] && printf '%s\n' "$out" >&2
-    printf '%s %s\n' "$( [ -n "$old" ] && echo changed || echo new )" "$(when "$now")"
-    exit 0
+    finish "$( [ -n "$old" ] && echo changed || echo new ) $(when "$now")" "$@"
 fi
 printf '%s\n' "$out" >&2
 exit 1

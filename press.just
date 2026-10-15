@@ -91,7 +91,7 @@ typst_flags := "--root . --font-path " + quote(press_root / "fonts") + " --ignor
 _list:
     @{{ quote(just_executable()) }} --list --unsorted
 
-# Compile one document → print/<same path>.pdf
+# Compile one document and audit it → print/<same path>.pdf
 #
 # The path is relative to the repo root, from whichever directory you invoke it.
 #
@@ -100,16 +100,23 @@ _list:
 # rebuild changes nothing on the page. The reasoning is at the top of that file.
 #
 # Then tools/report.sh says what was made, in one line: new, changed or unchanged, pages,
-# words (where poppler is installed), size, and the stamp the page carries.
-[doc("Compile one document -> print/<same path>.pdf")]
+# words (where poppler is installed), size, and the stamp the page carries. stamp.sh audits
+# what it built; a finding prints above that line and fails the recipe.
+[doc("Compile and audit one document -> print/<same path>.pdf")]
 [script]
 [working-directory(root)]
 [arg('doc', pattern='.+\.typ', help='a .typ file, relative to the repo root')]
 build doc:
     src={{ quote(trim_start_match(replace(doc, '\', '/'), './')) }}
     pdf="print/${src%.typ}.pdf"
-    st=$(sh {{ quote(press_root / "tools" / "stamp.sh") }} "$src" "$pdf" {{ typst_flags }})
+    # A finding fails the build after the PDF is written, so the line still says what was
+    # made; a compile that failed made nothing to report.
+    rc=0
+    st=$(sh {{ quote(press_root / "tools" / "stamp.sh") }} "$src" "$pdf" {{ typst_flags }}) || rc=$?
+    [ -n "$st" ] || exit "$rc"
     sh {{ quote(press_root / "tools" / "report.sh") }} "$pdf" $st
+    if [ "$rc" -ne 0 ] && [ -n "${PRESS_TALLY:-}" ]; then echo audit >> "$PRESS_TALLY"; fi
+    exit "$rc"
 
 # Recompile one document on every save -> print/<same path>.watch.pdf
 #
@@ -176,7 +183,7 @@ watch doc:
 #
 # The directories reach the shell as its own arguments, "$@", not as {{ dirs }}: that is
 # one string of every name joined by spaces, so a name with a space in it would split.
-[doc("Compile every document under the given directories (default docs/), not its parts")]
+[doc("Compile and audit every document under the given directories (default docs/), not its parts")]
 [script]
 [working-directory(root)]
 [positional-arguments]

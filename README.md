@@ -113,10 +113,16 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 | tool | does |
 |---|---|
 | `sh third_party/press/tools/new.sh docs/guide` | scaffolds `docs/guide/main.typ` from the template, its import written for where press sits; add `letter` for the letter template |
-| `sh third_party/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory |
-| `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | audits it: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text printed on text |
+| `sh third_party/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory; then audits it, where the audit's tools are installed |
+| `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | the audit alone, which refuses to run without its tools: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text printed on text |
 
 `<flags>` are the three above: `--root . --font-path third_party/press/fonts --ignore-system-fonts`.
+
+**Every build is audited.** A finding prints, and the build exits 1 with the PDF still written,
+so a runner, CI and `all` see it and the page can still be looked at. Where the audit's tools
+are missing, the build says the audit was skipped and why, and succeeds: building never
+depends on them. `check.sh` is the same audit for when it must run, as in CI: without its tools
+it refuses.
 
 The stamp prints in **`PRESS_TZ`**, an IANA zone name set for every build
 (`PRESS_TZ=America/Los_Angeles`, or `UTC` for documents read across zones), so every machine
@@ -148,9 +154,9 @@ line in its justfile: `import 'third_party/press/press.just'`, or `mod press
 already has). Then:
 
 ```sh
-just build docs/guide.typ        # -> print/docs/guide.pdf, and a line saying what it made
+just build docs/guide.typ        # -> print/docs/guide.pdf, audited, and a line saying what it made
 just watch docs/guide.typ        # a preview on every save -> print/docs/guide.watch.pdf
-just check docs/guide.typ        # the audit
+just check docs/guide.typ        # the audit, refusing without its tools
 just all                         # every document under docs/, or under the directories named
 just new docs/next-doc           # scaffold; just new docs/to-x letter for a letter
 just clean                       # delete print/
@@ -158,16 +164,18 @@ just clean                       # delete print/
 
 Under `mod` it is `just press build …`, and `just press` lists the recipes; under `import`,
 `just --list` does. `all` builds documents, not their parts: a file named `_*.typ` is a part,
-and so is everything beside a `main.typ`, at any depth. Export `PRESS_TZ` from the justfile.
+and so is everything beside a `main.typ`, at any depth; it builds every one, then fails if any
+failed its audit. Export `PRESS_TZ` from the justfile.
 
 ### Requirements
 
 - **typst 0.14 or newer.** An older one is refused with a message naming both versions.
 - **`sh`** for the tools. On Windows it comes with Git for Windows.
-- **The audit** also needs poppler (`pdffonts`, `pdftotext`, `pdftoppm`), a Python, and a grep
-  with PCRE (GNU grep; on macOS, `brew install grep`). Where `PATH` finds the wrong one, name
-  it: `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`, `PRESS_PDFTOPPM`, `PRESS_PYTHON`, `PRESS_GREP`
-  (`ggrep` on macOS). The audit refuses a `pdftotext` that is not poppler's.
+- **The audit** needs poppler (`pdffonts`, `pdftotext`, `pdftoppm`), a Python, and a grep
+  with PCRE (GNU grep; on macOS, `brew install grep`); a build without them is not audited.
+  Where `PATH` finds the wrong one, name it: `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`,
+  `PRESS_PDFTOPPM`, `PRESS_PYTHON`, `PRESS_GREP` (`ggrep` on macOS). The audit refuses a
+  `pdftotext` that is not poppler's.
 - **just 1.55 or newer**, only to use `press.just`.
 
 ### On Windows

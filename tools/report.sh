@@ -19,6 +19,8 @@
 #
 #   sh <press_root>/tools/report.sh --summary <tally> <documents found>
 #
+# The build recipe appends "audit" for a document that failed its audit, which the summary
+# counts apart; a document with no status at all did not build.
 #   press: 12 documents: 2 changed, 9 unchanged, 1 failed
 #
 # A document that fails to build never reaches report.sh, so failed is found minus tallied.
@@ -27,13 +29,14 @@
 set -eu
 
 if [ "$1" = --summary ]; then
-    awk -v found="$3" '{ n[$1]++; t++ } END {
+    awk -v found="$3" '{ n[$1]++; if ($1 != "audit") t++ } END {
         found += 0; failed = found - t
         line = sprintf("press: %d document%s", found, found == 1 ? "" : "s")
         sep = ": "
         split("changed new unchanged", k, " ")
         for (i = 1; i <= 3; i++) if (n[k[i]]) { line = line sep n[k[i]] " " k[i]; sep = ", " }
-        if (failed > 0) line = line sep failed " failed"
+        if (n["audit"]) line = line sep n["audit"] " failed the audit"
+        if (failed > 0) line = line sep failed " did not build"
         print line
     }' "$2"
     exit 0
