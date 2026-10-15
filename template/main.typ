@@ -1,13 +1,14 @@
-// Starter skeleton for a document. COPY this — do not import it.
-// Composition belongs to the document; only the vocabulary is shared.
+// A brief, from press's general-purpose template. It imports press and applies brief(), which
+// sets the page, the type and the head; the rest is placeholder for your own. Use it as it is,
+// or copy brief() into your repository and change your copy: press asks neither.
 //
 //   sh third_party/press/tools/new.sh docs/<name>    (or `just new docs/<name>`)
 //
 // copies it to docs/<name>/main.typ, with the import below rewritten to where press sits.
-// In press's own tree the import is relative, ../lib.typ, so the skeleton compiles there.
+// In press's own tree the import is relative, ../lib.typ, so the starter compiles there.
 //
 // ---------------------------------------------------------------------------
-// The conventions this skeleton encodes. They are what make a document
+// The conventions this starter encodes. They are what make a document
 // scannable; the tokens alone will not do it.
 //
 //   1. MEAT FIRST. Whatever the reader must act on goes at the top. Attention
@@ -27,38 +28,14 @@
 
 #import "../lib.typ": *
 
-// The document's name, set once. A PDF viewer shows it in its title bar and lists the file by
-// it, and the header and footer below print it from here.
-#set document(title: [Document title], author: "Your name")
-#set page(..card, footer: context {
-  set text(size: sz.micro, fill: ink-faint)
-  grid(columns: (1fr, auto),
-    align(left)[#document.title · status],
-    align(right)[#updated() · #counter(page).display("1 / 1", both: true)])
-})
-#set text(font: face-text, size: sz.small, fill: ink, lang: "en")
-#set par(leading: 0.52em, spacing: 0.55em)
-#set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.32em)
-#show raw: set text(font: face-mono, size: sz.micro)
-// Code blocks get press's treatment: one shaded, bordered block per listing,
-// commands as plain lines. Delete this line for a document that wants its own —
-// press supplies the treatment, the document decides to install it.
-#show raw.where(block: true): code
-// Links click on screen and footnote their address for paper. Delete this line for a
-// document that styles its own.
-#show link: link-note
-
-// ---- Header + legend ----
-#grid(columns: (auto, 1fr), align: (left + bottom, right + bottom),
-  text(font: face-display, size: sz.title, weight: 700)[#context document.title],
-  text(size: sz.fine, fill: ink-soft)[scope · date])
-#v(-3pt)
-#line(length: 100%, stroke: 2pt + slate)
-#v(4pt)
-#grid(columns: (auto, 1fr), align: (left + horizon, right + horizon),
-  text(size: sz.micro, fill: ink-faint)[Colour is state. Bands carry a role — skip on purpose.],
-  align(right)[#chip([SETTLED], "ok") #h(3pt) #chip([CONDITIONAL], "warn") #h(3pt) #chip([DECIDE], "bad")])
-#v(7pt)
+// The document's name, set once: a PDF viewer shows it in its title bar and lists the file by
+// it, and the head and footer print it from here.
+#show: brief.with(
+  title: [Document title],
+  author: "Your name",
+  meta: [scope · date],
+  status: [status],
+)
 
 // ---- Meat first ----
 #band-strong([What the reader must act on], "decide — start here", color: bad)

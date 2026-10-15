@@ -23,8 +23,11 @@ any runner calls.
 **One output for screen and print.** Every part must work in both media: a part that works in
 only one is not finished.
 
-**Additive.** press sets no page and installs no show rule of its own accord. A document takes
-the parts it wants and composes its own page.
+**Additive.** press sets no page and installs no show rule of its own accord: nothing takes
+effect until a document calls it. Its templates, `brief` and `letter` in `lib.typ`, are functions
+a document applies with `#show:`, each press's universal default for a kind of document. A
+repository imports one as it is, or copies one and changes its copy; press says nothing about
+which.
 
 press grows from the documents that use it: a template or part is added when a real document
 needs it, built for both media, and offered to every document from the next release.
@@ -35,9 +38,9 @@ needs it, built for both media, and offered to every document from the next rele
 
 | | what |
 |---|---|
-| `lib.typ` | the parts, tokens and presets a document imports |
+| `lib.typ` | the parts, tokens, presets and templates a document imports |
 | `press.toml` | `version`, the version last released, and `typst`, the oldest typst press works with |
-| `template/` | the skeletons `tools/new.sh` copies, `main.typ` and `letter.typ`; each imports `../lib.typ` so it compiles in place |
+| `template/` | the starters `tools/new.sh` copies, `main.typ` (applying `brief`) and `letter.typ` (applying `letter`); each imports `../lib.typ` so it compiles in place |
 | `calibration.typ` | the print calibration sheet; imports `lib.typ` |
 | `fonts/` | the vendored faces, and `fonts/licenses/` with each one's licence text |
 | `tools/` | `new.sh`, `stamp.sh`, `check.sh`, `report.sh`, and the audit's two Python passes |
@@ -108,9 +111,10 @@ repository has.
 
 - **Every template's import line is an interface.** `new.sh` rewrites exactly
   `#import "../lib.typ": *` into the copy's root-relative path, and refuses if the line is not
-  there. Keep the line as it is in each template, or change them and `new.sh` together. A new
-  template is a file in `template/`, which `new.sh`, `templates.sh` and the bundle pick up;
-  add it to the files `bundle-check.sh` requires.
+  there. Keep the line as it is in each starter, or change them and `new.sh` together. A new
+  template is a function in `lib.typ` and a starter in `template/` that applies it, which
+  `new.sh`, `templates.sh` and the bundle pick up; add the starter to the files
+  `bundle-check.sh` requires.
 - **Every build is audited through `check.sh`, from `stamp.sh`.** `stamp.sh` hands over the
   files its compile read and what typst printed (`PRESS_BUILT_DEPS`, `PRESS_BUILT_LOG`), with
   `PRESS_AUDIT=optional`, so a missing tool skips the audit with one line instead of failing;
@@ -152,7 +156,14 @@ repository has.
   it does not vendor, and Composer projects keep it out of git. The guides use
   `third_party/press`.
 - **Do not add a markdown path.** Markdown-to-PDF was tried and removed. Documents are `.typ`.
-- **Do not move whole-page composition into the library.** A helper that lays out an entire
-  page belongs in the document. A styling helper a document opts into is fine to offer.
+- **Do not make a template specific.** A template is press's universal default for a kind of
+  document, and stays generic: what one repository alone needs belongs in that repository's
+  own copy. Refuse a change that would fit one repository at the others' cost; when enough
+  documents need a different default, offer a separate template beside it.
+- **Do not tell a repository how to use press's templates.** Imported as they are, copied and
+  changed, or not used at all, it is the repository's choice.
+- **Do not make anything take effect on import.** A template applies only when a document
+  calls it with `#show:`; a part only where it is placed. A styling helper a document opts into
+  is fine to offer.
 - **Do not treat a suggestion as a decision.** A name, structure or convention you proposed
   and nobody explicitly answered is **not** approved. Ask, or leave it unbuilt.
