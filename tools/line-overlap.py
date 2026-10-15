@@ -78,7 +78,8 @@ def layout(pdf, tmp):
 
 
 def lines_by_page(xml):
-    """[(yMin, yMax, xMin, xMax, text)] per page, in document order."""
+    """[(yMin, yMax, xMin, xMax, text, words)] per page, sorted by yMin. words holds each
+    drawn word's box, (xMin, xMax, yMin, yMax)."""
     # Namespaced by poppler; strip it rather than carry a prefix everywhere.
     try:
         root = ET.fromstring(re.sub(r'\sxmlns="[^"]+"', "", xml, count=1))
@@ -98,36 +99,49 @@ def lines_by_page(xml):
     for page in root.iter("page"):
         rows = []
         for ln in page.iter("line"):
-            words = [(w.text or "") for w in ln.iter("word")]
-            text = " ".join(w for w in words if w.strip())
-            if not text:
+            drawn = [w for w in ln.iter("word") if (w.text or "").strip()]
+            if not drawn:
                 continue                              # whitespace-only, nothing drawn
+            text = " ".join(w.text for w in drawn)
+            boxes = [tuple(float(w.get(k)) for k in ("xMin", "xMax", "yMin", "yMax"))
+                     for w in drawn]
             rows.append((float(ln.get("yMin")), float(ln.get("yMax")),
-                         float(ln.get("xMin")), float(ln.get("xMax")), text))
-        yield sorted(rows)
+                         float(ln.get("xMin")), float(ln.get("xMax")), text, boxes))
+        yield sorted(rows, key=lambda r: r[:4])
 
 
 def collisions(rows):
-    for i, (yA0, yA1, xA0, xA1, tA) in enumerate(rows):
-        for yB0, yB1, xB0, xB1, tB in rows[i + 1:]:
+    for i, (yA0, yA1, xA0, xA1, tA, wA) in enumerate(rows):
+        for yB0, yB1, xB0, xB1, tB, wB in rows[i + 1:]:
             # Sorted by yMin, so once a later line starts below this one's
             # bottom, nothing after it can overlap either.
             if yB0 >= yA1:
                 break
             # Side by side rather than stacked. Two columns, or a heading and a
             # right-aligned label, legitimately share vertical space — it is only
-            # a collision if they also share horizontal space.
+            # a collision if they also share horizontal space, by more than the
+            # same floor.
             #
-            # No epsilon on this axis, deliberately. It would guard a case that
-            # does not occur: across the corpus the smallest horizontal overlap
-            # among pairs that clear the vertical test is 144.68pt, some 290x any
-            # floor worth setting. The vertical epsilon exists because rotation
-            # produces measured 0.13pt phantoms; nothing analogous shows up here,
-            # and a threshold with no measurement behind it is a guess that later
-            # reads as a finding.
-            if xA1 <= xB0 or xB1 <= xA0:
+            # The floor on this axis was left out at first, for want of a case:
+            # across the corpus the smallest horizontal overlap among pairs that
+            # clear the vertical test is 144.68pt. The case is a footnote marker.
+            # poppler gives link-note's raised marker a line of its own, starting
+            # where its word's line ends, and the two can meet with 0.000018pt in
+            # common, which is rounding, while the marker shares 4.18pt of height
+            # with the word. Nothing is drawn on anything, and with no floor here
+            # the pair was reported as text on text.
+            if min(xA1, xB1) - max(xA0, xB0) <= EPSILON_PT:
                 continue
-            ov = min(yA1, yB1) - max(yA0, yB0)
+            if min(yA1, yB1) - max(yA0, yB0) <= EPSILON_PT:
+                continue
+            # The lines' boxes meet; now the words in them must. A line's box spans
+            # its gaps, and poppler gives a raised footnote marker a line of its own,
+            # so a marker between two words of one line sits inside that line's box,
+            # 4.18pt deep, with no glyph touching it. Only words drawn on words are
+            # text on text, by the same floor on both axes.
+            ov = max((min(a[3], b[3]) - max(a[2], b[2])
+                      for a in wA for b in wB
+                      if min(a[1], b[1]) - max(a[0], b[0]) > EPSILON_PT), default=0)
             if ov > EPSILON_PT:
                 yield ov, tA, tB
 
