@@ -493,18 +493,30 @@
 
 // --------------------------------------------------------------- letters ---
 // A letter's own parts, which template/letter.typ composes and a letter takes as it needs.
-// None of them dates the page. A letter carries the day it was sent, written by its author,
-// and never the build stamp: its reader is outside, and has no shelf copy to compare.
+// The writer is the document's author, set once with `set document(author: "…")`, and the date
+// is written once, with dateline(), where the letter prints it; no part takes either again. The
+// date is never the build stamp: a letter is dated the day it goes out, and its reader is
+// outside, with no shelf copy to compare.
+
+#let _letter-date = state("press-letter-date", none)
+
+// The writer's name, from the document's author. Called in context.
+#let _writer() = {
+  assert(document.author.len() > 0,
+    message: "a letter takes its writer from set document(author: \"…\"); set it once at the top")
+  document.author.join(", ")
+}
 
 // The writer's name, a line of contact details, and a rule beneath. A contact item is text or
 // a link; a link that shows its own address (link("mailto:…"), or link(url)[example.com])
 // reads the same on paper as on screen, so link-note adds no footnote to it. `face` sets a
-// letter in the face of the résumé it goes with.
-#let letterhead(name, ..contact, face: face-text) = block(width: 100%, above: 0pt, below: 22pt, {
+// letter in the face of the résumé it goes with, and align(center, letterhead(…)) centres the
+// name and contact line to match a résumé's centred header; the rule stays full width.
+#let letterhead(..contact, face: face-text) = block(width: 100%, above: 0pt, below: 22pt, context {
   set text(font: face)
   let items = contact.pos()
   stack(spacing: 7pt,
-    text(size: sz.head, weight: 700, fill: ink, name),
+    text(size: sz.head, weight: 700, fill: ink, _writer()),
     ..if items.len() > 0 {
       (text(size: sz.small, fill: ink-soft, items.join(text(fill: ink-faint)[ #sym.dot.c ])),)
     },
@@ -512,25 +524,31 @@
   )
 })
 
+// The letter's date, written once, where it prints. continued() reads it from here.
+#let dateline(date) = { _letter-date.update(date); date }
+
 // The subject line. Each reference is kept whole, so an account number never breaks across a
 // line, and stays text a reader can copy.
 #let re(..refs, label: [Re:]) = block(above: 1.2em, below: 1.2em,
   [#text(weight: 700, label) #refs.pos().map(r => box(r)).join([; ])])
 
-// Where the letter is signed. By default, space for an ink signature over a line with the
-// name beneath, and beside it a line to date by hand (`dated: false` leaves that out). For a
-// letter sent as a file, `signed: false` is a typed sign-off: the name alone.
-#let signature(name, signed: true, dated: true) = {
-  if not signed { return block(above: 0.9em, breakable: false, name) }
-  let slot(caption) = stack(spacing: 5pt,
-    line(length: 100%, stroke: 0.5pt + ink),
-    caption)
-  let date = text(size: sz.small, fill: ink-soft)[Date]
-  block(above: 0.6in, breakable: false, grid(
-    columns: if dated { (2.6in, 0.4in, 1.4in) } else { (2.6in,) },
-    slot(name), ..if dated { ([], slot(date)) } else { () },
-  ))
-}
+// Where the letter is signed, with its closing (`closing: [Sincerely,]`) kept on the same page,
+// so a page break never strands it. By default, space for an ink signature over a line with the
+// writer's name beneath, and beside it a line to date by hand (`dated: false` leaves that out).
+// For a letter sent as a file, `signed: false` is a typed sign-off: the name alone.
+#let signature(closing: none, signed: true, dated: true) = block(breakable: false, context {
+  let name = _writer()
+  if closing != none { closing }
+  if not signed {
+    if closing != none { parbreak() }
+    name
+  } else {
+    let slot(caption) = stack(spacing: 5pt, line(length: 100%, stroke: 0.5pt + ink), caption)
+    v(0.55in)
+    grid(columns: if dated { (2.6in, 0.4in, 1.4in) } else { (2.6in,) },
+      slot(name), ..if dated { ([], slot([Date])) } else { () })
+  }
+})
 
 // What goes with the letter, one item to a line.
 #let enclosures(..items) = {
@@ -545,11 +563,13 @@
 // A header for page two onward: the writer, the date and the page number, so a page parted
 // from the first still says whose letter it is. Page one is left to the letterhead.
 //
-//   #set page(..reading, header: continued(sender, sent))
-#let continued(name, date) = context {
+//   #set page(..reading, header: continued())
+#let continued() = context {
   let n = counter(page).get().first()
   if n > 1 {
     set text(size: sz.fine, fill: ink-soft)
-    grid(columns: (1fr, auto, 1fr), align: (left, center, right), name, date, [Page #n])
+    let date = _letter-date.final()
+    grid(columns: (1fr, auto, 1fr), align: (left, center, right),
+      _writer(), if date != none { date }, [Page #n])
   }
 }

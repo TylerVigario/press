@@ -3,43 +3,45 @@
 //   sh third_party/press/tools/new.sh docs/<name> letter    (or `just new docs/<name> letter`)
 //
 // copies it to docs/<name>/main.typ, with the import below rewritten to where press sits.
-// Here it imports press relatively, so the skeleton itself compiles where it stands.
+// In press's own tree the import is relative, ../lib.typ, so the skeleton compiles there.
 //
 // ---------------------------------------------------------------------------
 // What a letter here does:
 //
-//   1. IT IS DATED THE DAY IT GOES OUT, written once below, by hand. It never prints the
-//      build stamp: its reader is outside, with no shelf copy to compare.
+//   1. IT NAMES ITS WRITER AND ITS DATE ONCE. The writer is the document's author, and the
+//      date is dateline()'s, the day the letter goes out; letterhead(), signature() and
+//      continued() read them from there. It never prints the build stamp: its reader is
+//      outside, with no shelf copy to compare.
 //   2. MEAT FIRST. The first paragraph says why you are writing and what you ask for.
 //   3. IT PRINTS AND IT UPLOADS. One column of real text, which a reader can copy and
 //      software reading a cover letter can parse.
 //   4. SIGNED IN INK, OR NOT. Keep signature()'s lines for a letter you print and sign;
 //      pass `signed: false` for a typed sign-off on a letter sent as a file.
 //
-// Delete the parts a letter does not use: re(), enclosures(), the continuation header.
+// Delete the parts a letter does not use: re(), enclosures(), the continuation header. To
+// match a résumé, pass its face to letterhead (face: face-sans), and centre it to match a
+// centred header: #align(center, letterhead(…)).
 // ---------------------------------------------------------------------------
 
 #import "../lib.typ": *
 
-#let sender = [Your Name]
-#let sent = [15 October 2026]
-
-// The letter's name, set once: a PDF viewer shows it in its title bar and lists the file by it.
+// The letter's name and its writer, set once: a PDF viewer shows them, and the letter's parts
+// print the writer from here.
 #set document(title: [Letter to Recipient Name], author: "Your Name")
 // Page two onward names the writer, the date and the page; page one has the letterhead.
-#set page(..reading, header: continued(sender, sent))
+#set page(..reading, header: continued())
 #set text(font: face-text, size: sz.body, fill: ink, lang: "en")
 #set par(leading: 0.6em, spacing: 1.05em)
 // Links click on screen; one whose text is not its address footnotes the address for paper.
 #show link: link-note
 
-#letterhead(sender,
+#letterhead(
   [123 Street Name, Town, ST 00000],
   [(555) 555-0100],
   link("mailto:you@example.com"),
 )
 
-#sent
+#dateline([15 October 2026])
 
 Recipient Name \
 Title \
@@ -59,8 +61,6 @@ needs them, each with the reference that lets them check it.
 
 The last paragraph says what happens next, and how to reach you.
 
-Sincerely,
-
-#signature(sender)
+#signature(closing: [Sincerely,])
 
 #enclosures([First enclosure], [Second enclosure])

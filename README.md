@@ -208,12 +208,15 @@ beside it, `#include`d from it. Switch the page to `..reading`, use typst's head
 absolute, and the audit measures them on any page size. **Landscape** is
 `#set page(..dense, flipped: true)`.
 
-**A letter** starts from its own template: `new.sh docs/to-landlord letter`. It sets the page
-with `..reading` and opens with `letterhead`. It ends with `signature`, which gives lines for an
-ink signature and a date, or a typed sign-off with `signed: false` for a letter sent as a file.
-`re` keeps reference numbers together, `enclosures` lists what goes with the letter, and
-`continued` heads page two onward with the writer, the date and the page. **A letter's date is
-written by hand**, the day it goes out, and it carries no build stamp: its reader is outside.
+**A letter** starts from its own template: `new.sh docs/to-landlord letter`. **It names its
+writer and its date once**: the writer is the document's author, `#set document(author: "…")`,
+and the date is written with `dateline`, where it prints. No part takes either again, and the
+letter carries no build stamp, since its reader is outside. It sets the page with `..reading`,
+opens with `letterhead`, and ends with `signature`, which keeps the closing on the same page as
+lines for an ink signature and a date, or a typed sign-off with `signed: false`. `re` keeps
+reference numbers together, `enclosures` lists what goes with the letter, and `continued()`
+heads page two onward with the writer, the date and the page. To match a résumé's centred
+header, centre the letterhead: `#align(center, letterhead(…))`.
 
 ### The six conventions
 
@@ -259,11 +262,12 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `stamp(body)` | Closing line — provenance, or a last caution. |
 | `updated()` | When the content last changed, as the stamp records it. For the footer. |
 | `press-version` | The version of press a document was built with. Never typed by hand. |
-| `letterhead(name, ..contact, face: face-text)` | A letter's head: the writer's name, a contact line, a rule. A link that shows its own address needs no footnote. |
+| `letterhead(..contact, face: face-text)` | A letter's head: the writer (the document's author), a contact line, a rule. A link that shows its own address needs no footnote. |
+| `dateline(date)` | A letter's date, written once where it prints; `continued` reads it. |
 | `re(..refs, label: [Re:])` | A letter's subject line; each reference stays whole and copyable. |
-| `signature(name, signed: true, dated: true)` | Lines for an ink signature and a hand-written date, or with `signed: false` a typed sign-off. |
+| `signature(closing: none, signed: true, dated: true)` | The closing, kept on its page, then lines for an ink signature over the writer's name and a hand-written date, or with `signed: false` a typed sign-off. |
 | `enclosures(..items)` | What goes with a letter, one item to a line. |
-| `continued(name, date)` | A header for page two onward of a letter: writer, date, page. Pass it to `set page(header: ...)`. |
+| `continued()` | A header for page two onward of a letter: writer, date, page. `set page(header: continued())`. |
 
 **Tokens.** Colours `ink`, `ink-soft`, `ink-faint`, `rule-hair`, `rule-mid`, `paper-tint`,
 `slate`, `slate-tint`, `steel`, and `ok`/`warn`/`bad` each with a `-tint`. Faces `face-text`

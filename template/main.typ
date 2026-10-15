@@ -4,7 +4,7 @@
 //   sh third_party/press/tools/new.sh docs/<name>    (or `just new docs/<name>`)
 //
 // copies it to docs/<name>/main.typ, with the import below rewritten to where press sits.
-// Here it imports press relatively, so the skeleton itself compiles where it stands.
+// In press's own tree the import is relative, ../lib.typ, so the skeleton compiles there.
 //
 // ---------------------------------------------------------------------------
 // The conventions this skeleton encodes. They are what make a document
