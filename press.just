@@ -33,7 +33,8 @@
 #   · creates that directory — typst refuses to write into one that does not
 #     exist and fails with a bare "No such file or directory";
 #   · carries --root, --font-path and --ignore-system-fonts;
-#   · stamps the document with when its content last changed (tools/stamp.sh).
+#   · stamps the document with when its content last changed (tools/stamp.sh);
+#   · audits what it built, and fails on a finding (tools/check.sh, through stamp.sh).
 
 # The oldest just this file works with. A just that knows the setting refuses this file with
 # "requires just 1.55.0 or later"; one older still stops at this line with "unknown setting",
@@ -240,7 +241,7 @@ new name template='main':
     echo "       build it with: $j build $f"
     echo "       preview it with: $j watch $f"
 
-# Audit a built document for the font failures typst does not report
+# Audit a built document for what typst lets through without a word
 #
 # Two of these checks exist because there are two ways to lose a glyph, and
 # neither warns.
@@ -339,7 +340,7 @@ new name template='main':
 # The passes themselves live in tools/check.sh, which any runner calls directly, and
 # which is how it should be exercised when changing it. It compiles through
 # tools/stamp.sh, as build does, so a document that was never built is built first.
-[doc("Audit a built PDF for the font failures typst does not report")]
+[doc("Audit a built PDF for what typst lets through: warnings, fonts, glyphs, edges, overlaps")]
 [script]
 [working-directory(root)]
 [arg('doc', pattern='.+\.typ', help='a .typ file, relative to the repo root')]
