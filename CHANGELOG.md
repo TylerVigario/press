@@ -8,6 +8,70 @@ verbatim. 0.1.0 at the bottom is hand-written and reads "Initial release." becau
 release has no changes to list — there is nothing it changed from.
 
 - - -
+## [v0.2.0](https://github.com/TylerVigario/press/compare/v0.1.0..v0.2.0) - 2026-10-15
+#### Features
+- each release attaches installers that install or update press/ in place, refusing any archive but the one released (#88) - ([9191fa6](https://github.com/TylerVigario/press/commit/9191fa62a139d155c6ff10f6521bf2ff53a958d4)) - Tyler Vigario, Claude Opus 5.5
+- each release attaches the kit as press.tar.gz and press.zip, with their sums and the font licences inside (#86) - ([eac5c91](https://github.com/TylerVigario/press/commit/eac5c914089a4b45b685bba1d625c7cd5b247a54)) - Tyler Vigario, Claude Opus 5.5
+- 0.2.0 declares its typst floor, seedepth looks up the page it points to, and matrix marks its header (#74) - ([41a3bee](https://github.com/TylerVigario/press/commit/41a3beec9e811e146a05f2bded68ca9d920f4d9c)) - Tyler Vigario, Claude Opus 5.5
+- the template and the calibration sheet name themselves once, in the PDF's title metadata (#70) - ([bd90ef1](https://github.com/TylerVigario/press/commit/bd90ef1eb099cae794e786aef32d128e88ee8bea)) - Tyler Vigario, Claude Opus 5.5
+- link-note makes a link click on screen and footnote its address for paper (#69) - ([edbbd39](https://github.com/TylerVigario/press/commit/edbbd395e3a22602307a5d4ce88bc957be85739f)) - Tyler Vigario, Claude Opus 5.5
+- the calibration sheet prints the press version it was set with, and when it last changed (#66) - ([e60f16e](https://github.com/TylerVigario/press/commit/e60f16e1f2df79d3091478b5efd643cbbb2063f6)) - Tyler Vigario, Claude Opus 5.5
+- releases from 0.2.0 carry only the @tylervigario namespace; 0.1.0 lives on in its tag (#65) - ([91eb2e5](https://github.com/TylerVigario/press/commit/91eb2e5da057b4a50db5a30567036678df85926a)) - Tyler Vigario, Claude Opus 5.5
+- the package moves to the @tylervigario namespace, as 0.2.0 (#64) - ([03fe55e](https://github.com/TylerVigario/press/commit/03fe55e4b45bbb1ba76c9ab9ef4007c49f930f01)) - Tyler Vigario, Claude Opus 5.5
+- recipes refuse a path they cannot use, naming what they take (#60) - ([f99a046](https://github.com/TylerVigario/press/commit/f99a0467725e5de6c118ca2a50fa74e26b88bc88)) - Tyler Vigario, Claude Opus 5.5
+- press.just refuses a typst older than 0.14.0 or a just older than 1.55.0, naming the version it needs (#57) - ([2b7ba11](https://github.com/TylerVigario/press/commit/2b7ba1152bde91e157c6fb9117d131e58791a3c4)) - Tyler Vigario, Claude Opus 5.5
+- the stamp prints in the document's time zone, PRESS_TZ, not the building machine's (#42) - ([c39bbae](https://github.com/TylerVigario/press/commit/c39bbae986ea0449b3462c857e2ab9123114ec5e)) - Tyler Vigario, Claude Opus 5.5
+- build says what it made: new, changed or unchanged, pages, words, size and stamp (#33) - ([7828e1a](https://github.com/TylerVigario/press/commit/7828e1a855682e87fc4b214ef636aa89cb6df68f)) - Tyler Vigario, Claude Opus 5.5
+#### Bug Fixes
+- an interrupted check stops instead of carrying on without its temporary files (#81) - ([58399b6](https://github.com/TylerVigario/press/commit/58399b6d63059f1f8aa10b3956d60a08f20e2640)) - Tyler Vigario, Claude Opus 5.5
+- all builds documents, not the chapter and definition files they are made of (#80) - ([20482a0](https://github.com/TylerVigario/press/commit/20482a0cfcf3d182b46432ac911d3d2ef407cc4d)) - Tyler Vigario, Claude Opus 5.5
+- check runs on macOS: paste reads stdin explicitly, and PRESS_GREP names a PCRE grep (#79) - ([6fd4ca6](https://github.com/TylerVigario/press/commit/6fd4ca65639cfe9c315fe58fe5f9b8db6bc5ea67)) - Tyler Vigario, Claude Opus 5.5
+- the calibration sheet's duplex field sits behind the observation window, found at compile time (#78) - ([4ed90b9](https://github.com/TylerVigario/press/commit/4ed90b90ffe3dd072f9748281025c2ba0ea7ced8)) - Tyler Vigario, Claude Opus 5.5
+- press's recipe list is _list, so a consumer's own default recipe no longer clashes with it (#77) - ([b45ce38](https://github.com/TylerVigario/press/commit/b45ce38c941cba5addd539c3b1361be1cce3aaa9)) - Tyler Vigario, Claude Opus 5.5
+- watch writes a preview beside the stamped PDF, so the next build keeps an unchanged page's stamp (#76) - ([eac64c9](https://github.com/TylerVigario/press/commit/eac64c92fa6819f356521973f86220f95dd0439e)) - Tyler Vigario, Claude Opus 5.5
+- all and the recipe listing run the just that is running them, not whichever PATH finds first (#75) - ([a8d22cb](https://github.com/TylerVigario/press/commit/a8d22cb65464522045a08b85eed287208f9487c3)) - Tyler Vigario, Claude Opus 5.5
+- the release dates its changelog entry by the release day, not the last merge (#71) - ([0225864](https://github.com/TylerVigario/press/commit/022586465d75772e39c0123006549655db0f6084)) - Tyler Vigario, Claude Opus 5.5
+- build reads the PDFs typst 0.14 writes, so an unchanged page keeps its stamp (#59) - ([b3dd164](https://github.com/TylerVigario/press/commit/b3dd16483b272c8b8e77b2c3ea26e0888facb30a)) - Tyler Vigario, Claude Opus 5.5
+- all takes directories whose names contain spaces (#53) - ([4d6eb56](https://github.com/TylerVigario/press/commit/4d6eb5653c1142cbf08ca5226d6d7e5c1436e599)) - Tyler Vigario, Claude Opus 5.5
+- the font check matches a vendored family by its whole name, not as a prefix (#52) - ([00ecb31](https://github.com/TylerVigario/press/commit/00ecb31e3bd28069918d2eea215f2316945ec9e7)) - Tyler Vigario, Claude Opus 5.5
+- new makes the document's parent directory, and CLAUDE.md names it without .typ (#51) - ([db9079c](https://github.com/TylerVigario/press/commit/db9079c714cf4c8b0856a184caf99273c3c80b65)) - Tyler Vigario, Claude Opus 5.5
+- check probes the glyphs of every .typ a document includes, not only its own file (#50) - ([0b78ee1](https://github.com/TylerVigario/press/commit/0b78ee1536849dd09b1b4ef217b987b607a286db)) - Tyler Vigario, Claude Opus 5.5
+- the printable-area check reports a pdftoppm it cannot run, or that fails, instead of a traceback (#49) - ([89cb56a](https://github.com/TylerVigario/press/commit/89cb56a4604ffed10db963ea69b3eace2db84e74)) - Tyler Vigario, Claude Opus 5.5
+- check keeps its font lists in its own temporary directory, not at fixed /tmp paths (#48) - ([de3a688](https://github.com/TylerVigario/press/commit/de3a6880861ce26cc97361c81b60d3ad9a75d430)) - Tyler Vigario, Claude Opus 5.5
+- the build line names the PDF with forward slashes on Windows too (#46) - ([7debb0a](https://github.com/TylerVigario/press/commit/7debb0a44d81dc3acf2d37f523171d581e8bb2a6)) - Tyler Vigario, Claude Opus 5.5
+- PRESS_TZ finds Git for Windows' zone database, so a named zone builds on Windows (#45) - ([cd871e2](https://github.com/TylerVigario/press/commit/cd871e2a9116b8674c3daf15418f01dfa7f78f7f)) - Tyler Vigario, Claude Opus 5.5
+- document paths given with backslashes come out with forward slashes (#32) - ([94cf74f](https://github.com/TylerVigario/press/commit/94cf74f3b6f7ff129cea944cd6bdc29db094678f)) - Tyler Vigario, Claude Opus 5.5
+#### Documentation
+- the guides put press in third_party/, since Go and Composer own vendor/ (#91) - ([fa41754](https://github.com/TylerVigario/press/commit/fa41754e67cb9a85ce08d800988b10d5a58d8612)) - Tyler Vigario, Claude Opus 5.5
+- press's comments and FONTS.md describe a kit any runner builds, not a package just builds (#89) - ([36aa649](https://github.com/TylerVigario/press/commit/36aa64900a00bd803050b8532e34f2b4b5ce30a2)) - Tyler Vigario, Claude Opus 5.5
+- README is the consumer's guide that ships in the bundle, and CLAUDE.md is for working on press (#87) - ([be549fa](https://github.com/TylerVigario/press/commit/be549fa6ecaa6234839627507363af873bfc5156)) - Tyler Vigario, Claude Opus 5.5
+- press is a toolkit for documents read on screen or on paper, from a sheet to a book (#68) - ([f3848cb](https://github.com/TylerVigario/press/commit/f3848cb0134c89cf388ef473fc720e3f65a43985)) - Tyler Vigario, Claude Opus 5.5
+- ci.yml says consumers move their submodule only to a later release (#47) - ([f74e711](https://github.com/TylerVigario/press/commit/f74e711c07bef5e1884dc293678ff3242f5199b3)) - Tyler Vigario, Claude Opus 5.5
+- a release that fails after its commit lands is recovered by a new run, not a re-run (#43) - ([f95c4f3](https://github.com/TylerVigario/press/commit/f95c4f36ca7daf1cd38f63651f30cb896a47049c)) - Tyler Vigario, Claude Opus 5.5
+- CLAUDE.md lists units(), unit's breakable and callout's size (#41) - ([e06f5ed](https://github.com/TylerVigario/press/commit/e06f5edd56e73c29f8cdc36ba86108da3eeced2e)) - Tyler Vigario, Claude Opus 5.5
+- press is a package anyone can use, not a VTS house apparatus (#39) - ([de72357](https://github.com/TylerVigario/press/commit/de723577b6caccadc920167bbb5f9f98446ddf7b)) - Tyler Vigario, Claude Opus 5.5
+- CLAUDE.md keeps what an agent needs to know, and adds what it lacked (#38) - ([f9f751c](https://github.com/TylerVigario/press/commit/f9f751ce6bfa37943aebf8b6d18b0bee9a3459fc)) - Tyler Vigario, Claude Opus 5.5
+- the README keeps what a user needs to know (#37) - ([9a53fe3](https://github.com/TylerVigario/press/commit/9a53fe3c9ce06ab95d079ecc612dcb29ec050737)) - Tyler Vigario, Claude Opus 5.5
+- consuming repos move press only to a release tag (#34) - ([be9eabc](https://github.com/TylerVigario/press/commit/be9eabcd5e6a66a6db4f47f60f0243597867c8ff)) - Tyler Vigario, Claude Opus 5.5
+#### Continuous Integration
+- the release run takes a bump, auto or a patch, minor or major override (#92) - ([8d7b777](https://github.com/TylerVigario/press/commit/8d7b777c4ef756a6e098050e3f71aca1d30ced57)) - Tyler Vigario, Claude Opus 5.5
+- a pull request merges only once its checks ran against the current main (#83) - ([fb06395](https://github.com/TylerVigario/press/commit/fb06395c66c34c9938c3f2ab7a5ff56b366faa43)) - Tyler Vigario, Claude Opus 5.5
+- checkouts drop their credentials, the rebuild check reads all's summary, and CodeQL cancels only pull request runs (#82) - ([a0e6fa5](https://github.com/TylerVigario/press/commit/a0e6fa5790dd6bcc47b236e693499b9f29e5fc79)) - Tyler Vigario, Claude Opus 5.5
+- every package version's template compiles against itself, and a copied version renames itself everywhere (#73) - ([c9443b0](https://github.com/TylerVigario/press/commit/c9443b066b0f355381e897ae997b505ce2e2e1f2)) - Tyler Vigario, Claude Opus 5.5
+- Lint main reports a merge commit on main again; cog.toml no longer ignores them (#72) - ([4b952f0](https://github.com/TylerVigario/press/commit/4b952f047cb863b2577cf5c359497ff2048e86ab)) - Tyler Vigario, Claude Opus 5.5
+- CodeQL's init and analyze steps move to 4.38.3 together, and Dependabot bumps them as one (#67) - ([ff2ad11](https://github.com/TylerVigario/press/commit/ff2ad1162002aa8b7829e34293a5fa1cf1510b05)) - Tyler Vigario, Claude Opus 5.5
+- build and audit at the oldest typst and just press.just accepts (#58) - ([9604403](https://github.com/TylerVigario/press/commit/960440351a076ea33d71b03fa0d9a8ab9a2b0249)) - Tyler Vigario, Claude Opus 5.5
+- report each hand-pinned tool that falls behind its latest release (#54) - ([e6b2ec2](https://github.com/TylerVigario/press/commit/e6b2ec28a7626326339bd2dbacc169b5a4f75fb6)) - Tyler Vigario, Claude Opus 5.5
+- verify the typst and just downloads by digest before installing them (#40) - ([1ba8a63](https://github.com/TylerVigario/press/commit/1ba8a631e874da3ec27bdec45a553c33158878db)) - Tyler Vigario, Claude Opus 5.5
+- the release keeps the hand-written first release in CHANGELOG.md (#36) - ([6a81732](https://github.com/TylerVigario/press/commit/6a817327424a6b0a43c5a891ff05d8668df4a5e5)) - Tyler Vigario, Claude Opus 5.5
+#### Refactoring
+- ![BREAKING](https://img.shields.io/badge/BREAKING-red) press is a flat kit of files imported by path, not a versioned Typst package (#85) - ([13ff4c5](https://github.com/TylerVigario/press/commit/13ff4c5fe20a095bddb8f85161bd83e07088dfc3)) - Tyler Vigario, Claude Opus 5.5
+- every recipe names the consumer root as its working directory (#63) - ([38d4367](https://github.com/TylerVigario/press/commit/38d4367b3630dc5417a71f71fef8c1f7ccb1f5f4)) - Tyler Vigario, Claude Opus 5.5
+- recipes are multi-line scripts, and the PDF path is made from the source path in one place (#62) - ([1526857](https://github.com/TylerVigario/press/commit/15268570ac78c2275f4b101fd219538ff9646a41)) - Tyler Vigario, Claude Opus 5.5
+#### Miscellaneous Chores
+- bump actions/create-github-app-token from 3.2.0 to 3.3.0 (#90) - ([3b3941a](https://github.com/TylerVigario/press/commit/3b3941ab85676429e02949b4eb3dc06e6831e4b2)) - dependabot[bot], dependabot[bot], Tyler Vigario
+- the tooling's comments give its current reasons, dead branches go, and the printable-area pass renders in batches (#84) - ([393118d](https://github.com/TylerVigario/press/commit/393118df81374af348d3b607d5f4537d1a03941b)) - Tyler Vigario, Claude Opus 5.5
+- main.json matches the branch ruleset as GitHub holds it (#61) - ([159fdb1](https://github.com/TylerVigario/press/commit/159fdb13d728051fecff3c02a5a4e14eb702094e)) - Tyler Vigario, Claude Opus 5.5
 
 - - -
 
