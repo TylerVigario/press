@@ -1,20 +1,27 @@
 // press — ready-made parts and page presets for Typst documents, read on screen or on paper.
 //
-//   #import "@tylervigario/press:0.2.0": *
+//   #import "/vendor/press/lib.typ": *     (from wherever press sits under the project root)
 //
-// 0.2.0 moves the package from the @vts namespace to @tylervigario, and adds `link-note`,
-// `press-version` and `seedepth`'s page lookup.
+// A document imports this file by path, and typst builds it with press's fonts:
+//
+//   typst compile --root . --font-path vendor/press/fonts --ignore-system-fonts <doc> <pdf>
+//
+// The path is the only thing a document knows about where press sits, and press is a set of
+// files, not a Typst package: no namespace, no version in the import. Which press a repo
+// builds with is the copy it holds; its version is in press.toml beside this file.
 //
 // Its composition vocabulary — `unit`, `chip`, `band-strong`, `dbadge`, `decision` — had
 // been copy-pasted between documents before press held it. None of it was ever
 // document-specific, and `unit` and `chip` had already gone byte-identical across three
 // files: the drift this package exists to prevent, one level down.
 //
-// Released versions are immutable. A change goes in a NEW directory with a
-// bumped `typst.toml` — consumers pin an exact version, and a silent edit
-// underneath them is the failure packaging exists to prevent. Until a version's
-// first release its directory takes additions: `updated()` came into 0.1.0 that way.
-//
+// The oldest typst press works with, from press.toml. Read as files rather than as a package,
+// nothing else would refuse an older typst, which would instead fail on whatever it lacks.
+#let _manifest = toml("press.toml")
+#assert(sys.version >= version(.._manifest.typst.split(".").map(int)),
+  message: "press needs typst " + _manifest.typst + " or newer; this is typst "
+    + str(sys.version))
+
 // What deliberately did NOT move: composition. Section order, page choice,
 // which diagrams exist, how deep a document layers — that stays local. The
 // library supplies vocabulary, the document writes the sentence.
@@ -317,17 +324,17 @@
 // A rebuild that changes nothing on the page keeps the old time, so a newer time than the
 // copy on the shelf means reprint, and the same time means that copy is current. Put it in
 // the footer, where every page carries it: a page parted from its stack still says which
-// edition it is. Outside `just build` -- typst watch, a bare typst compile -- there is no
-// stamp, and it says so rather than inventing one.
+// edition it is. Built without tools/stamp.sh -- typst watch, a bare typst compile -- there is
+// no stamp, and it says so rather than inventing one.
 #let updated() = {
   let s = sys.inputs.at("press-updated", default: none)
-  if s == none { [not stamped (built outside just build)] } else { [updated #s] }
+  if s == none { [not stamped (built without press's stamp.sh)] } else { [updated #s] }
 }
 
-// The version of press a document was set with, read from this package's own typst.toml,
-// so a page that prints it always names the package it imported. Not `version`: that is
+// The version of press a document was set with, read from press.toml beside this file, so a
+// page that prints it always names the press it was built with. Not `version`: that is
 // typst's own, and `import *` would shadow it.
-#let press-version = toml("typst.toml").package.version
+#let press-version = _manifest.version
 
 // ----------------------------------------------------------- composition ---
 // Generic by nature — a labelled bounded block, a state chip, a reversed band, a numbered

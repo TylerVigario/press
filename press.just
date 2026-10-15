@@ -1,6 +1,10 @@
 # press — build recipes for Typst documents, read on screen or on paper.
 #
-# A consuming repo carries a one-line justfile. If it has no recipes of its
+# ONE WAY IN, for a repo that already builds with just. Underneath it is plain typst with
+# press's fonts, plus the files under tools/ — stamp, check, report, new — which any runner
+# calls the same way: an npm script, a Makefile, CI. A repo never adopts just for press.
+#
+# A consuming repo that does use just carries a one-line justfile. If it has no recipes of its
 # own:
 #
 #   import 'vendor/press/press.just'      ->  just build docs/x.typ
@@ -15,12 +19,6 @@
 # behave identically: a module would otherwise run with press's own directory as the
 # working directory, and every document path would resolve against the wrong tree.
 #
-# WHY A JUSTFILE, not a wrapper script: one file instead of a POSIX and a
-# PowerShell twin that would inevitably drift — the same argument that moved
-# the styling into a shared package rather than copy-pasted blocks. `just` is
-# identical on every platform: same arguments, same invocation, nothing to
-# learn per system. Recipe listing, dependencies and variables come free.
-#
 # WHY sh EVERYWHERE, with no [windows] attributes: it is `just`'s own default
 # and primary path — "just uses `sh` on Windows by default", with PowerShell
 # offered only for people who would rather not install `sh`. The maintainer's
@@ -34,17 +32,15 @@
 #     rather than by every author remembering the convention;
 #   · creates that directory — typst refuses to write into one that does not
 #     exist and fails with a bare "No such file or directory";
-#   · carries --root, --package-path, --font-path and --ignore-system-fonts;
+#   · carries --root, --font-path and --ignore-system-fonts;
 #   · stamps the document with when its content last changed (tools/stamp.sh).
 
-# The oldest just and typst press works with. A just that knows the setting refuses this
-# file with "requires just 1.55.0 or later"; one older still stops at this line with
-# "unknown setting", and the line it shows names the version. The typst guard is the
-# _typst-version recipe below. CI builds and checks at both floors, installed by the
-# toolchain action's OLDEST_ pins, so raising one is an edit there too.
+# The oldest just this file works with. A just that knows the setting refuses this file with
+# "requires just 1.55.0 or later"; one older still stops at this line with "unknown setting",
+# and the line it shows names the version. typst's floor is press.toml's, which lib.typ and
+# tools/stamp.sh enforce for every runner. CI builds and checks at both floors, installed by
+# the toolchain action's OLDEST_ pins, so raising one is an edit there too.
 set minimum-version := '1.55.0'
-
-typst_minimum := '0.14.0'
 
 # Where press itself lives, resolved from THIS file rather than the consumer's
 # root justfile — so press may be vendored at any path and nothing here
@@ -69,9 +65,7 @@ root := justfile_directory()
 # --ignore-system-fonts removes the MACHINE's fonts, so output cannot vary by
 # machine. It does not isolate the vendored faces: typst's own embedded fonts
 # stay reachable as per-glyph fallbacks. See FONTS.md.
-typst_flags := "--root . --package-path " + quote(press_root / "packages") + \
-               " --font-path " + quote(press_root / "fonts") + \
-               " --ignore-system-fonts"
+typst_flags := "--root . --font-path " + quote(press_root / "fonts") + " --ignore-system-fonts"
 
 # The recipes are scripts ([script]), run by just's default script interpreter, sh -eu: a
 # failing command ends the recipe, as the && chains they replaced did.
@@ -97,20 +91,6 @@ typst_flags := "--root . --package-path " + quote(press_root / "packages") + \
 _list:
     @{{ quote(just_executable()) }} --list --unsorted
 
-# Refuse a typst older than typst_minimum, naming both versions. Without it an old typst
-# fails on the first flag it lacks, as "unexpected argument '--deps'". Every recipe that
-# runs typst depends on it.
-[script]
-[working-directory(root)]
-_typst-version:
-    v=$(typst --version) || { echo 'press: typst is not on PATH' >&2; exit 1; }
-    v=${v#typst }
-    v=${v%% *}
-    echo "$v" | awk -F. -v min={{ typst_minimum }} '{
-        split(min, m, ".")
-        for (i = 1; i <= 3; i++) { if ($i + 0 > m[i] + 0) exit 0; if ($i + 0 < m[i] + 0) exit 1 }
-    }' || { echo "press: needs typst {{ typst_minimum }} or newer; this is typst $v" >&2; exit 1; }
-
 # Compile one document → print/<same path>.pdf
 #
 # The path is relative to the repo root, from whichever directory you invoke it.
@@ -125,7 +105,7 @@ _typst-version:
 [script]
 [working-directory(root)]
 [arg('doc', pattern='.+\.typ', help='a .typ file, relative to the repo root')]
-build doc: _typst-version
+build doc:
     src={{ quote(trim_start_match(replace(doc, '\', '/'), './')) }}
     pdf="print/${src%.typ}.pdf"
     st=$(sh {{ quote(press_root / "tools" / "stamp.sh") }} "$src" "$pdf" {{ typst_flags }})
@@ -141,7 +121,7 @@ build doc: _typst-version
 [script]
 [working-directory(root)]
 [arg('doc', pattern='.+\.typ', help='a .typ file, relative to the repo root')]
-watch doc: _typst-version
+watch doc:
     src={{ quote(trim_start_match(replace(doc, '\', '/'), './')) }}
     pdf="print/${src%.typ}.watch.pdf"
     mkdir -p "$(dirname "$pdf")"
@@ -201,7 +181,7 @@ watch doc: _typst-version
 [working-directory(root)]
 [positional-arguments]
 [arg('dirs', help='directories to search for .typ files, relative to the repo root')]
-all +dirs='docs': _typst-version
+all +dirs='docs':
     for d in "$@"; do
         test -d "$d" || { echo "press: no such directory: $d" >&2; exit 1; }
     done
@@ -234,34 +214,23 @@ all +dirs='docs': _typst-version
     sh {{ quote(press_root / "tools" / "report.sh") }} --summary "$PRESS_TALLY" "$n"
     exit "$rc"
 
-# Scaffold a new document from the press skeleton
+# Scaffold a new document from the press skeleton -> <name>/main.typ
 #
-# typst init makes a DIRECTORY project. For a single file — which is what most
-# documents here are — copy template/main.typ and delete down instead; the
-# skeleton's own header says so.
-#
-# The name is that directory, so it takes no .typ: docs/thing -> docs/thing/main.typ.
-# typst init will not make the directory's parent, so it is made first, as build
-# makes print/.
-#
-# It scaffolds from the newest version in press's tree, so nothing here names a version
-# to move at a release. At a release tag, which is all a consumer ever checks out, that is
-# the version the tag released.
+# tools/new.sh does the work, as it does for any runner: it copies the template and writes
+# its import as press's path from the root. This adds only the next steps, as just was
+# invoked (module_path() is empty under import, the module's name under mod).
 [doc("Scaffold a new document from the press skeleton")]
 [script]
 [working-directory(root)]
 [arg('name', help='the directory to create, holding main.typ; no .typ of its own')]
-new name: _typst-version
-    n={{ quote(replace(name, '\', '/')) }}
-    case $n in
-        *.typ) echo "press: new makes a directory holding main.typ, so name it without .typ: ${n%.typ}" >&2
-               exit 1 ;;
-    esac
-    v=$(ls {{ quote(press_root / "packages" / "tylervigario" / "press") }} \
-        | awk -F. '/^[0-9]+\.[0-9]+\.[0-9]+$/ { k = ($1 * 1000 + $2) * 1000 + $3; if (k >= m) { m = k; v = $0 } } END { print v }')
-    test -n "$v" || { echo "press: no package version under packages/tylervigario/press" >&2; exit 1; }
-    mkdir -p "$(dirname "$n")"
-    typst init --package-path {{ quote(press_root / "packages") }} "@tylervigario/press:$v" "$n"
+new name:
+    sh {{ quote(press_root / "tools" / "new.sh") }} {{ quote(name) }}
+    n={{ quote(trim_end_match(replace(name, '\', '/'), '/')) }}
+    j={{ quote(if module_path() == "" { "just" } else { "just " + replace(module_path(), "::", " ") }) }}
+    f="$n/main.typ"
+    case $f in *[[:space:]]*) f="'$f'" ;; esac
+    echo "       build it with: $j build $f"
+    echo "       preview it with: $j watch $f"
 
 # Audit a built document for the font failures typst does not report
 #
@@ -366,7 +335,7 @@ new name: _typst-version
 [script]
 [working-directory(root)]
 [arg('doc', pattern='.+\.typ', help='a .typ file, relative to the repo root')]
-check doc: _typst-version
+check doc:
     src={{ quote(trim_start_match(replace(doc, '\', '/'), './')) }}
     pdf="print/${src%.typ}.pdf"
     sh {{ quote(press_root / "tools" / "check.sh") }} "$src" "$pdf" {{ quote(press_root) }} {{ typst_flags }}

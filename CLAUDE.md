@@ -130,13 +130,15 @@ the rest.
 
 ## Writing a document
 
-**Import the vocabulary, then compose the page yourself:**
+**Import the vocabulary by its path from the project root, then compose the page yourself:**
 
 ```typ
-#import "@tylervigario/press:0.2.0": *
+#import "/vendor/press/lib.typ": *
 ```
 
-`just new docs/thing` scaffolds a skeleton at `docs/thing/main.typ`, built with
+press is a set of files, not a Typst package: no namespace, and no version in the import.
+`sh vendor/press/tools/new.sh docs/thing` (or `just new docs/thing`) scaffolds a skeleton at
+`docs/thing/main.typ`, its import written for wherever press sits, built with
 `just build docs/thing/main.typ`. The name is a directory, so it takes no `.typ`. **Copy the
 skeleton, do not import it** — composition belongs to the document.
 
@@ -202,7 +204,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `seedepth(what, at: none)` | Pointer from the act layer to the depth layer. Given a label (`seedepth(<q>)`, or `at: <q>` beside a description) it looks up the page and links to it — never type a page number. |
 | `stamp(body)` | Closing line — provenance, or "the host is right". |
 | `updated()` | When the content last changed, as `build` stamps it. For the footer. |
-| `press-version` | The version of press imported, read from its `typst.toml`. Never typed by hand. |
+| `press-version` | The version of press a document was built with, read from `press.toml`. Never typed by hand. |
 | `link-note` | Show rule for links: coloured and underlined, address footnoted for paper. `#show link: link-note`. |
 
 **Tokens.** Colours `ink`, `ink-soft`, `ink-faint`, `rule-hair`, `rule-mid`,
@@ -227,30 +229,23 @@ CodeQL. The tools CI installs are pinned by hand, with digests, and Dependabot c
 them; the weekly Pins workflow opens an issue for each release a pin is behind
 (`sh .github/pins.sh` shows the same comparison).
 
-**Never edit a released version directory.** `v<version>` releases
-`packages/tylervigario/press/<version>/`, and CI's *Released versions are unchanged* fails any
-PR that edits or removes one. The one exception is 0.1.0, released as
-`packages/vts/press/0.1.0/` and retired: it lives in its tag, and the tree no longer carries
-it. For a change to the
-package, copy the newest version directory to the next version under
-`packages/tylervigario/press/`, set `version` in its `typst.toml`, and edit there. Name it for
-the version the commits will derive — ask `cog bump --auto --dry-run` or a dry run of the
-Release workflow; the release refuses a name that disagrees. Until a version's first release
-its directory takes additions.
+**Versions are tags.** `press.toml` holds the version last released; the release writes the
+next one there, with the changelog, and its immutable tag freezes it. Nothing in the tree is
+named for a version, so a change is made where the file is — `lib.typ`, the template, the
+tools — with nothing to copy or rename.
 
 **Releasing is one run of the Release workflow, dry run first.** It derives the version from
 the commits, gates on CI, writes `CHANGELOG.md` in a `release:` commit by the
-`vigario-press-release` App (with the version directory, when a tooling-only release needs
-one), and publishes the GitHub release, which creates the tag. Never tag by hand. If it fails
+`vigario-press-release` App, with the new version in `press.toml`, and publishes the GitHub
+release, which creates the tag. Never tag by hand. If it fails
 after the `release:` commit has landed, start a new run rather than re-running the failed one:
 a re-run checks out the old commit and the forge refuses its commit.
 `CHANGELOG.md` is generated except for its hand-written first release, "Initial release.",
 which `.github/write-changelog.sh` keeps (until cocogitto/cocogitto#580 is fixed).
 
-**`just new` scaffolds from the newest version directory**, so it needs no edit at a release.
-A version names itself in its `typst.toml`, its template's import and `lib.typ`'s usage line;
-CI's `templates.sh` compiles every version's template and refuses one that names another
-version, and the release renames all three when it copies a directory.
+**`new` copies the template.** `tools/new.sh`, which `just new` calls, writes the copy's import
+as press's path from the project root. The template itself imports `../lib.typ`, so it
+compiles in place; CI's `templates.sh` compiles it there and as a scaffolded document.
 
 **Editing press from inside a consuming repo.** A submodule is a **detached HEAD**; a commit
 made there is lost. Branch, open a PR, then put the submodule back on its release:
@@ -271,9 +266,8 @@ git -C vendor/press checkout v<version>
 git add vendor/press && git commit -m "chore: bump press to v<version>"
 ```
 
-A repo moving off v0.1.0 changes every `@vts/press:0.1.0` import to
-`@tylervigario/press:<version>` in the same commit: later releases do not carry the `@vts`
-namespace.
+A repo moving off v0.1.0 changes every `@vts/press:0.1.0` import to the path import,
+`/vendor/press/lib.typ`, in the same commit: later releases are files, not a Typst package.
 
 ---
 
@@ -329,7 +323,8 @@ namespace.
   of `just`.
 - **Do not move whole-page composition into the library.** A helper that lays out an entire
   page belongs in the document. A styling helper a document opts into is fine to offer.
-- **Do not publish to Typst Universe.** It would cost the `@tylervigario` namespace and local
-  editability.
+- **Do not make press a Typst package again.** A package cannot hand fonts to the compiler or
+  carry the tools beside it, and a version in every import only restates what the copy a
+  repo holds already says.
 - **Do not treat a suggestion as a decision.** A name, structure or convention you proposed
   and nobody explicitly answered is **not** approved. Ask, or leave it unbuilt.

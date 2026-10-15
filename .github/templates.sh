@@ -1,19 +1,16 @@
 #!/bin/sh
-# templates.sh — every package version in the tree compiles its own template, against itself.
+# templates.sh — the template compiles where it stands, and as a document new.sh scaffolds.
 #
 #   sh .github/templates.sh
 #
 # Run by CI's two build jobs, at the pinned typst and at the oldest press accepts.
 #
-# A package version is compiled only where a document imports it, and press's own
-# documents import one version. Without this, a new version directory could merge, and be
-# released, without anything ever building it.
-#
-# A version also names itself in three places: its typst.toml, its template's import, and
-# the usage line at the top of lib.typ. The release copies a directory to make a tooling-only
-# version, and a copy that misses one of them scaffolds documents importing the version
-# before it. So every `@<namespace>/press:<version>` in lib.typ and the template must name
-# the directory it sits in.
+# Two compiles, because the template lives two lives. In press's tree it imports press
+# relatively, ../lib.typ, so it compiles in place. A repo gets it through tools/new.sh, which
+# copies it with that import rewritten to press's path from the project root. So the second
+# compile is a scratch repo holding a copy of the kit at vendor/press, scaffolded by new.sh
+# exactly as a downstream repo would be. Either failing, or warning, fails the run: typst
+# exits 0 on a warning, so warnings are read from its output.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -23,33 +20,22 @@ trap 'rm -rf "$tmp"' EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-n=0
-for dir in packages/*/press/*/; do
-    dir=${dir%/}
-    [ -f "$dir/typst.toml" ] || continue
-    ns=${dir#packages/}
-    ns=${ns%%/*}
-    v=${dir##*/}
-    self="@$ns/press:$v"
-
-    manifest=$(sed -n 's/^version *= *"\(.*\)"$/\1/p' "$dir/typst.toml")
-    [ "$manifest" = "$v" ] || fail "$dir/typst.toml says version ${manifest:-nothing}, not $v"
-
-    others=$(grep -ho '@[a-z0-9-]*/press:[0-9][0-9.]*[0-9]' "$dir/lib.typ" "$dir/template/main.typ" \
-               | { grep -vx "$self" || true; } | sort -u)
-    [ -z "$others" ] || fail "$dir names another version than $self: $(printf '%s' "$others" | tr '\n' ' ')"
-    grep -q "^#import \"$self\"" "$dir/template/main.typ" \
-        || fail "$dir/template/main.typ does not import $self"
-
-    # typst exits 0 on a warning, so a template that warns is caught by reading its output.
-    out=$(typst compile --package-path packages --font-path fonts --ignore-system-fonts \
-            "$dir/template/main.typ" "$tmp/$ns-$v.pdf" 2>&1) \
-        || { printf '%s\n' "$out" >&2; fail "$self: the template does not compile"; }
+compile() {   # <root> <font dir> <document> <what>
+    out=$(cd "$1" && typst compile --root . --font-path "$2" --ignore-system-fonts "$3" "$tmp/out.pdf" 2>&1) \
+        || { printf '%s\n' "$out" >&2; fail "$4 does not compile"; }
     if printf '%s\n' "$out" | grep -q '^warning:'; then
         printf '%s\n' "$out" >&2
-        fail "$self: the template compiles with warnings"
+        fail "$4 compiles with warnings"
     fi
-    echo "$self: the template compiles against itself"
-    n=$((n + 1))
-done
-[ "$n" -gt 0 ] || fail "no package version found under packages/*/press/"
+    echo "$4 compiles"
+}
+
+compile . fonts template/main.typ "the template, in place,"
+
+repo="$tmp/repo"
+mkdir -p "$repo/vendor/press"
+cp -R lib.typ press.toml template fonts tools "$repo/vendor/press/"
+(cd "$repo" && sh vendor/press/tools/new.sh docs/scaffolded >/dev/null)
+grep -q '^#import "/vendor/press/lib.typ": \*' "$repo/docs/scaffolded/main.typ" \
+    || fail "new.sh did not point the copy's import at /vendor/press/lib.typ"
+compile "$repo" vendor/press/fonts docs/scaffolded/main.typ "the template, scaffolded by new.sh,"

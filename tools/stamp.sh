@@ -39,12 +39,25 @@ pdf=$2
 shift 2
 # What remains in "$@" is typst_flags, as in check.sh.
 
+# The oldest typst press works with, from press.toml. lib.typ asserts it too, but build and
+# check pass --creation-timestamp and --deps first, and an older typst stops on a flag it
+# lacks, as "unexpected argument", before lib.typ is ever read.
+min=$(sed -n 's/^typst *= *"\(.*\)"$/\1/p' "$(dirname "$0")/../press.toml")
+v=$(typst --version) || { echo 'press: typst is not on PATH' >&2; exit 1; }
+v=${v#typst }
+v=${v%% *}
+echo "$v" | awk -F. -v min="$min" '{
+    split(min, m, ".")
+    for (i = 1; i <= 3; i++) { if ($i + 0 > m[i] + 0) exit 0; if ($i + 0 < m[i] + 0) exit 1 }
+}' || { echo "press: needs typst $min or newer; this is typst $v" >&2; exit 1; }
+
 now=$(date +%s)
 
 # The stamp is kept and compared in UTC -- the PDF's /CreationDate -- and printed in the
-# DOCUMENT's time zone: PRESS_TZ, an IANA name the consuming repo exports from its justfile,
+# DOCUMENT's time zone: PRESS_TZ, an IANA name the consuming repo sets for every build —
+# exported from a justfile, set in an npm script or CI —
 #
-#   export PRESS_TZ := "America/Los_Angeles"     ("UTC" for documents read across zones)
+#   PRESS_TZ=America/Los_Angeles     ("UTC" for documents read across zones)
 #
 # so every machine prints the same text for the same moment, and an unchanged page stays
 # unchanged wherever it is built. Unset, it is the building machine's own zone, and a build

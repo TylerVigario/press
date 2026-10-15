@@ -71,7 +71,7 @@ git submodule update --init --recursive
 Import it:
 
 ```typst
-#import "@tylervigario/press:0.2.0": *
+#import "/vendor/press/lib.typ": *
 ```
 
 Build it. A consuming repo carries a one-line `justfile`:
@@ -128,7 +128,7 @@ a `main.typ` other than that `main.typ` — the shape `just new` makes, chapters
 Print at **100% — "Actual size"**, never "Fit to page". The page is exactly US Letter and
 keeps all ink at least 0.5in from every edge.
 
-`docs/calibration.typ` prints the text inks at the four smallest sizes, the pale tints, the
+`calibration.typ` prints the text inks at the four smallest sizes, the pale tints, the
 rule weights and both solid bands, where a printer gives out first. Print it on the paper and
 printer you actually use — once at normal quality and once in economy mode, duplexed on the
 long edge — to find where your hardware gives out before a real document does.
@@ -166,11 +166,11 @@ all; **read [`FONTS.md`](FONTS.md) before using any symbol**, and run `just chec
 
 ## Versioning
 
-A document imports one version, `@tylervigario/press:<version>`, and a released version
-never changes. 0.1.0 was released as `@vts/press:0.1.0` and lives on in its tag, v0.1.0;
-later releases do not carry it, so a repo moving past it changes the import in the same commit.
-A consuming repo moves its submodule only to a release tag, never to a commit on `main`
-between releases.
+press is a set of files, imported by path, so the copy a repo holds is the version it builds
+with; `press.toml` says which. A repo moves only to a release tag, never to a commit on `main`
+between releases. 0.1.0 was released as the Typst package `@vts/press:0.1.0` and lives on in
+its tag, v0.1.0; a repo moving past it changes each import to `/vendor/press/lib.typ` in the
+same commit.
 
 ## Licence
 

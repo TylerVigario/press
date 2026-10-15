@@ -10,22 +10,18 @@ name: Release
 # bumps, the run says so and releases nothing. Which types bump is cog.toml's to
 # change, not this file's.
 #
-# EVERY TAG NAMES ITS PACKAGE DIRECTORY. v<version> freezes
-# packages/<namespace>/press/<version>/, and CI's "Released versions are unchanged"
-# refuses any later change to it. 0.1.0 was released under vts and is retired: it
-# lives in its tag, and later releases do not carry it. Every version from 0.2.0 is
-# made under tylervigario. A package change is made in a new directory by pull
-# request, named for the version its commits will derive; the release checks that
-# the name and the commits agree. Where the derived version has no directory — a
-# release of tooling fixes, say — the release creates it as a copy of the newest
-# released one, so the version a consumer imports always exists.
+# THE VERSION IS WRITTEN AT RELEASE, ONCE. press.toml holds the version last released; the
+# release writes the new one there, in the same commit as the changelog, and the tag names
+# that commit. No version is written before its release, and the immutable tag is what
+# freezes it after. press is a set of files a repo imports by path, so no directory is
+# named for a version either.
 #
 # THE ORDER.
 #   decide   derives the version, checks it against the tree, runs cog check over
 #            the commits the changelog is built from, and previews the entry. No
 #            credentials.
 #   gate     ci.yml, called: nothing is released that a merge would refuse.
-#   publish  skipped on a dry run. Creates the version directory if it is missing,
+#   publish  skipped on a dry run. Writes the version into press.toml,
 #            writes the changelog, mints the App token, asks the forge for the
 #            commit that records both (repo standard rule 15: it does not push
 #            one), then publishes the release on that commit. Publishing is what
@@ -85,7 +81,6 @@ jobs:
       release: ${{ steps.decide.outputs.release }}
       version: ${{ steps.decide.outputs.version }}
       tag: ${{ steps.decide.outputs.tag }}
-      source: ${{ steps.decide.outputs.source }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -122,32 +117,14 @@ jobs:
           [[ "$version" =~ $semver ]] || fail "cocogitto derived something that is not a version: $next"
           ! tagged "$version" || fail "v$version is already released, and a tag here is create-once"
 
-          dir="packages/tylervigario/press/$version"
-          elsewhere=$(find packages -mindepth 3 -maxdepth 3 -type d -path "packages/*/press/$version" ! -path "$dir")
-          [ -z "$elsewhere" ] || fail "$version is released under $dir/, but the tree also has $elsewhere/"
-          source=""
-          if [ -d "$dir" ]; then
-            manifest=$(sed -n 's/^version *= *"\(.*\)"$/\1/p' "$dir/typst.toml")
-            [ "$manifest" = "$version" ] || fail "$dir/typst.toml says ${manifest:-nothing}, not $version"
-          else
-            # Created at publish from the newest directory in any namespace, which
-            # must already be released: an unreleased directory under another number
-            # means the tree and the commits disagree about what this release is.
-            source=$(find packages -mindepth 3 -maxdepth 3 -type d -path 'packages/*/press/*' \
-                       | awk -F/ '{ print $4 "\t" $0 }' \
-                       | { grep -E "${semver%\$}"$'\t' || true; } | sort -V | tail -1 | cut -f2)
-            [ -n "$source" ] || fail "no package directory to create $dir/ from"
-            tagged "${source##*/}" || fail "the commits derive $version, but $source/ is not released. Name that directory $version, or check the commit types since ${newest:+v}${newest:-the first commit}."
-          fi
-
-          if [ -n "$source" ]; then where="created from $source"; else where="already in the tree"; fi
-          echo "releasing $version; newest release so far: ${newest:-none}; directory $where"
+          current=$(sed -n 's/^version *= *"\(.*\)"$/\1/p' press.toml)
+          [[ "$current" =~ $semver ]] || fail "press.toml has no version line the release can rewrite"
+          echo "releasing $version; newest release so far: ${newest:-none}; press.toml says $current until the release writes $version"
           {
             echo "release=true"
             echo "version=$version"
             echo "tag=v$version"
             echo "newest=$newest"
-            echo "source=$source"
           } >> "$GITHUB_OUTPUT"
 
       - name: Every commit the changelog is built from follows the convention
@@ -168,7 +145,6 @@ jobs:
         if: steps.decide.outputs.release == 'true'
         env:
           TAG: ${{ steps.decide.outputs.tag }}
-          SOURCE: ${{ steps.decide.outputs.source }}
         run: |
           set -euo pipefail
           # The same script publish runs, so the dry run proves it, and the entry
@@ -179,7 +155,6 @@ jobs:
           {
             echo "### $TAG, as it will be recorded"
             echo
-            [ -z "$SOURCE" ] || { echo "packages/tylervigario/press/${TAG#v}/ will be created from $SOURCE/."; echo; }
             printf '%s\n' "$notes"
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -211,29 +186,17 @@ jobs:
       - name: Set up cocogitto
         run: sh .github/setup-cog.sh
 
-      - name: Create the version directory
-        if: needs.decide.outputs.source != ''
+      - name: Write the version
         env:
           VERSION: ${{ needs.decide.outputs.version }}
-          SOURCE: ${{ needs.decide.outputs.source }}
         run: |
           set -euo pipefail
-          # A copy of the newest released version with its own number, so the
-          # version a consumer imports exists. The version is renamed wherever the
-          # directory names itself — typst.toml, the template's import, lib.typ's
-          # usage line — so a document scaffolded from it imports it, not the one
-          # before. CI's templates.sh checks the same on every pull request.
-          dir="packages/tylervigario/press/$VERSION"
-          mkdir -p "${dir%/*}"
-          cp -r "$SOURCE" "$dir"
-          sed -i "s/^version *= *\".*\"$/version = \"$VERSION\"/" "$dir/typst.toml"
-          [ "$(sed -n 's/^version *= *"\(.*\)"$/\1/p' "$dir/typst.toml")" = "$VERSION" ] \
-            || { echo "::error::could not set the version in $dir/typst.toml"; exit 1; }
-          old="${SOURCE#packages/}"; old="@${old%%/*}/press:${SOURCE##*/}"
-          sed -i "s#$old#@tylervigario/press:$VERSION#g" "$dir/lib.typ" "$dir/template/main.typ"
-          ! grep -ho '@[a-z0-9-]*/press:[0-9][0-9.]*[0-9]' "$dir/lib.typ" "$dir/template/main.typ" \
-              | grep -vxq "@tylervigario/press:$VERSION" \
-            || { echo "::error::$dir still names a version other than $VERSION"; exit 1; }
+          # The one place a version is written: lib.typ's press-version and the bundle
+          # read it from here. On a new run after a failed publish it is already written,
+          # and this changes nothing.
+          sed -i "s/^version *= *\".*\"$/version = \"$VERSION\"/" press.toml
+          [ "$(sed -n 's/^version *= *"\(.*\)"$/\1/p' press.toml)" = "$VERSION" ] \
+            || { echo "::error::could not set the version in press.toml"; exit 1; }
 
       - name: Write the changelog and the release notes
         env:
@@ -261,8 +224,7 @@ jobs:
         run: |
           set -euo pipefail
           head=$(git rev-parse HEAD)
-          dir="packages/tylervigario/press/$VERSION"
-          changed=$(git status --porcelain --untracked-files=all -- CHANGELOG.md "$dir" | sed 's/^...//')
+          changed=$(git status --porcelain --untracked-files=all -- CHANGELOG.md press.toml | sed 's/^...//')
           if [ -z "$changed" ]; then
             # A new run after a failed publish: main already records this release.
             echo "main already records $TAG"
