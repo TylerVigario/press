@@ -69,9 +69,9 @@ cog --version
 # candidate and it does NOT work — libgit2 does not read those, and the panic is
 # unchanged. Measured, not assumed.
 #
-# `cog check` does not need an identity; only `verify` does. Both jobs get it anyway,
-# because Lint main falls back to `verify` when its range is unanswerable, and that
-# fallback exists precisely for the disordered cases nobody rehearses.
+# `cog check` does not need an identity; only `verify` does. Every job that runs cog gets
+# it anyway, because Lint main falls back to `verify` when its range is unanswerable, and
+# that fallback exists precisely for the disordered cases nobody rehearses.
 #
 # Nothing here ever commits. cog reads the identity only to print an author beside
 # the message it is checking.

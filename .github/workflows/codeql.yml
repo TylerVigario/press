@@ -12,8 +12,8 @@ name: CodeQL
 # WHAT THIS DOES NOT SEE. Stated first, because a comment claiming a check exists is
 # what stops anyone checking by hand.
 #
-# - tools/check.sh, tools/stamp.sh and press.just. CodeQL has no shell extractor;
-#   Shell scripts lint (shellcheck) is what covers them.
+# - The shell: tools/*.sh, .github/*.sh and press.just. CodeQL has no shell extractor;
+#   Shell scripts lint (shellcheck) and Workflows lint (actionlint) cover them.
 # - The Typst package. Nothing analyses Typst; its gate is that the documents build
 #   and pass the audit.
 # - workflow_dispatch inputs. The actions queries treat data an outsider controls
@@ -39,7 +39,9 @@ on:
 
 concurrency:
   group: codeql-${{ github.ref }}
-  cancel-in-progress: true
+  # Only a pull request cancels an earlier run. On main, a cancelled push run is a commit
+  # with no analysis, which reads as a missing one — the reason for no paths filter above.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
