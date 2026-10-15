@@ -2,11 +2,14 @@
 //
 // Print this TWICE on the paper you actually use — once at normal quality,
 // once in the printer's economy/draft mode — and compare the two by eye. It
-// exercises every ink, size, tint and rule weight in the library, so whatever
-// the printer degrades shows up here rather than in a document you needed.
+// prints the text inks at the four smallest sizes, the pale tints, the rule
+// weights and the solid bands, which is where a printer gives out first, so
+// whatever it degrades shows up here rather than in a document you needed.
 //
-// Duplex it. Page 2 carries a heavy solid field positioned to sit behind the
-// observation window on page 1, which is how you read show-through honestly.
+// Duplex it, flipping on the long edge (the usual setting). Page 2 carries a
+// heavy solid field placed where the observation window sits on page 1 — found
+// at compile time, so it follows the window if the page above it changes — which
+// is how you read show-through honestly.
 //
 //   just build docs/calibration.typ
 
@@ -36,7 +39,7 @@
 ]
 #v(7pt)
 
-#band-strong([Ink ladder — every ink at every size], "read this first", color: bad)
+#band-strong([Ink ladder — the text inks at the smallest sizes], "read this first", color: bad)
 
 #let sample(colour) = {
   set text(fill: colour)
@@ -91,8 +94,8 @@
 #grid(columns: (1fr, 1fr), gutter: 10pt, align: (left + top, left + top),
   [#text(size: sz.micro, fill: ink-soft)[rule-hair 0.4pt] #v(3pt)
    #line(length: 100%, stroke: 0.4pt + rule-hair) #v(6pt)
-   #text(size: sz.micro, fill: ink-soft)[rule-mid 0.7pt] #v(3pt)
-   #line(length: 100%, stroke: 0.7pt + rule-mid) #v(6pt)
+   #text(size: sz.micro, fill: ink-soft)[rule-mid 0.6pt] #v(3pt)
+   #line(length: 100%, stroke: 0.6pt + rule-mid) #v(6pt)
    #text(size: sz.micro, fill: ink-soft)[slate 2pt] #v(3pt)
    #line(length: 100%, stroke: 2pt + slate)],
   [#text(size: sz.micro, fill: ink-soft)[Solid bands — the ink-heavy element, and the one that
@@ -112,7 +115,7 @@
     sheet is the fix, not a lighter design, because the bands are what make a section
     skippable at a glance.
   ]
-]
+] <window>
 
 #stamp[Reprint this whenever the paper, the printer or the token set changes.]
 
@@ -121,11 +124,18 @@
 #align(center)[#text(size: sz.fine, fill: ink-faint, style: "italic")[
   Page 2 exists to be looked through, not read.
 ]]
-#v(20pt)
-#block(width: 100%, height: 300pt, fill: ink, radius: 2pt, inset: 12pt,
-  text(size: sz.small, fill: white)[
-    Solid field for the show-through test. Turn back to page 1 and look at the dashed window.
-  ])
+// Flipped on the long edge, page 2 shares page 1's heights, so the field is placed at the
+// height of the window, with 24pt to spare above and below it. place() takes it out of the
+// flow: where it lands moves nothing else, so the layout settles in one pass.
+#context {
+  let window = locate(<window>).position()
+  place(top + left, dy: window.y - card.margin.top - 24pt,
+    block(width: 100%, height: 76pt + 48pt, fill: ink, radius: 2pt, inset: 12pt,
+      text(size: sz.small, fill: white)[
+        Solid field for the show-through test. It sits behind the dashed window on page 1:
+        turn back and look through it.
+      ]))
+}
 #v(14pt)
 #text(size: sz.small)[
   A link, as `link-note` prints it: #link("https://github.com/TylerVigario/press")[the press

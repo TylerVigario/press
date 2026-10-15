@@ -123,9 +123,10 @@ just clean
 Print at **100% — "Actual size"**, never "Fit to page". The page is exactly US Letter and
 keeps all ink at least 0.5in from every edge.
 
-`docs/calibration.typ` prints every ink at every size, every tint, every rule weight and both
-solid bands. Print it on the paper and printer you actually use — once at normal quality and
-once in economy mode — to find where your hardware gives out before a real document does.
+`docs/calibration.typ` prints the text inks at the four smallest sizes, the pale tints, the
+rule weights and both solid bands, where a printer gives out first. Print it on the paper and
+printer you actually use — once at normal quality and once in economy mode, duplexed on the
+long edge — to find where your hardware gives out before a real document does.
 
 ## What lives where
 
