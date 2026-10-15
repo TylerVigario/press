@@ -112,7 +112,7 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 
 | tool | does |
 |---|---|
-| `sh third_party/press/tools/new.sh docs/guide` | scaffolds `docs/guide/main.typ` from the template, its import written for where press sits |
+| `sh third_party/press/tools/new.sh docs/guide` | scaffolds `docs/guide/main.typ` from the template, its import written for where press sits; add `letter` for the letter template |
 | `sh third_party/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory |
 | `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | audits it: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text printed on text |
 
@@ -152,7 +152,7 @@ just build docs/guide.typ        # -> print/docs/guide.pdf, and a line saying wh
 just watch docs/guide.typ        # a preview on every save -> print/docs/guide.watch.pdf
 just check docs/guide.typ        # the audit
 just all                         # every document under docs/, or under the directories named
-just new docs/next-doc           # scaffold
+just new docs/next-doc           # scaffold; just new docs/to-x letter for a letter
 just clean                       # delete print/
 ```
 
@@ -208,6 +208,13 @@ beside it, `#include`d from it. Switch the page to `..reading`, use typst's head
 absolute, and the audit measures them on any page size. **Landscape** is
 `#set page(..dense, flipped: true)`.
 
+**A letter** starts from its own template: `new.sh docs/to-landlord letter`. It sets the page
+with `..reading` and opens with `letterhead`. It ends with `signature`, which gives lines for an
+ink signature and a date, or a typed sign-off with `signed: false` for a letter sent as a file.
+`re` keeps reference numbers together, `enclosures` lists what goes with the letter, and
+`continued` heads page two onward with the writer, the date and the page. **A letter's date is
+written by hand**, the day it goes out, and it carries no build stamp: its reader is outside.
+
 ### The six conventions
 
 Tokens alone do not make a document readable. These do:
@@ -252,6 +259,11 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `stamp(body)` | Closing line — provenance, or a last caution. |
 | `updated()` | When the content last changed, as the stamp records it. For the footer. |
 | `press-version` | The version of press a document was built with. Never typed by hand. |
+| `letterhead(name, ..contact, face: face-text)` | A letter's head: the writer's name, a contact line, a rule. A link that shows its own address needs no footnote. |
+| `re(..refs, label: [Re:])` | A letter's subject line; each reference stays whole and copyable. |
+| `signature(name, signed: true, dated: true)` | Lines for an ink signature and a hand-written date, or with `signed: false` a typed sign-off. |
+| `enclosures(..items)` | What goes with a letter, one item to a line. |
+| `continued(name, date)` | A header for page two onward of a letter: writer, date, page. Pass it to `set page(header: ...)`. |
 
 **Tokens.** Colours `ink`, `ink-soft`, `ink-faint`, `rule-hair`, `rule-mid`, `paper-tint`,
 `slate`, `slate-tint`, `steel`, and `ok`/`warn`/`bad` each with a `-tint`. Faces `face-text`

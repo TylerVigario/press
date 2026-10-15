@@ -12,9 +12,9 @@
 #   · a scratch repo installs the tarball the way the README's line without the installer
 #     does, streamed into tar in the directory it should land in, and the zip unpacks to the
 #     same files (the installers themselves are .github/install-check.sh's);
-#   · in that repo, with no just: new.sh scaffolds a document, stamp.sh builds it, check.sh
-#     audits it clean, plain typst builds it from environment variables, and the calibration
-#     sheet builds and audits clean from inside the installed kit.
+#   · in that repo, with no just: new.sh scaffolds a document and a letter, stamp.sh builds
+#     them, check.sh audits them clean, plain typst builds the document from environment
+#     variables, and the calibration sheet builds and audits clean from inside the installed kit.
 set -eu
 
 b=$(cd "${1:?usage: sh .github/bundle-check.sh <bundle dir>}" && pwd)
@@ -43,7 +43,7 @@ cmp -s "$tmp/tar.list" "$tmp/zip.list" || { diff "$tmp/tar.list" "$tmp/zip.list"
 for f in .github CLAUDE.md CHANGELOG.md cog.toml justfile .gitignore; do
     ! grep -qx "press/$f" "$tmp/tar.list" || fail "press/$f is in the bundle; it is press's own machinery"
 done
-for f in lib.typ press.toml template/main.typ calibration.typ press.just README.md FONTS.md LICENSE \
+for f in lib.typ press.toml template/main.typ template/letter.typ calibration.typ press.just README.md FONTS.md LICENSE \
          tools/new.sh tools/stamp.sh tools/check.sh tools/report.sh fonts/licenses; do
     grep -qx "press/$f" "$tmp/tar.list" || fail "press/$f is missing from the bundle"
 done
@@ -62,6 +62,11 @@ sh third_party/press/tools/new.sh docs/guide
 sh third_party/press/tools/stamp.sh docs/guide/main.typ print/guide.pdf $flags
 # shellcheck disable=SC2086
 sh third_party/press/tools/check.sh docs/guide/main.typ print/guide.pdf third_party/press $flags
+sh third_party/press/tools/new.sh docs/letter letter
+# shellcheck disable=SC2086
+sh third_party/press/tools/stamp.sh docs/letter/main.typ print/letter.pdf $flags
+# shellcheck disable=SC2086
+sh third_party/press/tools/check.sh docs/letter/main.typ print/letter.pdf third_party/press $flags
 TYPST_ROOT=. TYPST_FONT_PATHS=third_party/press/fonts TYPST_IGNORE_SYSTEM_FONTS=true \
     typst compile docs/guide/main.typ print/plain.pdf
 # shellcheck disable=SC2086

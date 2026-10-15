@@ -1,9 +1,12 @@
 #!/bin/sh
-# new.sh — scaffold a new document from press's template, importing press from where it sits.
+# new.sh — scaffold a new document from a press template, importing press from where it sits.
 #
 # Run from the project root, by whatever runs the repo's builds:
 #
-#   sh third_party/press/tools/new.sh docs/thing    -> docs/thing/main.typ
+#   sh third_party/press/tools/new.sh docs/thing           -> docs/thing/main.typ
+#   sh third_party/press/tools/new.sh docs/thing letter    -> the same, from the letter template
+#
+# The second word names a skeleton in press's template/: main by default, or letter.
 #
 # The name is a directory, so it takes no .typ: a document grows chapters beside its
 # main.typ. The template imports press relatively, so it compiles where it stands; the copy
@@ -12,7 +15,7 @@
 # reads no file outside it.
 set -eu
 
-[ $# -eq 1 ] || { echo "usage: sh <press>/tools/new.sh <directory>" >&2; exit 2; }
+[ $# -eq 1 ] || [ $# -eq 2 ] || { echo "usage: sh <press>/tools/new.sh <directory> [letter]" >&2; exit 2; }
 n=$(printf '%s' "$1" | tr '\\' '/')
 n=${n%/}
 case $n in
@@ -28,6 +31,14 @@ esac
 # `cd ... && pwd` gives both in the shell's own form, so a symlinked directory above press and
 # Windows' C:/ paths line up.
 press=$(dirname "$0")/..
+t=${2:-main}
+case $t in
+    *[!a-z]* | '') t= ;;
+esac
+if [ -z "$t" ] || [ ! -f "$press/template/$t.typ" ]; then
+    echo "press: there is no ${2:-} template; press has: $(cd "$press/template" && ls -- *.typ | sed 's/\.typ$//' | tr '\n' ' ')" >&2
+    exit 1
+fi
 root=$(pwd)
 here=$(cd "$press" && pwd)
 case $here in
@@ -41,7 +52,8 @@ import="$at/lib.typ"
 
 mkdir -p "$n"
 esc=$(printf '%s' "$import" | sed 's/[&#\\]/\\&/g')
-sed "s#^\\#import \"\\.\\./lib\\.typ\": \\*#\\#import \"$esc\": *#" "$press/template/main.typ" > "$n/main.typ"
+sed "s#^\\#import \"\\.\\./lib\\.typ\": \\*#\\#import \"$esc\": *#" "$press/template/$t.typ" > "$n/main.typ"
 grep -q "^#import \"$import\": \\*" "$n/main.typ" \
     || { echo "press: the template's import line was not where new.sh expects it" >&2; exit 1; }
-echo "press: made $n/main.typ, importing press from $import"
+if [ "$t" = main ]; then echo "press: made $n/main.typ, importing press from $import"
+else echo "press: made $n/main.typ from the $t template, importing press from $import"; fi
