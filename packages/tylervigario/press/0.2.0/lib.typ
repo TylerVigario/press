@@ -2,13 +2,13 @@
 //
 //   #import "@tylervigario/press:0.2.0": *
 //
-// 0.2.0 is 0.1.0 moved from the @vts namespace to @tylervigario. It carries the composition vocabulary — `unit`, `chip`,
-// `band-strong`, `dbadge`, `decision` — which had been copy-pasted between
-// documents while the pipeline was still a prototype inside server-admin. None
-// of them was ever document-specific; they lived in the documents only because
-// that is where they were first written, and `unit` and `chip` had already gone
-// byte-identical across three files. That is the same drift this pipeline
-// exists to prevent, one level down.
+// 0.2.0 moves the package from the @vts namespace to @tylervigario, and adds `link-note`,
+// `press-version` and `seedepth`'s page lookup.
+//
+// Its composition vocabulary — `unit`, `chip`, `band-strong`, `dbadge`, `decision` — had
+// been copy-pasted between documents before press held it. None of it was ever
+// document-specific, and `unit` and `chip` had already gone byte-identical across three
+// files: the drift this package exists to prevent, one level down.
 //
 // Released versions are immutable. A change goes in a NEW directory with a
 // bumped `typst.toml` — consumers pin an exact version, and a silent edit
@@ -31,7 +31,8 @@
 // drift this package exists to end. It is a helper, not a governor: documents
 // vary too much for it to be anything else.
 //
-// Fonts are vendored beside this file rather than named from the system.
+// Fonts are vendored in press's fonts/ directory, which `just build` hands to typst with
+// --font-path, rather than named from the system.
 // Typst does NOT perform metric substitution the way fontconfig does: on a box
 // without Arial, `#set text(font: "Arial")` emits only `warning: unknown font
 // family` and silently falls back to an embedded serif. Since 0.15 has no
@@ -284,13 +285,14 @@
   #text(size: size)[#body]
 ]
 
-// Hairline table with a tinted header row.
+// Hairline table with a tinted header row. The header goes through `table.header`, so the
+// PDF marks it as one and a screen reader reads it as the column labels, not as data.
 #let matrix(head, ..rows) = table(
   columns: (auto, 1fr),
   stroke: 0.4pt + rule-hair,
   inset: (x: 7pt, y: 5.5pt),
   fill: (_, y) => if y == 0 { slate-tint } else { none },
-  ..head.map(h => text(size: sz.fine, weight: 700)[#h]),
+  table.header(..head.map(h => text(size: sz.fine, weight: 700)[#h])),
   ..rows.pos().map(c => text(size: sz.fine)[#c]),
 )
 
@@ -328,9 +330,8 @@
 #let press-version = toml("typst.toml").package.version
 
 // ----------------------------------------------------------- composition ---
-// Promoted out of individual documents while this was still a prototype.
-// Generic by nature — a labelled bounded block, a state chip, a reversed band,
-// a numbered badge.
+// Generic by nature — a labelled bounded block, a state chip, a reversed band, a numbered
+// badge.
 
 // The workhorse. A bounded unit of exactly one idea: a label to navigate by, a
 // bold LEAD that is the highlight pre-made, and a body as long as the idea
@@ -389,18 +390,14 @@
     ])
 ]
 
-// A wide data table. Promoted after the identical helper appeared in five
-// documents across two repos — `inventory` and `sheet` here, `sheet-table` in
-// three pool documents, byte-identical in most of them. The house `matrix` is
-// deliberately two-column; this is what every document reached for when it had
-// more columns than that.
+// A wide data table, for more columns than `matrix`'s two. Promoted after the same helper
+// turned up, byte-identical, in five documents.
 //
 // `cols` is passed through to `table.columns` so the document keeps control of
 // widths. Header row is bold on a slate tint, body rows zebra-striped.
 //
-// `size` exists because hardcoding it was pushing documents into writing their own
-// per-cell wrapper just to get a different one. The pool lane's `cell()` helper was
-// exactly that, and rather than promote the workaround the cause is fixed here.
+// `size` exists because a fixed size pushed documents into writing their own per-cell
+// wrapper just to get a different one.
 //
 // The header goes through `table.header`, which repeats it on every page the table
 // spans. Without it a table crossing a page break leaves the reader with bare rows
@@ -416,10 +413,24 @@
   ..rows.pos().map(c => text(size: size)[#c]),
 )
 
-// Cross-reference to the depth layer: "detail on p.N" without hard-coding N.
-#let seedepth(label) = text(size: sz.fine, fill: ink-faint, style: "italic")[
-  #sym.arrow.r detail: #label
-]
+// Pointer from the act layer to the depth layer, without a page number typed by hand:
+//
+//   #seedepth[quarter figures]                    -> detail: quarter figures
+//   #seedepth(<quarter>)                          -> detail on p. 2
+//   #seedepth(at: <quarter>)[quarter figures]     -> detail: quarter figures, p. 2
+//
+// Given a label, the page is looked up where the label lands, so it stays right when the
+// layout moves, and it links there: on a screen it clicks through, on paper it is a page
+// number. A label that does not exist is a compile error, not a silent "p. ?".
+#let seedepth(what, at: none) = {
+  let target = if type(what) == label { what } else { at }
+  let on = if target != none {
+    link(target, context [p. #counter(page).at(locate(target)).first()])
+  }
+  text(size: sz.fine, fill: ink-faint, style: "italic")[
+    #sym.arrow.r #if type(what) == label [detail on #on] else if on == none [detail: #what] else [detail: #what, #on]
+  ]
+}
 
 
 // Lay out a set of units. The document still owns its page; this owns only how a
