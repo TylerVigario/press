@@ -213,10 +213,15 @@ failed its audit. Export `PRESS_TZ` from the justfile.
   `press.just`), and a Python 3 on `PATH` as `python` or `python3`.
 - The tools run in Git's `sh`, in `C:\Program Files\Git\bin`. Git's default PATH choice adds
   only `Git\cmd`, which has no `sh`: add the `bin` directory to your user `PATH`.
-- winget does not put poppler's programs on `PATH`, and inside `sh` Git's own Xpdf
-  `pdftotext` would come first anyway. Set `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS` and
-  `PRESS_PDFTOPPM` in your user environment, with forward slashes, to the three programs in
-  poppler's `Library/bin` (under `%LOCALAPPDATA%/Microsoft/WinGet/Packages/`).
+- **Set `PRESS_PDFTOTEXT`, even though PowerShell finds poppler.** winget puts poppler's
+  `Library/bin` on your user `PATH`, and `where pdftotext` in PowerShell finds poppler's. The
+  tools run in Git's `sh`, though, which puts Git's own `/mingw64/bin` ahead of everything on
+  `PATH`, and Git bundles Xpdf's `pdftotext`. Inside `sh` that one wins, and the audit refuses
+  it: builds say "not audited: pdftotext is not poppler's". No `PATH` order fixes this. Set
+  `PRESS_PDFTOTEXT` in your user environment, with forward slashes, to `pdftotext.exe` in
+  poppler's `Library/bin` (under `%LOCALAPPDATA%/Microsoft/WinGet/Packages/`). Git bundles no
+  `pdffonts` or `pdftoppm`; `PRESS_PDFFONTS` and `PRESS_PDFTOPPM` pin those the same way if you
+  want all three fixed.
 
 ## Writing a document
 
