@@ -1,14 +1,17 @@
 #!/bin/sh
 # bundle-check.sh — the release bundle holds the kit, installs as the README says, and works.
 #
-#   sh .github/bundle-check.sh <dir holding press.tar.gz, press.zip and SHA256SUMS>
+#   sh .github/bundle-check.sh <dir holding what .github/bundle.sh built>
 #
 # Run by CI on every pull request, on what .github/bundle.sh just built:
 #
-#   · the sums match, and both archives hold the same files;
+#   · SHA256SUMS lists the two archives and the two installers, and they match it;
+#   · each installer carries the archives' version and the sum of the archive it fetches;
+#   · both archives hold the same files;
 #   · nothing of press's own machinery is in them, and every file the kit needs is;
-#   · a scratch repo installs the tarball the way the README's one-liner does, streamed into
-#     tar in the directory it should land in, and the zip unpacks to the same files;
+#   · a scratch repo installs the tarball the way the README's line without the installer
+#     does, streamed into tar in the directory it should land in, and the zip unpacks to the
+#     same files (the installers themselves are .github/install-check.sh's);
 #   · in that repo, with no just: new.sh scaffolds a document, stamp.sh builds it, check.sh
 #     audits it clean, plain typst builds it from environment variables, and the calibration
 #     sheet builds and audits clean from inside the installed kit.
@@ -21,7 +24,17 @@ trap 'rm -rf "$tmp"' EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-(cd "$b" && sha256sum -c --quiet SHA256SUMS) || fail "SHA256SUMS does not match the archives"
+(cd "$b" && sha256sum -c --quiet SHA256SUMS) || fail "SHA256SUMS does not match the files"
+listed=$(awk '{ print $2 }' "$b/SHA256SUMS" | LC_ALL=C sort | tr '\n' ' ')
+[ "$listed" = "install.ps1 install.sh press.tar.gz press.zip " ] || fail "SHA256SUMS lists $listed"
+
+v=$(tar -xzOf "$b/press.tar.gz" press/press.toml | sed -n 's/^version *= *"\(.*\)"$/\1/p')
+tgz=$(awk '$2 == "press.tar.gz" { print $1 }' "$b/SHA256SUMS")
+zip=$(awk '$2 == "press.zip" { print $1 }' "$b/SHA256SUMS")
+grep -qxF "    version='$v'" "$b/install.sh" || fail "install.sh does not install press $v"
+grep -qxF "    sum='$tgz'" "$b/install.sh" || fail "install.sh does not carry the tarball's sum"
+grep -qxF "    \$version = '$v'" "$b/install.ps1" || fail "install.ps1 does not install press $v"
+grep -qxF "    \$sum = '$zip'" "$b/install.ps1" || fail "install.ps1 does not carry the zip's sum"
 
 tar -tzf "$b/press.tar.gz" | sed 's#/$##' | LC_ALL=C sort > "$tmp/tar.list"
 unzip -Z1 "$b/press.zip" | sed 's#/$##' | LC_ALL=C sort > "$tmp/zip.list"

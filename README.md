@@ -52,23 +52,37 @@ the next release every document can use it.
 ## Install
 
 press is a folder of files your repository holds. From the directory it should live in —
-`vendor/`, say — one line, with the tools your system already has, unpacks `press/` there:
+`vendor/`, say — run the installer for your system. It puts `press/` there, and run again it
+updates it:
+
+| system | line |
+|---|---|
+| Linux, macOS | `curl -fsSL https://github.com/TylerVigario/press/releases/latest/download/install.sh \| sh` |
+| Linux without curl | `wget -qO- https://github.com/TylerVigario/press/releases/latest/download/install.sh \| sh` |
+| Windows, from PowerShell or `cmd.exe` | `powershell -NoProfile -c "irm https://github.com/TylerVigario/press/releases/latest/download/install.ps1 \| iex"` |
+
+Each release attaches its own installer, which installs that release: `latest/download` is the
+newest, and `download/v<version>` in its place fixes one. The installer downloads its
+release's archive, refuses it unless its SHA-256 is the one written into the installer, and
+swaps the new `press/` in whole, so a file a release removed does not linger. A `press/` that
+is not press, or is a git checkout, it leaves alone, and it changes nothing outside `press/`.
+
+**Commit `press/`.** The copy your repository holds is the version it builds with, and
+`press/press.toml` says which. Run the installer again to move to the newest release: the diff
+shows what changed.
+
+**Without the installer,** the archives unpack with the same tools. Delete `press/` first when
+updating, or files a release removed stay behind:
 
 | system | line |
 |---|---|
 | Linux, macOS | `curl -fsSL https://github.com/TylerVigario/press/releases/latest/download/press.tar.gz \| tar -xz` |
-| Linux without curl | `wget -qO- https://github.com/TylerVigario/press/releases/latest/download/press.tar.gz \| tar -xz` |
 | Windows, PowerShell 5.1 or 7 | `$ProgressPreference='SilentlyContinue'; Invoke-WebRequest https://github.com/TylerVigario/press/releases/latest/download/press.zip -OutFile press.zip; Expand-Archive press.zip -DestinationPath .; Remove-Item press.zip` |
 
-For a fixed version, write `download/v<version>` in place of `latest/download`. Each release
-also carries `SHA256SUMS` for both archives.
-
-**Commit `press/`.** The copy your repository holds is the version it builds with, and
-`press/press.toml` says which. To move to another release, delete `press/` and run the line
-again: the diff shows what changed.
-
-**Never stream the zip into `tar`.** A zip is read from its end: piped into `tar`, files are
-dropped silently and it still exits 0. Pipe the tarball; unpack the zip from a file.
+Under the Restricted execution policy, PowerShell 7 cannot load `Expand-Archive`; the
+installer does not use it. Each release's `SHA256SUMS` lists both archives and both
+installers. **Never stream the zip into `tar`.** A zip is read from its end: piped into `tar`,
+files are dropped silently and it still exits 0. Pipe the tarball; unpack the zip from a file.
 
 ## Use it
 
@@ -275,8 +289,9 @@ hardware gives out before a real document does.
 
 The copy of press a repository holds is the version it builds with. Move only to a release,
 never to a commit on `main` between releases. 0.1.0 was the Typst package `@vts/press:0.1.0`,
-used from a git submodule; a repository moving past it replaces the submodule with the kit
-and changes each import to `/vendor/press/lib.typ` in the same commit.
+used from a git submodule. A repository moving past it removes the submodule
+(`git rm vendor/press`), runs the installer in `vendor/`, and changes each import to
+`/vendor/press/lib.typ`, all in one commit.
 
 ## Licence
 
