@@ -219,13 +219,21 @@ jobs:
         run: |
           set -euo pipefail
           # A copy of the newest released version with its own number, so the
-          # version a consumer imports exists. Nothing else in it changes.
+          # version a consumer imports exists. The version is renamed wherever the
+          # directory names itself — typst.toml, the template's import, lib.typ's
+          # usage line — so a document scaffolded from it imports it, not the one
+          # before. CI's templates.sh checks the same on every pull request.
           dir="packages/tylervigario/press/$VERSION"
           mkdir -p "${dir%/*}"
           cp -r "$SOURCE" "$dir"
           sed -i "s/^version *= *\".*\"$/version = \"$VERSION\"/" "$dir/typst.toml"
           [ "$(sed -n 's/^version *= *"\(.*\)"$/\1/p' "$dir/typst.toml")" = "$VERSION" ] \
             || { echo "::error::could not set the version in $dir/typst.toml"; exit 1; }
+          old="${SOURCE#packages/}"; old="@${old%%/*}/press:${SOURCE##*/}"
+          sed -i "s#$old#@tylervigario/press:$VERSION#g" "$dir/lib.typ" "$dir/template/main.typ"
+          ! grep -ho '@[a-z0-9-]*/press:[0-9][0-9.]*[0-9]' "$dir/lib.typ" "$dir/template/main.typ" \
+              | grep -vxq "@tylervigario/press:$VERSION" \
+            || { echo "::error::$dir still names a version other than $VERSION"; exit 1; }
 
       - name: Write the changelog and the release notes
         env:

@@ -201,6 +201,10 @@ all +dirs='docs': _typst-version
 # The name is that directory, so it takes no .typ: docs/thing -> docs/thing/main.typ.
 # typst init will not make the directory's parent, so it is made first, as build
 # makes print/.
+#
+# It scaffolds from the newest version in press's tree, so nothing here names a version
+# to move at a release. At a release tag, which is all a consumer ever checks out, that is
+# the version the tag released.
 [doc("Scaffold a new document from the press skeleton")]
 [script]
 [working-directory(root)]
@@ -211,8 +215,11 @@ new name: _typst-version
         *.typ) echo "press: new makes a directory holding main.typ, so name it without .typ: ${n%.typ}" >&2
                exit 1 ;;
     esac
+    v=$(ls {{ quote(press_root / "packages" / "tylervigario" / "press") }} \
+        | awk -F. '/^[0-9]+\.[0-9]+\.[0-9]+$/ { k = ($1 * 1000 + $2) * 1000 + $3; if (k >= m) { m = k; v = $0 } } END { print v }')
+    test -n "$v" || { echo "press: no package version under packages/tylervigario/press" >&2; exit 1; }
     mkdir -p "$(dirname "$n")"
-    typst init --package-path {{ quote(press_root / "packages") }} @tylervigario/press:0.2.0 "$n"
+    typst init --package-path {{ quote(press_root / "packages") }} "@tylervigario/press:$v" "$n"
 
 # Audit a built document for the font failures typst does not report
 #
