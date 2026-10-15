@@ -10,7 +10,7 @@ Read this whole file before changing anything. Every trap listed has already hap
 
 ## What press is, and what it is not
 
-**A kit of files, imported by path.** A document writes `#import "/vendor/press/lib.typ": *`
+**A kit of files, imported by path.** A document writes `#import "/third_party/press/lib.typ": *`
 and builds with plain typst and press's fonts. There is no namespace and no version in any
 import; the copy a repository holds is the version it builds with.
 
@@ -134,6 +134,10 @@ repository has.
   repository holds already says.
 - **Do not make a repository need just,** or any one runner. Whatever press does must be
   reachable with plain typst and `sh`.
+- **Do not point the guides at `vendor/`.** Go and Composer own it: `go mod vendor` deletes
+  whatever else is in it, its presence alone breaks `go build` in a module with dependencies
+  it does not vendor, and Composer projects keep it out of git. The guides use
+  `third_party/press`.
 - **Do not add a markdown path.** Markdown-to-PDF was tried and removed. Documents are `.typ`.
 - **Do not move whole-page composition into the library.** A helper that lays out an entire
   page belongs in the document. A styling helper a document opts into is fine to offer.

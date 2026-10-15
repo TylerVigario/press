@@ -1,10 +1,10 @@
 // press — ready-made parts and page presets for Typst documents, read on screen or on paper.
 //
-//   #import "/vendor/press/lib.typ": *     (from wherever press sits under the project root)
+//   #import "/third_party/press/lib.typ": *     (or wherever press sits under the root)
 //
 // A document imports this file by path, and typst builds it with press's fonts:
 //
-//   typst compile --root . --font-path vendor/press/fonts --ignore-system-fonts <doc> <pdf>
+//   typst compile --root . --font-path third_party/press/fonts --ignore-system-fonts <doc> <pdf>
 //
 // The path is the only thing a document knows about where press sits, and press is a set of
 // files, not a Typst package: no namespace, no version in the import. Which press a repo

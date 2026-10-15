@@ -1,7 +1,7 @@
 // Starter skeleton for a document. COPY this — do not import it.
 // Composition belongs to the document; only the vocabulary is shared.
 //
-//   sh vendor/press/tools/new.sh docs/<name>     (or `just new docs/<name>`)
+//   sh third_party/press/tools/new.sh docs/<name>    (or `just new docs/<name>`)
 //
 // copies it to docs/<name>/main.typ, with the import below rewritten to where press sits.
 // Here it imports press relatively, so the skeleton itself compiles where it stands.
