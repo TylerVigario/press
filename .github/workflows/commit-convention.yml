@@ -37,13 +37,16 @@ name: Commit convention
 #   · `[commit_types]` in a cog.toml is ADDITIVE ONLY. A type can be added; none of
 #     the eleven can be removed, so `feat` and `fix` are structurally guaranteed.
 #
-# So there is no cog.toml. Configuring the type set could only restate the default,
-# which rule 6 says no repository should do. What is worth pinning — which cog — is
-# pinned below by digest.
+# cog.toml configures the changelog, the tag prefix and one added type, `release`, which
+# the release's own commit uses; a pull request titled `release: ...` therefore passes
+# too. It restates none of the eleven defaults, which rule 6 says no repository should
+# do. What is worth pinning — which cog — is pinned below by digest.
 #
-# `cog check` reads merge commits by default; `--ignore-merge-commits` is opt-in and
-# is deliberately not passed. `required_linear_history` should mean no merge ever
-# lands on main; if one does, this is the thing that says so.
+# `cog check` reads merge commits unless told not to, and nothing here tells it:
+# cog.toml leaves `ignore_merge_commits` unset, and `--ignore-merge-commits` is not
+# passed. `required_linear_history` should mean no merge ever lands on main; if one
+# does, this is the thing that says so. Only the release's check of the commits a
+# changelog is built from passes the flag.
 
 on:
   pull_request:
