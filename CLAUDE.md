@@ -87,9 +87,12 @@ the file is, with nothing to copy or rename.
 the commits, gates on CI, writes the version into `press.toml` and `CHANGELOG.md` into a
 `release:` commit by the `vigario-press-release` App, builds the bundle, and publishes the
 GitHub release with `press.tar.gz`, `press.zip`, `install.sh`, `install.ps1` and `SHA256SUMS`
-attached; publishing creates the tag. Never tag by hand. If it fails after the `release:`
-commit has landed, start a new run rather than re-running the failed one: a re-run checks out
-the old commit and the forge refuses its commit. `CHANGELOG.md` is generated except for its
+attached; publishing creates the tag. Never tag by hand. Its `bump` input is `auto`, the
+commits' own step, or `patch`, `minor` or `major` to override the step; with nothing that bumps
+since the last tag there is no release either way. If it fails after the `release:` commit has
+landed, start a new run with `auto` rather than re-running the failed one: a re-run checks out
+the old commit and the forge refuses its commit, and the new run publishes the version that
+commit records. `CHANGELOG.md` is generated except for its
 hand-written first release, "Initial release.", which `.github/write-changelog.sh` keeps (until
 cocogitto/cocogitto#580 is fixed).
 
