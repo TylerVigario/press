@@ -86,6 +86,9 @@ or, if it already has recipes of its own:
 mod press 'vendor/press/press.just'   # -> just press build docs/example.typ
 ```
 
+`just press` lists the recipes under `mod`. Under `import`, `just --list` does: just takes a
+bare `just`'s recipe from the consumer's own justfile, and a one-line justfile has none.
+
 Name the time zone `updated()` prints in, once per repo: an IANA name, or `"UTC"` for documents
 read across time zones. Unset, it is the zone of whichever machine builds.
 
