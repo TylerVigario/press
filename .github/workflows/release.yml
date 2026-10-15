@@ -271,9 +271,12 @@ jobs:
             # One addition per changed file, contents base64-encoded so any file
             # survives. The forge builds and signs the commit; nothing here
             # supplies an author, a committer or a signature. expectedHeadOid
-            # refuses it if main has moved since the gate passed.
+            # refuses it if main has moved since the gate passed. The encoding goes
+            # to jq through a file: as an argument it would fail once a file's
+            # base64 passed the 128 KiB a single argument may hold.
             while IFS= read -r f; do
-              jq -n --arg path "$f" --arg contents "$(base64 -w0 "$f")" '{path: $path, contents: $contents}'
+              base64 -w0 "$f" > "$RUNNER_TEMP/contents.b64"
+              jq -n --arg path "$f" --rawfile contents "$RUNNER_TEMP/contents.b64" '{path: $path, contents: $contents}'
             done <<< "$changed" | jq -s '.' > "$RUNNER_TEMP/additions.json"
             jq -n \
               --arg repo "$GITHUB_REPOSITORY" \

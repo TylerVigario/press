@@ -147,28 +147,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/typst-toolchain
       - run: just all
       - name: Every package version compiles its own template
         run: sh .github/templates.sh
       - name: A rebuild leaves every document unchanged
-        run: |
-          set -euo pipefail
-          # An unchanged page keeps its stamp: build reads the old one back from the PDF.
-          # A second build of the same tree must therefore report every document
-          # unchanged. One it cannot read back re-stamps every page, and shows here.
-          out=$(just all)
-          printf '%s\n' "$out"
-          if printf '%s\n' "$out" | grep '^print/' | grep -v ': unchanged,'; then
-            echo "::error::a rebuild of an unchanged tree re-stamped the documents above"
-            exit 1
-          fi
+        run: sh .github/rebuild-unchanged.sh
 
   audit:
     name: Documents pass the audit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/typst-toolchain
         with:
           poppler: "true"
@@ -186,6 +180,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/typst-toolchain
         with:
           poppler: "true"
@@ -212,17 +208,7 @@ jobs:
       - name: Every package version compiles its own template
         run: sh .github/templates.sh
       - name: A rebuild leaves every document unchanged
-        run: |
-          set -euo pipefail
-          # An unchanged page keeps its stamp: build reads the old one back from the PDF.
-          # A second build of the same tree must therefore report every document
-          # unchanged. One it cannot read back re-stamps every page, and shows here.
-          out=$(just all)
-          printf '%s\n' "$out"
-          if printf '%s\n' "$out" | grep '^print/' | grep -v ': unchanged,'; then
-            echo "::error::a rebuild of an unchanged tree re-stamped the documents above"
-            exit 1
-          fi
+        run: sh .github/rebuild-unchanged.sh
 
   invisible:
     name: No invisible characters
@@ -231,6 +217,7 @@ jobs:
       # Reads the tree and nothing else: no toolchain, no fonts.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           # git grep reads the index, so the whole tracked tree must be present.
           fetch-depth: 1
       - name: Scan
@@ -278,6 +265,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: shellcheck
         run: |
           set -euo pipefail

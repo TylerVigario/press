@@ -69,6 +69,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           # cog verify reads the piped string. It needs no git history.
           fetch-depth: 1
 
@@ -93,6 +94,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           # Full history: the range below asks what landed, and a depth of 1
           # cannot answer that for a push carrying more than one commit.
           fetch-depth: 0
