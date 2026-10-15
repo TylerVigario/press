@@ -11,9 +11,10 @@
 // at compile time, so it follows the window if the page above it changes — which
 // is how you read show-through honestly.
 //
-//   just build docs/calibration.typ
+//   just build calibration.typ                 (in press itself)
+//   just build vendor/press/calibration.typ    (from a repo that holds press at vendor/press)
 
-#import "@tylervigario/press:0.2.0": *
+#import "lib.typ": *
 
 #set document(title: [Print calibration], author: "press")
 #set page(..card, footer: context {

@@ -1,12 +1,10 @@
 // Starter skeleton for a document. COPY this — do not import it.
 // Composition belongs to the document; only the vocabulary is shared.
 //
-//   typst init --package-path vendor/press/packages @tylervigario/press:0.2.0 <name>
+//   sh vendor/press/tools/new.sh docs/<name>     (or `just new docs/<name>`)
 //
-// (that path is from a repo consuming press as a submodule at vendor/press;
-//  from inside the press repo itself it is just --package-path packages)
-//
-// or just copy this file to docs/<name>.typ and start deleting.
+// copies it to docs/<name>/main.typ, with the import below rewritten to where press sits.
+// Here it imports press relatively, so the skeleton itself compiles where it stands.
 //
 // ---------------------------------------------------------------------------
 // The conventions this skeleton encodes. They are what make a document
@@ -27,7 +25,7 @@
 //      fit, the layout is what changes.
 // ---------------------------------------------------------------------------
 
-#import "@tylervigario/press:0.2.0": *
+#import "../lib.typ": *
 
 // The document's name, set once. A PDF viewer shows it in its title bar and lists the file by
 // it, and the header and footer below print it from here.

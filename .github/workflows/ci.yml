@@ -3,17 +3,11 @@ name: CI
 # Public repository, so minutes are free and uncapped, and rule 9 fans out to one
 # job per assertion rather than grouping them to save minutes.
 #
-#   Released versions are unchanged
-#                            a package version directory that differs from the tag
-#                            that released it. Consumers pin the version in their
-#                            import and move their submodule only to a later
-#                            release, which must leave the version they import as
-#                            it was, unless that version is retired: 0.1.0, the
-#                            old @vts namespace, lives on only in its tag.
-#   Documents build          typst compile errors, a rebuild that re-stamps a
-#                            document whose page did not change, and a package
-#                            version whose template does not compile against it.
-#   Documents pass the audit press's own passes, run against its own document:
+#   Documents build          typst compile errors in the calibration sheet, a
+#                            rebuild that re-stamps it though its page did not
+#                            change, and a template that does not compile where it
+#                            stands or as the document new.sh scaffolds from it.
+#   Documents pass the audit press's own passes, run against its calibration sheet:
 #                            typst warnings that exit 0 and ship, fonts that are
 #                            not vendored, and ink inside the unprintable band.
 #   Documents pass on the oldest toolchain
@@ -60,88 +54,6 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  released:
-    name: Released versions are unchanged
-    runs-on: ubuntu-latest
-    steps:
-      # Reads refs and trees and nothing else: no toolchain, no fonts.
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          # Every tag and the commit it names. The default shallow clone has
-          # neither, and a comparison against a tag that was never fetched cannot
-          # run at all.
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Compare each released version with its tag
-        run: |
-          set -euo pipefail
-          # A tag here names a package version: v0.1.0 releases
-          # packages/vts/press/0.1.0/, and from that tag on the directory is
-          # frozen. A change adds packages/tylervigario/press/<next>/ instead.
-          # The namespace is whichever one the tag holds the version under: vts
-          # for 0.1.0, tylervigario from 0.2.0. A released version lives in
-          # exactly one, so another namespace may not grow a copy of it either.
-          #
-          # A RETIRED version is one later releases no longer carry. It lives on
-          # in its tag, which every consumer pinned to it still builds from, and
-          # the tree must not hold it at all. Only 0.1.0, the @vts namespace, is
-          # retired; removing any other released version still fails here.
-          retired=" 0.1.0 "
-          #
-          # HEAD is what would land: the merge result on a pull request, the new
-          # tip on a push to main. So an edit to a released directory is refused
-          # before it merges, not reported after it has reached every submodule.
-          #
-          # `if git diff --quiet` fails closed: an error exits non-zero exactly as
-          # a difference does, so a comparison that could not run reads as a
-          # change rather than as a clean tree.
-          released=0
-          bad=0
-          for tag in $(git tag --list 'v*'); do
-            # Tags carry the v; the directory and typst.toml do not (rule 17).
-            [[ "$tag" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || continue
-            version=${tag#v}
-            released=$((released + 1))
-            found=$(git ls-tree -r --name-only "$tag" -- packages \
-                      | { grep -E "^packages/[^/]+/press/${version//./\\.}/typst\.toml$" || true; })
-            if [ "$(printf '%s' "$found" | grep -c .)" -ne 1 ]; then
-              echo "::error::$tag must contain exactly one packages/<namespace>/press/$version/ — a tag here names a package version; it has ${found:-none}"
-              bad=1
-              continue
-            fi
-            dir=${found%/typst.toml}
-            if [ "${retired#* "$version" }" != "$retired" ]; then
-              here=$([ ! -d packages ] || find packages -mindepth 3 -maxdepth 3 -type d -path "packages/*/press/$version")
-              if [ -n "$here" ]; then
-                echo "::error::$version is retired and lives only in $tag, but the tree has: $(printf '%s' "$here" | tr '\n' ' ')"
-                bad=1
-              else
-                echo "$version: retired; it lives in $tag, and the tree no longer carries it"
-              fi
-              continue
-            fi
-            if [ ! -f "$dir/typst.toml" ]; then
-              echo "::error::$dir/ was released as $tag and has been removed"
-              bad=1
-              continue
-            fi
-            here=$([ ! -d packages ] || find packages -mindepth 3 -maxdepth 3 -type d -path "packages/*/press/$version" | sort)
-            if [ "$here" != "$dir" ]; then
-              echo "::error::$version was released as $dir/, but the tree has: $(printf '%s' "$here" | tr '\n' ' ')"
-              bad=1
-              continue
-            fi
-            if git diff --quiet "$tag" HEAD -- "$dir"; then
-              echo "$version: unchanged since $tag"
-            else
-              git diff --stat "$tag" HEAD -- "$dir"
-              echo "::error::$dir/ differs from $tag. A released version is immutable — add the change under a new version directory."
-              bad=1
-            fi
-          done
-          [ "$released" -gt 0 ] || echo "no released versions yet, so nothing is frozen"
-          exit "$bad"
-
   build:
     name: Documents build
     runs-on: ubuntu-latest
@@ -150,11 +62,11 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/typst-toolchain
-      - run: just all
-      - name: Every package version compiles its own template
+      - run: just build calibration.typ
+      - name: The template compiles, in place and scaffolded
         run: sh .github/templates.sh
-      - name: A rebuild leaves every document unchanged
-        run: sh .github/rebuild-unchanged.sh
+      - name: A rebuild leaves the document unchanged
+        run: sh .github/rebuild-unchanged.sh calibration.typ
 
   audit:
     name: Documents pass the audit
@@ -169,9 +81,9 @@ jobs:
       - name: Audit
         run: |
           set -euo pipefail
-          # check compiles each document through stamp.sh, as build does, so it needs
+          # check compiles the document through stamp.sh, as build does, so it needs
           # no build ahead of it. A compile failure is Documents build's to report.
-          for f in docs/*.typ; do just check "$f"; done
+          just check calibration.typ
 
   oldest:
     name: Documents pass on the oldest toolchain
@@ -184,29 +96,30 @@ jobs:
         with:
           poppler: "true"
           oldest: "true"
-      - name: Confirm these are the floors press.just declares
+      - name: Confirm these are the floors press declares
         run: |
           set -euo pipefail
-          # The toolchain action pins the floors by digest and press.just declares them.
-          # They must name the same versions, or this job tests a floor nobody declared.
-          want_typst=$(sed -n "s/^typst_minimum := '\(.*\)'$/\1/p" press.just)
+          # The toolchain action pins the floors by digest; press.toml declares typst's and
+          # press.just just's. They must name the same versions, or this job tests a floor
+          # nobody declared.
+          want_typst=$(sed -n 's/^typst *= *"\(.*\)"$/\1/p' press.toml)
           want_just=$(sed -n "s/^set minimum-version := '\(.*\)'$/\1/p" press.just)
           have_typst=$(typst --version | cut -d' ' -f2)
           have_just=$(just --version | cut -d' ' -f2)
           if [ "$want_typst" != "$have_typst" ] || [ "$want_just" != "$have_just" ]; then
-            echo "::error::press.just declares typst ${want_typst:-?} and just ${want_just:-?}; the toolchain action's oldest pins are typst $have_typst and just $have_just"
+            echo "::error::press declares typst ${want_typst:-?} and just ${want_just:-?}; the toolchain action's oldest pins are typst $have_typst and just $have_just"
             exit 1
           fi
-          echo "typst $have_typst and just $have_just, the floors press.just declares"
+          echo "typst $have_typst and just $have_just, the floors press declares"
       - name: Build, then audit
         run: |
           set -euo pipefail
-          just all
-          for f in docs/*.typ; do just check "$f"; done
-      - name: Every package version compiles its own template
+          just build calibration.typ
+          just check calibration.typ
+      - name: The template compiles, in place and scaffolded
         run: sh .github/templates.sh
-      - name: A rebuild leaves every document unchanged
-        run: sh .github/rebuild-unchanged.sh
+      - name: A rebuild leaves the document unchanged
+        run: sh .github/rebuild-unchanged.sh calibration.typ
 
   invisible:
     name: No invisible characters

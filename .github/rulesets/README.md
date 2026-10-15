@@ -58,7 +58,6 @@ a setting drifting back.
 | `Documents pass the audit` | the warning, font and printable-area passes |
 | `Documents pass on the oldest toolchain` | the same build and audit at the oldest typst and just `press.just` accepts |
 | `No invisible characters` | no soft hyphens or zero-width characters in any tracked file |
-| `Released versions are unchanged` | every tagged package version directory still matches its tag |
 | `JSON parses` | every tracked `*.json`, including these payloads, parses |
 | `Markdown lint` | every tracked `*.md` passes markdownlint |
 | `Workflows lint` | every workflow passes actionlint, with shellcheck on each `run:` block |
@@ -66,9 +65,8 @@ a setting drifting back.
 | `Validate PR title` | the pull request title parses as a Conventional Commit |
 
 **`strict_required_status_checks_policy: true`** — a pull request merges only once its
-checks ran against the main it lands on. Without it, a pull request that went green before a
-release could still merge an edit into the directory that release just froze: *Released
-versions are unchanged* compared it with a tag that did not exist yet. The cost is an update
+checks ran against the main it lands on. Two pull requests can each pass against an older main
+and fail together, and a release cut between them would ship that. The cost is an update
 whenever main moves under an open pull request, which the one-at-a-time flow already pays.
 
 These are **job names**, taken from each job's `name:` field. Renaming a job disables
