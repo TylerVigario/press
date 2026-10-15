@@ -1,13 +1,15 @@
 # install.ps1 - install press as .\press, or update the copy there, from the release this
 # installer is attached to.
 #
-#   powershell -ExecutionPolicy ByPass -c "irm https://github.com/TylerVigario/press/releases/latest/download/install.ps1 | iex"
+#   powershell -NoProfile -c "irm https://github.com/TylerVigario/press/releases/latest/download/install.ps1 | iex"
 #
 # Run it in the directory press lives in (vendor\, say), from PowerShell or cmd.exe. It
 # downloads its release's press.zip, refuses the archive unless its SHA-256 is the one written
 # below, unpacks it beside press\ and swaps it in whole, so a file a release removed does not
 # linger. A press\ that is not a press kit, or is a git checkout, is left alone, and nothing is
-# left behind but press\. Windows PowerShell 5.1 and PowerShell 7 alike.
+# left behind but press\. Windows PowerShell 5.1 and PowerShell 7 alike, the Restricted
+# execution policy included: it loads no script module. -NoProfile keeps the user's profile, and
+# whatever it loads, out of the run.
 #
 # Each release attaches its own installer, its version and its archive's sum written in by
 # .github/bundle.sh: latest/download/install.ps1 installs the latest release, and
@@ -27,7 +29,7 @@
     $sum = '@SHA256@'
     if (($version + $sum).Contains('@')) {
         throw ("press: this is the installer's source, with no release written in; run a release's:`n" +
-            '  powershell -ExecutionPolicy ByPass -c "irm https://github.com/TylerVigario/press/releases/latest/download/install.ps1 | iex"')
+            '  powershell -NoProfile -c "irm https://github.com/TylerVigario/press/releases/latest/download/install.ps1 | iex"')
     }
     $base = $env:PRESS_BASE_URL
     if (-not $base) { $base = "https://github.com/TylerVigario/press/releases/download/v$version" }
@@ -58,7 +60,13 @@
         } catch {
             throw "press: could not download $base/press.zip: $($_.Exception.Message)"
         }
-        $got = (Get-FileHash -Algorithm SHA256 -LiteralPath $zip).Hash.ToLowerInvariant()
+        # .NET's SHA-256 rather than Get-FileHash: Windows PowerShell keeps that in a script
+        # module, which a PowerShell 7 PSModulePath, inherited through cmd.exe as an npm script
+        # run from PowerShell 7 inherits it, leaves it unable to find.
+        $sha = [Security.Cryptography.SHA256]::Create()
+        $stream = [IO.File]::OpenRead($zip)
+        try { $got = -join ($sha.ComputeHash($stream) | ForEach-Object { $_.ToString('x2') }) }
+        finally { $stream.Dispose(); $sha.Dispose() }
         if ($got -ne $sum) {
             throw ("press: press.zip is not the archive press $version was released with; nothing changed`n" +
                 "  expected $sum`n  got      $got")

@@ -59,7 +59,7 @@ updates it:
 |---|---|
 | Linux, macOS | `curl -fsSL https://github.com/TylerVigario/press/releases/latest/download/install.sh \| sh` |
 | Linux without curl | `wget -qO- https://github.com/TylerVigario/press/releases/latest/download/install.sh \| sh` |
-| Windows, from PowerShell or `cmd.exe` | `powershell -ExecutionPolicy ByPass -c "irm https://github.com/TylerVigario/press/releases/latest/download/install.ps1 \| iex"` |
+| Windows, from PowerShell or `cmd.exe` | `powershell -NoProfile -c "irm https://github.com/TylerVigario/press/releases/latest/download/install.ps1 \| iex"` |
 
 Each release attaches its own installer, which installs that release: `latest/download` is the
 newest, and `download/v<version>` in its place fixes one. The installer downloads its
