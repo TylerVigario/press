@@ -87,7 +87,9 @@ for spec in "PRESS_PDFTOTEXT $PDFTOTEXT" "PRESS_PDFFONTS $PDFFONTS"; do
              echo "       Put it first on PATH, or set $var to it directly." >&2
              exit 1; }
 done
-allow=$(ls "$press_root/fonts" | sed 's/-[A-Za-z]*\.[to]tf$//;s/\.[to]tf$//' | sort -u | paste -sd'|' -)
+# The vendored families, from the font files' names; fonts/ also holds their licences.
+allow=$(for f in "$press_root"/fonts/*.[ot]tf; do basename "$f"; done \
+          | sed 's/-[A-Za-z]*\.[to]tf$//;s/\.[to]tf$//' | sort -u | paste -sd'|' -)
 rc=0
 # One temporary directory for every pass, made before any of them and removed however the
 # run ends. An interrupt exits, and the EXIT trap removes it: a trap on INT that only removed

@@ -74,6 +74,9 @@
           },
           {
             "context": "Documents pass on the oldest toolchain"
+          },
+          {
+            "context": "The release bundle installs and works"
           }
         ]
       }
