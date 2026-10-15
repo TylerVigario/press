@@ -65,6 +65,12 @@ a setting drifting back.
 | `Shell scripts lint` | every `*.sh` in the tree passes shellcheck |
 | `Validate PR title` | the pull request title parses as a Conventional Commit |
 
+**`strict_required_status_checks_policy: true`** — a pull request merges only once its
+checks ran against the main it lands on. Without it, a pull request that went green before a
+release could still merge an edit into the directory that release just froze: *Released
+versions are unchanged* compared it with a tag that did not exist yet. The cost is an update
+whenever main moves under an open pull request, which the one-at-a-time flow already pays.
+
 These are **job names**, taken from each job's `name:` field. Renaming a job disables
 that gate without a word of warning, and adding a job without adding its context here
 leaves protection reading as complete while covering less. To change one: relax the
