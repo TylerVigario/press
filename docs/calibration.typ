@@ -12,6 +12,7 @@
 
 #import "@tylervigario/press:0.2.0": *
 
+#set document(title: [Print calibration], author: "press")
 #set page(..card, footer: context {
   set text(size: sz.micro, fill: ink-faint)
   grid(columns: (1fr, auto),
@@ -24,7 +25,7 @@
 #show link: link-note
 
 #grid(columns: (auto, 1fr), align: (left + bottom, right + bottom),
-  text(font: face-display, size: sz.title, weight: 700)[Print calibration],
+  text(font: face-display, size: sz.title, weight: 700)[#context document.title],
   text(size: sz.fine, fill: ink-soft)[press #press-version · US Letter · actual size])
 #v(-3pt)
 #line(length: 100%, stroke: 2pt + slate)

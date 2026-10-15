@@ -29,10 +29,13 @@
 
 #import "@tylervigario/press:0.2.0": *
 
+// The document's name, set once. A PDF viewer shows it in its title bar and lists the file by
+// it, and the header and footer below print it from here.
+#set document(title: [Document title], author: "Your name")
 #set page(..card, footer: context {
   set text(size: sz.micro, fill: ink-faint)
   grid(columns: (1fr, auto),
-    align(left)[Document title · status],
+    align(left)[#document.title · status],
     align(right)[#updated() · #counter(page).display("1 / 1", both: true)])
 })
 #set text(font: face-text, size: sz.small, fill: ink, lang: "en")
@@ -49,7 +52,7 @@
 
 // ---- Header + legend ----
 #grid(columns: (auto, 1fr), align: (left + bottom, right + bottom),
-  text(font: face-display, size: sz.title, weight: 700)[Document Title],
+  text(font: face-display, size: sz.title, weight: 700)[#context document.title],
   text(size: sz.fine, fill: ink-soft)[scope · date])
 #v(-3pt)
 #line(length: 100%, stroke: 2pt + slate)
