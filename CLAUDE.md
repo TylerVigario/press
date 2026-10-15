@@ -67,12 +67,15 @@ a Typst package, and the audit treats a directory holding a `typst.toml` as a pa
 only once its checks ran against the current main. Pull requests squash-merge with the title
 as the commit, so the title must be a conventional commit; the type decides the next version.
 
-**CI** builds and audits the calibration sheet, compiles each template in place and as
-`new.sh` scaffolds it, rebuilds to prove an unchanged page keeps its stamp, does all of that
-again at the oldest typst and just press accepts, builds the release bundle and installs it in
-a scratch repository to scaffold, build and audit there with no just, runs both installers
-against the bundle served locally (install, update, refusals), and runs shellcheck,
-markdownlint (lines ≤ 100), actionlint, a JSON parse, an invisible-character scan and CodeQL.
+**CI** builds and audits the calibration sheet and the audit's known cases in
+`.github/audit-cases/` (a `pass-*` document is a false finding fixed once, a `fail-*` one a
+fault a pass must catch), compiles each template in place and as `new.sh` scaffolds it,
+rebuilds to prove an unchanged page keeps its stamp, does all of that again at the oldest typst
+and just press accepts, builds the release bundle and installs it in a scratch repository to
+scaffold, build and audit there with no just, runs both installers against the bundle served
+locally (install, update, refusals), and runs shellcheck, markdownlint (lines ≤ 100),
+actionlint, a JSON parse, an invisible-character scan and CodeQL. A false finding fixed gets a
+`pass-*` case.
 The tools CI installs are pinned by hand, with digests; the weekly Pins workflow opens an issue
 for each release a pin is behind (`sh .github/pins.sh` shows the same comparison).
 

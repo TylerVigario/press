@@ -9,7 +9,9 @@ name: CI
 #                            stands or as the document new.sh scaffolds from it.
 #   Documents pass the audit press's own passes, run against its calibration sheet:
 #                            typst warnings that exit 0 and ship, fonts that are
-#                            not vendored, and ink inside the unprintable band.
+#                            not vendored, and ink inside the unprintable band; and
+#                            against .github/audit-cases/, documents with one known
+#                            answer, so a false finding fixed once stays fixed.
 #   The release bundle installs and works
 #                            the archives the release attaches, built from this
 #                            tree: the kit and nothing of press's machinery,
@@ -91,6 +93,8 @@ jobs:
           # check compiles the document through stamp.sh, as build does, so it needs
           # no build ahead of it. A compile failure is Documents build's to report.
           just check calibration.typ
+      - name: The audit passes and refuses its known cases
+        run: sh .github/audit-cases.sh
 
   bundle:
     name: The release bundle installs and works
