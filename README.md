@@ -103,11 +103,15 @@ just --list                      # every recipe, self-documenting
 just build docs/example.typ      # -> print/docs/example.pdf, and a line saying what it made
 just watch docs/example.typ      # a preview on every save -> print/docs/example.watch.pdf
 just check docs/example.typ      # audit the PDF for silent font failures
-just all                         # every .typ under docs/
+just all                         # every document under docs/ (not its parts; see below)
 just all recipes protocols pcp   # …or under whatever directories you use
 just new docs/next-doc
 just clean
 ```
+
+**A document is one file or a directory.** `all` builds documents, not the files they are made
+of: a file whose name starts with `_` is a part, and so is everything in a directory that holds
+a `main.typ` other than that `main.typ` — the shape `just new` makes, chapters beside it.
 
 ### Requirements
 

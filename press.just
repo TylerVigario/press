@@ -157,6 +157,17 @@ watch doc: _typst-version
 # quietly make that false — a repo organised by meaning rather than by kind
 # should not have to restructure, or write its own `all`, to use this.
 #
+# DOCUMENTS, NOT THE FILES THEY ARE MADE OF. A document can #include chapters or #import
+# a file of its own definitions, and those compiled on their own fail or print a stray
+# page. So two kinds of .typ file are parts, not documents, and are not built:
+#
+#   · one whose name starts with _ — docs/_shared.typ, imported by several documents;
+#   · any file in a directory that holds a main.typ, other than that main.typ, at any
+#     depth below it — the shape `just new` makes, docs/book/main.typ beside its chapters.
+#
+# A directory named on the command line is a place to look, not a document, so a main.typ
+# directly inside one (docs/main.typ) makes nothing else in it a part.
+#
 # Fails loudly on an empty result rather than reporting a green build that
 # produced nothing — the state a repo is in before it has adopted any layout,
 # and the one where a false success is most expensive. The xargs form (rather
@@ -185,7 +196,7 @@ watch doc: _typst-version
 #
 # The directories reach the shell as its own arguments, "$@", not as {{ dirs }}: that is
 # one string of every name joined by spaces, so a name with a space in it would split.
-[doc("Compile every document under the given directories (default docs/)")]
+[doc("Compile every document under the given directories (default docs/), not its parts")]
 [script]
 [working-directory(root)]
 [positional-arguments]
@@ -194,16 +205,33 @@ all +dirs='docs': _typst-version
     for d in "$@"; do
         test -d "$d" || { echo "press: no such directory: $d" >&2; exit 1; }
     done
-    n=$(find "$@" -name '*.typ' | wc -l)
-    test "$n" -gt 0 || { echo "press: no .typ files in: $*" >&2; exit 1; }
+    docs=$(mktemp)
     PRESS_TALLY=$(mktemp)
     export PRESS_TALLY
+    trap 'rm -f "$docs" "$PRESS_TALLY"' EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
+    roots=$(printf '%s\n' "$@" | sed 's#/*$##')
+    find "$@" -name '*.typ' -type f | LC_ALL=C sort | ROOTS=$roots awk '
+        BEGIN { n = split(ENVIRON["ROOTS"], r, "\n"); for (i = 1; i <= n; i++) root[r[i]] = 1 }
+        { f[++k] = $0
+          if ($0 ~ /\/main\.typ$/) { d = $0; sub(/\/main\.typ$/, "", d); if (!(d in root)) proj[d] = 1 } }
+        END {
+            for (i = 1; i <= k; i++) {
+                base = f[i]; sub(/.*\//, "", base)
+                if (base ~ /^_/) continue
+                part = 0
+                for (p in proj) if (index(f[i], p "/") == 1 && f[i] != p "/main.typ") { part = 1; break }
+                if (!part) print f[i]
+            }
+        }' > "$docs"
+    n=$(wc -l < "$docs" | tr -d ' ')
+    test "$n" -gt 0 || { echo "press: no documents in: $*" >&2; exit 1; }
     rc=0
-    find "$@" -name '*.typ' -print0 | sort -z \
+    tr '\n' '\000' < "$docs" \
         | xargs -0 -n1 {{ quote(just_executable()) }} --justfile {{ quote(press_root / "press.just") }} --set root {{ quote(root) }} build \
         || rc=$?
     sh {{ quote(press_root / "tools" / "report.sh") }} --summary "$PRESS_TALLY" "$n"
-    rm -f "$PRESS_TALLY"
     exit "$rc"
 
 # Scaffold a new document from the press skeleton
