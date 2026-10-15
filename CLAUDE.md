@@ -65,7 +65,7 @@ git submodule update --init --recursive
 ```sh
 just build docs/services.typ     # -> print/docs/services.pdf, and a line saying what it made
 just watch docs/services.typ     # recompile on save -> print/docs/services.watch.pdf
-just all                         # every .typ under docs/ (fails if there are none)
+just all                         # every document under docs/ (fails if there are none)
 just all recipes protocols pcp   # any directories — docs/ is a default, not a layout
 just check docs/services.typ     # audit the built PDF
 just new docs/thing              # -> docs/thing/main.typ, from the skeleton
@@ -83,6 +83,10 @@ after `brew install grep`). On Windows, Git's `sh` puts its bundled Xpdf `pdftot
 recipe, so set `PRESS_PDFTOTEXT` there; `check` refuses anything that is not poppler.
 
 **Paths are relative to the repo root**, from whichever directory you invoke.
+
+**`all` builds documents, not their parts.** A file named `_*.typ` is a part, and so is every
+file in a directory holding a `main.typ`, other than that `main.typ`, at any depth. A
+directory named on the command line counts as a place to look, not a document.
 
 **Page orientation and size are the document's.** The presets are portrait US Letter;
 landscape is `#set page(..dense, flipped: true)`.
