@@ -7,13 +7,13 @@
 # A consuming repo that does use just carries a one-line justfile. If it has no recipes of its
 # own:
 #
-#   import 'vendor/press/press.just'      ->  just build docs/x.typ
+#   import 'third_party/press/press.just'     ->  just build docs/x.typ
 #
 # If it already has its own — and `build`, `all` and `clean` are names most
 # repos will already be using — import HARD-ERRORS on the duplicate. Use a
 # module instead, which namespaces them:
 #
-#   mod press 'vendor/press/press.just'   ->  just press build docs/x.typ
+#   mod press 'third_party/press/press.just'  ->  just press build docs/x.typ
 #
 # Every recipe runs in the consumer's root, [working-directory(root)], so both forms
 # behave identically: a module would otherwise run with press's own directory as the

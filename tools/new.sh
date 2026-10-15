@@ -3,13 +3,13 @@
 #
 # Run from the project root, by whatever runs the repo's builds:
 #
-#   sh vendor/press/tools/new.sh docs/thing        -> docs/thing/main.typ
+#   sh third_party/press/tools/new.sh docs/thing    -> docs/thing/main.typ
 #
 # The name is a directory, so it takes no .typ: a document grows chapters beside its
 # main.typ. The template imports press relatively, so it compiles where it stands; the copy
-# imports press by its path from the project root (/vendor/press/lib.typ), which is the form
-# a document anywhere under the root can use. press must sit under the root, since typst reads
-# no file outside it.
+# imports press by its path from the project root (/third_party/press/lib.typ), which is the
+# form a document anywhere under the root can use. press must sit under the root, since typst
+# reads no file outside it.
 set -eu
 
 [ $# -eq 1 ] || { echo "usage: sh <press>/tools/new.sh <directory>" >&2; exit 2; }
@@ -25,7 +25,7 @@ esac
 [ ! -e "$n" ] || { echo "press: $n already exists" >&2; exit 1; }
 
 # press's directory, as the path this script was run by, compared logically with the root:
-# `cd ... && pwd` gives both in the shell's own form, so a symlinked vendor directory and
+# `cd ... && pwd` gives both in the shell's own form, so a symlinked directory above press and
 # Windows' C:/ paths line up.
 press=$(dirname "$0")/..
 root=$(pwd)

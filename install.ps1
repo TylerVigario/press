@@ -3,7 +3,7 @@
 #
 #   powershell -NoProfile -c "irm https://github.com/TylerVigario/press/releases/latest/download/install.ps1 | iex"
 #
-# Run it in the directory press lives in (vendor\, say), from PowerShell or cmd.exe. It
+# Run it in the directory press lives in (third_party\, say), from PowerShell or cmd.exe. It
 # downloads its release's press.zip, refuses the archive unless its SHA-256 is the one written
 # below, unpacks it beside press\ and swaps it in whole, so a file a release removed does not
 # linger. A press\ that is not a press kit, or is a git checkout, is left alone, and nothing is
