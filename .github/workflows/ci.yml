@@ -107,6 +107,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # The history, not one commit. bundle.sh takes its time from the newest commit that
+          # is not a release's own, and on the push of a release: commit that commit is all a
+          # one-commit checkout holds.
+          fetch-depth: 0
           persist-credentials: false
       - uses: ./.github/actions/typst-toolchain
         with:
