@@ -87,7 +87,8 @@ oldest-toolchain job installs exactly those, from the toolchain action's `OLDEST
 refuses to run if they disagree. Raising a floor is a deliberate edit in both places.
 
 **Versions are tags.** Nothing in the tree is named for a version, so a change is made where
-the file is, with nothing to copy or rename.
+the file is, with nothing to copy or rename. Only the Release workflow writes `press.toml`'s
+version: `.github/version-check.sh`, in CI and before a release decides, refuses any other.
 
 **Releasing is one run of the Release workflow, dry run first.** It derives the version from
 the commits, gates on CI, writes the version into `press.toml` and `CHANGELOG.md` into a
