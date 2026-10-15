@@ -1,14 +1,12 @@
 # press
 
-A Typst package and build recipes for making documents: page presets, a type and colour
-system, ready-made parts, and a build that stamps and checks what it makes. It serves anything
-from a one-page information sheet to a conversation piece, a manual or a book, and one PDF
-serves both the screen and the printer. Anyone can use it, under the AGPL (see
-[Licence](#licence)).
+A scaffolding kit for Typst documents: page presets, a type and colour system, ready-made
+parts, a template, and tools that stamp and audit what you build. It serves anything from a
+one-page information sheet to a conversation piece, a manual or a book, and one PDF serves both
+the screen and the printer. Anyone can use it, under the AGPL (see [Licence](#licence)).
 
-> **Working on this with an agent?** Point it at [`CLAUDE.md`](CLAUDE.md) — install,
-> build, authoring vocabulary, how to version the package, and the traps that have
-> already bitten once.
+This README ships in every release. Working on press itself? Its repository's
+[`CLAUDE.md`](https://github.com/TylerVigario/press/blob/main/CLAUDE.md) covers that.
 
 ## Why this exists
 
@@ -18,15 +16,15 @@ recognise are decided once, not again in every document.
 
 Typst makes a good document easy to write and hard to keep consistent. Left alone, each one
 re-decides its page, its type scale and how a warning looks, and the copies of those decisions
-drift apart. press holds them in one place that every repository making documents vendors, so
-a new document starts from a ready-made template and ready-made parts, and a fix made for one
+drift apart. press holds them in one kit every repository making documents can take, so a new
+document starts from a ready-made template and ready-made parts, and a fix made for one
 document reaches all of them at the next release. It offers rather than governs: a document
 takes the parts it wants and composes its own page.
 
-It is more than styling. `just build` stamps each document with when its content last changed
-and says what it made, so a printed copy can be checked against the current one. `just check`
-catches the font and glyph failures typst lets through without a word. A document is built the
-same way on every machine, from fonts that ship with press.
+It is more than styling. Its stamp marks each document with when its content last changed, so
+a printed copy can be checked against the current one, and its audit catches the font and
+glyph failures typst lets through without a word. A document is built the same way on every
+machine, from fonts that ship with press.
 
 **One output, read anywhere.** A press document is a single PDF that reads on a screen and
 prints true, so every part is made for both:
@@ -49,133 +47,242 @@ prints true, so every part is made for both:
 **From a sheet to a book.** The same tokens and parts carry a one-page reference card, a
 proposal, a manual and a book. Short documents are best served today. press grows from the
 documents that use it: a template or part is added when a real document needs it, and from
-the next release every document can use it. Long-form parts (contents, figures, book trim
-sizes and facing pages) are among the next.
+the next release every document can use it.
 
-## Using it
+## Install
 
-Add it to a project:
+press is a folder of files your repository holds. From the directory it should live in —
+`vendor/`, say — one line, with the tools your system already has, unpacks `press/` there:
 
-```sh
-git submodule add https://github.com/TylerVigario/press vendor/press
-```
+| system | line |
+|---|---|
+| Linux, macOS | `curl -fsSL https://github.com/TylerVigario/press/releases/latest/download/press.tar.gz \| tar -xz` |
+| Linux without curl | `wget -qO- https://github.com/TylerVigario/press/releases/latest/download/press.tar.gz \| tar -xz` |
+| Windows, PowerShell 5.1 or 7 | `$ProgressPreference='SilentlyContinue'; Invoke-WebRequest https://github.com/TylerVigario/press/releases/latest/download/press.zip -OutFile press.zip; Expand-Archive press.zip -DestinationPath .; Remove-Item press.zip` |
 
-Clone a project that already uses it:
+For a fixed version, write `download/v<version>` in place of `latest/download`. Each release
+also carries `SHA256SUMS` for both archives.
 
-```sh
-git clone --recurse-submodules <project>
-# or, after a plain clone:
-git submodule update --init --recursive
-```
+**Commit `press/`.** The copy your repository holds is the version it builds with, and
+`press/press.toml` says which. To move to another release, delete `press/` and run the line
+again: the diff shows what changed.
 
-Import it:
+**Never stream the zip into `tar`.** A zip is read from its end: piped into `tar`, files are
+dropped silently and it still exits 0. Pipe the tarball; unpack the zip from a file.
+
+## Use it
+
+A document imports press by its path from the project root:
 
 ```typst
 #import "/vendor/press/lib.typ": *
 ```
 
-Build it. A consuming repo carries a one-line `justfile`:
-
-```just
-import 'vendor/press/press.just'
-```
-
-or, if it already has recipes of its own:
-
-```just
-mod press 'vendor/press/press.just'   # -> just press build docs/example.typ
-```
-
-`just press` lists the recipes under `mod`. Under `import`, `just --list` does: just takes a
-bare `just`'s recipe from the consumer's own justfile, and a one-line justfile has none.
-
-Name the time zone `updated()` prints in, once per repo: an IANA name, or `"UTC"` for documents
-read across time zones. Unset, it is the zone of whichever machine builds.
-
-```just
-export PRESS_TZ := "America/Los_Angeles"
-```
-
-and then, identically on Linux and Windows:
+and builds with plain typst, from whatever runs your builds:
 
 ```sh
-just --list                      # every recipe, self-documenting
-just build docs/example.typ      # -> print/docs/example.pdf, and a line saying what it made
-just watch docs/example.typ      # a preview on every save -> print/docs/example.watch.pdf
-just check docs/example.typ      # audit the PDF for silent font failures
-just all                         # every document under docs/ (not its parts; see below)
-just all recipes protocols pcp   # …or under whatever directories you use
-just new docs/next-doc
-just clean
+typst compile --root . --font-path vendor/press/fonts --ignore-system-fonts docs/guide.typ print/guide.pdf
 ```
 
-**A document is one file or a directory.** `all` builds documents, not the files they are made
-of: a file whose name starts with `_` is a part, and so is everything in a directory that holds
-a `main.typ` other than that `main.typ` — the shape `just new` makes, chapters beside it.
+The same three settings can come from the environment instead — `TYPST_ROOT=.`,
+`TYPST_FONT_PATHS=vendor/press/fonts`, `TYPST_IGNORE_SYSTEM_FONTS=true` — which also serves
+`typst watch` and an editor. press must sit under the project root, since typst reads no file
+outside it. **typst does not create the output directory**; press's stamp tool does.
+
+press's tools are plain `sh` scripts, called the same way from any runner:
+
+| tool | does |
+|---|---|
+| `sh vendor/press/tools/new.sh docs/guide` | scaffolds `docs/guide/main.typ` from the template, its import written for where press sits |
+| `sh vendor/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory |
+| `sh vendor/press/tools/check.sh <doc> <pdf> vendor/press <flags>` | audits it: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text printed on text |
+
+`<flags>` are the three above: `--root . --font-path vendor/press/fonts --ignore-system-fonts`.
+
+The stamp prints in **`PRESS_TZ`**, an IANA zone name set for every build
+(`PRESS_TZ=America/Los_Angeles`, or `UTC` for documents read across zones), so every machine
+prints the same time and an unchanged page stays unchanged wherever it is built.
+
+### From your runner
+
+**npm** — on Windows npm runs scripts with `cmd.exe`, where `mkdir -p` makes a folder named
+`-p`; let `stamp.sh` make the output directory instead:
+
+```json
+"scripts": {
+  "docs": "sh vendor/press/tools/stamp.sh docs/guide.typ print/guide.pdf --root . --font-path vendor/press/fonts --ignore-system-fonts",
+  "docs:check": "sh vendor/press/tools/check.sh docs/guide.typ print/guide.pdf vendor/press --root . --font-path vendor/press/fonts --ignore-system-fonts"
+}
+```
+
+**make:**
+
+```make
+FLAGS = --root . --font-path vendor/press/fonts --ignore-system-fonts
+print/%.pdf: docs/%.typ
+	sh vendor/press/tools/stamp.sh $< $@ $(FLAGS)
+```
+
+**just** — `press.just` is ready-made recipes for a repository that already uses just. One
+line in its justfile: `import 'vendor/press/press.just'`, or `mod press
+'vendor/press/press.just'` where it has recipes of its own (`import` refuses a recipe name it
+already has). Then:
+
+```sh
+just build docs/guide.typ        # -> print/docs/guide.pdf, and a line saying what it made
+just watch docs/guide.typ        # a preview on every save -> print/docs/guide.watch.pdf
+just check docs/guide.typ        # the audit
+just all                         # every document under docs/, or under the directories named
+just new docs/next-doc           # scaffold
+just clean                       # delete print/
+```
+
+Under `mod` it is `just press build …`, and `just press` lists the recipes; under `import`,
+`just --list` does. `all` builds documents, not their parts: a file named `_*.typ` is a part,
+and so is everything beside a `main.typ`, at any depth. Export `PRESS_TZ` from the justfile.
 
 ### Requirements
 
-- **typst** 0.14 or newer, **just** 1.55 or newer (`dnf install just`,
-  `winget install Casey.Just`) and **`sh`** on `PATH`. On Windows `sh` comes from Git for
-  Windows. An older typst or just is refused with a message naming the version it needs.
-- `check` also needs **poppler** (`pdffonts`, `pdftotext`, `pdftoppm`), a **Python**, and a
-  **grep with PCRE** (GNU grep; on macOS, `brew install grep`). Where `PATH` finds the wrong
-  one, name it: `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`, `PRESS_PDFTOPPM`, `PRESS_PYTHON`,
-  `PRESS_GREP` (`ggrep` on macOS).
+- **typst 0.14 or newer.** An older one is refused with a message naming both versions.
+- **`sh`** for the tools. On Windows it comes with Git for Windows.
+- **The audit** also needs poppler (`pdffonts`, `pdftotext`, `pdftoppm`), a Python, and a grep
+  with PCRE (GNU grep; on macOS, `brew install grep`). Where `PATH` finds the wrong one, name
+  it: `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`, `PRESS_PDFTOPPM`, `PRESS_PYTHON`, `PRESS_GREP`
+  (`ggrep` on macOS). The audit refuses a `pdftotext` that is not poppler's.
+- **just 1.55 or newer**, only to use `press.just`.
 
-## Printing
+### On Windows
 
-Print at **100% — "Actual size"**, never "Fit to page". The page is exactly US Letter and
-keeps all ink at least 0.5in from every edge.
+- `winget install Typst.Typst Git.Git oschwartz10612.Poppler` (and `Casey.Just` for
+  `press.just`), and a Python 3 on `PATH` as `python` or `python3`.
+- The tools run in Git's `sh`, in `C:\Program Files\Git\bin`. Git's default PATH choice adds
+  only `Git\cmd`, which has no `sh`: add the `bin` directory to your user `PATH`.
+- winget does not put poppler's programs on `PATH`, and inside `sh` Git's own Xpdf
+  `pdftotext` would come first anyway. Set `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS` and
+  `PRESS_PDFTOPPM` in your user environment, with forward slashes, to the three programs in
+  poppler's `Library/bin` (under `%LOCALAPPDATA%/Microsoft/WinGet/Packages/`).
 
-`calibration.typ` prints the text inks at the four smallest sizes, the pale tints, the
-rule weights and both solid bands, where a printer gives out first. Print it on the paper and
-printer you actually use — once at normal quality and once in economy mode, duplexed on the
-long edge — to find where your hardware gives out before a real document does.
+## Writing a document
 
-## What lives where
+**Import the vocabulary, then compose the page yourself.** press sets nothing until a document
+asks: the document owns its page and takes the parts that serve it. **Copy the template, do not
+import it** — composition belongs to the document.
 
-press sets nothing unless a document calls it. A document owns its page and takes whichever
-parts serve it.
+**Show rules are the document's to install.** One with commands in it wants the first two, and
+one with links the third:
 
-| | lives in |
-|---|---|
-| tokens — palette, type scale, faces, page presets | the package |
-| vocabulary — `unit`, `chip`, `band-strong`, `decision`, `matrix`, `flow`, `callout`, `code`, `link-note` | the package |
-| composition — section order, page choice, diagrams, depth layering | the document |
-| fonts | `fonts/`, a build input rather than styling API |
+```typ
+#show raw: set text(font: face-mono, size: sz.micro)
+#show raw.where(block: true): code
+#show link: link-note
+```
 
-## Conventions
+**Every document sets its body font**, `#set text(font: face-text, ...)` — without it the body
+renders in typst's own Libertinus Serif, without a word — and **names itself once**, with
+`#set document(title: [...], author: "...")`. A PDF viewer shows the title, and the template
+prints it in its header and footer from `document.title`.
+
+**A longer document** is a directory: `new.sh` makes `docs/handbook/main.typ`, and chapters go
+beside it, `#include`d from it. Switch the page to `..reading`, use typst's headings and
+`#outline()`, and import press in every chapter that uses its parts — `#include` does not carry
+`main.typ`'s imports. **A4** is `#set page(..dense, paper: "a4")`: the preset margins are
+absolute, and the audit measures them on any page size. **Landscape** is
+`#set page(..dense, flipped: true)`.
+
+### The six conventions
 
 Tokens alone do not make a document readable. These do:
 
-1. **Meat first.** Whatever must be acted on goes at the top. Attention is spent before it is
-   earned back.
-2. **One idea per unit, opened by a bold lead.** That lead is the highlight, pre-made.
+1. **Meat first.** Whatever the reader must act on goes at the top.
+2. **One idea per unit, opened by a bold lead.** The lead is the highlight, pre-made.
 3. **Units are self-contained.** Sections get read out of order and returned to weeks later.
 4. **Bands carry a role** — decide / design / reference — so skipping is deliberate.
-5. **Colour is state, never decoration**, and it gets a legend.
-6. **No length cap.** If a unit needs depth, give it depth, or push the depth to a second
-   layer. Never delete content to fit a layout — if it does not fit, *the layout* changes.
+5. **Colour is state, never decoration, and it gets a legend.**
+6. **No length cap.** If a unit needs depth, give it depth or push it to a second layer — never
+   delete it to fit a layout. If it does not fit, *the layout* changes.
 
-## Fonts
+From 1 and 6: for a document someone acts on, **the act layer comes first, the depth layer
+after a `#pagebreak()`**, with an italic line saying nothing past it is needed to act. The
+split is by role, not page number. The conventions are for a page read by a person: a document
+whose first reader is a parser — an ATS résumé — stays single-column and takes press's tokens
+and fonts, not its layout.
 
-Use the face constants — `face-sans`, `face-text`, `face-display`, `face-mono` — never font
-names as strings. A missing font only warns, and a missing weight or glyph says nothing at
-all; **read [`FONTS.md`](FONTS.md) before using any symbol**, and run `just check`.
+### Vocabulary
+
+Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"bad"` (red).
+
+| Call | For |
+|---|---|
+| `unit(label, tone, lead, body, caps:, breakable: false)` | The workhorse. One idea: label, bold lead, body. |
+| `units(..items, pack: "stacks", gutter:, spacing:)` | A group of units. `"stacks"`: two columns balanced by measured height. `"grid"`: rows aligned, when the pairing means something. `"single"`: one column. |
+| `band-strong(title, role, color:, caps:)` | Section header carrying its role. |
+| `band(label, color: slate)` | Lighter section header. |
+| `titlebar(title, meta, color:, face:, size:)` | Document head with right-aligned meta. |
+| `eyebrow(body, color:, caps:)` | Small tracked-out uppercase label. |
+| `chip(label, tone)` | Inline state pill — build legends from these. |
+| `callout(body, tone: "note", label: none, size:)` | Aside that must not be missed. |
+| `panel(body, label: none, color: slate)` | Boxed block, no tone semantics. |
+| `code(body, breakable: false)` | Code-block treatment; the document installs it as a show rule. |
+| `link-note` | Show rule for links: coloured and underlined, address footnoted for paper. |
+| `item(n, title, body, color:, size:)` | Numbered step. |
+| `matrix(head, ..rows)` | Two-column comparison table. |
+| `sheet(cols, head, ..rows, size:)` | Wide data table — any column count, zebra rows, header repeats across pages. |
+| `flow(..steps)` | Left-to-right stage sequence. |
+| `decision(n, q, note, color: bad)` / `dbadge(n, color:)` | Open question needing an answer. |
+| `seedepth(what, at: none)` | Pointer to the depth layer. Given a label it looks up the page and links to it — never type a page number. |
+| `stamp(body)` | Closing line — provenance, or a last caution. |
+| `updated()` | When the content last changed, as the stamp records it. For the footer. |
+| `press-version` | The version of press a document was built with. Never typed by hand. |
+
+**Tokens.** Colours `ink`, `ink-soft`, `ink-faint`, `rule-hair`, `rule-mid`, `paper-tint`,
+`slate`, `slate-tint`, `steel`, and `ok`/`warn`/`bad` each with a `-tint`. Faces `face-text`
+(Open Sans), `face-display` (Montserrat), `face-sans` (Liberation Sans), `face-mono`
+(Liberation Mono) — use these, never font names as strings. Sizes `sz.micro` 8.6 · `fine` 9.4
+· `small` 10.2 · `body` 11 · `lead` 12.5 · `head` 14.5 · `title` 21 · `hero` 28. Page presets
+`dense`, `reading`, `card`, spread with `#set page(..card)`. When the vocabulary does not fit,
+build it in the document.
+
+### Traps
+
+- **Fonts fail in three ways, and only one warns.** A missing *family* warns and still ships;
+  a missing *weight or style* substitutes the nearest face silently; a missing *glyph* is drawn
+  from typst's own fonts silently (`→` is absent from Open Sans). Only the audit catches them.
+  **Read [`FONTS.md`](FONTS.md) before using any symbol.**
+- **Some symbols are in no vendored face.** `✓ ✗ ▸` render from typst's NewCMMath, `⚠ ⚡ ☐`
+  from DejaVuSansMono, and **`⛔` and `📋` vanish** from the page. Build a probe and audit it.
+- **`unit`, `band-strong` and `eyebrow` uppercase their labels.** "pH" becomes "PH", "µS"
+  becomes "ΜS" (a capital Mu). Pass `caps: false` whenever case means something.
+- **A link in a heading is footnoted twice once there is an outline.** The contents repeat the
+  heading and its footnote. Keep links out of headings.
+- **A table that crosses a page loses its header unless it uses `table.header`.** `sheet`
+  does; a hand-rolled `table()` does not.
+- **Markdown habits break typst:** `**bold**` warns and vanishes (use one `*`), `+ thing` at a
+  line start becomes a list, `/ thing` is a compile error. Reword rather than escape.
+
+## Printing
+
+Print at **100% — "Actual size"**, never "Fit to page". The presets are exactly US Letter and
+keep all ink at least 0.5in from every edge; a document that overrides the margin or places
+content absolutely can break that, and the audit measures it.
+
+`calibration.typ` prints the text inks at the four smallest sizes, the pale tints, the rule
+weights and both solid bands, where a printer gives out first. Build it like any document
+(`vendor/press/calibration.typ`), and print it on the paper and printer you actually use —
+once at normal quality and once in economy mode, duplexed on the long edge — to find where your
+hardware gives out before a real document does.
 
 ## Versioning
 
-press is a set of files, imported by path, so the copy a repo holds is the version it builds
-with; `press.toml` says which. A repo moves only to a release tag, never to a commit on `main`
-between releases. 0.1.0 was released as the Typst package `@vts/press:0.1.0` and lives on in
-its tag, v0.1.0; a repo moving past it changes each import to `/vendor/press/lib.typ` in the
-same commit.
+The copy of press a repository holds is the version it builds with. Move only to a release,
+never to a commit on `main` between releases. 0.1.0 was the Typst package `@vts/press:0.1.0`,
+used from a git submodule; a repository moving past it replaces the submodule with the kit
+and changes each import to `/vendor/press/lib.typ` in the same commit.
 
 ## Licence
 
 Copyright © 2026 Tyler Vigario. **AGPL-3.0-or-later** — see [`LICENSE`](LICENSE). What you
-typeset with it is yours: a compiled PDF carries no licence from the tool.
+typeset with it is yours: a compiled PDF carries no licence from the kit.
 
 The faces under `fonts/` keep their own terms — Open Sans (Apache-2.0), Liberation
-(OFL-1.1-RFN), Montserrat (OFL-1.1). See [`FONTS.md`](FONTS.md).
+(OFL-1.1-RFN), Montserrat (OFL-1.1) — with each licence's text in `fonts/licenses/`. See
+[`FONTS.md`](FONTS.md).
