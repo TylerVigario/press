@@ -89,7 +89,7 @@ typst_flags := "--root . --package-path " + quote(press_root / "packages") + \
 
 [private]
 default:
-    @just --list --unsorted
+    @{{ quote(just_executable()) }} --list --unsorted
 
 # Refuse a typst older than typst_minimum, naming both versions. Without it an old typst
 # fails on the first flag it lacks, as "unexpected argument '--deps'". Every recipe that
@@ -153,6 +153,9 @@ watch doc: _typst-version
 # whole recipe: a loop's exit status is only its last iteration's, so doc 1
 # could fail and doc 9 succeed and `all` would still exit 0.
 #
+# It runs the `just` that is running it (just_executable()), not whichever one PATH finds
+# first: another just ahead on PATH would otherwise build every document.
+#
 # It reaches `build` through --justfile rather than as a bare `just build`,
 # because under `mod press` the recipe is `press build` and a bare call does not
 # resolve — it looks in the CONSUMER's justfile and fails with "does not contain
@@ -186,7 +189,7 @@ all +dirs='docs': _typst-version
     export PRESS_TALLY
     rc=0
     find "$@" -name '*.typ' -print0 | sort -z \
-        | xargs -0 -n1 just --justfile {{ quote(press_root / "press.just") }} --set root {{ quote(root) }} build \
+        | xargs -0 -n1 {{ quote(just_executable()) }} --justfile {{ quote(press_root / "press.just") }} --set root {{ quote(root) }} build \
         || rc=$?
     sh {{ quote(press_root / "tools" / "report.sh") }} --summary "$PRESS_TALLY" "$n"
     rm -f "$PRESS_TALLY"
