@@ -8,6 +8,26 @@ verbatim. 0.1.0 at the bottom is hand-written and reads "Initial release." becau
 release has no changes to list — there is nothing it changed from.
 
 - - -
+## [v0.3.0](https://github.com/TylerVigario/press/compare/v0.2.0..v0.3.0) - 2026-10-15
+#### Features
+- a document may accept a finding it keeps on purpose, in its own source, with a reason (#103) - ([b8ddbae](https://github.com/TylerVigario/press/commit/b8ddbaea7b96b987f8aac770101e97c79565b240)) - Tyler Vigario, Claude Opus 5.5
+- scan() marks a page the document did not set, and the audit leaves it out (#102) - ([14ae7c0](https://github.com/TylerVigario/press/commit/14ae7c0383d6a2d66f0ac27d18cbeb916b97fe25)) - Tyler Vigario, Claude Opus 5.5
+- press's templates are functions a document imports and applies, brief and letter (#101) - ([5dd4866](https://github.com/TylerVigario/press/commit/5dd4866fbbbf7e303e58047d4c4f32778e33a71d)) - Tyler Vigario, Claude Opus 5.5
+- every build is audited, and a finding fails it with the PDF still written (#99) - ([df0ba1d](https://github.com/TylerVigario/press/commit/df0ba1dadbe666d373b82e925e518893ac156abe)) - Tyler Vigario, Claude Opus 5.5
+- press has a letter: letterhead, re, signature, enclosures and continued, and a template (#96) - ([99f0254](https://github.com/TylerVigario/press/commit/99f02545b325b261cd628507433e8e14beba7e4a)) - Tyler Vigario, Claude Opus 5.5
+#### Bug Fixes
+- only a document's own file accepts a finding, and a pass that cannot run is never accepted (#106) - ([0a251af](https://github.com/TylerVigario/press/commit/0a251afc2a9b4799e1014e271956a52a28f10881)) - Tyler Vigario, Claude Opus 5.5
+- bundle.sh says what to fetch when a clone holds only a release's own commit (#105) - ([2a660ff](https://github.com/TylerVigario/press/commit/2a660ff6dc77910c1bc54d4988adc735f9f3738c)) - Tyler Vigario, Claude Opus 5.5
+- the glyph check leaves out characters in comments, which never reach the page (#104) - ([d829bd1](https://github.com/TylerVigario/press/commit/d829bd127b685dbf835267d7800f390689ecd452)) - Tyler Vigario, Claude Opus 5.5
+- a footnote marker beside or between words is not reported as text printed on text (#98) - ([1e889ff](https://github.com/TylerVigario/press/commit/1e889ff59888cff82b021d805d91821c4306b8e1)) - Tyler Vigario, Claude Opus 5.5
+#### Documentation
+- the audit is described as everything it checks, and build's summary as it reads (#108) - ([890d134](https://github.com/TylerVigario/press/commit/890d13497bd53ba2f4445c05d2cb1a428a22e7ba)) - Tyler Vigario, Claude Opus 5.5
+#### Continuous Integration
+- press.toml's version is refused unless the last release wrote it (#107) - ([f5e7961](https://github.com/TylerVigario/press/commit/f5e7961714889b78bcfe9b7340c7a4c24594c08c)) - Tyler Vigario, Claude Opus 5.5
+- a release's tag rebuilds the bundle it published, byte for byte (#93) - ([67e5bc0](https://github.com/TylerVigario/press/commit/67e5bc0fc6b56b4c7618293a84acc1de4021fa2c)) - Tyler Vigario, Claude Opus 5.5
+
+- - -
+
 ## [v0.2.0](https://github.com/TylerVigario/press/compare/v0.1.0..v0.2.0) - 2026-10-15
 #### Features
 - each release attaches installers that install or update press/ in place, refusing any archive but the one released (#88) - ([9191fa6](https://github.com/TylerVigario/press/commit/9191fa62a139d155c6ff10f6521bf2ff53a958d4)) - Tyler Vigario, Claude Opus 5.5
