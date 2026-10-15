@@ -102,7 +102,10 @@ def clearance(path):
     return min(minx, w-1-maxx, miny, h-1-maxy) / DPI
 
 def main():
+    # A third argument names the PDF in findings, when the one read is a copy of it: check reads
+    # a copy with every scan hidden (lib.typ's scan()), and reports against the document's PDF.
     pdf, floor = sys.argv[1], float(sys.argv[2])
+    name = sys.argv[3] if len(sys.argv) > 3 else pdf
     rc = 0
     with tempfile.TemporaryDirectory() as tmp:
         for n, page in pages(pdf, tmp):
@@ -110,7 +113,7 @@ def main():
             if c is None:
                 continue
             if c < floor:
-                print(f"press: {pdf} page {n} has ink {c:.2f}in from a paper edge "
+                print(f"press: {name} page {n} has ink {c:.2f}in from a paper edge "
                       f"(floor {floor:.2f}in) — it will clip when printed at actual size",
                       file=sys.stderr)
                 rc = 1

@@ -4,3 +4,6 @@ print/
 # Python bytecode, written beside tools/*.py if one is ever imported rather than run
 # (running a script, as check does, writes none)
 __pycache__/
+
+# The stand-in scan .github/audit-cases.sh compiles for its scan cases, and removes after
+/.github/audit-cases/scan/scan.pdf

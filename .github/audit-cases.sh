@@ -14,11 +14,14 @@ cd "$(dirname "$0")/.."
 
 fail() { echo "audit-cases: $*" >&2; exit 1; }
 tmp=$(mktemp -d)
-trap 'rm -rf "$tmp"' EXIT
+scan=.github/audit-cases/scan/scan.pdf
+trap 'rm -rf "$tmp"; rm -f "$scan"' EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
 flags="--root . --font-path fonts --ignore-system-fonts"
+# The stand-in scan the scan cases place, in typst's own Libertinus, a face press does not vendor.
+typst compile --root . --ignore-system-fonts .github/audit-cases/scan/scan.typ "$scan"
 for f in .github/audit-cases/*.typ; do
     c=$(basename "$f" .typ)
     # shellcheck disable=SC2086  # $flags is a list of flags
