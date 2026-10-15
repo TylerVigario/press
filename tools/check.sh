@@ -95,9 +95,12 @@ done
 allow=$(ls "$press_root/fonts" | sed 's/-[A-Za-z]*\.[to]tf$//;s/\.[to]tf$//' | sort -u | paste -sd'|' -)
 rc=0
 # One temporary directory for every pass, made before any of them and removed however the
-# run ends.
+# run ends. An interrupt exits, and the EXIT trap removes it: a trap on INT that only removed
+# it would let the script carry on without it, into a "does not compile" or a false MISSING.
 tmp=$(mktemp -d "${TMPDIR:-/tmp}/press.XXXXXX")
-trap 'rm -rf "$tmp"' EXIT INT TERM
+trap 'rm -rf "$tmp"' EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 # Recompile FIRST, and keep the compiler's own status.
 #
 # Every check below reads $pdf, so the recompile has to happen before any of them or
