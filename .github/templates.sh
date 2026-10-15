@@ -1,11 +1,11 @@
 #!/bin/sh
-# templates.sh — the template compiles where it stands, and as a document new.sh scaffolds.
+# templates.sh — each template compiles where it stands, and as a document new.sh scaffolds.
 #
 #   sh .github/templates.sh
 #
 # Run by CI's two build jobs, at the pinned typst and at the oldest press accepts.
 #
-# Two compiles, because the template lives two lives. In press's tree it imports press
+# Two compiles of each, because a template lives two lives. In press's tree it imports press
 # relatively, ../lib.typ, so it compiles in place. A repo gets it through tools/new.sh, which
 # copies it with that import rewritten to press's path from the project root. So the second
 # compile is a scratch repo holding a copy of the kit, scaffolded by new.sh exactly as a
@@ -32,13 +32,15 @@ compile() {   # <root> <font dir> <document> <what>
     echo "$4 compiles"
 }
 
-compile . fonts template/main.typ "the template, in place,"
-
 repo="$tmp/repo"
 kit="assets/typst kit/press"
 mkdir -p "$repo/$kit"
 cp -R lib.typ press.toml template fonts tools "$repo/$kit/"
-(cd "$repo" && sh "$kit/tools/new.sh" docs/scaffolded >/dev/null)
-grep -qxF "#import \"/$kit/lib.typ\": *" "$repo/docs/scaffolded/main.typ" \
-    || fail "new.sh did not point the copy's import at /$kit/lib.typ"
-compile "$repo" "$kit/fonts" docs/scaffolded/main.typ "the template, scaffolded by new.sh,"
+for f in template/*.typ; do
+    t=$(basename "$f" .typ)
+    compile . fonts "$f" "template/$t.typ, in place,"
+    (cd "$repo" && sh "$kit/tools/new.sh" "docs/$t" "$t" >/dev/null)
+    grep -qxF "#import \"/$kit/lib.typ\": *" "$repo/docs/$t/main.typ" \
+        || fail "new.sh did not point $t's copy's import at /$kit/lib.typ"
+    compile "$repo" "$kit/fonts" "docs/$t/main.typ" "template/$t.typ, scaffolded by new.sh,"
+done

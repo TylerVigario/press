@@ -37,7 +37,7 @@ needs it, built for both media, and offered to every document from the next rele
 |---|---|
 | `lib.typ` | the parts, tokens and presets a document imports |
 | `press.toml` | `version`, the version last released, and `typst`, the oldest typst press works with |
-| `template/main.typ` | the skeleton `tools/new.sh` copies; imports `../lib.typ` so it compiles in place |
+| `template/` | the skeletons `tools/new.sh` copies, `main.typ` and `letter.typ`; each imports `../lib.typ` so it compiles in place |
 | `calibration.typ` | the print calibration sheet; imports `lib.typ` |
 | `fonts/` | the vendored faces, and `fonts/licenses/` with each one's licence text |
 | `tools/` | `new.sh`, `stamp.sh`, `check.sh`, `report.sh`, and the audit's two Python passes |
@@ -67,7 +67,7 @@ a Typst package, and the audit treats a directory holding a `typst.toml` as a pa
 only once its checks ran against the current main. Pull requests squash-merge with the title
 as the commit, so the title must be a conventional commit; the type decides the next version.
 
-**CI** builds and audits the calibration sheet, compiles the template in place and as
+**CI** builds and audits the calibration sheet, compiles each template in place and as
 `new.sh` scaffolds it, rebuilds to prove an unchanged page keeps its stamp, does all of that
 again at the oldest typst and just press accepts, builds the release bundle and installs it in
 a scratch repository to scaffold, build and audit there with no just, runs both installers
@@ -103,9 +103,11 @@ repository has.
 
 ## Traps
 
-- **The template's import line is an interface.** `new.sh` rewrites exactly
+- **Every template's import line is an interface.** `new.sh` rewrites exactly
   `#import "../lib.typ": *` into the copy's root-relative path, and refuses if the line is not
-  there. Keep the line as it is, or change both.
+  there. Keep the line as it is in each template, or change them and `new.sh` together. A new
+  template is a file in `template/`, which `new.sh`, `templates.sh` and the bundle pick up;
+  add it to the files `bundle-check.sh` requires.
 - **The audit's glyph scan leaves out exactly press's `lib.typ`**, found beside `press.toml`,
   and the files of any Typst package, found beside a `typst.toml`. A document kept in press's
   directory, such as the calibration sheet, is still scanned.
