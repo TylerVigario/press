@@ -59,3 +59,22 @@ echo "audit-cases: the build audits as check does, and without poppler says it d
     "$tmp/b/accepted.pdf" . $flags > "$tmp/out" 2>&1 || fail "a pass that could not run was accepted"
 ! grep -qF "accepted" "$tmp/out" || { cat "$tmp/out" >&2; fail "a pass that could not run was called accepted"; }
 echo "audit-cases: a pass that cannot run fails the audit, whatever the document accepts"
+
+# The build record: a document whose inputs are unchanged is not compiled again, and an edit
+# to it is. typst runs through a wrapper that notes each compile.
+r=$tmp/record
+mkdir -p "$r/bin" "$r/kit"
+cp -R lib.typ press.toml fonts tools "$r/kit/"
+printf '#!/bin/sh\n[ "$1" != compile ] || echo compile >> "%s/compiles"\nexec "%s" "$@"\n' "$r" "$(command -v typst)" > "$r/bin/typst"
+chmod +x "$r/bin/typst"
+printf '#import "/kit/lib.typ": *\n#set document(title: [Record], author: "press")\n#set page(..card)\n#set text(font: face-text)\nOne line.\n' > "$r/doc.typ"
+build() { (cd "$r" && PATH="$r/bin:$PATH" sh kit/tools/stamp.sh doc.typ print/doc.pdf --root . --font-path kit/fonts --ignore-system-fonts 2>/dev/null); }
+build > /dev/null || fail "the record case did not build"
+grep -q "^== doc.typ" "$r/kit/.build-record" 2>/dev/null || fail "a build that passed its audit left no record"
+: > "$r/compiles"
+case $(build) in unchanged*) ;; *) fail "an unchanged document did not build as unchanged" ;; esac
+[ ! -s "$r/compiles" ] || fail "an unchanged document was compiled again"
+echo 'Another line.' >> "$r/doc.typ"
+case $(build) in changed*) ;; *) fail "an edited document did not build as changed" ;; esac
+[ -s "$r/compiles" ] || fail "an edited document was not compiled"
+echo "audit-cases: an unchanged document is not compiled again, and an edited one is"

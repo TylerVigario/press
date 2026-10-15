@@ -413,4 +413,7 @@ done
 if [ "$rc" -eq 0 ] && [ -z "$optional" ]; then
     if [ -z "$hit" ]; then echo "press: $pdf clean"; else echo "press: $pdf passes, with its accepted findings"; fi
 fi
+# For stamp.sh's build record: the audit ran every pass and passed. A build whose audit skipped
+# anything is not recorded, so the next build audits again once the tools are there.
+if [ "$rc" -eq 0 ] && [ -z "$skipped" ] && [ -n "${PRESS_AUDIT_RAN:-}" ]; then : > "$PRESS_AUDIT_RAN"; fi
 exit "$rc"

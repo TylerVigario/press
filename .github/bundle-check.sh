@@ -40,10 +40,10 @@ tar -tzf "$b/press.tar.gz" | sed 's#/$##' | LC_ALL=C sort > "$tmp/tar.list"
 unzip -Z1 "$b/press.zip" | sed 's#/$##' | LC_ALL=C sort > "$tmp/zip.list"
 cmp -s "$tmp/tar.list" "$tmp/zip.list" || { diff "$tmp/tar.list" "$tmp/zip.list" >&2; fail "the archives hold different files"; }
 
-for f in .github CLAUDE.md CHANGELOG.md cog.toml justfile .gitignore; do
+for f in .github CLAUDE.md CHANGELOG.md cog.toml justfile .markdownlint-cli2.jsonc; do
     ! grep -qx "press/$f" "$tmp/tar.list" || fail "press/$f is in the bundle; it is press's own machinery"
 done
-for f in lib.typ press.toml template/main.typ template/letter.typ calibration.typ press.just README.md FONTS.md LICENSE \
+for f in lib.typ press.toml .gitignore template/main.typ template/letter.typ calibration.typ press.just README.md FONTS.md LICENSE \
          tools/new.sh tools/stamp.sh tools/check.sh tools/report.sh fonts/licenses; do
     grep -qx "press/$f" "$tmp/tar.list" || fail "press/$f is missing from the bundle"
 done
