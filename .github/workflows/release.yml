@@ -10,6 +10,13 @@ name: Release
 # bumps, the run says so and releases nothing. Which types bump is cog.toml's to
 # change, not this file's.
 #
+# THE RUN MAY OVERRIDE THE STEP, and only the step. `bump` is auto by default: the
+# commits decide. patch, minor or major replaces how far the version moves from the last
+# release, so the next version is still one step past it: none can be skipped by a typo,
+# and none can name a release that already exists. An override still needs something to
+# ship. With nothing that bumps since the last tag there is nothing to release, whatever
+# the step, although cocogitto itself would bump an empty range.
+#
 # THE VERSION IS WRITTEN AT RELEASE, ONCE. press.toml holds the version last released; the
 # release writes the new one there, in the same commit as the changelog, and the tag names
 # that commit. No version is written before its release, and the immutable tag is what
@@ -32,7 +39,10 @@ name: Release
 # run; do not re-run the failed one. A re-run checks out the commit the original run
 # started from, main has since moved past it, and the forge refuses the commit
 # (expectedHeadOid). A new run starts from main, finds the release already recorded,
-# and goes on to publish. Before the commit lands, a re-run is fine.
+# and goes on to publish it at the version press.toml records, whatever the commits
+# since would derive. Only auto may do that: an override would move past the recorded
+# version and leave it unreleased, so it is refused until that one is out. Before the
+# commit lands, a re-run is fine.
 #
 # WHY AN APP. main takes no direct push (rule 6), and recording the release writes
 # main. The one exemption is a GitHub App installed on this repository alone (rule
@@ -61,6 +71,12 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
+      bump:
+        description: "How far to move from the last release. auto lets the commits decide; patch, minor or major overrides them."
+        required: true
+        type: choice
+        options: [auto, patch, minor, major]
+        default: auto
       dry-run:
         description: "Derive, lint and gate; publish nothing"
         required: false
@@ -96,30 +112,61 @@ jobs:
         id: decide
         env:
           REF: ${{ github.ref }}
+          # Through env, never pasted into the script: GitHub holds a choice to its
+          # options, and the step checks it anyway.
+          BUMP: ${{ inputs.bump }}
         run: |
           set -euo pipefail
           fail() { echo "::error::$*"; exit 1; }
           [ "$REF" = refs/heads/main ] || fail "releases are cut from main, not $REF"
+          case "$BUMP" in
+            auto | patch | minor | major) ;;
+            *) printf '::error::bump is auto, patch, minor or major, not %q\n' "$BUMP"; exit 1 ;;
+          esac
           semver='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
           tagged() { git rev-parse -q --verify "refs/tags/v$1" >/dev/null; }
           newest=$(git tag --list 'v*' | sed 's/^v//' | { grep -E "$semver" || true; } | sort -V | tail -1)
-
-          # cocogitto prints the next version, or a sentence when nothing bumps.
-          # Both exit 0, so the version is read from the output, not the status.
-          out=$(cog bump --auto --dry-run 2>&1) || { printf '%s\n' "$out"; fail "cocogitto could not derive the next version"; }
-          next=$(printf '%s\n' "$out" | { grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' || true; } | tail -1)
-          if [ -z "$next" ]; then
-            printf '%s\n' "$out"
-            echo "release=false" >> "$GITHUB_OUTPUT"
-            echo "Nothing since ${newest:+v}${newest:-the first commit} bumps a version. No release." | tee -a "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          version=${next#v}
-          [[ "$version" =~ $semver ]] || fail "cocogitto derived something that is not a version: $next"
-          ! tagged "$version" || fail "v$version is already released, and a tag here is create-once"
-
           current=$(sed -n 's/^version *= *"\(.*\)"$/\1/p' press.toml)
           [[ "$current" =~ $semver ]] || fail "press.toml has no version line the release can rewrite"
+
+          # derive <auto|patch|minor|major> sets next to the version cocogitto gives, or
+          # to nothing. It prints the next version, or a sentence when nothing bumps;
+          # both exit 0, so the version is read from the output, not the status.
+          derive() {
+            out=$(cog bump "--$1" --dry-run 2>&1) || { printf '%s\n' "$out"; fail "cocogitto could not derive the next version"; }
+            next=$(printf '%s\n' "$out" | { grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' || true; } | tail -1)
+          }
+
+          if [ -n "$newest" ] && [ "$current" != "$newest" ] && ! tagged "$current"; then
+            # Only the release commit writes press.toml's version, so one no tag names
+            # is a release recorded on main whose publish failed. It is finished at its
+            # own number before anything else is released.
+            [ "$(printf '%s\n%s\n' "$newest" "$current" | sort -V | tail -1)" = "$current" ] \
+              || fail "press.toml says $current, behind the newest release v$newest"
+            [ "$BUMP" = auto ] \
+              || fail "main records v$current, which no tag names yet: run with auto to publish it first; a $BUMP bump now would skip it"
+            version=$current
+            echo "Finishing v$version: main records it, and its publish has not happened." | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            # The commits decide whether there is a release at all; an override only
+            # sizes the step. cocogitto would bump an empty range at a named level.
+            derive auto
+            if [ -z "$next" ]; then
+              printf '%s\n' "$out"
+              echo "release=false" >> "$GITHUB_OUTPUT"
+              echo "Nothing since ${newest:+v}${newest:-the first commit} bumps a version. No release, whatever the bump." | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            if [ "$BUMP" != auto ]; then
+              by_commits=$next
+              derive "$BUMP"
+              [ -n "$next" ] || fail "cocogitto gave no version for a $BUMP bump"
+              echo "The commits say $by_commits; the $BUMP override makes it $next." | tee -a "$GITHUB_STEP_SUMMARY"
+            fi
+            version=${next#v}
+          fi
+          [[ "$version" =~ $semver ]] || fail "cocogitto derived something that is not a version: $version"
+          ! tagged "$version" || fail "v$version is already released, and a tag here is create-once"
           echo "releasing $version; newest release so far: ${newest:-none}; press.toml says $current until the release writes $version"
           {
             echo "release=true"
