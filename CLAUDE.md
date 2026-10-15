@@ -120,6 +120,10 @@ repository has.
   `PRESS_AUDIT=optional`, so a missing tool skips the audit with one line instead of failing;
   `check.sh`'s own compile sets `PRESS_IN_CHECK`, so it is not audited twice. A build's stdout
   is its one status line, which `press.just` hands to `report.sh`; findings go to stderr.
+- **The page passes read a copy with every scan hidden** when the document reads an image file
+  (`lib.typ`'s `scan()`, `--input press-scans=hidden`). `stamp.sh` compiles that copy at the
+  document PDF's own stamp (`PRESS_STAMP_AS`), so it lays out exactly as the document does; the
+  Python passes take the document's PDF as a name to report findings against.
 - **The audit's glyph scan leaves out exactly press's `lib.typ`**, found beside `press.toml`,
   and the files of any Typst package, found beside a `typst.toml`. A document kept in press's
   directory, such as the calibration sheet, is still scanned.

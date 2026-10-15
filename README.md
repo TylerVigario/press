@@ -125,6 +125,11 @@ are missing, the build says the audit was skipped and why, and succeeds: buildin
 depends on them. `check.sh` is the same audit for when it must run, as in CI: without its tools
 it refuses.
 
+**A page the document did not set** — a scanned form it fills in, an embedded PDF page — is
+marked with `scan(...)`. The audit then reads a copy with every scan hidden, so the scan's own
+fonts, text layer and edge-to-edge ink are not findings, and what the document sets over it is
+audited as usual. The copy costs a second compile, only for a document that reads an image.
+
 The stamp prints in **`PRESS_TZ`**, an IANA zone name set for every build
 (`PRESS_TZ=America/Los_Angeles`, or `UTC` for documents read across zones), so every machine
 prints the same time and an unchanged page stays unchanged wherever it is built.
@@ -277,6 +282,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `stamp(body)` | Closing line — provenance, or a last caution. |
 | `updated()` | When the content last changed, as the stamp records it. For the footer. |
 | `press-version` | The version of press a document was built with. Never typed by hand. |
+| `scan(body)` | Marks content the document did not set, a scanned or embedded page, for the audit to leave out; what is set over it is still audited. |
 | `letterhead(..contact, face: face-text)` | A letter's head: the writer (the document's author), a contact line, a rule. A link that shows its own address needs no footnote. |
 | `dateline(date)` | A letter's date, written once where it prints; `continued` reads it. |
 | `re(..refs, label: [Re:])` | A letter's subject line; each reference stays whole and copyable. |

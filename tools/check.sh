@@ -140,6 +140,18 @@ else
         exit 1
     }
 fi
+# SCANS (lib.typ's scan()). A document that reads an image file may have marked some of it as a
+# scan, content it did not set. The passes that read the page — fonts, ink near the edge, text
+# on text — then read a copy compiled with every scan hidden, its space kept and its stamp the
+# same, so the page lays out exactly as the document's does, without the scans. A document
+# that reads no image is read as it is, with no second compile.
+page=$pdf
+if tr '\000' '\n' < "$tmp/deps" | grep -qiE '\.(pdf|png|jpe?g|gif|svg|webp)$'; then
+    if PRESS_IN_CHECK=1 PRESS_STAMP_AS="$pdf" sh "$press_root/tools/stamp.sh" "$src" "$tmp/scans-hidden.pdf" \
+            "$@" --input press-scans=hidden 2>/dev/null; then
+        page=$tmp/scans-hidden.pdf
+    fi
+fi
 # The PRINTABLE-AREA check. A document can overflow the unprintable band
 # silently: typst has no concept of it, so the failure appears on paper and
 # nowhere else. Skipped rather than fatal where no interpreter is present,
@@ -189,7 +201,7 @@ if [ -n "$PY" ] && [ -n "$optional" ] && ! command -v "${PRESS_PDFTOPPM:-pdftopp
     echo "press: skipping the printable-area check (no pdftoppm, which comes with poppler)" >&2
 elif [ -n "$PY" ]; then
     PRESS_PDFTOPPM="${PRESS_PDFTOPPM:-pdftoppm}" \
-        "$PY" "$press_root/tools/ink-margin.py" "$pdf" 0.48 || rc=1
+        "$PY" "$press_root/tools/ink-margin.py" "$page" 0.48 "$pdf" || rc=1
 else
     echo "press: skipping the printable-area check (no working python found)" >&2
     echo "       set PRESS_PYTHON to one if it is not on PATH as python3 or python" >&2
@@ -205,7 +217,7 @@ fi
 # NOT share its instrument — see the module docstring for why the raster cannot
 # answer this and pdftotext can.
 if [ -n "$PY" ]; then
-    PRESS_PDFTOTEXT="$PDFTOTEXT" "$PY" "$press_root/tools/line-overlap.py" "$pdf" || rc=1
+    PRESS_PDFTOTEXT="$PDFTOTEXT" "$PY" "$press_root/tools/line-overlap.py" "$page" "$pdf" || rc=1
 else
     echo "press: skipping the line-overlap check (no working python found)" >&2
 fi
@@ -224,7 +236,7 @@ fi
 # A face is vendored when its name, past the subset prefix, is a vendored family alone or
 # followed by -: OpenSans, OpenSans-Bold, Montserrat-Bold-Identity-H. Without the - a family
 # that only begins with a vendored one, like LiberationSansNarrow, would pass as it.
-leaks=$("$PDFFONTS" "$pdf" | tail -n +3 | awk '{print $1}' | sed 's/^[A-Z]*+//' | grep -vE "^($allow)(-|\$)" || true)
+leaks=$("$PDFFONTS" "$page" | tail -n +3 | awk '{print $1}' | sed 's/^[A-Z]*+//' | grep -vE "^($allow)(-|\$)" || true)
 if [ -n "$leaks" ]; then
     echo "press: $pdf draws from fonts that are NOT vendored here —" >&2
     echo "$leaks" | sort -u | sed 's/^/  /' >&2

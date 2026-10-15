@@ -147,12 +147,15 @@ def collisions(rows):
 
 
 def main():
+    # A second argument names the PDF in findings, when the one read is a copy of it: check reads
+    # a copy with every scan hidden (lib.typ's scan()), and reports against the document's PDF.
     pdf = sys.argv[1]
+    name = sys.argv[2] if len(sys.argv) > 2 else pdf
     rc = 0
     with tempfile.TemporaryDirectory() as tmp:
         for n, rows in enumerate(lines_by_page(layout(pdf, tmp)), 1):
             for ov, upper, lower in collisions(rows):
-                print(f"press: {pdf} page {n} prints text on text — {ov:.2f}pt overlap",
+                print(f"press: {name} page {n} prints text on text — {ov:.2f}pt overlap",
                       file=sys.stderr)
                 print(f"    upper: {upper[:72]}", file=sys.stderr)
                 print(f"    lower: {lower[:72]}", file=sys.stderr)

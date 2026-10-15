@@ -338,6 +338,15 @@
 // typst's own, and `import *` would shadow it.
 #let press-version = _manifest.version
 
+// What the document did not set: a scanned form, an embedded PDF page, placed as it is. The
+// audit leaves it out. check compiles the document a second time with every scan hidden, its
+// space kept, and reads that copy for fonts, text on text and ink near the edge: a scan's own
+// fonts, text layer and full-bleed ink are not findings, and whatever the document sets over
+// it is audited as usual.
+//
+//   #place(top + left, scan(image("form.pdf", width: 100%, height: 100%)))
+#let scan(body) = if sys.inputs.at("press-scans", default: none) == "hidden" { hide(body) } else { body }
+
 // ----------------------------------------------------------- composition ---
 // Generic by nature — a labelled bounded block, a state chip, a reversed band, a numbered
 // badge.

@@ -140,6 +140,15 @@ at() {
 
 mkdir -p "$(dirname "$pdf")"
 
+# A copy at another PDF's stamp (PRESS_STAMP_AS): check's copy with every scan hidden, which
+# must lay out exactly as the document's PDF does, stamp and all. No comparison, no audit.
+if [ -n "${PRESS_STAMP_AS:-}" ]; then
+    e=$(stamp_of "$PRESS_STAMP_AS")
+    [ -n "$e" ] || e=$now
+    out=$(at "$e" "$pdf" "$@") || { printf '%s\n' "$out" >&2; exit 1; }
+    exit 0
+fi
+
 old=$( [ -f "$pdf" ] && stamp_of "$pdf" || true )
 if [ -n "$old" ]; then
     # typst takes the format from the extension, so the trial build keeps .pdf. It sits in
