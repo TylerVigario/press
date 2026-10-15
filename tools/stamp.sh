@@ -100,8 +100,12 @@ mkdir -p "$(dirname "$pdf")"
 
 old=$( [ -f "$pdf" ] && stamp_of "$pdf" || true )
 if [ -n "$old" ]; then
-    # typst takes the format from the extension, so the trial build keeps .pdf.
+    # typst takes the format from the extension, so the trial build keeps .pdf. It sits in
+    # print/, so an interrupt mid-compile removes it rather than leaving it there.
     tmp="${pdf%.pdf}.press-trial.$$.pdf"
+    trap 'rm -f "$tmp"' EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
     if out=$(at "$old" "$tmp" "$@"); then
         if cmp -s "$tmp" "$pdf"; then
             rm -f "$tmp"
