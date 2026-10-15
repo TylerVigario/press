@@ -194,7 +194,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `sheet(cols, head, ..rows, size:)` | Wide data table — any column count, zebra rows, header repeats across pages. |
 | `flow(..steps)` | Left-to-right stage sequence. |
 | `decision(n, q, note, color: bad)` / `dbadge(n, color:)` | Open question needing an answer. |
-| `seedepth(label)` | Pointer from the act layer to the depth layer. |
+| `seedepth(what, at: none)` | Pointer from the act layer to the depth layer. Given a label (`seedepth(<q>)`, or `at: <q>` beside a description) it looks up the page and links to it — never type a page number. |
 | `stamp(body)` | Closing line — provenance, or "the host is right". |
 | `updated()` | When the content last changed, as `build` stamps it. For the footer. |
 | `press-version` | The version of press imported, read from its `typst.toml`. Never typed by hand. |
