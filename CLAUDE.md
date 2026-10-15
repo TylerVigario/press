@@ -14,11 +14,11 @@ Read this whole file before changing anything. Every trap listed has already hap
 and builds with plain typst and press's fonts. There is no namespace and no version in any
 import; the copy a repository holds is the version it builds with.
 
-**Universal.** A repository takes press with the tools its system already has — the one-line
-installs in README.md — and builds from whatever runner it already uses. It never adopts just,
-or anything else, for press. `press.just` is one adapter, for repositories that use just
-already; underneath it are plain typst and the `sh` scripts in `tools/`, which any runner
-calls.
+**Universal.** A repository takes press with the tools its system already has — the
+installers README.md gives one line each — and builds from whatever runner it already uses. It
+never adopts just, or anything else, for press. `press.just` is one adapter, for repositories
+that use just already; underneath it are plain typst and the `sh` scripts in `tools/`, which
+any runner calls.
 
 **One output for screen and print.** Every part must work in both media: a part that works in
 only one is not finished.
@@ -43,10 +43,16 @@ needs it, built for both media, and offered to every document from the next rele
 | `tools/` | `new.sh`, `stamp.sh`, `check.sh`, `report.sh`, and the audit's two Python passes |
 | `press.just` | recipes for repositories that use just |
 | `README.md`, `FONTS.md`, `LICENSE` | the consumer guide, the font account, the AGPL |
+| `install.sh`, `install.ps1` | the installers each release attaches beside the kit, not inside it |
 | `.github/`, `CLAUDE.md`, `CHANGELOG.md`, `cog.toml`, `justfile` | press's own machinery |
 
 **The release bundle is an allowlist** in `.github/bundle.sh`: the kit rows above, nothing of
 the machinery. A file the kit needs is added there on purpose; anything else stays out.
+
+**The installers in the tree are templates.** `bundle.sh` writes `press.toml`'s
+version and the SHA-256 of the archive each one fetches over their `@VERSION@` and `@SHA256@`,
+so a release's installer installs that release and refuses any other bytes. Unstamped, they
+refuse to run.
 
 **`press.toml` is the one place each version is written.** `lib.typ` reads it — `press-version`
 prints `version`, and an assert refuses a typst older than `typst` — and `tools/stamp.sh` reads
@@ -64,7 +70,8 @@ as the commit, so the title must be a conventional commit; the type decides the 
 **CI** builds and audits the calibration sheet, compiles the template in place and as
 `new.sh` scaffolds it, rebuilds to prove an unchanged page keeps its stamp, does all of that
 again at the oldest typst and just press accepts, builds the release bundle and installs it in
-a scratch repository to scaffold, build and audit there with no just, and runs shellcheck,
+a scratch repository to scaffold, build and audit there with no just, runs both installers
+against the bundle served locally (install, update, refusals), and runs shellcheck,
 markdownlint (lines ≤ 100), actionlint, a JSON parse, an invisible-character scan and CodeQL.
 The tools CI installs are pinned by hand, with digests; the weekly Pins workflow opens an issue
 for each release a pin is behind (`sh .github/pins.sh` shows the same comparison).
@@ -79,11 +86,12 @@ the file is, with nothing to copy or rename.
 **Releasing is one run of the Release workflow, dry run first.** It derives the version from
 the commits, gates on CI, writes the version into `press.toml` and `CHANGELOG.md` into a
 `release:` commit by the `vigario-press-release` App, builds the bundle, and publishes the
-GitHub release with `press.tar.gz`, `press.zip` and `SHA256SUMS` attached; publishing creates
-the tag. Never tag by hand. If it fails after the `release:` commit has landed, start a new run
-rather than re-running the failed one: a re-run checks out the old commit and the forge refuses
-its commit. `CHANGELOG.md` is generated except for its hand-written first release, "Initial
-release.", which `.github/write-changelog.sh` keeps (until cocogitto/cocogitto#580 is fixed).
+GitHub release with `press.tar.gz`, `press.zip`, `install.sh`, `install.ps1` and `SHA256SUMS`
+attached; publishing creates the tag. Never tag by hand. If it fails after the `release:`
+commit has landed, start a new run rather than re-running the failed one: a re-run checks out
+the old commit and the forge refuses its commit. `CHANGELOG.md` is generated except for its
+hand-written first release, "Initial release.", which `.github/write-changelog.sh` keeps (until
+cocogitto/cocogitto#580 is fixed).
 
 **When behaviour changes, change README.md with it.** It is the only guide a consuming
 repository has.
@@ -110,6 +118,12 @@ repository has.
   - `all` takes its directories as the shell's own arguments: it is `[positional-arguments]`
     and reads `"$@"`. Interpolating `{{ dirs }}` joins every name into one string and splits a
     name with a space in it.
+- **The installers' stamp lines are an interface.** `bundle.sh` substitutes them and
+  `bundle-check.sh` finds them by their exact text, indentation included (`version='…'` in
+  `install.sh`, `$sum = '…'` in `install.ps1`). Change all three together.
+- **`install.ps1` is ASCII only.** Windows PowerShell reads a script with no byte order mark in
+  the system's code page. It throws instead of exiting: run through `irm | iex` in someone's
+  session, `exit` would close it.
 - **The tools run in Git's `sh` on Windows**, from `cmd.exe`, PowerShell and npm alike. Keep
   them POSIX `sh`, and test Windows through the laptop before claiming it works.
 

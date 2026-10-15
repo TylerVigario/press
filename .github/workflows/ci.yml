@@ -14,7 +14,9 @@ name: CI
 #                            the archives the release attaches, built from this
 #                            tree: the kit and nothing of press's machinery,
 #                            installed in a scratch repo as the README says, then
-#                            used there with no just to scaffold, build and audit.
+#                            used there with no just to scaffold, build and audit;
+#                            and both installers, served the bundle locally, install,
+#                            update and refuse as they should.
 #   Documents pass on the oldest toolchain
 #                            the same build and audit at the oldest typst and just
 #                            press.just accepts, so a change that needs a newer one
@@ -104,6 +106,13 @@ jobs:
         run: sh .github/bundle.sh "$RUNNER_TEMP/bundle"
       - name: Install it in a scratch repo and use it there
         run: sh .github/bundle-check.sh "$RUNNER_TEMP/bundle"
+      - name: Run the installers, install.ps1 through PowerShell 7
+        run: |
+          set -euo pipefail
+          # The runner image carries pwsh; install-check runs install.ps1 only where there is
+          # one, so its absence here must fail rather than skip.
+          pwsh --version
+          sh .github/install-check.sh "$RUNNER_TEMP/bundle"
 
   oldest:
     name: Documents pass on the oldest toolchain

@@ -288,6 +288,7 @@ jobs:
           gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --draft \
             --target "$OID" --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md" \
             "$RUNNER_TEMP/bundle/press.tar.gz" "$RUNNER_TEMP/bundle/press.zip" \
+            "$RUNNER_TEMP/bundle/install.sh" "$RUNNER_TEMP/bundle/install.ps1" \
             "$RUNNER_TEMP/bundle/SHA256SUMS"
           gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false
 
@@ -296,6 +297,6 @@ jobs:
           named=$(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" --jq .sha)
           [ "$named" = "$OID" ] || { echo "::error::$TAG names $named, not $OID"; exit 1; }
           assets=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '[.assets[].name] | sort | join(" ")')
-          [ "$assets" = "SHA256SUMS press.tar.gz press.zip" ] \
+          [ "$assets" = "SHA256SUMS install.ps1 install.sh press.tar.gz press.zip" ] \
             || { echo "::error::$TAG carries [$assets], not the bundle"; exit 1; }
           echo "Published $TAG on $OID." >> "$GITHUB_STEP_SUMMARY"

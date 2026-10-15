@@ -1,11 +1,19 @@
 #!/bin/sh
-# bundle.sh — build the release bundle: the kit a repo holds, and none of press's machinery.
+# bundle.sh — build the release bundle: the kit a repo holds, none of press's machinery, and
+# the installers that fetch it.
 #
 #   sh .github/bundle.sh <out dir>
 #
-# Writes press.tar.gz, press.zip and SHA256SUMS into <out dir>, each archive holding press/
-# with exactly the files below. The release attaches all three; CI builds them on every pull
-# request and installs them into a scratch repo (.github/bundle-check.sh).
+# Writes into <out dir>:
+#
+#   press.tar.gz, press.zip  each holding press/ with exactly the files below;
+#   install.sh, install.ps1  the installers, with press.toml's version and their archive's
+#                            SHA-256 written in, so each release's installer installs that
+#                            release and refuses any other bytes;
+#   SHA256SUMS               all four.
+#
+# The release attaches all five; CI builds them on every pull request, installs the kit into a
+# scratch repo (.github/bundle-check.sh) and runs the installers (.github/install-check.sh).
 #
 # An ALLOWLIST, not the tree minus exclusions: a file press adds to its own machinery
 # (.github/, CLAUDE.md, the changelog) stays out without anyone remembering to leave it out,
@@ -17,6 +25,8 @@ set -eu
 cd "$(dirname "$0")/.."
 
 out=${1:?usage: sh .github/bundle.sh <out dir>}
+version=$(sed -n 's/^version *= *"\(.*\)"$/\1/p' press.toml)
+[ -n "$version" ] || { echo "bundle: press.toml has no version line" >&2; exit 1; }
 kit="lib.typ press.toml template calibration.typ fonts tools press.just README.md FONTS.md LICENSE"
 
 tmp=$(mktemp -d)
@@ -42,5 +52,14 @@ out=$(cd "$out" && pwd)
     | gzip -n -9 > "$out/press.tar.gz")
 rm -f "$out/press.zip"
 (cd "$tmp" && find press | LC_ALL=C sort | TZ=UTC zip -q -X -@ "$out/press.zip")
-(cd "$out" && sha256sum press.tar.gz press.zip > SHA256SUMS)
-echo "bundle: $out/press.tar.gz, press.zip, SHA256SUMS"
+
+# Each installer carries the sum of the archive it fetches: the tarball for sh, the zip for
+# PowerShell.
+for i in sh:press.tar.gz ps1:press.zip; do
+    sum=$(sha256sum "$out/${i#*:}")
+    sed -e "s/@VERSION@/$version/g" -e "s/@SHA256@/${sum%% *}/g" "install.${i%%:*}" > "$out/install.${i%%:*}"
+    ! grep -q '@VERSION@\|@SHA256@' "$out/install.${i%%:*}" \
+        || { echo "bundle: install.${i%%:*} still has a placeholder" >&2; exit 1; }
+done
+(cd "$out" && sha256sum press.tar.gz press.zip install.sh install.ps1 > SHA256SUMS)
+echo "bundle: $out/press.tar.gz, press.zip, install.sh, install.ps1, SHA256SUMS (press $version)"
