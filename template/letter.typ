@@ -1,4 +1,5 @@
-// Starter skeleton for a letter. COPY this — do not import it.
+// Starter skeleton for a letter, press's default: new.sh copies it, and the copy is yours to
+// change. Letters that share one letterhead can keep it in a template of their repository's own.
 //
 //   sh third_party/press/tools/new.sh docs/<name> letter    (or `just new docs/<name> letter`)
 //

@@ -18,8 +18,8 @@ Typst makes a good document easy to write and hard to keep consistent. Left alon
 re-decides its page, its type scale and how a warning looks, and the copies of those decisions
 drift apart. press holds them in one kit every repository making documents can take, so a new
 document starts from a ready-made template and ready-made parts, and a fix made for one
-document reaches all of them at the next release. It offers rather than governs: a document
-takes the parts it wants and composes its own page.
+document reaches all of them at the next release. It offers rather than governs: its
+templates are a default to start from, and a repository uses them and the parts as it wishes.
 
 It is more than styling. Its stamp marks each document with when its content last changed, so
 a printed copy can be checked against the current one, and its audit catches the font and
@@ -191,9 +191,11 @@ failed its audit. Export `PRESS_TZ` from the justfile.
 
 ## Writing a document
 
-**Import the vocabulary, then compose the page yourself.** press sets nothing until a document
-asks: the document owns its page and takes the parts that serve it. **Copy the template, do not
-import it** — composition belongs to the document.
+**press sets nothing until something asks.** Importing it changes no page; a document, or a
+template of your repository's own, takes the parts that serve it. **press's templates are a
+default to start from**: `new.sh` copies one into a new document, and the copy is yours to
+change. Documents that share one layout can keep it in a template of your own that they all
+import.
 
 **Show rules are the document's to install.** One with commands in it wants the first two, and
 one with links the third:

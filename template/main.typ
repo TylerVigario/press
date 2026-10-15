@@ -1,5 +1,5 @@
-// Starter skeleton for a document. COPY this — do not import it.
-// Composition belongs to the document; only the vocabulary is shared.
+// Starter skeleton for a document, press's default: new.sh copies it, and the copy is yours to
+// change. Documents that share one layout can keep it in a template of their repository's own.
 //
 //   sh third_party/press/tools/new.sh docs/<name>    (or `just new docs/<name>`)
 //

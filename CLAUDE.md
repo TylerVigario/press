@@ -23,8 +23,9 @@ any runner calls.
 **One output for screen and print.** Every part must work in both media: a part that works in
 only one is not finished.
 
-**Additive.** press sets no page and installs no show rule of its own accord. A document takes
-the parts it wants and composes its own page.
+**Additive.** press sets no page and installs no show rule of its own accord. Its templates are
+a default to start from: a repository takes the parts it wants and composes its pages as it
+wishes, in each document or in a template of its own that its documents share.
 
 press grows from the documents that use it: a template or part is added when a real document
 needs it, built for both media, and offered to every document from the next release.
@@ -153,6 +154,9 @@ repository has.
   `third_party/press`.
 - **Do not add a markdown path.** Markdown-to-PDF was tried and removed. Documents are `.typ`.
 - **Do not move whole-page composition into the library.** A helper that lays out an entire
-  page belongs in the document. A styling helper a document opts into is fine to offer.
+  page belongs in a template: press's, which `new.sh` copies, or a repository's own. A styling
+  helper a document opts into is fine to offer.
+- **Do not tell a repository how to compose its documents.** press's templates are a default,
+  and what a repository does with them is its own.
 - **Do not treat a suggestion as a decision.** A name, structure or convention you proposed
   and nobody explicitly answered is **not** approved. Ask, or leave it unbuilt.

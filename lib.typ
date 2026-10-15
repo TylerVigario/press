@@ -22,15 +22,16 @@
   message: "press needs typst " + _manifest.typst + " or newer; this is typst "
     + str(sys.version))
 
-// What deliberately did NOT move: composition. Section order, page choice,
-// which diagrams exist, how deep a document layers — that stays local. The
-// library supplies vocabulary, the document writes the sentence.
+// What deliberately did NOT move here: composition. Section order, page choice,
+// which diagrams exist, how deep a document layers — this library decides none of
+// it. Each repository does, in its documents or in a template of its own. The
+// library supplies vocabulary; whoever composes the page writes the sentence.
 //
 // This library is ADDITIVE, not governing. Nothing here takes effect unless a
 // document calls it: it sets no page and installs no show rule of its own
-// accord, and assumes no layout. The document owns its page and takes whichever
-// parts serve it. That inversion is deliberate — a template that owns the page
-// is what forces every document with real layout needs to escape the system.
+// accord, and assumes no layout. Whoever composes the page takes whichever parts
+// serve it. That inversion is deliberate — a library that owned the page would
+// force every document with real layout needs to escape it.
 //
 // "Not governing" limits what this library ENFORCES, never what it may OFFER. A
 // styling helper a document opts into enforces nothing. Treating styling as out
@@ -129,7 +130,7 @@
 )
 
 // Page geometry presets. Spread at the call site — `#set page(..dense)` —
-// so the document stays visibly in charge of its own page.
+// so the page is visibly set where it is composed.
 //
 // Sized so that PRINTING AT 100% IS SAFE. The page is exactly US Letter, so
 // "actual size" needs no scaling — but consumer printers cannot print to the
@@ -440,8 +441,8 @@
 }
 
 
-// Lay out a set of units. The document still owns its page; this owns only how a
-// GROUP packs, which is the one thing every document was re-deriving by hand.
+// Lay out a set of units. This sets no page; it owns only how a GROUP packs,
+// which is the one thing every document was re-deriving by hand.
 //
 //   "stacks"  two columns filled independently and balanced by MEASURED height.
 //             Nothing is padded to match a neighbour, which is the failure of a
