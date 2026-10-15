@@ -76,9 +76,10 @@ just clean                       # delete print/
 `sh` comes from Git for Windows. `press.just` refuses an older typst or just, naming the
 version it needs. CI builds and checks at those floors too, so a change that needs a newer
 one fails; raising a floor is a deliberate edit in `press.just` and in the toolchain action.
-`check` also needs poppler (`pdffonts`, `pdftotext`, `pdftoppm`) and a Python. Where PATH
-finds the wrong one, name it with `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`, `PRESS_PDFTOPPM` or
-`PRESS_PYTHON`. On Windows, Git's `sh` puts its bundled Xpdf `pdftotext` first inside every
+`check` also needs poppler (`pdffonts`, `pdftotext`, `pdftoppm`), a Python, and a grep with
+PCRE — GNU grep, not macOS's. Where PATH finds the wrong one, name it with
+`PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`, `PRESS_PDFTOPPM`, `PRESS_PYTHON` or `PRESS_GREP` (`ggrep`
+after `brew install grep`). On Windows, Git's `sh` puts its bundled Xpdf `pdftotext` first inside every
 recipe, so set `PRESS_PDFTOTEXT` there; `check` refuses anything that is not poppler.
 
 **Paths are relative to the repo root**, from whichever directory you invoke.

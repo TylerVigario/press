@@ -36,12 +36,18 @@ test -f "$pdf" || { echo "press: not built yet — run build first: $pdf" >&2; e
 # the document clean. Probing once, up front, is the difference between an unmet
 # dependency and a check that quietly does nothing.
 #
+# GNU grep has all three; macOS's BSD grep has no -P at all. PRESS_GREP names another,
+# as PRESS_PDFTOTEXT names a pdftotext: on macOS, `brew install grep` and PRESS_GREP=ggrep.
+#
 # The probe is the construct itself, not a proxy for it: a literal U+00A0 must match
 # the same class the extraction filters on. Without (*UTF) that is two bytes and the
 # anchored single-character class cannot match; without properties grep errors outright.
 # One assertion, and it fails for either missing piece.
-printf '\302\240\n' | grep -qP '(*UTF)^[\p{Z}\p{Cf}]$' 2>/dev/null \
-    || { echo 'press: check needs a grep whose PCRE supports the (*UTF) verb and \p{...} properties' >&2; exit 1; }
+GREP=${PRESS_GREP:-grep}
+printf '\302\240\n' | "$GREP" -qP '(*UTF)^[\p{Z}\p{Cf}]$' 2>/dev/null \
+    || { echo "press: check needs a grep whose PCRE supports the (*UTF) verb and \\p{...} properties;" >&2
+         echo "       $GREP does not. GNU grep does: on macOS, brew install grep and set PRESS_GREP=ggrep." >&2
+         exit 1; }
 # Poppler specifically, not merely a program answering to that name.
 #
 # pdftotext and pdffonts are also shipped by Xpdf and mupdf, and they do not agree.
@@ -86,7 +92,7 @@ for spec in "PRESS_PDFTOTEXT $PDFTOTEXT" "PRESS_PDFFONTS $PDFFONTS"; do
              echo "       Put it first on PATH, or set $var to it directly." >&2
              exit 1; }
 done
-allow=$(ls "$press_root/fonts" | sed 's/-[A-Za-z]*\.[to]tf$//;s/\.[to]tf$//' | sort -u | paste -sd'|')
+allow=$(ls "$press_root/fonts" | sed 's/-[A-Za-z]*\.[to]tf$//;s/\.[to]tf$//' | sort -u | paste -sd'|' -)
 rc=0
 # One temporary directory for every pass, made before any of them and removed however the
 # run ends.
@@ -243,14 +249,14 @@ tr '\000\\' '\n/' < "$tmp/deps" | awk '
 # At least $src itself; an empty list would skip the check and report the document clean.
 test -s "$tmp/sources" || { echo "press: typst listed no sources for $src" >&2; exit 1; }
 chars=$(while IFS= read -r f; do grep -v '^[[:space:]]*//' "$f" || true; done < "$tmp/sources" \
-        | grep -oP '(*UTF)[^\x00-\x7F]' \
+        | "$GREP" -oP '(*UTF)[^\x00-\x7F]' \
         | grep -vP '(*UTF)^[\p{Z}\p{Cf}]$' \
         | sort -u || true)
 if [ -n "$chars" ]; then
     fontdir="$press_root/fonts"
     typst fonts --ignore-system-fonts | sort > "$tmp/embedded"
     typst fonts --font-path "$fontdir" --ignore-system-fonts | sort > "$tmp/all"
-    fams=$(comm -13 "$tmp/embedded" "$tmp/all" | sed 's/.*/"&"/' | paste -sd,)
+    fams=$(comm -13 "$tmp/embedded" "$tmp/all" | sed 's/.*/"&"/' | paste -sd, -)
     for ch in $chars; do
         printf '#set page(width: 6cm, height: 2cm)\n#set text(font: (%s))\nX%sX\n' "$fams" "$ch" > "$tmp/probe.typ"
         typst compile --root "$tmp" --font-path "$fontdir" --ignore-system-fonts "$tmp/probe.typ" "$tmp/probe.pdf" 2>/dev/null || true

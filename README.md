@@ -114,9 +114,10 @@ just clean
 - **typst** 0.14 or newer, **just** 1.55 or newer (`dnf install just`,
   `winget install Casey.Just`) and **`sh`** on `PATH`. On Windows `sh` comes from Git for
   Windows. An older typst or just is refused with a message naming the version it needs.
-- `check` also needs **poppler** (`pdffonts`, `pdftotext`, `pdftoppm`) and a **Python**.
-  Where `PATH` finds the wrong one, name it: `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`,
-  `PRESS_PDFTOPPM`, `PRESS_PYTHON`.
+- `check` also needs **poppler** (`pdffonts`, `pdftotext`, `pdftoppm`), a **Python**, and a
+  **grep with PCRE** (GNU grep; on macOS, `brew install grep`). Where `PATH` finds the wrong
+  one, name it: `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`, `PRESS_PDFTOPPM`, `PRESS_PYTHON`,
+  `PRESS_GREP` (`ggrep` on macOS).
 
 ## Printing
 
