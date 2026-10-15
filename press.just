@@ -87,8 +87,14 @@ typst_flags := "--root . --package-path " + quote(press_root / "packages") + \
 # not end in one. A directory, a PDF or a markdown file is refused by name before typst
 # sees it, rather than failing inside it.
 
+# The recipe list, as the first recipe. Under `mod press`, `just press` runs a module's first
+# recipe, so it lists press's. Under `import` the default comes from the consumer's own
+# justfile, never an imported one, so a one-line justfile lists with `just --list`. Named
+# _list, not default: a consumer with its own `default` recipe and an import would otherwise
+# fail with "recipe `default` first defined ... is redefined". Not [default] either: that
+# would claim the consumer's default, and clash with a consumer's own [default].
 [private]
-default:
+_list:
     @{{ quote(just_executable()) }} --list --unsorted
 
 # Refuse a typst older than typst_minimum, naming both versions. Without it an old typst
