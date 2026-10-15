@@ -35,6 +35,8 @@ prints true, so every part is made for both:
   same on every machine.
 - **Links work on both:** they click on screen, and `link-note` footnotes their address for
   paper.
+- **A document names itself once:** its title is the PDF's metadata, so a viewer shows it,
+  and the template prints it in the header and footer from there.
 - **Colour is never the only carrier of meaning,** so a greyscale printer or a colour-blind
   reader loses nothing.
 - **Commands are short and unwrapped,** so they copy cleanly from the screen and can be typed

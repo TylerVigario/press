@@ -144,6 +144,10 @@ A document with commands in it wants the first two, and one with links the third
 #show link: link-note
 ```
 
+**A document names itself once,** with `#set document(title: [...], author: "...")`. A PDF
+viewer shows the title in its title bar, and the template prints it in its header and footer
+from `document.title` rather than typing it again.
+
 ### The six conventions
 
 1. **Meat first.** Whatever the reader must act on goes at the top — never make them read
