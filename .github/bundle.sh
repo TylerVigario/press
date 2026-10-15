@@ -47,6 +47,11 @@ find "$tmp/press" -name __pycache__ -prune -exec rm -rf {} +
 find "$tmp/press" -name '*.pyc' -exec rm -f {} +
 
 when=$(git log -1 --format=%ct --invert-grep --grep='^release: v' 2>/dev/null || date +%s)
+# A clone holding only a release's own commit, as `git clone --depth 1 --branch v<version>`
+# makes, has no commit to take the time from, and its bytes could not be the published ones.
+[ -n "$when" ] || { echo "bundle: HEAD is a release's own commit and the history stops there;" >&2
+                    echo "        fetch the commit before it (git fetch --deepen 1) and run this again" >&2
+                    exit 1; }
 find "$tmp/press" -exec touch -h -d "@$when" {} +
 
 mkdir -p "$out"
