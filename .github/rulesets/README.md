@@ -55,6 +55,7 @@ a setting drifting back.
 | context | asserts |
 | --- | --- |
 | `Documents build` | typst compiles every document |
+| `The release bundle installs and works` | the bundle holds the kit and nothing else, installs as the README says, and works with no just |
 | `Documents pass the audit` | the warning, font and printable-area passes |
 | `Documents pass on the oldest toolchain` | the same build and audit at the oldest typst and just `press.just` accepts |
 | `No invisible characters` | no soft hyphens or zero-width characters in any tracked file |

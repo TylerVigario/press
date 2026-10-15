@@ -8,7 +8,8 @@
 | Montserrat | `face-display` | Regular, Bold — **no italic** | OFL-1.1 |
 
 All permit redistribution. Liberation carries a Reserved Font Name — redistribute
-unmodified, and do not reuse the name for a modified version.
+unmodified, and do not reuse the name for a modified version. Each family's licence text is in
+`fonts/licenses/`, and travels with the fonts in every release bundle.
 
 ## Why they are vendored
 

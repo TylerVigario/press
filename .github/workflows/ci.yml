@@ -10,6 +10,11 @@ name: CI
 #   Documents pass the audit press's own passes, run against its calibration sheet:
 #                            typst warnings that exit 0 and ship, fonts that are
 #                            not vendored, and ink inside the unprintable band.
+#   The release bundle installs and works
+#                            the archives the release attaches, built from this
+#                            tree: the kit and nothing of press's machinery,
+#                            installed in a scratch repo as the README says, then
+#                            used there with no just to scaffold, build and audit.
 #   Documents pass on the oldest toolchain
 #                            the same build and audit at the oldest typst and just
 #                            press.just accepts, so a change that needs a newer one
@@ -84,6 +89,21 @@ jobs:
           # check compiles the document through stamp.sh, as build does, so it needs
           # no build ahead of it. A compile failure is Documents build's to report.
           just check calibration.typ
+
+  bundle:
+    name: The release bundle installs and works
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/typst-toolchain
+        with:
+          poppler: "true"
+      - name: Build the bundle
+        run: sh .github/bundle.sh "$RUNNER_TEMP/bundle"
+      - name: Install it in a scratch repo and use it there
+        run: sh .github/bundle-check.sh "$RUNNER_TEMP/bundle"
 
   oldest:
     name: Documents pass on the oldest toolchain
