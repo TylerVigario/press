@@ -1,28 +1,25 @@
 #!/bin/sh
 # check.sh — audit a built document for the font failures typst does not report.
 #
-# Invoked by press's `check` recipe, which runs in the consumer root:
+# Run from the consumer root by whatever runs the repo's builds, press.just's `check`
+# among them:
 #
 #   sh <press_root>/tools/check.sh <doc> <pdf> <press_root> <typst flags...>
 #
-# Paths are relative to the consumer root, which is why the recipe runs there and
-# passes press_root separately — the two are the same directory only when press
-# is being used on itself.
-#
-# It lives in a file rather than inline in press.just so it can be run directly,
-# without just, which is how it should be exercised when changing it.
+# Paths are relative to the consumer root, which is why it runs there and takes
+# press_root separately — the two are the same directory only when press is being
+# used on itself.
 #
 # The rationale for what each pass does, and the limits of each, is in press.just
-# above the recipe. This file is the mechanism; that comment is the argument.
+# above its `check` recipe. This file is the mechanism; that comment is the argument.
 set -eu
 
 src=$1
 pdf=$2
 press_root=$3
 shift 3
-# What remains in "$@" is typst_flags, already shell-quoted by just, so it
-# re-parses into separate arguments here. Passing it through rather than
-# rebuilding it keeps this file from drifting away from build and watch.
+# What remains in "$@" is the typst flags, passed through to stamp.sh rather than
+# rebuilt here, so the audit compiles exactly as the build does.
 
 # The glyph check needs a grep that speaks PCRE, honours the (*UTF) verb, and knows
 # \p{...} properties. Assert it here rather than relying on the pipeline to complain:
@@ -63,7 +60,7 @@ printf '\302\240\n' | "$GREP" -qP '(*UTF)^[\p{Z}\p{Cf}]$' 2>/dev/null \
 #
 # PRESS_PDFTOTEXT and PRESS_PDFFONTS exist because on Windows PATH is not the
 # user's to order. Git for Windows' sh prepends its own /mingw64/bin and
-# /usr/bin at startup, so the Xpdf binaries it bundles win inside every recipe
+# /usr/bin at startup, so the Xpdf binaries it bundles win inside every tool
 # no matter what PowerShell or a .bashrc resolves — a Windows contributor has
 # no reachable lever. Naming the executable directly is that lever, and it is
 # press-scoped: nothing else on the machine reads these names, so unlike
@@ -111,9 +108,9 @@ trap 'exit 143' TERM
 # And the status must come from typst, not from the grep reading its output. Piping
 # into grep hands $? to grep, so a source that did not compile at all left the old
 # PDF in place, produced error: lines that no warning: filter matched, and every
-# pass then passed the stale artifact — `build` failing while `check` said clean.
+# pass then passed the stale artifact — the build failing while the audit said clean.
 #
-# Through stamp.sh, as `build` does: a bare typst compile here would overwrite the
+# Through stamp.sh, as the build does: a bare typst compile here would overwrite the
 # stamped PDF with an unstamped one, and every check would wipe the edition off the page.
 # It also writes the files the compile read, for the glyph check at the end.
 out=$(sh "$press_root/tools/stamp.sh" "$src" "$pdf" "$@" --deps "$tmp/deps" --deps-format zero 2>&1) || {
@@ -211,7 +208,7 @@ fi
 # The verb rather than LC_ALL=C.UTF-8 on purpose: the locale must exist to take
 # effect, macOS has no C.UTF-8, and glibc falls back to C *silently* when a locale
 # is missing. That reintroduces the bug while the check reports success, which is
-# the one failure mode this recipe exists to prevent. The verb needs nothing from
+# the one failure mode this check exists to prevent. The verb needs nothing from
 # the environment; the guard above is what makes its absence loud.
 #
 # `|| true` stays: grep exits 1 on a document with no non-ASCII characters at all,

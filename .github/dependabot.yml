@@ -1,10 +1,9 @@
 # Dependabot — one ecosystem, because one applies.
 #
 # `github-actions` is the whole surface here. This repository has no package.json,
-# no Cargo.toml and no requirements.txt; its dependencies are Typst packages
-# vendored in-tree and fonts committed as files, neither of which Dependabot
-# understands. Listing an ecosystem with nothing to update would be a claim without
-# a subject.
+# no Cargo.toml and no requirements.txt; its one dependency is the fonts committed
+# as files, which Dependabot does not understand. Listing an ecosystem with nothing
+# to update would be a claim without a subject.
 #
 # What it does watch: the third-party actions in .github/workflows and in
 # .github/actions/typst-toolchain, which are the one thing here that moves without

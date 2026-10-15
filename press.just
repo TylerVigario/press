@@ -96,7 +96,7 @@ _list:
 # The path is relative to the repo root, from whichever directory you invoke it.
 #
 # Through tools/stamp.sh, which stamps the document with when its content last changed
-# (sys.inputs.press-updated, shown by the package's updated()) and keeps that time when a
+# (sys.inputs.press-updated, shown by lib.typ's updated()) and keeps that time when a
 # rebuild changes nothing on the page. The reasoning is at the top of that file.
 #
 # Then tools/report.sh says what was made, in one line: new, changed or unchanged, pages,
@@ -238,7 +238,7 @@ new name:
 # neither warns.
 #
 #   SUBSTITUTED — the codepoint is missing from every vendored face, so typst
-#   draws it from one of its OWN embedded fonts. Measured on this package:
+#   draws it from one of its OWN embedded fonts. Measured on press:
 #   ✓ ✗ ▸ come from NewCMMath, ⚠ ⚡ ☐ from DejaVuSansMono, ℹ from
 #   LibertinusSerif. The page looks almost right and the species is wrong.
 #
@@ -328,8 +328,8 @@ new name:
 # line drawn once are the same pixels. It reads pdftotext's line geometry, where
 # that information survives.
 #
-# The passes themselves live in tools/check.sh, which can be run directly, without
-# just — how it should be exercised when changing it. It compiles through
+# The passes themselves live in tools/check.sh, which any runner calls directly, and
+# which is how it should be exercised when changing it. It compiles through
 # tools/stamp.sh, as build does, so a document that was never built is built first.
 [doc("Audit a built PDF for the font failures typst does not report")]
 [script]

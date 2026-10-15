@@ -51,12 +51,12 @@ column out of alignment quietly, where a Libertinus fallback would at least look
 sight — and this file argues elsewhere that quieter failures are worse. It stands because
 there is no second monospace face vendored to fall back to, and losing a glyph outright is
 worse than losing alignment on one character. If a mono document ever depends on column
-alignment for meaning, `check` it and consider vendoring a wider mono.
+alignment for meaning, audit it and consider vendoring a wider mono.
 
 ### The stacks narrow this hole; they do not seal it
 
 A codepoint absent from **every** vendored face still comes from Typst's own bundled
-fonts, and `--ignore-system-fonts` does not touch those. Measured on this package:
+fonts, and `--ignore-system-fonts` does not touch those. Measured on press:
 
 | Character | Outcome |
 |---|---|
@@ -71,9 +71,9 @@ diffed against anything.
 
 **So a symbol vocabulary is a vendoring decision, not a typing decision.** Before a
 document commits to one — safety callouts, checkboxes, list markers — write a probe
-containing every symbol it needs, build it, and run `just check`. Adopt the symbols the
-vendored faces actually carry, or vendor a face that carries them and add it to the table
-above.
+containing every symbol it needs, build it, and audit it with `tools/check.sh`. Adopt the
+symbols the vendored faces actually carry, or vendor a face that carries them and add it to
+the table above.
 
 ### Weight level — the table above is a constraint, not an inventory
 

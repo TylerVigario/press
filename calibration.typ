@@ -11,8 +11,12 @@
 // at compile time, so it follows the window if the page above it changes — which
 // is how you read show-through honestly.
 //
-//   just build calibration.typ                 (in press itself)
-//   just build vendor/press/calibration.typ    (from a repo that holds press at vendor/press)
+// Build it like any document. From a repo that holds press at vendor/press:
+//
+//   sh vendor/press/tools/stamp.sh vendor/press/calibration.typ print/calibration.pdf \
+//       --root . --font-path vendor/press/fonts --ignore-system-fonts
+//
+// and in press itself, `just build calibration.typ`.
 
 #import "lib.typ": *
 
