@@ -10,8 +10,9 @@ name: CI
 #                            release, which must leave the version they import as
 #                            it was, unless that version is retired: 0.1.0, the
 #                            old @vts namespace, lives on only in its tag.
-#   Documents build          typst compile errors, and a rebuild that re-stamps a
-#                            document whose page did not change.
+#   Documents build          typst compile errors, a rebuild that re-stamps a
+#                            document whose page did not change, and a package
+#                            version whose template does not compile against it.
 #   Documents pass the audit press's own passes, run against its own document:
 #                            typst warnings that exit 0 and ship, fonts that are
 #                            not vendored, and ink inside the unprintable band.
@@ -148,6 +149,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/typst-toolchain
       - run: just all
+      - name: Every package version compiles its own template
+        run: sh .github/templates.sh
       - name: A rebuild leaves every document unchanged
         run: |
           set -euo pipefail
@@ -206,6 +209,8 @@ jobs:
           set -euo pipefail
           just all
           for f in docs/*.typ; do just check "$f"; done
+      - name: Every package version compiles its own template
+        run: sh .github/templates.sh
       - name: A rebuild leaves every document unchanged
         run: |
           set -euo pipefail

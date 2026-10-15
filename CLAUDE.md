@@ -242,8 +242,10 @@ a re-run checks out the old commit and the forge refuses its commit.
 `CHANGELOG.md` is generated except for its hand-written first release, "Initial release.",
 which `.github/write-changelog.sh` keeps (until cocogitto/cocogitto#580 is fixed).
 
-**`just new` scaffolds from the version named in `press.just`** (`@tylervigario/press:0.2.0` today).
-Move it when a new version is released.
+**`just new` scaffolds from the newest version directory**, so it needs no edit at a release.
+A version names itself in its `typst.toml`, its template's import and `lib.typ`'s usage line;
+CI's `templates.sh` compiles every version's template and refuses one that names another
+version, and the release renames all three when it copies a directory.
 
 **Editing press from inside a consuming repo.** A submodule is a **detached HEAD**; a commit
 made there is lost. Branch, open a PR, then put the submodule back on its release:
