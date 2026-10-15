@@ -8,8 +8,10 @@
 # Two compiles, because the template lives two lives. In press's tree it imports press
 # relatively, ../lib.typ, so it compiles in place. A repo gets it through tools/new.sh, which
 # copies it with that import rewritten to press's path from the project root. So the second
-# compile is a scratch repo holding a copy of the kit at vendor/press, scaffolded by new.sh
-# exactly as a downstream repo would be. Either failing, or warning, fails the run: typst
+# compile is a scratch repo holding a copy of the kit, scaffolded by new.sh exactly as a
+# downstream repo would be. Not at the README's third_party/press, which bundle-check.sh
+# installs to: press works wherever it sits under the root, so this copy sits deeper, under a
+# name with a space in it. Either failing, or warning, fails the run: typst
 # exits 0 on a warning, so warnings are read from its output.
 set -eu
 cd "$(dirname "$0")/.."
@@ -33,9 +35,10 @@ compile() {   # <root> <font dir> <document> <what>
 compile . fonts template/main.typ "the template, in place,"
 
 repo="$tmp/repo"
-mkdir -p "$repo/vendor/press"
-cp -R lib.typ press.toml template fonts tools "$repo/vendor/press/"
-(cd "$repo" && sh vendor/press/tools/new.sh docs/scaffolded >/dev/null)
-grep -q '^#import "/vendor/press/lib.typ": \*' "$repo/docs/scaffolded/main.typ" \
-    || fail "new.sh did not point the copy's import at /vendor/press/lib.typ"
-compile "$repo" vendor/press/fonts docs/scaffolded/main.typ "the template, scaffolded by new.sh,"
+kit="assets/typst kit/press"
+mkdir -p "$repo/$kit"
+cp -R lib.typ press.toml template fonts tools "$repo/$kit/"
+(cd "$repo" && sh "$kit/tools/new.sh" docs/scaffolded >/dev/null)
+grep -qxF "#import \"/$kit/lib.typ\": *" "$repo/docs/scaffolded/main.typ" \
+    || fail "new.sh did not point the copy's import at /$kit/lib.typ"
+compile "$repo" "$kit/fonts" docs/scaffolded/main.typ "the template, scaffolded by new.sh,"

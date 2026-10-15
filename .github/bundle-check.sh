@@ -49,23 +49,23 @@ for f in lib.typ press.toml template/main.typ calibration.typ press.just README.
 done
 
 repo="$tmp/repo"
-mkdir -p "$repo/vendor"
-(cd "$repo/vendor" && tar -xz < "$b/press.tar.gz")
+mkdir -p "$repo/third_party"
+(cd "$repo/third_party" && tar -xz < "$b/press.tar.gz")
 mkdir -p "$tmp/zip"
 (cd "$tmp/zip" && unzip -q "$b/press.zip")
-diff -r "$repo/vendor/press" "$tmp/zip/press" >/dev/null || fail "the zip unpacks to different files than the tarball"
+diff -r "$repo/third_party/press" "$tmp/zip/press" >/dev/null || fail "the zip unpacks to different files than the tarball"
 
 cd "$repo"
-flags="--root . --font-path vendor/press/fonts --ignore-system-fonts"
-sh vendor/press/tools/new.sh docs/guide
+flags="--root . --font-path third_party/press/fonts --ignore-system-fonts"
+sh third_party/press/tools/new.sh docs/guide
 # shellcheck disable=SC2086  # $flags is a list of flags
-sh vendor/press/tools/stamp.sh docs/guide/main.typ print/guide.pdf $flags
+sh third_party/press/tools/stamp.sh docs/guide/main.typ print/guide.pdf $flags
 # shellcheck disable=SC2086
-sh vendor/press/tools/check.sh docs/guide/main.typ print/guide.pdf vendor/press $flags
-TYPST_ROOT=. TYPST_FONT_PATHS=vendor/press/fonts TYPST_IGNORE_SYSTEM_FONTS=true \
+sh third_party/press/tools/check.sh docs/guide/main.typ print/guide.pdf third_party/press $flags
+TYPST_ROOT=. TYPST_FONT_PATHS=third_party/press/fonts TYPST_IGNORE_SYSTEM_FONTS=true \
     typst compile docs/guide/main.typ print/plain.pdf
 # shellcheck disable=SC2086
-sh vendor/press/tools/stamp.sh vendor/press/calibration.typ print/calibration.pdf $flags
+sh third_party/press/tools/stamp.sh third_party/press/calibration.typ print/calibration.pdf $flags
 # shellcheck disable=SC2086
-sh vendor/press/tools/check.sh vendor/press/calibration.typ print/calibration.pdf vendor/press $flags
-echo "bundle-check: the bundle installs and works, version $(sed -n 's/^version *= *"\(.*\)"$/\1/p' vendor/press/press.toml)"
+sh third_party/press/tools/check.sh third_party/press/calibration.typ print/calibration.pdf third_party/press $flags
+echo "bundle-check: the bundle installs and works, version $(sed -n 's/^version *= *"\(.*\)"$/\1/p' third_party/press/press.toml)"

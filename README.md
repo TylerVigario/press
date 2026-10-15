@@ -52,8 +52,8 @@ the next release every document can use it.
 ## Install
 
 press is a folder of files your repository holds. From the directory it should live in —
-`vendor/`, say — run the installer for your system. It puts `press/` there, and run again it
-updates it:
+`third_party/` at the project root, as this guide assumes — run the installer for your
+system. It puts `press/` there, and run again it updates it:
 
 | system | line |
 |---|---|
@@ -66,6 +66,11 @@ newest, and `download/v<version>` in its place fixes one. The installer download
 release's archive, refuses it unless its SHA-256 is the one written into the installer, and
 swaps the new `press/` in whole, so a file a release removed does not linger. A `press/` that
 is not press, or is a git checkout, it leaves alone, and it changes nothing outside `press/`.
+
+**Any directory under the project root works**: typst reads no file outside it, and `new.sh`
+writes each import for wherever press sits. Not `vendor/`, which other toolchains own:
+`go mod vendor` deletes whatever else is in it, its presence alone breaks `go build` in a Go
+module with dependencies it does not vendor, and Composer projects keep it out of git.
 
 **Commit `press/`.** The copy your repository holds is the version it builds with, and
 `press/press.toml` says which. Run the installer again to move to the newest release: the diff
@@ -89,17 +94,17 @@ files are dropped silently and it still exits 0. Pipe the tarball; unpack the zi
 A document imports press by its path from the project root:
 
 ```typst
-#import "/vendor/press/lib.typ": *
+#import "/third_party/press/lib.typ": *
 ```
 
 and builds with plain typst, from whatever runs your builds:
 
 ```sh
-typst compile --root . --font-path vendor/press/fonts --ignore-system-fonts docs/guide.typ print/guide.pdf
+typst compile --root . --font-path third_party/press/fonts --ignore-system-fonts docs/guide.typ print/guide.pdf
 ```
 
 The same three settings can come from the environment instead — `TYPST_ROOT=.`,
-`TYPST_FONT_PATHS=vendor/press/fonts`, `TYPST_IGNORE_SYSTEM_FONTS=true` — which also serves
+`TYPST_FONT_PATHS=third_party/press/fonts`, `TYPST_IGNORE_SYSTEM_FONTS=true` — which also serves
 `typst watch` and an editor. press must sit under the project root, since typst reads no file
 outside it. **typst does not create the output directory**; press's stamp tool does.
 
@@ -107,11 +112,11 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 
 | tool | does |
 |---|---|
-| `sh vendor/press/tools/new.sh docs/guide` | scaffolds `docs/guide/main.typ` from the template, its import written for where press sits |
-| `sh vendor/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory |
-| `sh vendor/press/tools/check.sh <doc> <pdf> vendor/press <flags>` | audits it: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text printed on text |
+| `sh third_party/press/tools/new.sh docs/guide` | scaffolds `docs/guide/main.typ` from the template, its import written for where press sits |
+| `sh third_party/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory |
+| `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | audits it: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text printed on text |
 
-`<flags>` are the three above: `--root . --font-path vendor/press/fonts --ignore-system-fonts`.
+`<flags>` are the three above: `--root . --font-path third_party/press/fonts --ignore-system-fonts`.
 
 The stamp prints in **`PRESS_TZ`**, an IANA zone name set for every build
 (`PRESS_TZ=America/Los_Angeles`, or `UTC` for documents read across zones), so every machine
@@ -124,22 +129,22 @@ prints the same time and an unchanged page stays unchanged wherever it is built.
 
 ```json
 "scripts": {
-  "docs": "sh vendor/press/tools/stamp.sh docs/guide.typ print/guide.pdf --root . --font-path vendor/press/fonts --ignore-system-fonts",
-  "docs:check": "sh vendor/press/tools/check.sh docs/guide.typ print/guide.pdf vendor/press --root . --font-path vendor/press/fonts --ignore-system-fonts"
+  "docs": "sh third_party/press/tools/stamp.sh docs/guide.typ print/guide.pdf --root . --font-path third_party/press/fonts --ignore-system-fonts",
+  "docs:check": "sh third_party/press/tools/check.sh docs/guide.typ print/guide.pdf third_party/press --root . --font-path third_party/press/fonts --ignore-system-fonts"
 }
 ```
 
 **make:**
 
 ```make
-FLAGS = --root . --font-path vendor/press/fonts --ignore-system-fonts
+FLAGS = --root . --font-path third_party/press/fonts --ignore-system-fonts
 print/%.pdf: docs/%.typ
-	sh vendor/press/tools/stamp.sh $< $@ $(FLAGS)
+	sh third_party/press/tools/stamp.sh $< $@ $(FLAGS)
 ```
 
 **just** — `press.just` is ready-made recipes for a repository that already uses just. One
-line in its justfile: `import 'vendor/press/press.just'`, or `mod press
-'vendor/press/press.just'` where it has recipes of its own (`import` refuses a recipe name it
+line in its justfile: `import 'third_party/press/press.just'`, or `mod press
+'third_party/press/press.just'` where it has recipes of its own (`import` refuses a recipe name it
 already has). Then:
 
 ```sh
@@ -281,7 +286,7 @@ content absolutely can break that, and the audit measures it.
 
 `calibration.typ` prints the text inks at the four smallest sizes, the pale tints, the rule
 weights and both solid bands, where a printer gives out first. Build it like any document
-(`vendor/press/calibration.typ`), and print it on the paper and printer you actually use —
+(`third_party/press/calibration.typ`), and print it on the paper and printer you actually use —
 once at normal quality and once in economy mode, duplexed on the long edge — to find where your
 hardware gives out before a real document does.
 
@@ -289,9 +294,10 @@ hardware gives out before a real document does.
 
 The copy of press a repository holds is the version it builds with. Move only to a release,
 never to a commit on `main` between releases. 0.1.0 was the Typst package `@vts/press:0.1.0`,
-used from a git submodule. A repository moving past it removes the submodule
-(`git rm vendor/press`), runs the installer in `vendor/`, and changes each import to
-`/vendor/press/lib.typ`, all in one commit.
+used from a git submodule at `vendor/press`. A repository moving past it removes the
+submodule (`git rm vendor/press`), runs the installer in `third_party/`, and changes each
+import to `/third_party/press/lib.typ`, and any other `vendor/press` path, such as a
+justfile's `import`, all in one commit.
 
 ## Licence
 
