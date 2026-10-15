@@ -113,6 +113,16 @@ jobs:
           # one, so its absence here must fail rather than skip.
           pwsh --version
           sh .github/install-check.sh "$RUNNER_TEMP/bundle"
+      - name: A release's commit rebuilds the bundle it published
+        run: |
+          set -euo pipefail
+          # The release run builds the bundle, then the forge records its release: commit, a
+          # later one. Rebuilt from that commit, the bundle must still match its published sums.
+          # Dated an hour on, so the two times differ. Last, because it commits to the checkout.
+          GIT_COMMITTER_DATE="@$(( $(git log -1 --format=%ct) + 3600 ))" \
+            git -c user.name=ci -c user.email=ci@invalid commit -q --allow-empty -m "release: v0.0.0"
+          sh .github/bundle.sh "$RUNNER_TEMP/rebuilt"
+          diff "$RUNNER_TEMP/bundle/SHA256SUMS" "$RUNNER_TEMP/rebuilt/SHA256SUMS"
 
   oldest:
     name: Documents pass on the oldest toolchain

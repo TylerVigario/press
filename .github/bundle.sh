@@ -19,8 +19,11 @@
 # (.github/, CLAUDE.md, the changelog) stays out without anyone remembering to leave it out,
 # and a file the kit needs is added here on purpose.
 #
-# Reproducible: every file carries the commit's time, names are sorted and owners zeroed, so
-# one commit always yields the same bytes and the published sums can be rebuilt and compared.
+# Reproducible: every file carries one commit's time, names are sorted and owners zeroed, so
+# a release's tag always yields the bytes it published, and its sums can be rebuilt and
+# compared. The time is the newest commit's that is not a release's own. The release run
+# builds the bundle before the forge records its `release:` commit, so a rebuild from the tag
+# skips that commit to reach the same time.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -43,7 +46,7 @@ done
 find "$tmp/press" -name __pycache__ -prune -exec rm -rf {} +
 find "$tmp/press" -name '*.pyc' -exec rm -f {} +
 
-when=$(git log -1 --format=%ct 2>/dev/null || date +%s)
+when=$(git log -1 --format=%ct --invert-grep --grep='^release: v' 2>/dev/null || date +%s)
 find "$tmp/press" -exec touch -h -d "@$when" {} +
 
 mkdir -p "$out"
