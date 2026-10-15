@@ -43,6 +43,9 @@
 // commands as plain lines. Delete this line for a document that wants its own —
 // press supplies the treatment, the document decides to install it.
 #show raw.where(block: true): code
+// Links click on screen and footnote their address for paper. Delete this line for a
+// document that styles its own.
+#show link: link-note
 
 // ---- Header + legend ----
 #grid(columns: (auto, 1fr), align: (left + bottom, right + bottom),

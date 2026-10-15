@@ -136,11 +136,12 @@ the rest.
 skeleton, do not import it** — composition belongs to the document.
 
 **Show rules are the document's to install.** Nothing takes effect until the document asks.
-A document with commands in it wants both:
+A document with commands in it wants the first two, and one with links the third:
 
 ```typ
 #show raw: set text(font: face-mono, size: sz.micro)
 #show raw.where(block: true): code
+#show link: link-note
 ```
 
 ### The six conventions
@@ -193,6 +194,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `stamp(body)` | Closing line — provenance, or "the host is right". |
 | `updated()` | When the content last changed, as `build` stamps it. For the footer. |
 | `press-version` | The version of press imported, read from its `typst.toml`. Never typed by hand. |
+| `link-note` | Show rule for links: coloured and underlined, address footnoted for paper. `#show link: link-note`. |
 
 **Tokens.** Colours `ink`, `ink-soft`, `ink-faint`, `rule-hair`, `rule-mid`,
 `paper-tint`, `slate`, `slate-tint`, `steel`, and `ok`/`warn`/`bad` each with a `-tint`.
@@ -266,6 +268,9 @@ namespace.
 
 ## Traps
 
+- **A link in a heading is footnoted twice once there is an outline.** The contents repeat
+  the heading, and `link-note`'s footnote with it; hiding footnotes in the outline does not
+  help, because typst still counts and lists them. Keep links out of headings.
 - **Fonts fail in three ways, and only one warns.** A missing *family* warns and still
   ships. A missing *weight or style* substitutes the nearest face silently (`weight: 400` on
   `face-display` embedded Montserrat-Bold). A missing *glyph* is drawn from Typst's embedded
