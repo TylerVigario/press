@@ -140,6 +140,77 @@ else
         exit 1
     }
 fi
+# The document's own sources, which the glyph check probes and which may accept findings:
+# every .typ the document is made of, not only $src, since text in a file it #includes or
+# #imports is on the page too. typst lists what the compile read. Two kinds of file are left
+# out, since their characters are their own business, not the page's:
+#
+#   · press's lib.typ, found as the lib.typ beside press.toml, which lib.typ reads on every
+#     import — and only that file, so a document kept in press's directory, such as its
+#     calibration sheet, is still scanned;
+#   · a Typst package's files: a package lists its typst.toml with them, so anything under
+#     a directory holding one is the package's.
+#
+# Files read as data (yaml, csv, ...) are not scanned.
+#
+# The paths are typst's own, separators turned to /. On Linux they are relative to the
+# root. typst on Windows writes a package's files relative with mixed separators, and the
+# document's own as \\?\C:\... verbatim paths, which reach grep as //?/C:/... and Git's sh
+# reads as they are. A package's files and its typst.toml come in the same form, so the
+# prefix that drops them lines up. Nothing compares a path with the root or the cwd.
+tr '\000\\' '\n/' < "$tmp/deps" | awk '
+    { f[++n] = $0 }
+    /\/typst\.toml$/ { p = $0; sub(/typst\.toml$/, "", p); pkg[p] = 1 }
+    /(^|\/)press\.toml$/ { p = $0; sub(/press\.toml$/, "", p); press[p "lib.typ"] = 1 }
+    END {
+        for (i = 1; i <= n; i++) {
+            if (f[i] !~ /\.typ$/ || f[i] in press) continue
+            inpkg = 0
+            for (p in pkg) if (index(f[i], p) == 1) inpkg = 1
+            if (!inpkg) print f[i]
+        }
+    }' > "$tmp/sources"
+# At least $src itself; an empty list would skip the check and report the document clean.
+test -s "$tmp/sources" || { echo "press: typst listed no sources for $src" >&2; exit 1; }
+
+# ACCEPTED FINDINGS. A document may accept a finding it keeps on purpose, a sent record that
+# will not be restyled, with a line in its own source naming the pass and why:
+#
+#   // press: accept ink-margin — sent 2026-03-02, kept as sent
+#
+# That pass's findings still print, then a line saying they were accepted and why, and they do
+# not fail. A reason is required, and the pass must be one of $passes. An acceptance its pass
+# finds nothing for fails: left standing, it would hide that pass's next real finding.
+passes="warnings fonts glyphs ink-margin text-on-text"
+accepted=
+hit=
+skipped=
+: > "$tmp/reasons"
+while IFS= read -r f; do
+    grep -E '^[[:space:]]*//[[:space:]]*press:[[:space:]]*accept([[:space:]]|$)' "$f" || true
+done < "$tmp/sources" > "$tmp/accepts"
+while IFS= read -r line; do
+    rest=$(printf '%s\n' "$line" | sed -E 's#^[[:space:]]*//[[:space:]]*press:[[:space:]]*accept[[:space:]]*##')
+    name=$(printf '%s\n' "$rest" | awk '{ print $1 }' | sed 's/:$//')
+    reason=$(printf '%s\n' "$rest" | sed -E 's/^[^[:space:]]*[[:space:]]*//; s/^(—|-|:)[[:space:]]*//')
+    case " $passes " in
+        *" $name "*) ;;
+        *) echo "press: $src accepts \"$name\", which is not a pass; the passes are: $passes" >&2
+           rc=1; continue ;;
+    esac
+    if [ -z "$reason" ]; then
+        echo "press: $src accepts $name with no reason; say why: // press: accept $name — <why>" >&2
+        rc=1; continue
+    fi
+    accepted="$accepted $name"
+    printf '%s\t%s\n' "$name" "$reason" >> "$tmp/reasons"
+done < "$tmp/accepts"
+# found <pass>: the pass found something; it fails the audit unless the document accepts it.
+found() {
+    hit="$hit $1"
+    case " $accepted " in *" $1 "*) ;; *) rc=1 ;; esac
+}
+
 # SCANS (lib.typ's scan()). A document that reads an image file may have marked some of it as a
 # scan, content it did not set. The passes that read the page — fonts, ink near the edge, text
 # on text — then read a copy compiled with every scan hidden, its space kept and its stamp the
@@ -199,11 +270,13 @@ fi
 if [ -n "$PY" ] && [ -n "$optional" ] && ! command -v "${PRESS_PDFTOPPM:-pdftoppm}" >/dev/null 2>&1; then
     # A build without pdftoppm skips this pass and says so; check reports it as the pass fails.
     echo "press: skipping the printable-area check (no pdftoppm, which comes with poppler)" >&2
+    skipped="$skipped ink-margin"
 elif [ -n "$PY" ]; then
     PRESS_PDFTOPPM="${PRESS_PDFTOPPM:-pdftoppm}" \
-        "$PY" "$press_root/tools/ink-margin.py" "$page" 0.48 "$pdf" || rc=1
+        "$PY" "$press_root/tools/ink-margin.py" "$page" 0.48 "$pdf" || found ink-margin
 else
     echo "press: skipping the printable-area check (no working python found)" >&2
+    skipped="$skipped ink-margin"
     echo "       set PRESS_PYTHON to one if it is not on PATH as python3 or python" >&2
 fi
 # The OVERLAP check — text printed on top of text. A document can collide with
@@ -217,21 +290,22 @@ fi
 # NOT share its instrument — see the module docstring for why the raster cannot
 # answer this and pdftotext can.
 if [ -n "$PY" ]; then
-    PRESS_PDFTOTEXT="$PDFTOTEXT" "$PY" "$press_root/tools/line-overlap.py" "$page" "$pdf" || rc=1
+    PRESS_PDFTOTEXT="$PDFTOTEXT" "$PY" "$press_root/tools/line-overlap.py" "$page" "$pdf" || found text-on-text
 else
     echo "press: skipping the line-overlap check (no working python found)" >&2
+    skipped="$skipped text-on-text"
 fi
 warns=$(printf '%s\n' "$out" | grep '^warning:' || true)
 if [ -n "$warns" ] && [ -n "${PRESS_BUILT_DEPS:-}" ]; then
     # The build printed them already, just above.
     echo "press: $src compiles with the warnings above — typst exits 0 on these and there is" >&2
     echo "       no deny-warnings flag, so they ship unless something reads them" >&2
-    rc=1
+    found warnings
 elif [ -n "$warns" ]; then
     echo "press: $src compiles with warnings — typst exits 0 on these and there is no" >&2
     echo "       deny-warnings flag, so they ship unless something reads them:" >&2
     echo "$warns" | sed 's/^/  /' >&2
-    rc=1
+    found warnings
 fi
 # A face is vendored when its name, past the subset prefix, is a vendored family alone or
 # followed by -: OpenSans, OpenSans-Bold, Montserrat-Bold-Identity-H. Without the - a family
@@ -240,7 +314,7 @@ leaks=$("$PDFFONTS" "$page" | tail -n +3 | awk '{print $1}' | sed 's/^[A-Z]*+//'
 if [ -n "$leaks" ]; then
     echo "press: $pdf draws from fonts that are NOT vendored here —" >&2
     echo "$leaks" | sort -u | sed 's/^/  /' >&2
-    rc=1
+    found fonts
 fi
 # (*UTF) forces PCRE to match characters rather than bytes. Without it the class
 # is byte-oriented under a non-UTF-8 locale, so every multi-byte character is split
@@ -261,39 +335,8 @@ fi
 # missing one. Space separators and format characters are absence by design, and
 # pdftotext gives back a plain space for U+00A0, so probing them fails a document
 # that is correct. Stray invisible characters in source are a real concern and a
-# different one; the check that owns that concern should own it.
-#
-# The characters come from every .typ the document is made of, not only $src: text in a
-# file it #includes or #imports is on the page too. typst lists what the compile read. Two
-# kinds of file are left out, since their characters are their own business, not the page's:
-#
-#   · press's lib.typ, found as the lib.typ beside press.toml, which lib.typ reads on every
-#     import — and only that file, so a document kept in press's directory, such as its
-#     calibration sheet, is still scanned;
-#   · a Typst package's files: a package lists its typst.toml with them, so anything under
-#     a directory holding one is the package's.
-#
-# Files read as data (yaml, csv, ...) are not scanned.
-#
-# The paths are typst's own, separators turned to /. On Linux they are relative to the
-# root. typst on Windows writes a package's files relative with mixed separators, and the
-# document's own as \\?\C:\... verbatim paths, which reach grep as //?/C:/... and Git's sh
-# reads as they are. A package's files and its typst.toml come in the same form, so the
-# prefix that drops them lines up. Nothing compares a path with the root or the cwd.
-tr '\000\\' '\n/' < "$tmp/deps" | awk '
-    { f[++n] = $0 }
-    /\/typst\.toml$/ { p = $0; sub(/typst\.toml$/, "", p); pkg[p] = 1 }
-    /(^|\/)press\.toml$/ { p = $0; sub(/press\.toml$/, "", p); press[p "lib.typ"] = 1 }
-    END {
-        for (i = 1; i <= n; i++) {
-            if (f[i] !~ /\.typ$/ || f[i] in press) continue
-            inpkg = 0
-            for (p in pkg) if (index(f[i], p) == 1) inpkg = 1
-            if (!inpkg) print f[i]
-        }
-    }' > "$tmp/sources"
-# At least $src itself; an empty list would skip the check and report the document clean.
-test -s "$tmp/sources" || { echo "press: typst listed no sources for $src" >&2; exit 1; }
+# different one; the check that owns that concern should own it. The characters come from
+# the document's own sources, listed above.
 chars=$(while IFS= read -r f; do grep -v '^[[:space:]]*//' "$f" || true; done < "$tmp/sources" \
         | "$GREP" -oP '(*UTF)[^\x00-\x7F]' \
         | grep -vP '(*UTF)^[\p{Z}\p{Cf}]$' \
@@ -308,10 +351,24 @@ if [ -n "$chars" ]; then
         typst compile --root "$tmp" --font-path "$fontdir" --ignore-system-fonts "$tmp/probe.typ" "$tmp/probe.pdf" 2>/dev/null || true
         if ! "$PDFTOTEXT" "$tmp/probe.pdf" - 2>/dev/null | grep -qF "$ch"; then
             echo "press: $pdf is MISSING a character present in the source: $ch" >&2
-            rc=1
+            found glyphs
         fi
     done
 fi
 # A build's stdout is its one status line, so only check says clean.
-if [ "$rc" -eq 0 ] && [ -z "$optional" ]; then echo "press: $pdf clean"; fi
+for p in $accepted; do
+    r=$(awk -F '\t' -v p="$p" '$1 == p { print $2; exit }' "$tmp/reasons")
+    case " $hit " in
+        *" $p "*) echo "press: $pdf: the $p findings above are accepted — $r" >&2 ;;
+        *) case " $skipped " in
+               *" $p "*) ;;
+               *) echo "press: $src accepts $p, but there is no $p finding; remove the line, or it" >&2
+                  echo "       hides the next one" >&2
+                  rc=1 ;;
+           esac ;;
+    esac
+done
+if [ "$rc" -eq 0 ] && [ -z "$optional" ]; then
+    if [ -z "$hit" ]; then echo "press: $pdf clean"; else echo "press: $pdf passes, with its accepted findings"; fi
+fi
 exit "$rc"

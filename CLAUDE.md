@@ -120,6 +120,9 @@ repository has.
   `PRESS_AUDIT=optional`, so a missing tool skips the audit with one line instead of failing;
   `check.sh`'s own compile sets `PRESS_IN_CHECK`, so it is not audited twice. A build's stdout
   is its one status line, which `press.just` hands to `report.sh`; findings go to stderr.
+- **Every pass reports through `found <pass>`** in `check.sh`, so a document's
+  `// press: accept <pass> — <why>` can apply to it. A new pass gets a name in `$passes` and
+  in README's list, or a document can never accept it.
 - **The page passes read a copy with every scan hidden** when the document reads an image file
   (`lib.typ`'s `scan()`, `--input press-scans=hidden`). `stamp.sh` compiles that copy at the
   document PDF's own stamp (`PRESS_STAMP_AS`), so it lays out exactly as the document does; the
