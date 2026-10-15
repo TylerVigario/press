@@ -22,15 +22,17 @@
   message: "press needs typst " + _manifest.typst + " or newer; this is typst "
     + str(sys.version))
 
-// What deliberately did NOT move: composition. Section order, page choice,
-// which diagrams exist, how deep a document layers — that stays local. The
-// library supplies vocabulary, the document writes the sentence.
+// Composition is OFFERED, never imposed. Section order, page choice, which
+// diagrams exist, how deep a document layers: the templates at the end of this
+// file compose the parts into press's default pages, and a document applies one
+// or composes its own. The library supplies vocabulary and defaults; whoever
+// composes the page writes the sentence.
 //
 // This library is ADDITIVE, not governing. Nothing here takes effect unless a
-// document calls it: it sets no page and installs no show rule of its own
-// accord, and assumes no layout. The document owns its page and takes whichever
-// parts serve it. That inversion is deliberate — a template that owns the page
-// is what forces every document with real layout needs to escape the system.
+// document calls it: importing it sets no page and installs no show rule, and a
+// template applies only through a document's own #show. Whoever composes the page
+// takes whichever parts serve it. That inversion is deliberate — a library that
+// owned the page would force every document with real layout needs to escape it.
 //
 // "Not governing" limits what this library ENFORCES, never what it may OFFER. A
 // styling helper a document opts into enforces nothing. Treating styling as out
@@ -129,7 +131,7 @@
 )
 
 // Page geometry presets. Spread at the call site — `#set page(..dense)` —
-// so the document stays visibly in charge of its own page.
+// so the page is visibly set where it is composed.
 //
 // Sized so that PRINTING AT 100% IS SAFE. The page is exactly US Letter, so
 // "actual size" needs no scaling — but consumer printers cannot print to the
@@ -440,8 +442,8 @@
 }
 
 
-// Lay out a set of units. The document still owns its page; this owns only how a
-// GROUP packs, which is the one thing every document was re-deriving by hand.
+// Lay out a set of units. This sets no page; it owns only how a GROUP packs,
+// which is the one thing every document was re-deriving by hand.
 //
 //   "stacks"  two columns filled independently and balanced by MEASURED height.
 //             Nothing is padded to match a neighbour, which is the failure of a
@@ -572,4 +574,75 @@
     grid(columns: (1fr, auto, 1fr), align: (left, center, right),
       _writer(), if date != none { date }, [Page #n])
   }
+}
+
+// ------------------------------------------------------------- templates ---
+// press's templates: a document's page, type and head, composed from the parts above, which a
+// document applies with a show rule and nothing else. Each is press's universal default for a
+// kind of document. A repository imports one as it is, or copies it and changes its copy; press
+// says nothing about which. They stay generic: what one repository alone needs belongs in its
+// own copy, and press adds another template when enough documents need one.
+
+// The general-purpose document: a sheet, a guide, a brief. The title names the document once,
+// in the PDF's metadata and in the head, and the footer prints it beside the status, the
+// stamp and the page. `meta` sits at the right of the head; `legend` is the colour legend
+// under it (auto, the three states press's chips carry; none; or content of your own).
+// `preset` is the page.
+//
+//   #show: brief.with(title: [Rack power], author: "Your name", meta: [Site A · October 2026])
+#let brief(
+  title: none, author: (), meta: none, status: none, legend: auto, preset: card, body,
+) = {
+  set document(title: title, author: author)
+  set page(..preset, footer: context {
+    set text(size: sz.micro, fill: ink-faint)
+    grid(columns: (1fr, auto),
+      align(left)[#document.title#if status != none [ · #status]],
+      align(right)[#updated() · #counter(page).display("1 / 1", both: true)])
+  })
+  set text(font: face-text, size: sz.small, fill: ink, lang: "en")
+  set par(leading: 0.52em, spacing: 0.55em)
+  set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.32em)
+  show raw: set text(font: face-mono, size: sz.micro)
+  show raw.where(block: true): code
+  show link: link-note
+
+  grid(columns: (auto, 1fr), align: (left + bottom, right + bottom),
+    text(font: face-display, size: sz.title, weight: 700, title),
+    text(size: sz.fine, fill: ink-soft, meta))
+  v(-3pt)
+  line(length: 100%, stroke: 2pt + slate)
+  v(4pt)
+  if legend == auto {
+    grid(columns: (auto, 1fr), align: (left + horizon, right + horizon),
+      text(size: sz.micro, fill: ink-faint)[Colour is state. Bands carry a role — skip on purpose.],
+      align(right)[#chip([SETTLED], "ok") #h(3pt) #chip([CONDITIONAL], "warn") #h(3pt) #chip([DECIDE], "bad")])
+    v(7pt)
+  } else if legend != none {
+    legend
+    v(7pt)
+  }
+  body
+}
+
+// A letter: the reading page, the letterhead, and the date once; page two onward carries
+// continued()'s header. The body is the letter from the recipient on, ending with signature()
+// and, where it has them, enclosures(). `face` sets the letter, letterhead included, in the
+// face of a résumé it goes with, and `centred` centres the letterhead to match a centred head.
+//
+//   #show: letter.with(title: [Letter to the county], author: "Your Name",
+//     contact: ([Town, ST], link("mailto:you@example.com")), date: [15 October 2026])
+#let letter(
+  title: none, author: (), contact: (), date: none, face: face-text, centred: false, body,
+) = {
+  set document(title: title, author: author)
+  set page(..reading, header: continued())
+  set text(font: face, size: sz.body, fill: ink, lang: "en")
+  set par(leading: 0.6em, spacing: 1.05em)
+  show link: link-note
+
+  let head = letterhead(..contact, face: face)
+  if centred { align(center, head) } else { head }
+  if date != none { dateline(date); parbreak() }
+  body
 }

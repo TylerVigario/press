@@ -18,8 +18,9 @@ Typst makes a good document easy to write and hard to keep consistent. Left alon
 re-decides its page, its type scale and how a warning looks, and the copies of those decisions
 drift apart. press holds them in one kit every repository making documents can take, so a new
 document starts from a ready-made template and ready-made parts, and a fix made for one
-document reaches all of them at the next release. It offers rather than governs: a document
-takes the parts it wants and composes its own page.
+document reaches all of them at the next release. It offers rather than governs: its
+templates are a universal default, imported as they are or copied and changed, as a
+repository wishes.
 
 It is more than styling. Its stamp marks each document with when its content last changed, so
 a printed copy can be checked against the current one, and its audit catches the font and
@@ -191,12 +192,15 @@ failed its audit. Export `PRESS_TZ` from the justfile.
 
 ## Writing a document
 
-**Import the vocabulary, then compose the page yourself.** press sets nothing until a document
-asks: the document owns its page and takes the parts that serve it. **Copy the template, do not
-import it** — composition belongs to the document.
+**press sets nothing until something asks.** Importing it changes no page. **Its templates are
+functions a document applies**: `#show: brief.with(title: [...], author: "...")` sets the page,
+the type, the show rules and the head from press's general-purpose default, and `letter` does
+the same for a letter. A document uses one as it is, or a repository copies one and changes its
+copy; press asks neither. `new.sh` starts a document that applies one, with placeholder text
+to replace.
 
-**Show rules are the document's to install.** One with commands in it wants the first two, and
-one with links the third:
+**A document that composes its own page** takes the parts it wants and installs the show rules
+itself. One with commands in it wants the first two, and one with links the third:
 
 ```typ
 #show raw: set text(font: face-mono, size: sz.micro)
@@ -204,27 +208,28 @@ one with links the third:
 #show link: link-note
 ```
 
-**Every document sets its body font**, `#set text(font: face-text, ...)` — without it the body
-renders in typst's own Libertinus Serif, without a word — and **names itself once**, with
-`#set document(title: [...], author: "...")`. A PDF viewer shows the title, and the template
-prints it in its header and footer from `document.title`.
+It **sets its body font**, `#set text(font: face-text, ...)` — without it the body renders in
+typst's own Libertinus Serif, without a word — and **names itself once**, with
+`#set document(title: [...], author: "...")`. A PDF viewer shows the title, and a page prints it
+from `document.title`. The templates do both.
 
 **A longer document** is a directory: `new.sh` makes `docs/handbook/main.typ`, and chapters go
-beside it, `#include`d from it. Switch the page to `..reading`, use typst's headings and
-`#outline()`, and import press in every chapter that uses its parts — `#include` does not carry
-`main.typ`'s imports. **A4** is `#set page(..dense, paper: "a4")`: the preset margins are
-absolute, and the audit measures them on any page size. **Landscape** is
-`#set page(..dense, flipped: true)`.
+beside it, `#include`d from it. Give it the reading page, `brief.with(preset: reading)`, use
+typst's headings and `#outline()`, and import press in every chapter that uses its parts —
+`#include` does not carry `main.typ`'s imports. **A4** is a preset with its paper changed,
+`(..card, paper: "a4")`, given to `brief` as its `preset` or spread into `#set page(...)`: the
+preset margins are absolute, and the audit measures them on any page size. **Landscape** is
+`(..card, flipped: true)`.
 
-**A letter** starts from its own template: `new.sh docs/to-landlord letter`. **It names its
-writer and its date once**: the writer is the document's author, `#set document(author: "…")`,
-and the date is written with `dateline`, where it prints. No part takes either again, and the
-letter carries no build stamp, since its reader is outside. It sets the page with `..reading`,
-opens with `letterhead`, and ends with `signature`, which keeps the closing on the same page as
-lines for an ink signature and a date, or a typed sign-off with `signed: false`. `re` keeps
-reference numbers together, `enclosures` lists what goes with the letter, and `continued()`
-heads page two onward with the writer, the date and the page. To match a résumé's centred
-header, centre the letterhead: `#align(center, letterhead(…))`.
+**A letter** applies `letter`: `new.sh docs/to-landlord letter` starts one.
+`#show: letter.with(title:, author:, contact:, date:)` **names the writer and the date once**,
+sets the reading page and the letterhead, and heads page two onward with the writer, the date
+and the page; the letter carries no build stamp, since its reader is outside. The body is the
+letter from the recipient on, ending with `signature`, which keeps the closing on the same page
+as lines for an ink signature and a date, or a typed sign-off with `signed: false`. `re` keeps
+reference numbers together and `enclosures` lists what goes with the letter. To match a résumé,
+pass its face (`face: face-sans`) and centre the letterhead (`centred: true`). A letter that
+composes its own page uses the same parts: `letterhead`, `dateline` and `continued()`.
 
 ### The six conventions
 
@@ -250,6 +255,8 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 
 | Call | For |
 |---|---|
+| `brief(title:, author:, meta:, status:, legend: auto, preset: card)` | Template: the general-purpose document's page, type, show rules, head and footer. `#show: brief.with(...)`. |
+| `letter(title:, author:, contact:, date:, face: face-text, centred: false)` | Template: a letter's page, letterhead and date, and the page-two header. `#show: letter.with(...)`. |
 | `unit(label, tone, lead, body, caps:, breakable: false)` | The workhorse. One idea: label, bold lead, body. |
 | `units(..items, pack: "stacks", gutter:, spacing:)` | A group of units. `"stacks"`: two columns balanced by measured height. `"grid"`: rows aligned, when the pairing means something. `"single"`: one column. |
 | `band-strong(title, role, color:, caps:)` | Section header carrying its role. |
