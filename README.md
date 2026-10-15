@@ -98,7 +98,7 @@ and then, identically on Linux and Windows:
 ```sh
 just --list                      # every recipe, self-documenting
 just build docs/example.typ      # -> print/docs/example.pdf, and a line saying what it made
-just watch docs/example.typ
+just watch docs/example.typ      # a preview on every save -> print/docs/example.watch.pdf
 just check docs/example.typ      # audit the PDF for silent font failures
 just all                         # every .typ under docs/
 just all recipes protocols pcp   # …or under whatever directories you use

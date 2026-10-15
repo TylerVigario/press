@@ -64,7 +64,7 @@ git submodule update --init --recursive
 
 ```sh
 just build docs/services.typ     # -> print/docs/services.pdf, and a line saying what it made
-just watch docs/services.typ     # recompile on save
+just watch docs/services.typ     # recompile on save -> print/docs/services.watch.pdf
 just all                         # every .typ under docs/ (fails if there are none)
 just all recipes protocols pcp   # any directories — docs/ is a default, not a layout
 just check docs/services.typ     # audit the built PDF
