@@ -8,6 +8,15 @@ verbatim. 0.1.0 at the bottom is hand-written and reads "Initial release." becau
 release has no changes to list — there is nothing it changed from.
 
 - - -
+## [v0.4.0](https://github.com/TylerVigario/press/compare/v0.3.0..v0.4.0) - 2026-10-15
+#### Features
+- an unchanged document is not built again, from one record of what each build read (#110) - ([2c7c4cd](https://github.com/TylerVigario/press/commit/2c7c4cd572645951d71102022d164ba06698d61f)) - Tyler Vigario, Claude Opus 5.5
+#### Bug Fixes
+- press's Windows guidance names Git's sh, not winget, as what hides poppler's pdftotext (#111) - ([5c05ad6](https://github.com/TylerVigario/press/commit/5c05ad634567ecaa5e39d8635b3d6522f0a8159a)) - Tyler Vigario, Claude Opus 5.5
+- CI's bundle job fetches the history, so the push of a release's commit builds its bundle (#109) - ([6807d16](https://github.com/TylerVigario/press/commit/6807d16c1e613737f98f64d781d9258fd7b6ad1a)) - Tyler Vigario, Claude Opus 5.5
+
+- - -
+
 ## [v0.3.0](https://github.com/TylerVigario/press/compare/v0.2.0..v0.3.0) - 2026-10-15
 #### Features
 - a document may accept a finding it keeps on purpose, in its own source, with a reason (#103) - ([b8ddbae](https://github.com/TylerVigario/press/commit/b8ddbaea7b96b987f8aac770101e97c79565b240)) - Tyler Vigario, Claude Opus 5.5
