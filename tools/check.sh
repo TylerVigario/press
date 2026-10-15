@@ -181,14 +181,24 @@ test -s "$tmp/sources" || { echo "press: typst listed no sources for $src" >&2; 
 # That pass's findings still print, then a line saying they were accepted and why, and they do
 # not fail. A reason is required, and the pass must be one of $passes. An acceptance its pass
 # finds nothing for fails: left standing, it would hide that pass's next real finding.
+#
+# Only the document's own file accepts. An acceptance in a file it imports or includes, a
+# shared template, would speak for every document that uses the file; a finding that file
+# causes is the file's to fix, so such a line is refused.
 passes="warnings fonts glyphs ink-margin text-on-text"
 accepted=
 hit=
 skipped=
 : > "$tmp/reasons"
+accept_re='^[[:space:]]*//[[:space:]]*press:[[:space:]]*accept([[:space:]]|$)'
+grep -E "$accept_re" "$src" > "$tmp/accepts" || true
 while IFS= read -r f; do
-    grep -E '^[[:space:]]*//[[:space:]]*press:[[:space:]]*accept([[:space:]]|$)' "$f" || true
-done < "$tmp/sources" > "$tmp/accepts"
+    if grep -qE "$accept_re" "$f" && ! cmp -s "$f" "$src"; then
+        echo "press: $f accepts a finding, but only the document's own file may ($src):" >&2
+        echo "       a finding a shared file causes is that file's to fix" >&2
+        rc=1
+    fi
+done < "$tmp/sources"
 while IFS= read -r line; do
     rest=$(printf '%s\n' "$line" | sed -E 's#^[[:space:]]*//[[:space:]]*press:[[:space:]]*accept[[:space:]]*##')
     name=$(printf '%s\n' "$rest" | awk '{ print $1 }' | sed 's/:$//')
@@ -272,8 +282,11 @@ if [ -n "$PY" ] && [ -n "$optional" ] && ! command -v "${PRESS_PDFTOPPM:-pdftopp
     echo "press: skipping the printable-area check (no pdftoppm, which comes with poppler)" >&2
     skipped="$skipped ink-margin"
 elif [ -n "$PY" ]; then
+    # 1 is a finding; anything else is the pass failing to run, which no acceptance covers.
+    s=0
     PRESS_PDFTOPPM="${PRESS_PDFTOPPM:-pdftoppm}" \
-        "$PY" "$press_root/tools/ink-margin.py" "$page" 0.48 "$pdf" || found ink-margin
+        "$PY" "$press_root/tools/ink-margin.py" "$page" 0.48 "$pdf" || s=$?
+    case $s in 0) ;; 1) found ink-margin ;; *) rc=1; skipped="$skipped ink-margin" ;; esac
 else
     echo "press: skipping the printable-area check (no working python found)" >&2
     skipped="$skipped ink-margin"
@@ -290,7 +303,9 @@ fi
 # NOT share its instrument — see the module docstring for why the raster cannot
 # answer this and pdftotext can.
 if [ -n "$PY" ]; then
-    PRESS_PDFTOTEXT="$PDFTOTEXT" "$PY" "$press_root/tools/line-overlap.py" "$page" "$pdf" || found text-on-text
+    s=0
+    PRESS_PDFTOTEXT="$PDFTOTEXT" "$PY" "$press_root/tools/line-overlap.py" "$page" "$pdf" || s=$?
+    case $s in 0) ;; 1) found text-on-text ;; *) rc=1; skipped="$skipped text-on-text" ;; esac
 else
     echo "press: skipping the line-overlap check (no working python found)" >&2
     skipped="$skipped text-on-text"

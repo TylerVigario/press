@@ -51,3 +51,11 @@ PRESS_PDFTOTEXT=/nonexistent/pdftotext sh tools/stamp.sh .github/audit-cases/fai
     > "$tmp/out" 2>&1 || { cat "$tmp/out" >&2; fail "a build without poppler failed"; }
 grep -qF "is not audited: " "$tmp/out" || { cat "$tmp/out" >&2; fail "a build without poppler did not say it was not audited"; }
 echo "audit-cases: the build audits as check does, and without poppler says it did not"
+
+# A pass that cannot run is never a finding, so no acceptance covers it: with pdftoppm missing,
+# the case that accepts its ink finding is refused, and nothing is said to be accepted.
+# shellcheck disable=SC2086
+! PRESS_PDFTOPPM=/nonexistent/pdftoppm sh tools/check.sh .github/audit-cases/pass-finding-accepted.typ \
+    "$tmp/b/accepted.pdf" . $flags > "$tmp/out" 2>&1 || fail "a pass that could not run was accepted"
+! grep -qF "accepted" "$tmp/out" || { cat "$tmp/out" >&2; fail "a pass that could not run was called accepted"; }
+echo "audit-cases: a pass that cannot run fails the audit, whatever the document accepts"

@@ -20,6 +20,12 @@ reason PRESS_PDFTOTEXT exists: on Windows PATH is not the contributor's to order
 """
 import os, re, subprocess, sys, tempfile, pathlib
 
+def die(msg):
+    """The pass could not run: exit 2, apart from 1 for a finding, so check never takes a
+    missing or broken tool for a finding a document has accepted."""
+    print(msg, file=sys.stderr)
+    sys.exit(2)
+
 DPI = 150
 
 # The third poppler binary, and the one PRESS_PDFTOTEXT / PRESS_PDFFONTS forgot.
@@ -50,16 +56,16 @@ def render(pdf, tmp, first=None, last=None):
         # Without this the failure is a bare Python traceback ending in
         # "[WinError 2] The system cannot find the file specified", which names
         # neither the missing tool nor the remedy.
-        sys.exit(f"press: printable-area check needs poppler; {PDFTOPPM} not found\n"
+        die(f"press: printable-area check needs poppler; {PDFTOPPM} not found\n"
                  f"       set PRESS_PDFTOPPM to poppler's binary if it is not on PATH")
     except OSError as e:
         # Found but not runnable, as line-overlap.py handles for PRESS_PDFTOTEXT: on
         # Windows a script raises WinError 193, and the bare traceback names CreateProcess
         # instead of the variable that caused it.
-        sys.exit(f"press: {PDFTOPPM} could not be run ({e})\n"
+        die(f"press: {PDFTOPPM} could not be run ({e})\n"
                  f"       PRESS_PDFTOPPM must name an executable, not a script")
     except subprocess.CalledProcessError:
-        sys.exit(f"press: {PDFTOPPM} could not render {pdf}")
+        die(f"press: {PDFTOPPM} could not render {pdf}")
     # pdftoppm numbers files by page, padded to the document's page count.
     return sorted(pathlib.Path(tmp).glob("p-*.pgm"),
                   key=lambda f: int(re.search(r"(\d+)\.pgm$", f.name).group(1)))
@@ -120,4 +126,9 @@ def main():
     return rc
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except SystemExit:
+        raise
+    except Exception as e:                    # a crash is the pass failing to run, never a finding
+        die(f"press: {pathlib.Path(sys.argv[0]).name} failed: {e!r}")
