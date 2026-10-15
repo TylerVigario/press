@@ -21,6 +21,18 @@ shift 3
 # What remains in "$@" is the typst flags, passed through to stamp.sh rather than
 # rebuilt here, so the audit compiles exactly as the build does.
 
+# Run by stamp.sh, every build is audited too (PRESS_AUDIT=optional). There the PDF was just
+# written, and stamp.sh hands over the files its compile read and what typst printed
+# (PRESS_BUILT_DEPS, PRESS_BUILT_LOG), so nothing compiles twice. A tool the audit lacks is
+# then one line saying the audit was skipped and why, not a failure: building never depends
+# on these tools, and check itself still refuses without them.
+optional=
+[ "${PRESS_AUDIT:-}" != optional ] || optional=1
+skip() {
+    echo "press: $pdf is not audited: $1; run check for the details" >&2
+    exit 0
+}
+
 # The glyph check needs a grep that speaks PCRE, honours the (*UTF) verb, and knows
 # \p{...} properties. Assert it here rather than relying on the pipeline to complain:
 # $? in `a | b | sort` belongs to sort, so a grep that rejects any of the three leaves
@@ -37,7 +49,8 @@ shift 3
 # One assertion, and it fails for either missing piece.
 GREP=${PRESS_GREP:-grep}
 printf '\302\240\n' | "$GREP" -qP '(*UTF)^[\p{Z}\p{Cf}]$' 2>/dev/null \
-    || { echo "press: check needs a grep whose PCRE supports the (*UTF) verb and \\p{...} properties;" >&2
+    || { [ -z "$optional" ] || skip "$GREP has no PCRE with (*UTF) and \\p{...}"
+         echo "press: check needs a grep whose PCRE supports the (*UTF) verb and \\p{...} properties;" >&2
          echo "       $GREP does not. GNU grep does: on macOS, brew install grep and set PRESS_GREP=ggrep." >&2
          exit 1; }
 # Poppler specifically, not merely a program answering to that name.
@@ -73,11 +86,13 @@ PDFFONTS=${PRESS_PDFFONTS:-pdffonts}
 for spec in "PRESS_PDFTOTEXT $PDFTOTEXT" "PRESS_PDFFONTS $PDFFONTS"; do
     var=${spec%% *}; tool=${spec#* }
     command -v "$tool" >/dev/null 2>&1 \
-        || { echo "press: check needs poppler; $tool not found" >&2
+        || { [ -z "$optional" ] || skip "poppler's $tool is not found"
+             echo "press: check needs poppler; $tool not found" >&2
              echo "       set $var to poppler's binary if it is not on PATH" >&2
              exit 1; }
     "$tool" -v 2>&1 | grep -qi poppler \
-        || { echo "press: $tool is not poppler's —" >&2
+        || { [ -z "$optional" ] || skip "$tool is not poppler's"
+             echo "press: $tool is not poppler's —" >&2
              "$tool" -v 2>&1 | head -1 | sed 's/^/  /' >&2
              echo "       extractors disagree about which glyphs a PDF contains, so the" >&2
              echo "       glyph check is only meaningful against poppler." >&2
@@ -113,11 +128,18 @@ trap 'exit 143' TERM
 # Through stamp.sh, as the build does: a bare typst compile here would overwrite the
 # stamped PDF with an unstamped one, and every check would wipe the edition off the page.
 # It also writes the files the compile read, for the glyph check at the end.
-out=$(sh "$press_root/tools/stamp.sh" "$src" "$pdf" "$@" --deps "$tmp/deps" --deps-format zero 2>&1) || {
-    echo "press: $src does not compile —" >&2
-    printf '%s\n' "$out" | sed 's/^/  /' >&2
-    exit 1
-}
+#
+# After a build (PRESS_BUILT_DEPS), the build just did this, and its record is used.
+if [ -n "${PRESS_BUILT_DEPS:-}" ]; then
+    cp "$PRESS_BUILT_DEPS" "$tmp/deps"
+    out=$(cat "$PRESS_BUILT_LOG")
+else
+    out=$(PRESS_IN_CHECK=1 sh "$press_root/tools/stamp.sh" "$src" "$pdf" "$@" --deps "$tmp/deps" --deps-format zero 2>&1) || {
+        echo "press: $src does not compile —" >&2
+        printf '%s\n' "$out" | sed 's/^/  /' >&2
+        exit 1
+    }
+fi
 # The PRINTABLE-AREA check. A document can overflow the unprintable band
 # silently: typst has no concept of it, so the failure appears on paper and
 # nowhere else. Skipped rather than fatal where no interpreter is present,
@@ -162,7 +184,10 @@ if [ -z "$PY" ]; then
         if "$cand" -c 'pass' >/dev/null 2>&1; then PY=$cand; break; fi
     done
 fi
-if [ -n "$PY" ]; then
+if [ -n "$PY" ] && [ -n "$optional" ] && ! command -v "${PRESS_PDFTOPPM:-pdftoppm}" >/dev/null 2>&1; then
+    # A build without pdftoppm skips this pass and says so; check reports it as the pass fails.
+    echo "press: skipping the printable-area check (no pdftoppm, which comes with poppler)" >&2
+elif [ -n "$PY" ]; then
     PRESS_PDFTOPPM="${PRESS_PDFTOPPM:-pdftoppm}" \
         "$PY" "$press_root/tools/ink-margin.py" "$pdf" 0.48 || rc=1
 else
@@ -185,7 +210,12 @@ else
     echo "press: skipping the line-overlap check (no working python found)" >&2
 fi
 warns=$(printf '%s\n' "$out" | grep '^warning:' || true)
-if [ -n "$warns" ]; then
+if [ -n "$warns" ] && [ -n "${PRESS_BUILT_DEPS:-}" ]; then
+    # The build printed them already, just above.
+    echo "press: $src compiles with the warnings above — typst exits 0 on these and there is" >&2
+    echo "       no deny-warnings flag, so they ship unless something reads them" >&2
+    rc=1
+elif [ -n "$warns" ]; then
     echo "press: $src compiles with warnings — typst exits 0 on these and there is no" >&2
     echo "       deny-warnings flag, so they ship unless something reads them:" >&2
     echo "$warns" | sed 's/^/  /' >&2
@@ -270,5 +300,6 @@ if [ -n "$chars" ]; then
         fi
     done
 fi
-if [ "$rc" -eq 0 ]; then echo "press: $pdf clean"; fi
+# A build's stdout is its one status line, so only check says clean.
+if [ "$rc" -eq 0 ] && [ -z "$optional" ]; then echo "press: $pdf clean"; fi
 exit "$rc"

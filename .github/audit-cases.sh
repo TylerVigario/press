@@ -7,7 +7,8 @@
 # a pass-*.typ must audit clean, and a fail-*.typ must be refused with the words its
 # `// expect:` line gives. A pass case is a false finding the audit once made, kept so it is not
 # made again; a fail case is a fault a pass exists to catch, kept so a fix for the first does not
-# blind it.
+# blind it. Then the build, stamp.sh, audits as check does: it fails a fail case with its PDF
+# written, and without poppler it says the audit was skipped and succeeds.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -33,3 +34,17 @@ for f in .github/audit-cases/*.typ; do
         *) fail "$c is named neither pass-* nor fail-*" ;;
     esac
 done
+
+# shellcheck disable=SC2086
+sh tools/stamp.sh .github/audit-cases/pass-marker-beside-word.typ "$tmp/b/pass.pdf" $flags > "$tmp/out" 2>&1 \
+    || { cat "$tmp/out" >&2; fail "the build failed a pass case"; }
+# shellcheck disable=SC2086
+! sh tools/stamp.sh .github/audit-cases/fail-text-on-text.typ "$tmp/b/fail.pdf" $flags > "$tmp/out" 2>&1 \
+    || fail "the build passed a fail case"
+grep -qF "prints text on text" "$tmp/out" || { cat "$tmp/out" >&2; fail "the build failed a fail case, but not for its finding"; }
+[ -f "$tmp/b/fail.pdf" ] || fail "the build that failed its audit left no PDF"
+# shellcheck disable=SC2086
+PRESS_PDFTOTEXT=/nonexistent/pdftotext sh tools/stamp.sh .github/audit-cases/fail-text-on-text.typ "$tmp/b/fail.pdf" $flags \
+    > "$tmp/out" 2>&1 || { cat "$tmp/out" >&2; fail "a build without poppler failed"; }
+grep -qF "is not audited: " "$tmp/out" || { cat "$tmp/out" >&2; fail "a build without poppler did not say it was not audited"; }
+echo "audit-cases: the build audits as check does, and without poppler says it did not"

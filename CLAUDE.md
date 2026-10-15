@@ -111,6 +111,11 @@ repository has.
   there. Keep the line as it is in each template, or change them and `new.sh` together. A new
   template is a file in `template/`, which `new.sh`, `templates.sh` and the bundle pick up;
   add it to the files `bundle-check.sh` requires.
+- **Every build is audited through `check.sh`, from `stamp.sh`.** `stamp.sh` hands over the
+  files its compile read and what typst printed (`PRESS_BUILT_DEPS`, `PRESS_BUILT_LOG`), with
+  `PRESS_AUDIT=optional`, so a missing tool skips the audit with one line instead of failing;
+  `check.sh`'s own compile sets `PRESS_IN_CHECK`, so it is not audited twice. A build's stdout
+  is its one status line, which `press.just` hands to `report.sh`; findings go to stderr.
 - **The audit's glyph scan leaves out exactly press's `lib.typ`**, found beside `press.toml`,
   and the files of any Typst package, found beside a `typst.toml`. A document kept in press's
   directory, such as the calibration sheet, is still scanned.
