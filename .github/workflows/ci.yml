@@ -5,8 +5,9 @@ name: CI
 #
 #   Documents build          typst compile errors in the calibration sheet, a
 #                            rebuild that re-stamps it though its page did not
-#                            change, and a template that does not compile where it
-#                            stands or as the document new.sh scaffolds from it.
+#                            change, a template that does not compile where it
+#                            stands or as the document new.sh scaffolds from it, and
+#                            a press.toml version no release wrote.
 #   Documents pass the audit press's own passes, run against its calibration sheet:
 #                            typst warnings that exit 0 and ship, fonts that are
 #                            not vendored, and ink inside the unprintable band; and
@@ -69,7 +70,11 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # The history and the tags, for the version check.
+          fetch-depth: 0
           persist-credentials: false
+      - name: press.toml's version is the one the last release wrote
+        run: sh .github/version-check.sh
       - uses: ./.github/actions/typst-toolchain
       - run: just build calibration.typ
       - name: The template compiles, in place and scaffolded

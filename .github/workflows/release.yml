@@ -108,6 +108,10 @@ jobs:
       - name: Set up cocogitto
         run: sh .github/setup-cog.sh
 
+      # A version no release wrote would read below as an unfinished release, and be published.
+      - name: press.toml's version is the one the last release wrote
+        run: sh .github/version-check.sh
+
       - name: Decide
         id: decide
         env:
