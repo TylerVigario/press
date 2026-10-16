@@ -222,16 +222,16 @@ all +dirs='docs':
     sh {{ quote(press_root / "tools" / "report.sh") }} --summary "$PRESS_TALLY" "$n"
     exit "$rc"
 
-# Scaffold a new document from a press starter, main or letter -> <name>/main.typ
+# Scaffold a new document from a press starter, main, letter or recipe -> <name>/main.typ
 #
 # tools/new.sh does the work, as it does for any runner: it copies the template and writes
 # its import as press's path from the root. This adds only the next steps, as just was
 # invoked (module_path() is empty under import, the module's name under mod).
-[doc("Scaffold a new document from a press starter: main, or letter")]
+[doc("Scaffold a new document from a press starter: main, letter or recipe")]
 [script]
 [working-directory(root)]
 [arg('name', help='the directory to create, holding main.typ; no .typ of its own')]
-[arg('template', help='the starter to copy: main, or letter')]
+[arg('template', help='the starter to copy: main, letter or recipe')]
 new name template='main':
     sh {{ quote(press_root / "tools" / "new.sh") }} {{ quote(name) }} {{ quote(template) }}
     n={{ quote(trim_end_match(replace(name, '\', '/'), '/')) }}
