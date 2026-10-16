@@ -164,8 +164,8 @@ prints the same time and an unchanged page stays unchanged wherever it is built.
 
 ```json
 "scripts": {
-  "print": "sh third_party/press/tools/stamp.sh docs/guide.typ print/guide.pdf --root . --font-path third_party/press/fonts --ignore-system-fonts",
-  "print:check": "sh third_party/press/tools/check.sh docs/guide.typ print/guide.pdf third_party/press --root . --font-path third_party/press/fonts --ignore-system-fonts"
+  "press": "sh third_party/press/tools/stamp.sh docs/guide.typ print/guide.pdf --root . --font-path third_party/press/fonts --ignore-system-fonts",
+  "press:check": "sh third_party/press/tools/check.sh docs/guide.typ print/guide.pdf third_party/press --root . --font-path third_party/press/fonts --ignore-system-fonts"
 }
 ```
 
