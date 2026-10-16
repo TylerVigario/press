@@ -92,11 +92,18 @@
 // spans pages passes `breakable: true` through a closure:
 //
 //   #show raw.where(block: true): it => code(it, breakable: true)
-#let code(body, breakable: false) = block(
-  width: 100%, fill: paper-tint, stroke: 0.6pt + rule-mid,
-  inset: (x: 7pt, y: 6pt), radius: 1.5pt, breakable: breakable,
-  body,
-)
+//
+// A template installs code for every block, so a document's own rule for one block, above,
+// runs first and code then meets the same block again. It marks what it holds, and leaves a
+// block already inside a code alone: the document's choice stands, and the block is boxed once.
+#let _in-code = state("press-in-code", false)
+#let code(body, breakable: false) = context if _in-code.get() { body } else {
+  block(
+    width: 100%, fill: paper-tint, stroke: 0.6pt + rule-mid,
+    inset: (x: 7pt, y: 6pt), radius: 1.5pt, breakable: breakable,
+    { _in-code.update(true); body; _in-code.update(false) },
+  )
+}
 
 // Links that work on a screen and on paper, in the one PDF. A document installs it, as it
 // installs `code`:
