@@ -159,7 +159,9 @@ fails the audit whatever the document accepts.
 
 The stamp prints in **`PRESS_TZ`**, an IANA zone name set for every build
 (`PRESS_TZ=America/Los_Angeles`, or `UTC` for documents read across zones), so every machine
-prints the same time and an unchanged page stays unchanged wherever it is built.
+prints the same time and an unchanged page stays unchanged wherever it is built. A runner that
+cannot set a variable on its command line, npm in `cmd.exe` on Windows, passes it to the tool
+instead: `build.sh --tz America/Los_Angeles`, `all.sh --tz America/Los_Angeles`.
 
 ### From your runner
 
@@ -168,8 +170,8 @@ prints the same time and an unchanged page stays unchanged wherever it is built.
 
 ```json
 "scripts": {
-  "press": "sh third_party/press/tools/all.sh",
-  "press:check": "sh third_party/press/tools/all.sh --check",
+  "press": "sh third_party/press/tools/all.sh --tz America/Los_Angeles",
+  "press:check": "sh third_party/press/tools/all.sh --check --tz America/Los_Angeles",
   "press:watch": "sh third_party/press/tools/watch.sh"
 }
 ```

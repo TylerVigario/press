@@ -83,7 +83,7 @@ if [ -n "${PRESS_TZ:-}" ]; then
         fi
     done
     if [ -z "$zone" ]; then
-        echo "press: PRESS_TZ is not a time zone this machine knows: $PRESS_TZ" >&2
+        echo "press: PRESS_TZ (or --tz) is not a time zone this machine knows: $PRESS_TZ" >&2
         echo "       looked in ${TZDIR:+$TZDIR, }/usr/share/zoneinfo and /mingw64/share/zoneinfo;" >&2
         echo "       set TZDIR if this machine keeps its zones elsewhere" >&2
         exit 1

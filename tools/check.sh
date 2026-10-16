@@ -2,8 +2,8 @@
 # check.sh — audit a built document for what typst lets through without a word: warnings that
 # exit 0, fonts that are not vendored, glyphs that vanish, ink too near the edge, text on text.
 #
-# Run from the consumer root by whatever runs the repo's builds, press.just's `check`
-# among them:
+# Run from the consumer root by build.sh --check, which any runner calls, and by stamp.sh after
+# every build:
 #
 #   sh <press_root>/tools/check.sh <doc> <pdf> <press_root> <typst flags...>
 #
@@ -11,8 +11,98 @@
 # press_root separately — the two are the same directory only when press is being
 # used on itself.
 #
-# The rationale for what each pass does, and the limits of each, is in press.just
-# above its `check` recipe. This file is the mechanism; that comment is the argument.
+# Two of these checks exist because there are two ways to lose a glyph, and
+# neither warns.
+#
+#   SUBSTITUTED — the codepoint is missing from every vendored face, so typst
+#   draws it from one of its OWN embedded fonts. Measured on press:
+#   ✓ ✗ ▸ come from NewCMMath, ⚠ ⚡ ☐ from DejaVuSansMono, ℹ from
+#   LibertinusSerif. The page looks almost right and the species is wrong.
+#
+#   VANISHED — no font anywhere has it, so it is dropped from the page AND from
+#   the extracted text. Measured: ⛔ and 📋 disappear outright. This is the worse
+#   half: a substitution ships the wrong glyph, a disappearance ships missing
+#   content, and a printed sheet cannot be diffed against anything.
+#
+# The WARNINGS check reads typst's own output. typst exits 0 on warnings and has no
+# deny-warnings flag, so a warning ships unless something reads it — markdown
+# `**bold**` silently renders as nothing, an unknown font family falls back. It
+# recompiles and fails on any warning, which is the only enforcement available.
+#
+# The FONT check catches substitution by listing embedded faces that are not
+# vendored here. The GLYPH check catches disappearance by rendering each
+# non-ASCII character from the source in ISOLATION and asking whether it survived.
+#
+# The glyph check probes rather than reading the document's own text layer, because
+# that layer lies. In `A ⛔ B 📋 C` with neither symbol drawable, only the FIRST
+# unmapped character is dropped from the extracted text; the rest remain in it
+# and read back as present. A whole-document scan therefore reports one missing
+# glyph when there are five. Isolating one candidate per probe makes each the
+# first, and the answer truthful.
+#
+# The vendored family list is derived by subtracting `typst fonts` without a
+# --font-path (typst's own embedded faces) from the same command with one, so
+# it stays correct when typst changes what it bundles.
+#
+# LIMITS, stated because a check trusted past its reach is worse than none:
+#   · `#sym.checkmark` and friends carry no source codepoint, so the glyph check
+#     cannot see them — the font check still catches the substitution they cause.
+#   · A probe asks whether a character survives at all — drawn by a vendored face
+#     or by one of typst's own embedded faces — not whether THIS document's face
+#     draws it, and it never looks at the document's page. So a character in a
+#     trailing comment is probed like any other, and reported only if nothing can
+#     draw it (full-line `//` comments are skipped). A glyph drawn from an embedded
+#     face, or present only in the mono face, is the font check's to report.
+#   · Space separators and format characters are not probed at all. Nothing is
+#     drawn for them, so "did it survive" has no answer, and pdftotext hands
+#     back a plain space for U+00A0 — which read as vanished and failed correct
+#     documents. A stray invisible character in source is a real fault; it is
+#     just not this pass's to report.
+#   · Needs poppler — pdffonts, pdftotext AND pdftoppm, all three — and poppler
+#     specifically for the first two: Xpdf and mupdf ship programs of those names
+#     that disagree about which glyphs a PDF contains, so check asserts the
+#     implementation rather than the name. pdftoppm carries no such assertion:
+#     Git for Windows bundles no pdftoppm at all, so on Windows it is an absence
+#     problem. Xpdf ships one too, and press has not been run against it.
+#     That is also why a build skips a pass whose tools are missing and says so,
+#     where check refuses: building must not require any of it.
+#     Set PRESS_PDFTOTEXT / PRESS_PDFFONTS to point at them directly where PATH
+#     cannot be made to resolve poppler first — on Windows it cannot, because
+#     Git's sh prepends its own bin directories at startup and the Xpdf copies
+#     bundled there win inside every tool. The assertion still applies to
+#     whatever the variables name.
+#   · The overlap check sees GLYPHS ONLY. Text printed over a coloured panel, or
+#     a rule struck through a line, is invisible to it — those are ink-on-ink,
+#     and what would distinguish them is not in the text layer. Nothing cheap
+#     covers that case; the printable-area check does not either, because ink in
+#     the middle of a page is not its question.
+#   · Rotated text is the overlap check's soft spot. Poppler segments rotated
+#     glyphs into fragments and reports them as separate lines, which reads as a
+#     small phantom overlap — worst measured 0.13pt against a smallest genuine
+#     collision of 2.72pt. The 0.5pt floor exists for that gap and nothing else,
+#     so a document leaning heavily on rotation deserves a look by eye.
+#   · The printable-area check additionally needs a Python and poppler's
+#     pdftoppm, and is skipped with a message rather than failing when no
+#     interpreter is found. PRESS_PYTHON and PRESS_PDFTOPPM name either
+#     directly. The interpreter is found by EXECUTING a candidate, not by
+#     resolving a name — Windows ships a zero-byte python3 alias that answers
+#     `command -v` and then prints a Store advert, and turning that alias off
+#     leaves a working `python` and no `python3`. A name-based guard failed
+#     both ways: it ran a stub that could not work, and skipped where a working
+#     interpreter was present under the other name.
+#
+# The PRINTABLE-AREA check verifies that no ink comes within 0.48in of a paper
+# edge — the 0.5in safe area the page presets are built around, less a rendering
+# tolerance.
+#
+# The OVERLAP check reports any line of text printed on top of another. It and
+# the printable-area check catch LAYOUT faults rather than font ones, and they
+# take opposite instruments for a reason worth stating: the printable-area check
+# renders the page, because "is there ink near the edge" needs no layering, and
+# it must see panels and rules as well as glyphs. The overlap check cannot render,
+# because layering is the whole question — two lines drawn on each other and one
+# line drawn once are the same pixels. It reads pdftotext's line geometry, where
+# that information survives.
 set -eu
 
 src=$1
@@ -37,7 +127,7 @@ skip() {
 # The glyph check needs a grep that speaks PCRE, honours the (*UTF) verb, and knows
 # \p{...} properties. Assert it here rather than relying on the pipeline to complain:
 # $? in `a | b | sort` belongs to sort, so a grep that rejects any of the three leaves
-# the character list empty and the check skips itself while the recipe goes on to report
+# the character list empty and the check skips itself while check goes on to report
 # the document clean. Probing once, up front, is the difference between an unmet
 # dependency and a check that quietly does nothing.
 #

@@ -32,12 +32,21 @@
 # success is most expensive. It ends with a count of what the run did (changed, new, unchanged,
 # failed), from the status each build adds to the file PRESS_TALLY names.
 #
-# --check audits every one instead, refusing without the audit's tools, as build.sh --check does.
+# --check audits every one instead, refusing without the audit's tools, and --tz names the
+# stamp's zone, as build.sh takes them.
 set -eu
 
 press=$(dirname "$(dirname "$0")")
+usage() { echo "usage: sh <press>/tools/all.sh [--check] [--tz <zone>] [<dir>...]" >&2; exit 2; }
 check=
-if [ "${1:-}" = --check ]; then check=--check; shift; fi
+while [ $# -gt 0 ]; do
+    case $1 in
+        --check) check=--check; shift ;;
+        --tz) [ $# -ge 2 ] || usage; PRESS_TZ=$2; export PRESS_TZ; shift 2 ;;
+        --tz=*) PRESS_TZ=${1#--tz=}; export PRESS_TZ; shift ;;
+        *) break ;;
+    esac
+done
 [ $# -gt 0 ] || set -- docs
 for d in "$@"; do
     test -d "$d" || { echo "press: no such directory: $d" >&2; exit 1; }

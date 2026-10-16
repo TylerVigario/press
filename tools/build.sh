@@ -19,15 +19,28 @@
 #
 #   sh third_party/press/tools/build.sh --check docs/guide.typ
 #
+# --tz names the zone the stamp prints in, as PRESS_TZ does, for a runner that cannot set an
+# environment variable on its command line: npm runs its scripts in cmd.exe on Windows.
+#
+#   sh third_party/press/tools/build.sh --tz America/Los_Angeles docs/guide.typ
+#
 # The typst flags are press's own: the project root is the root, and press's fonts and no
 # others. --ignore-system-fonts keeps the machine's fonts out, so output cannot vary by machine;
 # typst's own embedded fonts stay reachable as per-glyph fallbacks (FONTS.md).
 # Run by `all` (PRESS_TALLY set), it adds each document to that run's count instead.
 set -eu
 
+usage() { echo "usage: sh <press>/tools/build.sh [--check] [--tz <zone>] <doc.typ>..." >&2; exit 2; }
 check=
-if [ "${1:-}" = --check ]; then check=1; shift; fi
-[ $# -gt 0 ] || { echo "usage: sh <press>/tools/build.sh [--check] <doc.typ>..." >&2; exit 2; }
+while [ $# -gt 0 ]; do
+    case $1 in
+        --check) check=1; shift ;;
+        --tz) [ $# -ge 2 ] || usage; PRESS_TZ=$2; export PRESS_TZ; shift 2 ;;
+        --tz=*) PRESS_TZ=${1#--tz=}; export PRESS_TZ; shift ;;
+        *) break ;;
+    esac
+done
+[ $# -gt 0 ] || usage
 # press's folder, as the path this script was run by: absolute from just, relative from npm.
 press=$(dirname "$(dirname "$0")")
 
