@@ -230,7 +230,10 @@ functions a document applies**: `#show: brief.with(title: [...], author: "...")`
 the type, the show rules and the head from press's general-purpose default, and `letter` does
 the same for a letter. A document uses one as it is, or a repository copies one and changes its
 copy; press asks neither. `new.sh` starts a document that applies one, with placeholder text
-to replace.
+to replace. **Every word a template or part prints is an argument**, with English as its
+default: `continued(label: [Página])`, `signature(date-label: [Fecha])`. A template takes the
+header or footer it places, `letter.with(header: continued(label: [Página]))`, because a page
+rule written after its head would start a new page.
 
 **A document that lays out its own page** applies `base`:
 `#show: base.with(title: [...], author: "...", preset: dense)` sets the page, names the document
@@ -290,8 +293,8 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | Call | For |
 |---|---|
 | `base(title:, author:, preset: card)` | Template: the page, the document's name, the type and the show rules, with nothing drawn, for a document that lays out its own page. `#show: base.with(...)`. |
-| `brief(title:, author:, meta:, status:, legend: auto, preset: card)` | Template: the general-purpose document's page, type, show rules, head and footer. `#show: brief.with(...)`. |
-| `letter(title:, author:, contact:, date:, face: face-text, centred: false)` | Template: a letter's page, letterhead and date, and the page-two header. `#show: letter.with(...)`. |
+| `brief(title:, author:, meta:, status:, legend: auto, footer: auto, preset: card)` | Template: the general-purpose document's page, type, show rules, head and footer. `#show: brief.with(...)`. |
+| `letter(title:, author:, contact:, date:, face: face-text, centred: false, header: auto)` | Template: a letter's page, letterhead and date, and the page-two header. `#show: letter.with(...)`. |
 | `unit(label, tone, lead, body, caps:, breakable: false)` | The workhorse. One idea: label, bold lead, body. |
 | `units(..items, pack: "stacks", gutter:, spacing:)` | A group of units. `"stacks"`: two columns balanced by measured height. `"grid"`: rows aligned, when the pairing means something. `"single"`: one column. |
 | `band-strong(title, role, color:, caps:)` | Section header carrying its role. |
@@ -310,16 +313,16 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `decision(n, q, note, color: bad)` / `dbadge(n, color:)` | Open question needing an answer. |
 | `seedepth(what, at: none)` | Pointer to the depth layer. Given a label it looks up the page and links to it — never type a page number. |
 | `stamp(body)` | Closing line — provenance, or a last caution. |
-| `updated()` | When the content last changed, as the stamp records it. For the footer. |
-| `footer(status: none)` | `brief`'s footer, for a document that lays out its own page: title and status, then `updated()` and the page. `#set page(footer: footer())`. |
+| `updated(label: [updated], unstamped: [...])` | When the content last changed, as the stamp records it. For the footer. |
+| `footer(status: none, edition: auto)` | `brief`'s footer, for a document that lays out its own page: title and status, then `updated()` and the page. `#set page(footer: footer())`. |
 | `press-version` | The version of press a document was built with. Never typed by hand. |
 | `scan(body)` | Marks content the document did not set, a scanned or embedded page, for the audit to leave out; what is set over it is still audited. |
 | `letterhead(..contact, face: face-text)` | A letter's head: the writer (the document's author), a contact line, a rule. A link that shows its own address needs no footnote. |
 | `dateline(date)` | A letter's date, written once where it prints; `continued` reads it. |
 | `re(..refs, label: [Re:])` | A letter's subject line; each reference stays whole and copyable. |
-| `signature(closing: none, signed: true, dated: true)` | The closing, kept on its page, then lines for an ink signature over the writer's name and a hand-written date, or with `signed: false` a typed sign-off. |
-| `enclosures(..items)` | What goes with a letter, one item to a line. |
-| `continued()` | A header for page two onward of a letter: writer, date, page. `set page(header: continued())`. |
+| `signature(closing: none, signed: true, dated: true, date-label: [Date])` | The closing, kept on its page, then lines for an ink signature over the writer's name and a hand-written date, or with `signed: false` a typed sign-off. |
+| `enclosures(..items, label: auto)` | What goes with a letter, one item to a line. |
+| `continued(label: [Page])` | A header for page two onward of a letter: writer, date, page. `set page(header: continued())`. |
 
 **Tokens.** Colours `ink`, `ink-soft`, `ink-faint`, `rule-hair`, `rule-mid`, `paper-tint`,
 `slate`, `slate-tint`, `steel`, and `ok`/`warn`/`bad` each with a `-tint`. Faces `face-text`

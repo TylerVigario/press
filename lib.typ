@@ -327,23 +327,28 @@
 // copy on the shelf means reprint, and the same time means that copy is current. Put it in
 // the footer, where every page carries it: a page parted from its stack still says which
 // edition it is. Built without tools/stamp.sh -- typst watch, a bare typst compile -- there is
-// no stamp, and it says so rather than inventing one.
-#let updated() = {
+// no stamp, and it says so rather than inventing one. `label` and `unstamped` are its words.
+#let updated(label: [updated], unstamped: [not stamped (built without press's stamp.sh)]) = {
   let s = sys.inputs.at("press-updated", default: none)
-  if s == none { [not stamped (built without press's stamp.sh)] } else { [updated #s] }
+  if s == none { unstamped } else { [#label #s] }
 }
 
 // The footer brief prints, for a document that lays out its own page: the document's title, and
 // its status where it has one, on the left; updated() and the page of the total on the right. The
 // title is the one the document names itself with, set document(title:) or base's title.
+// `edition` is what it says of the edition: auto is updated(), none leaves it out, and content
+// takes its place, updated(label: […]) for updated() in other words.
 //
 //   #set page(..dense, footer: footer(status: [draft]))
-#let footer(status: none) = context {
+#let footer(status: none, edition: auto) = context {
   set text(size: sz.micro, fill: ink-faint)
+  let edition = if edition == auto { updated() } else { edition }
   grid(columns: (1fr, auto),
     align(left)[#document.title#if status != none [ · #status]],
-    align(right)[#updated() · #counter(page).display("1 / 1", both: true)])
+    align(right)[#if edition != none [#edition · ]#counter(page).display("1 / 1", both: true)])
 }
+// brief's own name for the part, since its `footer` argument hides this one inside it.
+#let _footer = footer
 
 // The version of press a document was set with, read from press.toml beside this file, so a
 // page that prints it always names the press it was built with. Not `version`: that is
@@ -559,7 +564,8 @@
 // so a page break never strands it. By default, space for an ink signature over a line with the
 // writer's name beneath, and beside it a line to date by hand (`dated: false` leaves that out).
 // For a letter sent as a file, `signed: false` is a typed sign-off: the name alone.
-#let signature(closing: none, signed: true, dated: true) = block(breakable: false, context {
+// `date-label` is the word under the date line.
+#let signature(closing: none, signed: true, dated: true, date-label: [Date]) = block(breakable: false, context {
   let name = _writer()
   if closing != none { closing }
   if not signed {
@@ -569,31 +575,34 @@
     let slot(caption) = stack(spacing: 5pt, line(length: 100%, stroke: 0.5pt + ink), caption)
     v(0.55in)
     grid(columns: if dated { (2.6in, 0.4in, 1.4in) } else { (2.6in,) },
-      slot(name), ..if dated { ([], slot([Date])) } else { () })
+      slot(name), ..if dated { ([], slot(date-label)) } else { () })
   }
 })
 
-// What goes with the letter, one item to a line.
-#let enclosures(..items) = {
+// What goes with the letter, one item to a line, under `label`: auto is Enclosure, or
+// Enclosures for more than one.
+#let enclosures(..items, label: auto) = {
   let items = items.pos()
   assert(items.len() > 0, message: "enclosures() needs at least one item")
+  let label = if label != auto { label } else if items.len() == 1 [Enclosure] else [Enclosures]
   block(above: 2em, breakable: false, {
-    text(weight: 700, if items.len() == 1 [Enclosure] else [Enclosures])
+    text(weight: 700, label)
     pad(left: 1.2em, top: 2pt, items.join(linebreak()))
   })
 }
 
 // A header for page two onward: the writer, the date and the page number, so a page parted
-// from the first still says whose letter it is. Page one is left to the letterhead.
+// from the first still says whose letter it is. Page one is left to the letterhead. `label` is
+// the word before the page number.
 //
 //   #set page(..reading, header: continued())
-#let continued() = context {
+#let continued(label: [Page]) = context {
   let n = counter(page).get().first()
   if n > 1 {
     set text(size: sz.fine, fill: ink-soft)
     let date = _letter-date.final()
     grid(columns: (1fr, auto, 1fr), align: (left, center, right),
-      _writer(), if date != none { date }, [Page #n])
+      _writer(), if date != none { date }, [#label #n])
   }
 }
 
@@ -627,14 +636,17 @@
 // in the PDF's metadata and in the head, and the footer prints it beside the status, the
 // stamp and the page. `meta` sits at the right of the head; `legend` is the colour legend
 // under it (auto, the three states press's chips carry; none; or content of your own).
+// `footer` is the footer (auto, footer(status:); none; or your own, footer(edition: …) for
+// its words), passed here because a set page rule after the head would start a new page.
 // `preset` is the page.
 //
 //   #show: brief.with(title: [Rack power], author: "Your name", meta: [Site A · October 2026])
 #let brief(
-  title: none, author: (), meta: none, status: none, legend: auto, preset: card, body,
+  title: none, author: (), meta: none, status: none, legend: auto, footer: auto, preset: card,
+  body,
 ) = {
   set document(title: title, author: author)
-  set page(..preset, footer: footer(status: status))
+  set page(..preset, footer: if footer == auto { _footer(status: status) } else { footer })
   set text(font: face-text, size: sz.small, fill: ink, lang: "en")
   set par(leading: 0.52em, spacing: 0.55em)
   set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.32em)
@@ -664,14 +676,17 @@
 // continued()'s header. The body is the letter from the recipient on, ending with signature()
 // and, where it has them, enclosures(). `face` sets the letter, letterhead included, in the
 // face of a résumé it goes with, and `centred` centres the letterhead to match a centred head.
+// `header` is the header for page two onward (auto, continued(); none; or your own,
+// continued(label: …) for its word).
 //
 //   #show: letter.with(title: [Letter to the county], author: "Your Name",
 //     contact: ([Town, ST], link("mailto:you@example.com")), date: [15 October 2026])
 #let letter(
-  title: none, author: (), contact: (), date: none, face: face-text, centred: false, body,
+  title: none, author: (), contact: (), date: none, face: face-text, centred: false,
+  header: auto, body,
 ) = {
   set document(title: title, author: author)
-  set page(..reading, header: continued())
+  set page(..reading, header: if header == auto { continued() } else { header })
   set text(font: face, size: sz.body, fill: ink, lang: "en")
   set par(leading: 0.6em, spacing: 1.05em)
   show link: link-note
