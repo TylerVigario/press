@@ -15,6 +15,9 @@
 # exits 0 on a warning, so warnings are read from its output.
 #
 # Then base, which has no starter: base.typ applies it.
+#
+# First, that no template is built on another: a template's file in lib/ imports tokens.typ,
+# parts.typ and composition.typ, and nothing else.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -34,10 +37,17 @@ compile() {   # <root> <font dir> <document> <what>
     echo "$4 compiles"
 }
 
+for f in lib/*.typ; do
+    case $f in lib/tokens.typ|lib/parts.typ|lib/composition.typ) continue ;; esac
+    other=$(grep '^#import' "$f" | grep -vxE '#import "(tokens|parts|composition)\.typ": \*' || true)
+    [ -z "$other" ] || fail "$f is a template, built from tokens, parts and composition alone, but has: $other"
+done
+echo "every template in lib/ is built from tokens, parts and composition alone"
+
 repo="$tmp/repo"
 kit="assets/typst kit/press"
 mkdir -p "$repo/$kit"
-cp -R lib.typ press.toml template fonts tools "$repo/$kit/"
+cp -R lib.typ lib press.toml template fonts tools "$repo/$kit/"
 for f in template/*.typ; do
     t=$(basename "$f" .typ)
     compile . fonts "$f" "template/$t.typ, in place,"
