@@ -229,10 +229,24 @@ fails if any failed its audit. Export `PRESS_TZ` from the justfile.
 **press sets nothing until something asks.** Importing it changes no page. **Its templates are
 functions a document applies**: `#show: brief.with(title: [...], author: "...")` sets the page,
 the type, the show rules and the head from press's general-purpose default, and `letter` does
-the same for a letter. A document uses one as it is, or a repository copies one and changes its
-copy; press asks neither. `new.sh` starts a document that applies one, with placeholder text
-to replace. **The words a part prints are its `words`**, a dictionary whose English defaults
-the part's signature shows in full: `continued(words: (page: [Página]))`,
+the same for a letter. A document uses one as it is. Or a repository keeps a template of its
+own that applies press's with what all its documents share, `docs/_template.typ`:
+
+```typst
+#import "/third_party/press/lib.typ": *
+#let house(title: none, body) = {
+  show: brief.with(title: title, author: "Valley Clinic", legend: none)
+  show raw: set text(size: sz.fine)
+  body
+}
+```
+
+and each document applies that, `#import "_template.typ": *` and
+`#show: house.with(title: [Intake])`, so a fix to press's template still reaches every document;
+`all` takes `_template.typ` for a part and does not build it. Or a repository copies press's
+template and changes its copy. press prefers none of them. `new.sh` starts a document that applies
+one, with placeholder text to replace. **The words a part prints are its `words`**, a dictionary
+whose English defaults the part's signature shows in full: `continued(words: (page: [Página]))`,
 `enclosures(..items, words: (singular: [Anexo], plural: [Anexos]))`. A document passes every key
 the part prints, and a missing one is a compile error that names it. A template takes the header
 or footer it places, `letter.with(header: continued(words: (page: [Página])))`, because a page

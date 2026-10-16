@@ -26,8 +26,8 @@ only one is not finished.
 **Additive.** press sets no page and installs no show rule of its own accord: nothing takes effect
 until a document calls it. Its templates, `base`, `brief`, `letter`, `recipe` and `resume`, each in
 a file of its own in `lib/`, are functions a document applies with `#show:`, each press's universal
-default for a kind of document. A repository imports one as it is, or copies one and changes its
-copy; press says nothing about which.
+default for a kind of document. A repository imports one as it is, applies it through a shared
+template of its own, or copies one and changes its copy; press says nothing about which.
 
 press grows from the documents that use it: a template or part is added when a real document
 needs it, built for both media, and offered to every document from the next release.

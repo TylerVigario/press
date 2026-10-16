@@ -1,6 +1,7 @@
 // A brief, from press's general-purpose template. It imports press and applies brief(), which
 // sets the page, the type and the head; the rest is placeholder for your own. Use it as it is,
-// or copy brief() into your repository and change your copy: press asks neither.
+// apply your repository's own template that wraps brief(), or copy brief() into your repository
+// and change your copy: press prefers none of them.
 //
 //   sh third_party/press/tools/new.sh docs/<name>    (or `just new docs/<name>`)
 //

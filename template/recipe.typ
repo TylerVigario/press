@@ -1,6 +1,7 @@
 // A recipe card, from press's recipe template. It imports press and applies recipe(), which sets
-// the card page and the head; the rest is placeholder for your own. Use it as it is, or copy
-// recipe() into your repository and change your copy: press asks neither.
+// the card page and the head; the rest is placeholder for your own. Use it as it is, apply your
+// repository's own template that wraps recipe(), or copy recipe() into your repository and
+// change your copy: press prefers none of them.
 //
 //   sh third_party/press/tools/new.sh recipes/<name> recipe    (or `just new recipes/<name> recipe`)
 //
