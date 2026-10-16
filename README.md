@@ -341,7 +341,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | Call | For |
 |---|---|
 | `base(title:, author:, preset: card)` | Template: the page, the document's name, the type and the show rules, with nothing drawn, for a document that lays out its own page. `#show: base.with(...)`. |
-| `brief(title:, author:, meta:, status:, legend: auto, footer: auto, preset: card)` | Template: the general-purpose document's page, type, show rules, head and footer. `#show: brief.with(...)`. |
+| `brief(title:, author:, meta:, status:, legend: none, footer: auto, preset: card)` | Template: the general-purpose document's page, type, show rules, head and footer. `#show: brief.with(...)`. |
 | `letter(title:, author:, contact:, date:, face: face-text, centred: false, header: continued())` | Template: a letter's page, letterhead and date, and the page-two header. `#show: letter.with(...)`. |
 | `resume(title:, author:, headline:, contact:, face: face-text, centred: false, size: sz.small, accent: slate, caps: true, preset: (paper: "us-letter", margin: (x: 0.6in, y: 0.5in)))` | Template: a résumé's page, type and head, and its headings as ruled sections. `#show: resume.with(...)`. |
 | `recipe(title:, author:, yield:, method:, time:, intro:, preset: card, footer: footer())` | Template: a recipe card's page and head, its yield, method and time beside the dish. `#show: recipe.with(...)`. |
@@ -352,6 +352,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `titlebar(title, meta, color:, face:, size:)` | Document head with right-aligned meta. |
 | `eyebrow(body, color:, caps:)` | Small tracked-out uppercase label. |
 | `chip(label, tone)` | Inline state pill — build legends from these. |
+| `legend(note, ..chips)` | The colour legend under a head: the note on the left, the chips on the right. `brief.with(legend: legend([…], chip([DONE], "ok")))`. |
 | `callout(body, tone: "note", label: none, size:)` | Aside that must not be missed. |
 | `panel(body, label: none, color: slate)` | Boxed block, no tone semantics. |
 | `code(body, breakable: false)` | Code-block treatment; the document installs it as a show rule. |

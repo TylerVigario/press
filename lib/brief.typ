@@ -9,14 +9,15 @@
 // The general-purpose document: a sheet, a guide, a brief. The title names the document once,
 // in the PDF's metadata and in the head, and the footer prints it beside the status, the
 // stamp and the page. `meta` sits at the right of the head; `legend` is the colour legend
-// under it (auto, the three states press's chips carry; none; or content of your own).
+// under it: none, or one the document passes, legend(note, ..chips), for the states its pages
+// carry.
 // `footer` is the footer (auto, footer(status:); none; or your own, footer(edition: …) for
 // other words), passed here because a set page rule after the head would start a new page.
 // `preset` is the page.
 //
 //   #show: brief.with(title: [Rack power], author: "Your name", meta: [Site A · October 2026])
 #let brief(
-  title: none, author: (), meta: none, status: none, legend: auto, footer: auto, preset: card,
+  title: none, author: (), meta: none, status: none, legend: none, footer: auto, preset: card,
   body,
 ) = {
   set document(title: title, author: author)
@@ -34,12 +35,9 @@
   v(-3pt)
   line(length: 100%, stroke: 2pt + slate)
   v(4pt)
-  if legend == auto {
-    grid(columns: (auto, 1fr), align: (left + horizon, right + horizon),
-      text(size: sz.micro, fill: ink-faint)[Colour is state. Bands carry a role — skip on purpose.],
-      align(right)[#chip([SETTLED], "ok") #h(3pt) #chip([CONDITIONAL], "warn") #h(3pt) #chip([DECIDE], "bad")])
-    v(7pt)
-  } else if legend != none {
+  assert(legend != auto,
+    message: "brief(legend:) takes none, its default, or a legend: legend(note, chip(...), ...)")
+  if legend != none {
     legend
     v(7pt)
   }
