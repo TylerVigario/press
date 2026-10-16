@@ -592,6 +592,25 @@
 // says nothing about which. They stay generic: what one repository alone needs belongs in its
 // own copy, and press adds another template when enough documents need one.
 
+// The bare setup, for a document that lays out its own page: press's defaults for the page, the
+// type and the rules for code and links, and the document's title and author, with nothing
+// drawn. Like every template it keeps its own lines, so it can be read, or copied, on its own.
+// A set rule written after it changes any of these for the document it is in:
+// `#set par(leading: 0.58em)` after the show rule wins over base's own.
+//
+//   #show: base.with(title: [Rack power], author: "Your name", preset: dense)
+#let base(title: none, author: (), preset: card, body) = {
+  set document(title: title, author: author)
+  set page(..preset)
+  set text(font: face-text, size: sz.small, fill: ink, lang: "en")
+  set par(leading: 0.52em, spacing: 0.55em)
+  set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.32em)
+  show raw: set text(font: face-mono, size: sz.micro)
+  show raw.where(block: true): code
+  show link: link-note
+  body
+}
+
 // The general-purpose document: a sheet, a guide, a brief. The title names the document once,
 // in the PDF's metadata and in the head, and the footer prints it beside the status, the
 // stamp and the page. `meta` sits at the right of the head; `legend` is the colour legend

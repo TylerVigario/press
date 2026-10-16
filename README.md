@@ -232,19 +232,18 @@ the same for a letter. A document uses one as it is, or a repository copies one 
 copy; press asks neither. `new.sh` starts a document that applies one, with placeholder text
 to replace.
 
-**A document that composes its own page** takes the parts it wants and installs the show rules
-itself. One with commands in it wants the first two, and one with links the third:
+**A document that lays out its own page** applies `base`:
+`#show: base.with(title: [...], author: "...", preset: dense)` sets the page, names the document
+once, sets the body type, and installs the show rules for code and links, from press's
+defaults, and draws nothing. A set rule written after the show rule changes any of these for
+that document — `#set par(leading: 0.58em)` wins over `base`'s own — so a repository with
+spacing of its own writes only the lines that differ.
 
-```typ
-#show raw: set text(font: face-mono, size: sz.micro)
-#show raw.where(block: true): code
-#show link: link-note
-```
-
-It **sets its body font**, `#set text(font: face-text, ...)` — without it the body renders in
-typst's own Libertinus Serif, without a word — and **names itself once**, with
-`#set document(title: [...], author: "...")`. A PDF viewer shows the title, and a page prints it
-from `document.title`. The templates do both.
+Without `base`, a document sets these itself: its body font, `#set text(font: face-text, ...)`
+(without it the body renders in typst's own Libertinus Serif, without a word); its name, with
+`#set document(title: [...], author: "...")`, which a PDF viewer shows and a page prints from
+`document.title`; and the show rules it needs, `raw` and `code` for commands and `link-note`
+for links.
 
 **A longer document** is a directory: `new.sh` makes `docs/handbook/main.typ`, and chapters go
 beside it, `#include`d from it. Give it the reading page, `brief.with(preset: reading)`, use
@@ -288,6 +287,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 
 | Call | For |
 |---|---|
+| `base(title:, author:, preset: card)` | Template: the page, the document's name, the type and the show rules, with nothing drawn, for a document that lays out its own page. `#show: base.with(...)`. |
 | `brief(title:, author:, meta:, status:, legend: auto, preset: card)` | Template: the general-purpose document's page, type, show rules, head and footer. `#show: brief.with(...)`. |
 | `letter(title:, author:, contact:, date:, face: face-text, centred: false)` | Template: a letter's page, letterhead and date, and the page-two header. `#show: letter.with(...)`. |
 | `unit(label, tone, lead, body, caps:, breakable: false)` | The workhorse. One idea: label, bold lead, body. |

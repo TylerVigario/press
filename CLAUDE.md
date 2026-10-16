@@ -24,10 +24,10 @@ any runner calls.
 only one is not finished.
 
 **Additive.** press sets no page and installs no show rule of its own accord: nothing takes
-effect until a document calls it. Its templates, `brief` and `letter` in `lib.typ`, are functions
-a document applies with `#show:`, each press's universal default for a kind of document. A
-repository imports one as it is, or copies one and changes its copy; press says nothing about
-which.
+effect until a document calls it. Its templates, `base`, `brief` and `letter` in `lib.typ`, are
+functions a document applies with `#show:`, each press's universal default for a kind of
+document. A repository imports one as it is, or copies one and changes its copy; press says
+nothing about which.
 
 press grows from the documents that use it: a template or part is added when a real document
 needs it, built for both media, and offered to every document from the next release.
@@ -177,6 +177,8 @@ repository has.
   document, and stays generic: what one repository alone needs belongs in that repository's
   own copy. Refuse a change that would fit one repository at the others' cost; when enough
   documents need a different default, offer a separate template beside it.
+- **Do not build a template on another template.** A template is composed from parts and keeps
+  its own lines, so it can be read, or copied, on its own, and is free to differ from the others.
 - **Do not tell a repository how to use press's templates.** Imported as they are, copied and
   changed, or not used at all, it is the repository's choice.
 - **Do not make anything take effect on import.** A template applies only when a document
