@@ -193,8 +193,9 @@ just clean                       # delete print/
 
 Under `mod` it is `just press build …`, and `just press` lists the recipes; under `import`,
 `just --list` does. `all` builds documents, not their parts: a file named `_*.typ` is a part,
-and so is everything beside a `main.typ`, at any depth; it builds every one, then fails if any
-failed its audit. Export `PRESS_TZ` from the justfile.
+and so is everything beside a `main.typ`, at any depth; press's own folder is skipped, so
+`just all .` builds the repository's documents and not press's files. It builds every one, then
+fails if any failed its audit. Export `PRESS_TZ` from the justfile.
 
 ### Requirements
 
