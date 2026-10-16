@@ -310,7 +310,8 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `link-note` | Show rule for links: coloured and underlined, address footnoted for paper. |
 | `item(n, title, body, color:, size:)` | Numbered step. |
 | `matrix(head, ..rows)` | Two-column comparison table. |
-| `sheet(cols, head, ..rows, size:)` | Wide data table — any column count, zebra rows, header repeats across pages. |
+| `sheet(cols, head, ..rows, size:, blank: 0)` | Wide data table — any column count, zebra rows, header repeats across pages. `blank` adds empty rows tall enough to write in. |
+| `writein(n, label: none, pitch: 8mm)` | Lines to write on by hand, each after its label: `writein(3, label: [date])`. Print only; typst writes no PDF form fields. |
 | `flow(..steps)` | Left-to-right stage sequence. |
 | `decision(n, q, note, color: bad)` / `dbadge(n, color:)` | Open question needing an answer. |
 | `seedepth(what, at: none)` | Pointer to the depth layer. Given a label it looks up the page and links to it — never type a page number. |

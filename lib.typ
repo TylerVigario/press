@@ -436,6 +436,13 @@
     ])
 ]
 
+// Room for a pen: ruled paper spaces its lines 7 to 9 mm apart, and 8 mm takes ordinary
+// handwriting. A blank table row is otherwise only as tall as its inset, about 3 mm.
+#let _pen = 8mm
+
+// The line a pen writes on, under a signature, a date or a note.
+#let _hand-line = line(length: 100%, stroke: 0.5pt + ink)
+
 // A wide data table, for more columns than `matrix`'s two. Promoted after the same helper
 // turned up, byte-identical, in five documents.
 //
@@ -450,14 +457,35 @@
 // and no column labels — and on paper there is no scrolling back. `matrix` gets away
 // without it because two-column comparisons are short; `sheet` is explicitly the
 // many-column data table, which is the shape that breaks.
-#let sheet(cols, head, size: sz.micro, ..rows) = table(
-  columns: cols,
-  stroke: 0.4pt + rule-hair,
-  inset: (x: 5pt, y: 4pt),
-  fill: (_, y) => if y == 0 { slate-tint } else if calc.odd(y) { paper-tint } else { none },
-  table.header(..head.map(h => text(size: size, weight: 700)[#h])),
-  ..rows.pos().map(c => text(size: size)[#c]),
-)
+//
+// `blank` adds that many empty rows after the given ones, each tall enough to write in, for a
+// log filled in by hand: `#sheet((auto, auto, 1fr), ([Date], [Size], [Notes]), blank: 6)`.
+#let sheet(cols, head, size: sz.micro, blank: 0, ..rows) = {
+  let inset = (x: 5pt, y: 4pt)
+  let n = if type(cols) == int { cols } else { cols.len() }
+  table(
+    columns: cols,
+    stroke: 0.4pt + rule-hair,
+    inset: inset,
+    fill: (_, y) => if y == 0 { slate-tint } else if calc.odd(y) { paper-tint } else { none },
+    table.header(..head.map(h => text(size: size, weight: 700)[#h])),
+    ..rows.pos().map(c => text(size: size)[#c]),
+    ..range(blank * n).map(_ => box(height: _pen - 2 * inset.y)),
+  )
+}
+
+// Lines to write on by hand, `n` of them, `pitch` apart, each after `label` where one is given:
+// `#writein(3, label: [date])` for dated notes. They print; a PDF viewer cannot fill them, since
+// typst writes no PDF form fields.
+#let writein(n, label: none, pitch: _pen) = {
+  assert(type(n) == int and n > 0, message: "writein() needs a number of lines, 1 or more")
+  let row = if label == none { (_hand-line,) } else {
+    (text(size: sz.micro, fill: ink-soft, label), _hand-line)
+  }
+  grid(columns: if label == none { (1fr,) } else { (auto, 1fr) },
+    rows: pitch, column-gutter: 6pt, align: bottom,
+    ..range(n).map(_ => row).flatten())
+}
 
 // Pointer from the act layer to the depth layer, without a page number typed by hand:
 //
@@ -582,7 +610,7 @@
     if closing != none { parbreak() }
     name
   } else {
-    let slot(caption) = stack(spacing: 5pt, line(length: 100%, stroke: 0.5pt + ink), caption)
+    let slot(caption) = stack(spacing: 5pt, _hand-line, caption)
     v(0.55in)
     grid(columns: if dated { (2.6in, 0.4in, 1.4in) } else { (2.6in,) },
       slot(name), ..if dated { ([], slot(_words("signature", words, "date").date)) } else { () })
