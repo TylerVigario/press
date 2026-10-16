@@ -386,6 +386,9 @@ build it in the document.
   does; a hand-rolled `table()` does not.
 - **Markdown habits break typst:** `**bold**` warns and vanishes (use one `*`), `+ thing` at a
   line start becomes a list, `/ thing` is a compile error. Reword rather than escape.
+- **A title given as a string keeps straight quotes.** typst curls quotes and apostrophes in
+  markup only, so `title: "God's Promises"` prints a straight apostrophe wherever the title
+  prints, in the head and in `footer()`. Give it as markup: `title: [God's Promises]`.
 
 ## Printing
 
