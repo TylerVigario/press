@@ -43,7 +43,7 @@ cmp -s "$tmp/tar.list" "$tmp/zip.list" || { diff "$tmp/tar.list" "$tmp/zip.list"
 for f in .github CLAUDE.md CHANGELOG.md cog.toml justfile .markdownlint-cli2.jsonc; do
     ! grep -qx "press/$f" "$tmp/tar.list" || fail "press/$f is in the bundle; it is press's own machinery"
 done
-for f in lib.typ press.toml .gitignore calibration.typ press.just README.md FONTS.md LICENSE \
+for f in lib.typ press.toml .gitignore .gitattributes calibration.typ press.just README.md FONTS.md LICENSE \
          lib/tokens.typ lib/parts.typ lib/composition.typ \
          lib/base.typ lib/brief.typ lib/letter.typ lib/recipe.typ lib/resume.typ \
          template/main.typ template/letter.typ template/recipe.typ template/resume.typ \

@@ -48,6 +48,7 @@ needs it, built for both media, and offered to every document from the next rele
 | `press.just` | recipes for repositories that use just |
 | `README.md`, `FONTS.md`, `LICENSE` | the consumer guide, the font account, the AGPL |
 | `.gitignore` | ships in the kit, so a repository that commits press's folder ignores the build record in it |
+| `.gitattributes` | ships in the kit, so a repository that commits press's folder checks it out with LF, which `sh` needs, and its fonts as binary |
 | `install.sh`, `install.ps1` | the installers each release attaches beside the kit, not inside it |
 | `.github/`, `CLAUDE.md`, `CHANGELOG.md`, `cog.toml`, `justfile` | press's own machinery |
 
