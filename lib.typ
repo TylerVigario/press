@@ -322,21 +322,33 @@
 }
 
 
+// A part's own words, as a document passes them in `words`: every key the part prints must be
+// there, so a misspelt or missing one is a compile error naming it, not English left behind.
+#let _words(part, words, ..keys) = {
+  let keys = keys.pos()
+  for k in keys {
+    assert(type(words) == dictionary and k in words,
+      message: part + "(words:) takes " + keys.map(k => k + ":").join(", ") + "; " + k + ": is missing")
+  }
+  words
+}
+
 // When the page's content last changed, as tools/stamp.sh stamps it.
 // A rebuild that changes nothing on the page keeps the old time, so a newer time than the
 // copy on the shelf means reprint, and the same time means that copy is current. Put it in
 // the footer, where every page carries it: a page parted from its stack still says which
 // edition it is. Built without tools/stamp.sh -- typst watch, a bare typst compile -- there is
-// no stamp, and it says so rather than inventing one. `label` and `unstamped` are its words.
-#let updated(label: [updated], unstamped: [not stamped (built without press's stamp.sh)]) = {
+// no stamp, and it says so rather than inventing one.
+#let updated(words: (updated: [updated], unstamped: [not stamped (built without press's stamp.sh)])) = {
+  let w = _words("updated", words, "updated", "unstamped")
   let s = sys.inputs.at("press-updated", default: none)
-  if s == none { unstamped } else { [#label #s] }
+  if s == none { w.unstamped } else { [#w.updated #s] }
 }
 
 // The footer brief prints, for a document that lays out its own page: the document's title, and
 // its status where it has one, on the left; updated() and the page of the total on the right. The
 // title is the one the document names itself with, set document(title:) or base's title.
-// `edition` is what it says of the edition: none leaves it out, and updated(label: […]) says
+// `edition` is what it says of the edition: none leaves it out, and updated(words: …) says
 // it in other words.
 //
 //   #set page(..dense, footer: footer(status: [draft]))
@@ -556,15 +568,14 @@
 
 // The subject line. Each reference is kept whole, so an account number never breaks across a
 // line, and stays text a reader can copy.
-#let re(..refs, label: [Re:]) = block(above: 1.2em, below: 1.2em,
-  [#text(weight: 700, label) #refs.pos().map(r => box(r)).join([; ])])
+#let re(..refs, words: (re: [Re:])) = block(above: 1.2em, below: 1.2em,
+  [#text(weight: 700, _words("re", words, "re").re) #refs.pos().map(r => box(r)).join([; ])])
 
 // Where the letter is signed, with its closing (`closing: [Sincerely,]`) kept on the same page,
 // so a page break never strands it. By default, space for an ink signature over a line with the
 // writer's name beneath, and beside it a line to date by hand (`dated: false` leaves that out).
 // For a letter sent as a file, `signed: false` is a typed sign-off: the name alone.
-// `date-label` is the word under the date line.
-#let signature(closing: none, signed: true, dated: true, date-label: [Date]) = block(breakable: false, context {
+#let signature(closing: none, signed: true, dated: true, words: (date: [Date])) = block(breakable: false, context {
   let name = _writer()
   if closing != none { closing }
   if not signed {
@@ -574,16 +585,17 @@
     let slot(caption) = stack(spacing: 5pt, line(length: 100%, stroke: 0.5pt + ink), caption)
     v(0.55in)
     grid(columns: if dated { (2.6in, 0.4in, 1.4in) } else { (2.6in,) },
-      slot(name), ..if dated { ([], slot(date-label)) } else { () })
+      slot(name), ..if dated { ([], slot(_words("signature", words, "date").date)) } else { () })
   }
 })
 
-// What goes with the letter, one item to a line, under `singular` for one item and `plural`
-// for more.
-#let enclosures(..items, singular: [Enclosure], plural: [Enclosures]) = {
+// What goes with the letter, one item to a line, under the singular word for one item and the
+// plural for more.
+#let enclosures(..items, words: (singular: [Enclosure], plural: [Enclosures])) = {
   let items = items.pos()
   assert(items.len() > 0, message: "enclosures() needs at least one item")
-  let label = if items.len() == 1 { singular } else { plural }
+  let w = _words("enclosures", words, "singular", "plural")
+  let label = if items.len() == 1 { w.singular } else { w.plural }
   block(above: 2em, breakable: false, {
     text(weight: 700, label)
     pad(left: 1.2em, top: 2pt, items.join(linebreak()))
@@ -591,17 +603,17 @@
 }
 
 // A header for page two onward: the writer, the date and the page number, so a page parted
-// from the first still says whose letter it is. Page one is left to the letterhead. `label` is
-// the word before the page number.
+// from the first still says whose letter it is. Page one is left to the letterhead.
 //
 //   #set page(..reading, header: continued())
-#let continued(label: [Page]) = context {
+#let continued(words: (page: [Page])) = context {
+  let w = _words("continued", words, "page")
   let n = counter(page).get().first()
   if n > 1 {
     set text(size: sz.fine, fill: ink-soft)
     let date = _letter-date.final()
     grid(columns: (1fr, auto, 1fr), align: (left, center, right),
-      _writer(), if date != none { date }, [#label #n])
+      _writer(), if date != none { date }, [#w.page #n])
   }
 }
 
@@ -636,7 +648,7 @@
 // stamp and the page. `meta` sits at the right of the head; `legend` is the colour legend
 // under it (auto, the three states press's chips carry; none; or content of your own).
 // `footer` is the footer (auto, footer(status:); none; or your own, footer(edition: …) for
-// its words), passed here because a set page rule after the head would start a new page.
+// other words), passed here because a set page rule after the head would start a new page.
 // `preset` is the page.
 //
 //   #show: brief.with(title: [Rack power], author: "Your name", meta: [Site A · October 2026])
@@ -675,8 +687,8 @@
 // continued()'s header. The body is the letter from the recipient on, ending with signature()
 // and, where it has them, enclosures(). `face` sets the letter, letterhead included, in the
 // face of a résumé it goes with, and `centred` centres the letterhead to match a centred head.
-// `header` is the header for page two onward: none leaves it out, and continued(label: …)
-// gives it another word.
+// `header` is the header for page two onward: none leaves it out, and continued(words: …)
+// gives it other words.
 //
 //   #show: letter.with(title: [Letter to the county], author: "Your Name",
 //     contact: ([Town, ST], link("mailto:you@example.com")), date: [15 October 2026])
