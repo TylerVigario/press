@@ -336,13 +336,12 @@
 // The footer brief prints, for a document that lays out its own page: the document's title, and
 // its status where it has one, on the left; updated() and the page of the total on the right. The
 // title is the one the document names itself with, set document(title:) or base's title.
-// `edition` is what it says of the edition: auto is updated(), none leaves it out, and content
-// takes its place, updated(label: […]) for updated() in other words.
+// `edition` is what it says of the edition: none leaves it out, and updated(label: […]) says
+// it in other words.
 //
 //   #set page(..dense, footer: footer(status: [draft]))
-#let footer(status: none, edition: auto) = context {
+#let footer(status: none, edition: updated()) = context {
   set text(size: sz.micro, fill: ink-faint)
-  let edition = if edition == auto { updated() } else { edition }
   grid(columns: (1fr, auto),
     align(left)[#document.title#if status != none [ · #status]],
     align(right)[#if edition != none [#edition · ]#counter(page).display("1 / 1", both: true)])
@@ -579,12 +578,12 @@
   }
 })
 
-// What goes with the letter, one item to a line, under `label`: auto is Enclosure, or
-// Enclosures for more than one.
-#let enclosures(..items, label: auto) = {
+// What goes with the letter, one item to a line, under `singular` for one item and `plural`
+// for more.
+#let enclosures(..items, singular: [Enclosure], plural: [Enclosures]) = {
   let items = items.pos()
   assert(items.len() > 0, message: "enclosures() needs at least one item")
-  let label = if label != auto { label } else if items.len() == 1 [Enclosure] else [Enclosures]
+  let label = if items.len() == 1 { singular } else { plural }
   block(above: 2em, breakable: false, {
     text(weight: 700, label)
     pad(left: 1.2em, top: 2pt, items.join(linebreak()))
@@ -676,17 +675,17 @@
 // continued()'s header. The body is the letter from the recipient on, ending with signature()
 // and, where it has them, enclosures(). `face` sets the letter, letterhead included, in the
 // face of a résumé it goes with, and `centred` centres the letterhead to match a centred head.
-// `header` is the header for page two onward (auto, continued(); none; or your own,
-// continued(label: …) for its word).
+// `header` is the header for page two onward: none leaves it out, and continued(label: …)
+// gives it another word.
 //
 //   #show: letter.with(title: [Letter to the county], author: "Your Name",
 //     contact: ([Town, ST], link("mailto:you@example.com")), date: [15 October 2026])
 #let letter(
   title: none, author: (), contact: (), date: none, face: face-text, centred: false,
-  header: auto, body,
+  header: continued(), body,
 ) = {
   set document(title: title, author: author)
-  set page(..reading, header: if header == auto { continued() } else { header })
+  set page(..reading, header: header)
   set text(font: face, size: sz.body, fill: ink, lang: "en")
   set par(leading: 0.6em, spacing: 1.05em)
   show link: link-note
