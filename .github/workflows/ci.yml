@@ -12,7 +12,8 @@ name: CI
 #                            typst warnings that exit 0 and ship, fonts that are
 #                            not vendored, and ink inside the unprintable band; and
 #                            against .github/audit-cases/, documents with one known
-#                            answer, so a false finding fixed once stays fixed.
+#                            answer, so a false finding fixed once stays fixed; and
+#                            a résumé's text, which must read in the order it prints.
 #   The release bundle installs and works
 #                            the archives the release attaches, built from this
 #                            tree: the kit and nothing of press's machinery,
@@ -100,6 +101,8 @@ jobs:
           just check calibration.typ
       - name: The audit passes and refuses its known cases
         run: sh .github/audit-cases.sh
+      - name: A résumé reads in the order it prints
+        run: sh .github/reading-order.sh
 
   bundle:
     name: The release bundle installs and works
