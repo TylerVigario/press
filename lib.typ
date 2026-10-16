@@ -63,10 +63,11 @@
 
 // ------------------------------------------------------------- templates ---
 // press's templates: a document's page, type and head, composed from the files above, which a
-// document applies with a show rule and nothing else. Each is press's universal default for a
-// kind of document. A repository imports one as it is, or copies it and changes its copy; press
-// says nothing about which. They stay generic: what one repository alone needs belongs in its
-// own copy, and press adds another template when enough documents need one.
+// document applies with a show rule and nothing else. Each is press's universal default for a kind
+// of document. A repository imports one as it is, applies it through a shared template of its own,
+// or copies it and changes its copy; press says nothing about which. They stay generic: what one
+// repository alone needs belongs in its own copy, and press adds another template when enough
+// documents need one.
 
 #import "lib/tokens.typ": *
 #import "lib/parts.typ": *

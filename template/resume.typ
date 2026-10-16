@@ -1,6 +1,7 @@
 // A résumé, from press's résumé template. It imports press and applies resume(), which sets the
-// page, the type and the head; the rest is placeholder for your own. Use it as it is, or copy
-// resume() into your repository and change your copy: press asks neither.
+// page, the type and the head; the rest is placeholder for your own. Use it as it is, apply your
+// repository's own template that wraps resume(), or copy resume() into your repository and
+// change your copy: press prefers none of them.
 //
 //   sh third_party/press/tools/new.sh docs/<name> resume    (or `just new docs/<name> resume`)
 //

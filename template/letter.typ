@@ -1,6 +1,7 @@
 // A letter, from press's letter template. It imports press and applies letter(), which sets the
-// page, the letterhead and the date; the rest is placeholder for your own. Use it as it is, or
-// copy letter() into your repository and change your copy: press asks neither.
+// page, the letterhead and the date; the rest is placeholder for your own. Use it as it is, apply
+// your repository's own template that wraps letter(), or copy letter() into your repository and
+// change your copy: press prefers none of them.
 //
 //   sh third_party/press/tools/new.sh docs/<name> letter    (or `just new docs/<name> letter`)
 //
