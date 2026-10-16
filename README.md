@@ -251,7 +251,7 @@ own that applies press's with what all its documents share, `docs/_template.typ`
 #import "/third_party/press/lib.typ": *
 #let house(title: none, body) = {
   show: brief.with(title: title, author: "Valley Clinic", legend: none)
-  show raw: set text(size: sz.fine)
+  set par(leading: 0.58em)
   body
 }
 ```

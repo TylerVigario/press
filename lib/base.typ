@@ -18,7 +18,7 @@
   set text(font: face-text, size: sz.small, fill: ink, lang: "en")
   set par(leading: 0.52em, spacing: 0.55em)
   set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.32em)
-  show raw: set text(font: face-mono, size: sz.micro)
+  show raw: set text(font: face-mono, size: sz.fine)
   show raw.where(block: true): code
   show link: link-note
   body

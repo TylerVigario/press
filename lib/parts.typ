@@ -62,7 +62,7 @@
 
 // Code block treatment. The document installs it; press never does:
 //
-//   #show raw: set text(font: face-mono, size: sz.micro)
+//   #show raw: set text(font: face-mono, size: sz.fine)
 //   #show raw.where(block: true): code
 //
 // Shading and a border, commands as plain lines, nothing per line. That is what
