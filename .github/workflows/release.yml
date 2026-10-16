@@ -243,7 +243,7 @@ jobs:
           VERSION: ${{ needs.decide.outputs.version }}
         run: |
           set -euo pipefail
-          # The one place a version is written: lib.typ's press-version and the bundle
+          # The one place a version is written: lib/tokens.typ's press-version and the bundle
           # read it from here. On a new run after a failed publish it is already written,
           # and this changes nothing.
           sed -i "s/^version *= *\".*\"$/version = \"$VERSION\"/" press.toml

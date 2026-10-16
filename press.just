@@ -38,7 +38,7 @@
 
 # The oldest just this file works with. A just that knows the setting refuses this file with
 # "requires just 1.55.0 or later"; one older still stops at this line with "unknown setting",
-# and the line it shows names the version. typst's floor is press.toml's, which lib.typ and
+# and the line it shows names the version. typst's floor is press.toml's, which lib/tokens.typ and
 # tools/stamp.sh enforce for every runner. CI builds and checks at both floors, installed by
 # the toolchain action's OLDEST_ pins, so raising one is an edit there too.
 set minimum-version := '1.55.0'

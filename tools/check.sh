@@ -149,9 +149,9 @@ fi
 # #imports is on the page too. typst lists what the compile read. Two kinds of file are left
 # out, since their characters are their own business, not the page's:
 #
-#   · press's lib.typ, found as the lib.typ beside press.toml, which lib.typ reads on every
-#     import — and only that file, so a document kept in press's directory, such as its
-#     calibration sheet, is still scanned;
+#   · press's own: the lib.typ beside press.toml, which press reads on every import, and the
+#     files in the lib/ beside it — and only those, so a document kept in press's directory,
+#     such as its calibration sheet, is still scanned;
 #   · a Typst package's files: a package lists its typst.toml with them, so anything under
 #     a directory holding one is the package's.
 #
@@ -165,13 +165,14 @@ fi
 tr '\000\\' '\n/' < "$tmp/deps" | awk '
     { f[++n] = $0 }
     /\/typst\.toml$/ { p = $0; sub(/typst\.toml$/, "", p); pkg[p] = 1 }
-    /(^|\/)press\.toml$/ { p = $0; sub(/press\.toml$/, "", p); press[p "lib.typ"] = 1 }
+    /(^|\/)press\.toml$/ { p = $0; sub(/press\.toml$/, "", p); press[p] = 1 }
     END {
         for (i = 1; i <= n; i++) {
-            if (f[i] !~ /\.typ$/ || f[i] in press) continue
-            inpkg = 0
-            for (p in pkg) if (index(f[i], p) == 1) inpkg = 1
-            if (!inpkg) print f[i]
+            if (f[i] !~ /\.typ$/) continue
+            skip = 0
+            for (p in press) if (f[i] == p "lib.typ" || index(f[i], p "lib/") == 1) skip = 1
+            for (p in pkg) if (index(f[i], p) == 1) skip = 1
+            if (!skip) print f[i]
         }
     }' > "$tmp/sources"
 # At least $src itself; an empty list would skip the check and report the document clean.

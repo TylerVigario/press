@@ -45,9 +45,9 @@ pdf=$2
 shift 2
 # What remains in "$@" is the typst flags, as in check.sh.
 
-# The oldest typst press works with, from press.toml. lib.typ asserts it too, but build and
-# check pass --creation-timestamp and --deps first, and an older typst stops on a flag it
-# lacks, as "unexpected argument", before lib.typ is ever read.
+# The oldest typst press works with, from press.toml. lib/tokens.typ asserts it too, but build
+# and check pass --creation-timestamp and --deps first, and an older typst stops on a flag it
+# lacks, as "unexpected argument", before press is ever read.
 min=$(sed -n 's/^typst *= *"\(.*\)"$/\1/p' "$(dirname "$0")/../press.toml")
 v=$(typst --version) || { echo 'press: typst is not on PATH' >&2; exit 1; }
 v=${v#typst }

@@ -64,7 +64,7 @@ echo "audit-cases: a pass that cannot run fails the audit, whatever the document
 # to it is. typst runs through a wrapper that notes each compile.
 r=$tmp/record
 mkdir -p "$r/bin" "$r/kit"
-cp -R lib.typ press.toml fonts tools "$r/kit/"
+cp -R lib.typ lib press.toml fonts tools "$r/kit/"
 printf '#!/bin/sh\n[ "$1" != compile ] || echo compile >> "%s/compiles"\nexec "%s" "$@"\n' "$r" "$(command -v typst)" > "$r/bin/typst"
 chmod +x "$r/bin/typst"
 printf '#import "/kit/lib.typ": *\n#set document(title: [Record], author: "press")\n#set page(..card)\n#set text(font: face-text)\nOne line.\n' > "$r/doc.typ"

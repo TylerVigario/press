@@ -23,9 +23,9 @@ any runner calls.
 **One output for screen and print.** Every part must work in both media: a part that works in
 only one is not finished.
 
-**Additive.** press sets no page and installs no show rule of its own accord: nothing takes
-effect until a document calls it. Its templates, `base`, `brief`, `letter`, `recipe` and
-`resume` in `lib.typ`, are functions a document applies with `#show:`, each press's universal
+**Additive.** press sets no page and installs no show rule of its own accord: nothing takes effect
+until a document calls it. Its templates, `base`, `brief`, `letter`, `recipe` and `resume`, each in
+a file of its own in `lib/`, are functions a document applies with `#show:`, each press's universal
 default for a kind of document. A repository imports one as it is, or copies one and changes its
 copy; press says nothing about which.
 
@@ -38,7 +38,8 @@ needs it, built for both media, and offered to every document from the next rele
 
 | | what |
 |---|---|
-| `lib.typ` | the parts, tokens, presets and templates a document imports |
+| `lib.typ` | the one file a document imports, which imports every file in `lib/` |
+| `lib/` | `tokens.typ` (colours, faces, sizes, presets, the version), `parts.typ`, `composition.typ`, and a file for each template, with the parts only it uses: `letter.typ` holds the letter's, `resume.typ` the résumé's `entry` |
 | `press.toml` | `version`, the version last released, and `typst`, the oldest typst press works with |
 | `template/` | the starters `tools/new.sh` copies, `main.typ` (applying `brief`), `letter.typ` (applying `letter`), `recipe.typ` (applying `recipe`) and `resume.typ` (applying `resume`); each imports `../lib.typ` so it compiles in place |
 | `calibration.typ` | the print calibration sheet; imports `lib.typ` |
@@ -58,10 +59,11 @@ version and the SHA-256 of the archive each one fetches over their `@VERSION@` a
 so a release's installer installs that release and refuses any other bytes. Unstamped, they
 refuse to run.
 
-**`press.toml` is the one place each version is written.** `lib.typ` reads it — `press-version`
-prints `version`, and an assert refuses a typst older than `typst` — and `tools/stamp.sh` reads
-`typst` before the flags an older typst would stop on. It is not a `typst.toml`: press is not
-a Typst package, and the audit treats a directory holding a `typst.toml` as a package's.
+**`press.toml` is the one place each version is written.** `lib/tokens.typ` reads it —
+`press-version` prints `version`, and an assert refuses a typst older than `typst` — and
+`tools/stamp.sh` reads `typst` before the flags an older typst would stop on. It is not a
+`typst.toml`: press is not a Typst package, and the audit treats a directory holding a `typst.toml`
+as a package's.
 
 ---
 
@@ -114,8 +116,8 @@ repository has.
 - **Every template's import line is an interface.** `new.sh` rewrites exactly
   `#import "../lib.typ": *` into the copy's root-relative path, and refuses if the line is not
   there. Keep the line as it is in each starter, or change them and `new.sh` together. A new
-  template is a function in `lib.typ` and a starter in `template/` that applies it, which
-  `new.sh`, `templates.sh` and the bundle pick up; add the starter to the files
+  template is a file in `lib/`, imported by `lib.typ`, and a starter in `template/` that applies
+  it, which `new.sh`, `templates.sh` and the bundle pick up; add both to the files
   `bundle-check.sh` requires.
 - **Every build is audited through `check.sh`, from `stamp.sh`.** `stamp.sh` hands over the
   files its compile read and what typst printed (`PRESS_BUILT_DEPS`, `PRESS_BUILT_LOG`), with
@@ -137,9 +139,9 @@ repository has.
   (`lib.typ`'s `scan()`, `--input press-scans=hidden`). `stamp.sh` compiles that copy at the
   document PDF's own stamp (`PRESS_STAMP_AS`), so it lays out exactly as the document does; the
   Python passes take the document's PDF as a name to report findings against.
-- **The audit's glyph scan leaves out exactly press's `lib.typ`**, found beside `press.toml`,
-  and the files of any Typst package, found beside a `typst.toml`. A document kept in press's
-  directory, such as the calibration sheet, is still scanned.
+- **The audit's glyph scan leaves out exactly press's `lib.typ` and the files in its `lib/`**,
+  found beside `press.toml`, and the files of any Typst package, found beside a `typst.toml`. A
+  document kept in press's directory, such as the calibration sheet, is still scanned.
 - **Editing `press.just`:**
   - `just` takes the last comment line before a recipe as its description; every recipe
     carries an explicit `[doc("...")]` for that reason. Keep it, and check `just --list`.
@@ -179,6 +181,8 @@ repository has.
   documents need a different default, offer a separate template beside it.
 - **Do not build a template on another template.** A template is composed from parts and keeps
   its own lines, so it can be read, or copied, on its own, and is free to differ from the others.
+  Its file in `lib/` imports `tokens.typ`, `parts.typ` and `composition.typ` and nothing else;
+  `templates.sh` fails on any other import.
 - **Do not fix a word a template or part prints.** A part's words are its `words` argument, a
   dictionary with the English written in full as the default and every key checked through
   `_words`, as `continued(words: (page: [Page]))` is, so a document that imports press can change
