@@ -496,13 +496,14 @@
 // Given a label, the page is looked up where the label lands, so it stays right when the
 // layout moves, and it links there: on a screen it clicks through, on paper it is a page
 // number. A label that does not exist is a compile error, not a silent "p. ?".
-#let seedepth(what, at: none) = {
+#let seedepth(what, at: none, words: (detail: [detail], on: [on], page: [p.])) = {
+  let w = _words("seedepth", words, "detail", "on", "page")
   let target = if type(what) == label { what } else { at }
   let on = if target != none {
-    link(target, context [p. #counter(page).at(locate(target)).first()])
+    link(target, context [#w.page #counter(page).at(locate(target)).first()])
   }
   text(size: sz.fine, fill: ink-faint, style: "italic")[
-    #sym.arrow.r #if type(what) == label [detail on #on] else if on == none [detail: #what] else [detail: #what, #on]
+    #sym.arrow.r #if type(what) == label [#w.detail #w.on #on] else if on == none [#w.detail: #what] else [#w.detail: #what, #on]
   ]
 }
 

@@ -314,7 +314,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `writein(n, label: none, pitch: 8mm)` | Lines to write on by hand, each after its label: `writein(3, label: [date])`. Print only; typst writes no PDF form fields. |
 | `flow(..steps)` | Left-to-right stage sequence. |
 | `decision(n, q, note, color: bad)` / `dbadge(n, color:)` | Open question needing an answer. |
-| `seedepth(what, at: none)` | Pointer to the depth layer. Given a label it looks up the page and links to it — never type a page number. |
+| `seedepth(what, at: none, words: (detail: [detail], on: [on], page: [p.]))` | Pointer to the depth layer. Given a label it looks up the page and links to it — never type a page number. |
 | `stamp(body)` | Closing line — provenance, or a last caution. |
 | `updated(words: (updated: [updated], unstamped: [...]))` | When the content last changed, as the stamp records it. For the footer. |
 | `footer(status: none, edition: updated())` | `brief`'s footer, for a document that lays out its own page: title and status, then `updated()` and the page. `#set page(footer: footer())`. |
