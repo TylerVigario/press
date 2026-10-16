@@ -24,10 +24,10 @@ any runner calls.
 only one is not finished.
 
 **Additive.** press sets no page and installs no show rule of its own accord: nothing takes
-effect until a document calls it. Its templates, `base`, `brief`, `letter` and `recipe` in
-`lib.typ`, are functions a document applies with `#show:`, each press's universal default for a
-kind of document. A repository imports one as it is, or copies one and changes its copy; press
-says nothing about which.
+effect until a document calls it. Its templates, `base`, `brief`, `letter`, `recipe` and
+`resume` in `lib.typ`, are functions a document applies with `#show:`, each press's universal
+default for a kind of document. A repository imports one as it is, or copies one and changes its
+copy; press says nothing about which.
 
 press grows from the documents that use it: a template or part is added when a real document
 needs it, built for both media, and offered to every document from the next release.
@@ -40,7 +40,7 @@ needs it, built for both media, and offered to every document from the next rele
 |---|---|
 | `lib.typ` | the parts, tokens, presets and templates a document imports |
 | `press.toml` | `version`, the version last released, and `typst`, the oldest typst press works with |
-| `template/` | the starters `tools/new.sh` copies, `main.typ` (applying `brief`), `letter.typ` (applying `letter`) and `recipe.typ` (applying `recipe`); each imports `../lib.typ` so it compiles in place |
+| `template/` | the starters `tools/new.sh` copies, `main.typ` (applying `brief`), `letter.typ` (applying `letter`), `recipe.typ` (applying `recipe`) and `resume.typ` (applying `resume`); each imports `../lib.typ` so it compiles in place |
 | `calibration.typ` | the print calibration sheet; imports `lib.typ` |
 | `fonts/` | the vendored faces, and `fonts/licenses/` with each one's licence text |
 | `tools/` | `new.sh`, `stamp.sh`, `check.sh`, `report.sh`, and the audit's two Python passes |

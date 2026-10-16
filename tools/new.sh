@@ -6,7 +6,8 @@
 #   sh third_party/press/tools/new.sh docs/thing           -> docs/thing/main.typ
 #   sh third_party/press/tools/new.sh docs/thing letter    -> the same, from the letter template
 #
-# The second word names a starter in press's template/: main by default, letter, or recipe.
+# The second word names a starter in press's template/: main by default, letter, recipe or
+# resume.
 #
 # The name is a directory, so it takes no .typ: a document grows chapters beside its
 # main.typ. The template imports press relatively, so it compiles where it stands; the copy

@@ -113,7 +113,7 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 
 | tool | does |
 |---|---|
-| `sh third_party/press/tools/new.sh docs/guide` | scaffolds `docs/guide/main.typ` from the template, its import written for where press sits; add `letter` or `recipe` for those templates |
+| `sh third_party/press/tools/new.sh docs/guide` | scaffolds `docs/guide/main.typ` from the template, its import written for where press sits; add `letter`, `recipe` or `resume` for those templates |
 | `sh third_party/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory; then audits it, where the audit's tools are installed |
 | `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | the audit alone, which refuses to run without its tools: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text printed on text |
 
@@ -277,6 +277,15 @@ what the dish is. Page one is the whole cook: the ingredients in a `matrix`, the
 numbered `item`s, a costly step in `color: warn`. `depth()` starts the reference on a page of its
 own, and `writein()` leaves lines for what the cook changed.
 
+**A résumé** applies `resume`: `new.sh docs/resume resume` starts one.
+`#show: resume.with(title:, author:, headline:, contact:)` sets one column on a full sheet, with
+no footer, under a head of the writer's name, the headline and the contact line. A section is a
+heading, `= Experience`, and a role is `entry(role, org, dates)`: one paragraph, so a parser reads
+the role, the organisation and the dates in that order, and a role that wraps carries its dates
+on its last line. `size:` sets the body, `sz.small` by default, and the head and headings follow it;
+`face:` and `centred:` match a letter's. A heading's gaps are set rules after the show rule:
+`#show heading: set block(above: 8pt)`.
+
 ### The six conventions
 
 Tokens alone do not make a document readable. These do:
@@ -304,6 +313,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `base(title:, author:, preset: card)` | Template: the page, the document's name, the type and the show rules, with nothing drawn, for a document that lays out its own page. `#show: base.with(...)`. |
 | `brief(title:, author:, meta:, status:, legend: auto, footer: auto, preset: card)` | Template: the general-purpose document's page, type, show rules, head and footer. `#show: brief.with(...)`. |
 | `letter(title:, author:, contact:, date:, face: face-text, centred: false, header: continued())` | Template: a letter's page, letterhead and date, and the page-two header. `#show: letter.with(...)`. |
+| `resume(title:, author:, headline:, contact:, face: face-text, centred: false, size: sz.small, accent: slate, caps: true, preset: (paper: "us-letter", margin: (x: 0.6in, y: 0.5in)))` | Template: a résumé's page, type and head, and its headings as ruled sections. `#show: resume.with(...)`. |
 | `recipe(title:, author:, yield:, method:, time:, intro:, preset: card, footer: footer())` | Template: a recipe card's page and head, its yield, method and time beside the dish. `#show: recipe.with(...)`. |
 | `unit(label, tone, lead, body, caps:, breakable: false)` | The workhorse. One idea: label, bold lead, body. |
 | `units(..items, pack: "stacks", gutter:, spacing:)` | A group of units. `"stacks"`: two columns balanced by measured height. `"grid"`: rows aligned, when the pairing means something. `"single"`: one column. |
@@ -335,6 +345,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `signature(closing: none, signed: true, dated: true, words: (date: [Date]))` | The closing, kept on its page, then lines for an ink signature over the writer's name and a hand-written date, or with `signed: false` a typed sign-off. |
 | `enclosures(..items, words: (singular: [Enclosure], plural: [Enclosures]))` | What goes with a letter, one item to a line. |
 | `continued(words: (page: [Page]))` | A header for page two onward of a letter: writer, date, page. `set page(header: continued())`. |
+| `entry(role, org, dates, stacked: false)` | A résumé's role: role, organisation and dates in one paragraph, the dates at the right; `stacked` puts the organisation on its own line. It stays with what follows, so no page ends on a role. |
 
 **Tokens.** Colours `ink`, `ink-soft`, `ink-faint`, `rule-hair`, `rule-mid`, `paper-tint`,
 `slate`, `slate-tint`, `steel`, and `ok`/`warn`/`bad` each with a `-tint`. Faces `face-text`
