@@ -93,7 +93,7 @@
 // and, where it has them, enclosures(). `face` sets the letter, letterhead included, in the
 // face of a résumé it goes with, and `centred` centres the letterhead to match a centred head.
 // `header` is the header for page two onward: none leaves it out, and continued(words: …)
-// gives it other words.
+// gives it other words. `contact` is a list of items, or one item alone.
 //
 //   #show: letter.with(title: [Letter to the county], author: "Your Name",
 //     contact: ([Town, ST], link("mailto:you@example.com")), date: [15 October 2026])
@@ -107,7 +107,7 @@
   set par(leading: 0.6em, spacing: 1.05em)
   show link: link-note
 
-  let head = letterhead(..contact, face: face)
+  let head = letterhead(..if type(contact) == array { contact } else { (contact,) }, face: face)
   if centred { align(center, head) } else { head }
   if date != none { dateline(date); parbreak() }
   body

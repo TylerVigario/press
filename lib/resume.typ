@@ -36,7 +36,8 @@
 // the body text, and the head and headings are sized from it. `caps: false` keeps the headings'
 // case, which upper() would change. A set rule after the show rule changes a heading's gaps:
 // `#show heading: set block(above: 8pt)` for the space above, `below:` for the space under the
-// rule, and `inset: (bottom: 2pt)` for the space between the title and its rule.
+// rule, and `inset: (bottom: 2pt)` for the space between the title and its rule. `contact` is a
+// list of items, or one item alone.
 //
 //   #show: resume.with(title: [Your Name — Résumé], author: "Your Name",
 //     headline: [Network and systems], contact: ([Town, ST], link("mailto:you@example.com")))
@@ -51,6 +52,7 @@
   set par(leading: 0.52em, spacing: 0.55em)
   set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.32em)
   show link: link-note
+  let contact = if type(contact) == array { contact } else { (contact,) }
   show heading: set block(above: 1.1em, below: 0.6em, inset: (bottom: 0.3em),
     stroke: (bottom: 0.5pt + rule-mid), sticky: true)
   show heading: it => block(width: 100%, text(size: 1.1 * size, weight: 700, fill: accent,
