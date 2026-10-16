@@ -177,6 +177,9 @@ repository has.
   document, and stays generic: what one repository alone needs belongs in that repository's
   own copy. Refuse a change that would fit one repository at the others' cost; when enough
   documents need a different default, offer a separate template beside it.
+- **Do not build a template on another template.** A template is composed from parts and keeps
+  its own lines, so it can be read, or copied, on its own. Where two templates must set the same
+  things, as `base` and `brief` do, a check in CI holds them together: `.github/base-agrees.typ`.
 - **Do not tell a repository how to use press's templates.** Imported as they are, copied and
   changed, or not used at all, it is the repository's choice.
 - **Do not make anything take effect on import.** A template applies only when a document

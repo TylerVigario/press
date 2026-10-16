@@ -593,9 +593,11 @@
 // own copy, and press adds another template when enough documents need one.
 
 // The bare setup, for a document that lays out its own page: the page, the document's title and
-// author, the type, and the rules for code and links, with nothing drawn. brief() is base() with a
-// head, a legend and a footer. A set rule written after it changes any of these for the document
-// it is in: `#set par(leading: 0.58em)` after the show rule wins over base's own.
+// author, the type, and the rules for code and links, with nothing drawn. It sets what brief sets,
+// without brief's head, legend and footer; each template keeps its own lines, so either can be
+// read, or copied, on its own, and CI checks that the two still agree. A set rule written after
+// it changes any of these for the document it is in: `#set par(leading: 0.58em)` after the show
+// rule wins over base's own.
 //
 //   #show: base.with(title: [Rack power], author: "Your name", preset: dense)
 #let base(title: none, author: (), preset: card, body) = {
@@ -620,13 +622,19 @@
 #let brief(
   title: none, author: (), meta: none, status: none, legend: auto, preset: card, body,
 ) = {
-  show: base.with(title: title, author: author, preset: preset)
-  set page(footer: context {
+  set document(title: title, author: author)
+  set page(..preset, footer: context {
     set text(size: sz.micro, fill: ink-faint)
     grid(columns: (1fr, auto),
       align(left)[#document.title#if status != none [ · #status]],
       align(right)[#updated() · #counter(page).display("1 / 1", both: true)])
   })
+  set text(font: face-text, size: sz.small, fill: ink, lang: "en")
+  set par(leading: 0.52em, spacing: 0.55em)
+  set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.32em)
+  show raw: set text(font: face-mono, size: sz.micro)
+  show raw.where(block: true): code
+  show link: link-note
 
   grid(columns: (auto, 1fr), align: (left + bottom, right + bottom),
     text(font: face-display, size: sz.title, weight: 700, title),
