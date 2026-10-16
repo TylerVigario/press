@@ -8,6 +8,29 @@ verbatim. 0.1.0 at the bottom is hand-written and reads "Initial release." becau
 release has no changes to list — there is nothing it changed from.
 
 - - -
+## [v0.5.0](https://github.com/TylerVigario/press/compare/v0.4.0..v0.5.0) - 2026-10-16
+#### Features
+- resume(), a résumé template, and entry(), a role that reads in the order it prints (#120) - ([210316f](https://github.com/TylerVigario/press/commit/210316ff09f64fce63b91dbe753c0a82b6f9972f)) - Tyler Vigario, Claude Opus 5.5
+- recipe(), a recipe card template, and depth(), where the depth layer starts (#119) - ([0400457](https://github.com/TylerVigario/press/commit/0400457f3c54f9ac0daa6bd614286936c106cc35)) - Tyler Vigario, Claude Opus 5.5
+- writein() lines and blank sheet rows, spaced for a pen (#117) - ([20f0491](https://github.com/TylerVigario/press/commit/20f04911be588345788bca44baf49d47d02df3d5)) - Tyler Vigario, Claude Opus 5.5
+- a part takes the words it prints in words, a dictionary with English defaults (#116) - ([be2c981](https://github.com/TylerVigario/press/commit/be2c9810898e9b8513f2c80ac81a626d9cbe3247)) - Tyler Vigario, Claude Opus 5.5
+- footer(), the footer brief prints, as a part a document can put on its own page (#115) - ([226a180](https://github.com/TylerVigario/press/commit/226a18084266d917a8a728bdbea602892b91b33b)) - Tyler Vigario, Claude Opus 5.5
+- base(), press defaults for a page that lays out itself, beside brief (#114) - ([7b93b17](https://github.com/TylerVigario/press/commit/7b93b17270c21997fee238c93f583154904aff87)) - Tyler Vigario, Claude Opus 5.5
+#### Bug Fixes
+- resume() and letter() take a lone contact item as well as a list (#124) - ([4387689](https://github.com/TylerVigario/press/commit/4387689b927c6e202c2fc9fab8917638b756736b)) - Tyler Vigario, Claude Opus 5.5
+- with no XML parser, check fails the text-on-text pass and a build skips it, never passes it (#123) - ([f6b8fed](https://github.com/TylerVigario/press/commit/f6b8fed483dbaa34afe3058d28db11cdb8350fce)) - Tyler Vigario, Claude Opus 5.5
+- all skips press's own folder, so all . builds the repository's documents and not press's files (#122) - ([63b5a7f](https://github.com/TylerVigario/press/commit/63b5a7fbcc1161639bb92debc516907775e48209)) - Tyler Vigario, Claude Opus 5.5
+- seedepth takes the words it prints in words, as the other parts do (#118) - ([216e8f0](https://github.com/TylerVigario/press/commit/216e8f059cc75ba2dc09750c5d68284ba1f26b27)) - Tyler Vigario, Claude Opus 5.5
+- the starter lays out its units with units(), not hand-written grids (#113) - ([f8eb95c](https://github.com/TylerVigario/press/commit/f8eb95cb1bc89d5025d9238908512514210c8af8)) - Tyler Vigario, Claude Opus 5.5
+#### Documentation
+- the npm example names its scripts press and press:check (#112) - ([7411fb8](https://github.com/TylerVigario/press/commit/7411fb83ab16350d6d36952863899baccf1f3bbf)) - Tyler Vigario, Claude Opus 5.5
+#### Continuous Integration
+- the oldest toolchain runs the audit's known cases and the résumé's reading order too (#125) - ([b27947d](https://github.com/TylerVigario/press/commit/b27947d8ef8b3cb3763629d228f3ef09a735e15c)) - Tyler Vigario, Claude Opus 5.5
+#### Refactoring
+- lib.typ imports press's files in lib/, each template in a file of its own (#121) - ([6a7d695](https://github.com/TylerVigario/press/commit/6a7d695185649bd407d4e2e93cc787a675517422)) - Tyler Vigario, Claude Opus 5.5
+
+- - -
+
 ## [v0.4.0](https://github.com/TylerVigario/press/compare/v0.3.0..v0.4.0) - 2026-10-15
 #### Features
 - an unchanged document is not built again, from one record of what each build read (#110) - ([2c7c4cd](https://github.com/TylerVigario/press/commit/2c7c4cd572645951d71102022d164ba06698d61f)) - Tyler Vigario, Claude Opus 5.5
