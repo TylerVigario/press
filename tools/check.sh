@@ -307,7 +307,12 @@ fi
 # reasoning: a box with poppler and no python still gets the font checks. It does
 # NOT share its instrument — see the module docstring for why the raster cannot
 # answer this and pdftotext can.
-if [ -n "$PY" ]; then
+if [ -n "$PY" ] && [ -n "$optional" ] && ! "$PY" -c 'import xml.parsers.expat' >/dev/null 2>&1; then
+    # A build whose python has no XML parser skips this pass and says so, as for pdftoppm above;
+    # check runs it, and the pass reports that it could not.
+    echo "press: skipping the line-overlap check ($PY has no XML parser)" >&2
+    skipped="$skipped text-on-text"
+elif [ -n "$PY" ]; then
     s=0
     PRESS_PDFTOTEXT="$PDFTOTEXT" "$PY" "$press_root/tools/line-overlap.py" "$page" "$pdf" || s=$?
     case $s in 0) ;; 1) found text-on-text ;; *) rc=1; skipped="$skipped text-on-text" ;; esac
