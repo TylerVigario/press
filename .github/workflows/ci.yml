@@ -23,9 +23,10 @@ name: CI
 #                            and both installers, served the bundle locally, install,
 #                            update and refuse as they should.
 #   Documents pass on the oldest toolchain
-#                            the same build and audit at the oldest typst and just
-#                            press.just accepts, so a change that needs a newer one
-#                            fails here, not on a machine still at the floor.
+#                            the same build and audit, known cases and résumé
+#                            reading order at the oldest typst and just press.just
+#                            accepts, so a change that needs a newer one fails here,
+#                            not on a machine still at the floor.
 #   No invisible characters  soft hyphens and zero-width characters in any tracked
 #                            file, which reach paper unseen and survive review.
 #   Shell scripts lint       every *.sh in the tree. tools/check.sh is the audit
@@ -174,6 +175,10 @@ jobs:
           set -euo pipefail
           just build calibration.typ
           just check calibration.typ
+      - name: The audit passes and refuses its known cases
+        run: sh .github/audit-cases.sh
+      - name: A résumé reads in the order it prints
+        run: sh .github/reading-order.sh
       - name: The template compiles, in place and scaffolded
         run: sh .github/templates.sh
       - name: A rebuild leaves the document unchanged
