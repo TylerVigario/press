@@ -60,6 +60,29 @@ echo "audit-cases: the build audits as check does, and without poppler says it d
 ! grep -qF "accepted" "$tmp/out" || { cat "$tmp/out" >&2; fail "a pass that could not run was called accepted"; }
 echo "audit-cases: a pass that cannot run fails the audit, whatever the document accepts"
 
+# A python with no XML parser cannot run the text-on-text pass. A stand-in python, the real one
+# with expat taken away at startup, is named by PRESS_PYTHON: check fails, and says why, and a
+# build says it skipped the pass and is not recorded as audited.
+nx=$tmp/no-xml
+mkdir -p "$nx"
+printf 'import sys\nsys.modules["pyexpat"] = None\nsys.modules["xml.parsers.expat"] = None\n' > "$nx/sitecustomize.py"
+py=$(command -v python3)
+printf '#!/bin/sh\nPYTHONPATH="%s" exec "%s" "$@"\n' "$nx" "$py" > "$nx/python"
+chmod +x "$nx/python"
+# shellcheck disable=SC2086
+! PRESS_PYTHON=$nx/python sh tools/check.sh .github/audit-cases/pass-marker-beside-word.typ \
+    "$tmp/x/check.pdf" . $flags > "$tmp/out" 2>&1 || { cat "$tmp/out" >&2; fail "check passed with no XML parser"; }
+grep -qF "needs a python with an XML parser" "$tmp/out" \
+    || { cat "$tmp/out" >&2; fail "check failed with no XML parser, but did not say why"; }
+# shellcheck disable=SC2086
+PRESS_PYTHON=$nx/python sh tools/stamp.sh .github/audit-cases/pass-marker-beside-word.typ "$tmp/x/build.pdf" $flags \
+    > "$tmp/out" 2>&1 || { cat "$tmp/out" >&2; fail "a build with no XML parser failed"; }
+grep -qF "skipping the line-overlap check" "$tmp/out" \
+    || { cat "$tmp/out" >&2; fail "a build with no XML parser did not say it skipped the pass"; }
+! grep -qF "== .github/audit-cases/pass-marker-beside-word.typ	$tmp/x/build.pdf" .build-record 2>/dev/null \
+    || fail "a build that skipped a pass was recorded as audited"
+echo "audit-cases: with no XML parser, check fails and a build skips the pass, unrecorded"
+
 # The build record: a document whose inputs are unchanged is not compiled again, and an edit
 # to it is. typst runs through a wrapper that notes each compile.
 r=$tmp/record
