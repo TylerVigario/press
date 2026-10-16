@@ -58,8 +58,10 @@
   show heading: it => block(width: 100%, text(size: 1.1 * size, weight: 700, fill: accent,
     tracking: 0.5pt, if caps { upper(it.body) } else { it.body }))
 
+  // The name's box ends at its descenders, not its baseline, so the gap under it clears a g or
+  // a y at any body size.
   let head = block(width: 100%, above: 0pt, below: 1.2em, context stack(spacing: 0.6em,
-    text(size: sz.title, weight: 700, _writer(what: "a résumé")),
+    text(size: sz.title, weight: 700, bottom-edge: "descender", _writer(what: "a résumé")),
     ..if headline != none { (text(size: 1.1 * size, fill: accent, headline),) },
     ..if contact.len() > 0 {
       (text(size: 0.95 * size, fill: ink-soft, contact.join(text(fill: ink-faint)[ #sym.dot.c ])),)
