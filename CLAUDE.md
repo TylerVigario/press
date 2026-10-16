@@ -179,6 +179,12 @@ repository has.
   documents need a different default, offer a separate template beside it.
 - **Do not build a template on another template.** A template is composed from parts and keeps
   its own lines, so it can be read, or copied, on its own, and is free to differ from the others.
+- **Do not fix a word a template or part prints.** A part's words are its `words` argument, a
+  dictionary with the English written in full as the default and every key checked through
+  `_words`, as `continued(words: (page: [Page]))` is, so a document that imports press can change
+  them without copying. Content the document supplies, `callout(label:)` or `panel(label:)`,
+  is not press's words. A template takes the header or footer it places as an argument too: a
+  page rule written after its head starts a new page.
 - **Do not tell a repository how to use press's templates.** Imported as they are, copied and
   changed, or not used at all, it is the repository's choice.
 - **Do not make anything take effect on import.** A template applies only when a document
