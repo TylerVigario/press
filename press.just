@@ -153,6 +153,10 @@ watch doc:
 #   · any file in a directory that holds a main.typ, other than that main.typ, at any
 #     depth below it — the shape `just new` makes, docs/book/main.typ beside its chapters.
 #
+# Nor is anything in press's own folder, a directory holding press.toml, which `just all .`
+# would otherwise reach: its library is no document, its starters are copied before they are
+# built, and its calibration sheet is built by name when a printer is being checked.
+#
 # A directory named on the command line is a place to look, not a document, so a main.typ
 # directly inside one (docs/main.typ) makes nothing else in it a part.
 #
@@ -200,8 +204,9 @@ all +dirs='docs':
     trap 'exit 130' INT
     trap 'exit 143' TERM
     roots=$(printf '%s\n' "$@" | sed 's#/*$##')
-    find "$@" -name '*.typ' -type f | LC_ALL=C sort | ROOTS=$roots awk '
+    find "$@" \( -name '*.typ' -o -name press.toml \) -type f | LC_ALL=C sort | ROOTS=$roots awk '
         BEGIN { n = split(ENVIRON["ROOTS"], r, "\n"); for (i = 1; i <= n; i++) root[r[i]] = 1 }
+        /(^|\/)press\.toml$/ { d = $0; sub(/\/?press\.toml$/, "", d); kit[d == "" ? "." : d] = 1; next }
         { f[++k] = $0
           if ($0 ~ /\/main\.typ$/) { d = $0; sub(/\/main\.typ$/, "", d); if (!(d in root)) proj[d] = 1 } }
         END {
@@ -209,6 +214,7 @@ all +dirs='docs':
                 base = f[i]; sub(/.*\//, "", base)
                 if (base ~ /^_/) continue
                 part = 0
+                for (p in kit) if (index(f[i], p "/") == 1) { part = 1; break }
                 for (p in proj) if (index(f[i], p "/") == 1 && f[i] != p "/main.typ") { part = 1; break }
                 if (!part) print f[i]
             }

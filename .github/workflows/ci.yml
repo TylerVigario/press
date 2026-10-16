@@ -6,7 +6,8 @@ name: CI
 #   Documents build          typst compile errors in the calibration sheet, a
 #                            rebuild that re-stamps it though its page did not
 #                            change, a template that does not compile where it
-#                            stands or as the document new.sh scaffolds from it, and
+#                            stands or as the document new.sh scaffolds from it, an
+#                            `all` that builds anything but a repo's documents, and
 #                            a press.toml version no release wrote.
 #   Documents pass the audit press's own passes, run against its calibration sheet:
 #                            typst warnings that exit 0 and ship, fonts that are
@@ -82,6 +83,8 @@ jobs:
         run: sh .github/templates.sh
       - name: A rebuild leaves the document unchanged
         run: sh .github/rebuild-unchanged.sh calibration.typ
+      - name: all builds the documents, not their parts or press's files
+        run: sh .github/all-check.sh
 
   audit:
     name: Documents pass the audit
@@ -175,6 +178,8 @@ jobs:
         run: sh .github/templates.sh
       - name: A rebuild leaves the document unchanged
         run: sh .github/rebuild-unchanged.sh calibration.typ
+      - name: all builds the documents, not their parts or press's files
+        run: sh .github/all-check.sh
 
   invisible:
     name: No invisible characters
