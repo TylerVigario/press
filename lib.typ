@@ -507,6 +507,17 @@
   ]
 }
 
+// Where the depth layer starts: a new page, and a line saying that what comes before it is the
+// whole job, so a reader who stops there knows they have missed nothing they need. seedepth()
+// points into what follows.
+//
+//   #depth()
+#let depth(words: (note: [Nothing past this point is needed: what comes before it is the whole job.])) = {
+  let w = _words("depth", words, "note")
+  pagebreak(weak: true)
+  text(size: sz.fine, style: "italic", fill: ink-soft, w.note)
+  v(6pt)
+}
 
 // Lay out a set of units. This sets no page; it owns only how a GROUP packs,
 // which is the one thing every document was re-deriving by hand.
@@ -734,5 +745,32 @@
   let head = letterhead(..contact, face: face)
   if centred { align(center, head) } else { head }
   if date != none { dateline(date); parbreak() }
+  body
+}
+
+// A recipe card: the card page, a head naming the dish with its yield, method and time, and a
+// line of introduction under it. The body is the cook and then the reference: the ingredients
+// and the method first, depth() where the reference starts, and writein() for what the cook
+// changed. `footer` is the footer: none leaves it out.
+//
+//   #show: recipe.with(title: [Black beans], yield: [serves 8], method: [stovetop],
+//     time: [about 40 min], intro: [A pot of beans for the week.])
+#let recipe(
+  title: none, author: (), yield: none, method: none, time: none, intro: none, preset: card,
+  footer: footer(), body,
+) = {
+  set document(title: title, author: author)
+  set page(..preset, footer: footer)
+  set text(font: face-text, size: sz.small, fill: ink, lang: "en")
+  set par(leading: 0.52em, spacing: 0.55em)
+  set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.32em)
+  show link: link-note
+
+  titlebar(title, (yield, method, time).filter(x => x != none).join([ · ]))
+  if intro != none {
+    v(3pt)
+    text(size: sz.micro, fill: ink-soft, intro)
+  }
+  v(7pt)
   body
 }

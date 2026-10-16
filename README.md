@@ -113,7 +113,7 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 
 | tool | does |
 |---|---|
-| `sh third_party/press/tools/new.sh docs/guide` | scaffolds `docs/guide/main.typ` from the template, its import written for where press sits; add `letter` for the letter template |
+| `sh third_party/press/tools/new.sh docs/guide` | scaffolds `docs/guide/main.typ` from the template, its import written for where press sits; add `letter` or `recipe` for those templates |
 | `sh third_party/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory; then audits it, where the audit's tools are installed |
 | `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | the audit alone, which refuses to run without its tools: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text printed on text |
 
@@ -270,6 +270,13 @@ reference numbers together and `enclosures` lists what goes with the letter. To 
 pass its face (`face: face-sans`) and centre the letterhead (`centred: true`). A letter that
 composes its own page uses the same parts: `letterhead`, `dateline` and `continued()`.
 
+**A recipe** applies `recipe`: `new.sh recipes/black-beans recipe` starts a card.
+`#show: recipe.with(title:, yield:, method:, time:, intro:)` sets the card page and a head that
+says what the cook is in for, `serves 8 · stovetop · about 40 min`, with a line under it saying
+what the dish is. Page one is the whole cook: the ingredients in a `matrix`, the method in
+numbered `item`s, a costly step in `color: warn`. `depth()` starts the reference on a page of its
+own, and `writein()` leaves lines for what the cook changed.
+
 ### The six conventions
 
 Tokens alone do not make a document readable. These do:
@@ -297,6 +304,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `base(title:, author:, preset: card)` | Template: the page, the document's name, the type and the show rules, with nothing drawn, for a document that lays out its own page. `#show: base.with(...)`. |
 | `brief(title:, author:, meta:, status:, legend: auto, footer: auto, preset: card)` | Template: the general-purpose document's page, type, show rules, head and footer. `#show: brief.with(...)`. |
 | `letter(title:, author:, contact:, date:, face: face-text, centred: false, header: continued())` | Template: a letter's page, letterhead and date, and the page-two header. `#show: letter.with(...)`. |
+| `recipe(title:, author:, yield:, method:, time:, intro:, preset: card, footer: footer())` | Template: a recipe card's page and head, its yield, method and time beside the dish. `#show: recipe.with(...)`. |
 | `unit(label, tone, lead, body, caps:, breakable: false)` | The workhorse. One idea: label, bold lead, body. |
 | `units(..items, pack: "stacks", gutter:, spacing:)` | A group of units. `"stacks"`: two columns balanced by measured height. `"grid"`: rows aligned, when the pairing means something. `"single"`: one column. |
 | `band-strong(title, role, color:, caps:)` | Section header carrying its role. |
@@ -315,6 +323,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `flow(..steps)` | Left-to-right stage sequence. |
 | `decision(n, q, note, color: bad)` / `dbadge(n, color:)` | Open question needing an answer. |
 | `seedepth(what, at: none, words: (detail: [detail], on: [on], page: [p.]))` | Pointer to the depth layer. Given a label it looks up the page and links to it — never type a page number. |
+| `depth(words: (note: [...]))` | Where the depth layer starts: a new page, and a line saying what comes before it is the whole job. |
 | `stamp(body)` | Closing line — provenance, or a last caution. |
 | `updated(words: (updated: [updated], unstamped: [...]))` | When the content last changed, as the stamp records it. For the footer. |
 | `footer(status: none, edition: updated())` | `brief`'s footer, for a document that lays out its own page: title and status, then `updated()` and the page. `#set page(footer: footer())`. |
