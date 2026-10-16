@@ -237,7 +237,9 @@ to replace.
 once, sets the body type, and installs the show rules for code and links, from press's
 defaults, and draws nothing. A set rule written after the show rule changes any of these for
 that document — `#set par(leading: 0.58em)` wins over `base`'s own — so a repository with
-spacing of its own writes only the lines that differ.
+spacing of its own writes only the lines that differ. `footer` puts `brief`'s footer on its
+pages, `#set page(footer: footer(status: [draft]))`: the title and status, then the stamp and
+page, so a page parted from the rest still says what it is and which edition.
 
 Without `base`, a document sets these itself: its body font, `#set text(font: face-text, ...)`
 (without it the body renders in typst's own Libertinus Serif, without a word); its name, with
@@ -309,6 +311,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `seedepth(what, at: none)` | Pointer to the depth layer. Given a label it looks up the page and links to it — never type a page number. |
 | `stamp(body)` | Closing line — provenance, or a last caution. |
 | `updated()` | When the content last changed, as the stamp records it. For the footer. |
+| `footer(status: none)` | `brief`'s footer, for a document that lays out its own page: title and status, then `updated()` and the page. `#set page(footer: footer())`. |
 | `press-version` | The version of press a document was built with. Never typed by hand. |
 | `scan(body)` | Marks content the document did not set, a scanned or embedded page, for the audit to leave out; what is set over it is still audited. |
 | `letterhead(..contact, face: face-text)` | A letter's head: the writer (the document's author), a contact line, a rule. A link that shows its own address needs no footnote. |

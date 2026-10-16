@@ -333,6 +333,18 @@
   if s == none { [not stamped (built without press's stamp.sh)] } else { [updated #s] }
 }
 
+// The footer brief prints, for a document that lays out its own page: the document's title, and
+// its status where it has one, on the left; updated() and the page of the total on the right. The
+// title is the one the document names itself with, set document(title:) or base's title.
+//
+//   #set page(..dense, footer: footer(status: [draft]))
+#let footer(status: none) = context {
+  set text(size: sz.micro, fill: ink-faint)
+  grid(columns: (1fr, auto),
+    align(left)[#document.title#if status != none [ · #status]],
+    align(right)[#updated() · #counter(page).display("1 / 1", both: true)])
+}
+
 // The version of press a document was set with, read from press.toml beside this file, so a
 // page that prints it always names the press it was built with. Not `version`: that is
 // typst's own, and `import *` would shadow it.
@@ -622,12 +634,7 @@
   title: none, author: (), meta: none, status: none, legend: auto, preset: card, body,
 ) = {
   set document(title: title, author: author)
-  set page(..preset, footer: context {
-    set text(size: sz.micro, fill: ink-faint)
-    grid(columns: (1fr, auto),
-      align(left)[#document.title#if status != none [ · #status]],
-      align(right)[#updated() · #counter(page).display("1 / 1", both: true)])
-  })
+  set page(..preset, footer: footer(status: status))
   set text(font: face-text, size: sz.small, fill: ink, lang: "en")
   set par(leading: 0.52em, spacing: 0.55em)
   set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.32em)
