@@ -592,12 +592,11 @@
 // says nothing about which. They stay generic: what one repository alone needs belongs in its
 // own copy, and press adds another template when enough documents need one.
 
-// The bare setup, for a document that lays out its own page: the page, the document's title and
-// author, the type, and the rules for code and links, with nothing drawn. It sets what brief sets,
-// without brief's head, legend and footer; each template keeps its own lines, so either can be
-// read, or copied, on its own, and CI checks that the two still agree. A set rule written after
-// it changes any of these for the document it is in: `#set par(leading: 0.58em)` after the show
-// rule wins over base's own.
+// The bare setup, for a document that lays out its own page: press's defaults for the page, the
+// type and the rules for code and links, and the document's title and author, with nothing
+// drawn. Like every template it keeps its own lines, so it can be read, or copied, on its own.
+// A set rule written after it changes any of these for the document it is in:
+// `#set par(leading: 0.58em)` after the show rule wins over base's own.
 //
 //   #show: base.with(title: [Rack power], author: "Your name", preset: dense)
 #let base(title: none, author: (), preset: card, body) = {

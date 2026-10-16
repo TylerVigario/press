@@ -14,8 +14,7 @@
 # name with a space in it. Either failing, or warning, fails the run: typst
 # exits 0 on a warning, so warnings are read from its output.
 #
-# Then base, which has no starter: base-agrees.typ fails to compile where base and brief no
-# longer set the same page, type and show rules.
+# Then base, which has no starter: base.typ applies it.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -47,4 +46,4 @@ for f in template/*.typ; do
         || fail "new.sh did not point $t's copy's import at /$kit/lib.typ"
     compile "$repo" "$kit/fonts" "docs/$t/main.typ" "template/$t.typ, scaffolded by new.sh,"
 done
-compile . fonts .github/base-agrees.typ "base, checked against brief,"
+compile . fonts .github/base.typ "base, applied by .github/base.typ,"

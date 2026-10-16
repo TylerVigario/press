@@ -234,10 +234,10 @@ to replace.
 
 **A document that lays out its own page** applies `base`:
 `#show: base.with(title: [...], author: "...", preset: dense)` sets the page, names the document
-once, sets the body type, and installs the show rules for code and links, and draws nothing:
-what `brief` sets, without its head, legend and footer. A set rule written after the show rule
-changes any of these for that document — `#set par(leading: 0.58em)` wins over `base`'s own —
-so a repository with spacing of its own writes only the lines that differ.
+once, sets the body type, and installs the show rules for code and links, from press's
+defaults, and draws nothing. A set rule written after the show rule changes any of these for
+that document — `#set par(leading: 0.58em)` wins over `base`'s own — so a repository with
+spacing of its own writes only the lines that differ.
 
 Without `base`, a document sets these itself: its body font, `#set text(font: face-text, ...)`
 (without it the body renders in typst's own Libertinus Serif, without a word); its name, with
