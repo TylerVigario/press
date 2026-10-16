@@ -40,7 +40,7 @@
 // ---- Meat first ----
 #band-strong([What the reader must act on], "decide — start here", color: bad)
 
-#grid(columns: (1fr, 1fr), gutter: 9pt,
+#units(
   unit([First thing], "bad")[The lead states the point outright.][
     The body carries as much as the idea needs. No cap.
   ],
@@ -53,7 +53,7 @@
 // ---- Design ----
 #band-strong([How it works], "design")
 
-#grid(columns: (1fr, 1fr), gutter: 9pt, row-gutter: 6pt,
+#units(
   unit([A property], "ok")[Settled, no action needed.][Detail here.],
   unit([Another property], "note")[Neutral statement of fact.][Detail here.],
 )
