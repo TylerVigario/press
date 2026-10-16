@@ -1,7 +1,7 @@
 #!/bin/sh
 # report.sh — say what `build` just made, one line per document.
 #
-# Invoked by press's `build` recipe, from the consumer root, with what stamp.sh printed:
+# Invoked by tools/build.sh, from the consumer root, with what stamp.sh printed:
 #
 #   sh <press_root>/tools/report.sh <pdf> <new|changed|unchanged> <updated...>
 #
@@ -19,7 +19,7 @@
 #
 #   sh <press_root>/tools/report.sh --summary <tally> <documents found>
 #
-# The build recipe appends "audit" for a document that failed its audit, which the summary
+# build.sh appends "audit" for a document that failed its audit, which the summary
 # counts apart; a document with no status at all did not build.
 #   press: 12 documents: 2 changed, 9 unchanged, 1 failed the audit, 1 did not build
 #

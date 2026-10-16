@@ -47,7 +47,8 @@ for f in lib.typ press.toml .gitignore .gitattributes calibration.typ press.just
          lib/tokens.typ lib/parts.typ lib/composition.typ \
          lib/base.typ lib/brief.typ lib/letter.typ lib/recipe.typ lib/resume.typ \
          template/main.typ template/letter.typ template/recipe.typ template/resume.typ \
-         tools/new.sh tools/stamp.sh tools/check.sh tools/report.sh fonts/licenses; do
+         tools/new.sh tools/build.sh tools/all.sh tools/watch.sh tools/clean.sh \
+         tools/stamp.sh tools/check.sh tools/report.sh fonts/licenses; do
     grep -qx "press/$f" "$tmp/tar.list" || fail "press/$f is missing from the bundle"
 done
 
@@ -72,6 +73,13 @@ sh third_party/press/tools/stamp.sh docs/letter/main.typ print/letter.pdf $flags
 sh third_party/press/tools/check.sh docs/letter/main.typ print/letter.pdf third_party/press $flags
 TYPST_ROOT=. TYPST_FONT_PATHS=third_party/press/fonts TYPST_IGNORE_SYSTEM_FONTS=true \
     typst compile docs/guide/main.typ print/plain.pdf
+# Without just, as an npm or make repo builds: one document, then every one under docs/.
+sh third_party/press/tools/build.sh docs/guide/main.typ
+[ -f print/docs/guide/main.pdf ] || fail "build.sh made no print/docs/guide/main.pdf"
+out=$(sh third_party/press/tools/all.sh docs)
+printf '%s\n' "$out"
+case $out in *"press: 2 documents: "*) ;; *) fail "all.sh did not build the two documents under docs/" ;; esac
+sh third_party/press/tools/build.sh --check docs/guide/main.typ
 # shellcheck disable=SC2086
 sh third_party/press/tools/stamp.sh third_party/press/calibration.typ print/calibration.pdf $flags
 # shellcheck disable=SC2086
