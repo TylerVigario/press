@@ -110,6 +110,8 @@ jobs:
         run: sh .github/reading-order.sh
       - name: A code block a document lets break breaks, and only that one
         run: sh .github/code-break.sh
+      - name: A form page is its blank's, and each answer lands where it is put
+        run: sh .github/form-fill.sh
 
   bundle:
     name: The release bundle installs and works
@@ -184,6 +186,8 @@ jobs:
         run: sh .github/reading-order.sh
       - name: A code block a document lets break breaks, and only that one
         run: sh .github/code-break.sh
+      - name: A form page is its blank's, and each answer lands where it is put
+        run: sh .github/form-fill.sh
       - name: The template compiles, in place and scaffolded
         run: sh .github/templates.sh
       - name: A rebuild leaves the document unchanged

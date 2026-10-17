@@ -143,6 +143,8 @@ folder, and deleting it costs one full build per document, never a wrong answer.
 marked with `scan(...)`. The audit then reads a copy with every scan hidden, so the scan's own
 fonts, text layer and edge-to-edge ink are not findings, and what the document sets over it is
 audited as usual. The copy costs a second compile, only for a document that reads an image.
+A form filled in is a `form()` page for each page of it, with `at()` and `tick()` placing the
+answers, and its blank is a scan already.
 
 **A finding a document keeps on purpose** — a sent record that will not be restyled — is
 accepted in the document's own file, naming the pass and why; a file it imports or includes
@@ -373,6 +375,9 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `footer(status: none, edition: updated())` | `brief`'s footer, for a document that lays out its own page: title and status, then `updated()` and the page. `#set page(footer: footer())`. |
 | `press-version` | The version of press a document was built with. Never typed by hand. |
 | `scan(body)` | Marks content the document did not set, a scanned or embedded page, for the audit to leave out; what is set over it is still audited. |
+| `form(blank, body)` | One page of a flat PDF form, filled in: the page is the blank's own, its size and edge to edge, with none of the document's header, footer, background or foreground, and the blank a `scan()` under the answers. `#form(image("application.pdf", page: 2))[...]`; the document makes the image, so the path is its own. |
+| `at(x, y, width: none, body)` | An answer placed where its blank is, measured from the page's top-left corner. Given a width, a long answer wraps inside it. |
+| `tick(x, y)` | A box marked with an X, centred on the point given. |
 | `letterhead(..contact, face: face-text)` | A letter's head: the writer (the document's author), a contact line, a rule. A link that shows its own address needs no footnote. |
 | `dateline(date)` | A letter's date, written once where it prints; `continued` reads it. |
 | `re(..refs, words: (re: [Re:]))` | A letter's subject line; each reference stays whole and copyable. |
