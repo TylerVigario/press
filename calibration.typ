@@ -30,7 +30,7 @@
 })
 #set text(font: face-text, size: sz.small, fill: ink, lang: "en")
 #set par(leading: 0.52em, spacing: 0.55em)
-#show raw: set text(font: face-mono, size: sz.micro)
+#show raw: set text(font: face-mono, size: sz.fine)
 #show link: link-note
 
 #grid(columns: (auto, 1fr), align: (left + bottom, right + bottom),
