@@ -67,6 +67,13 @@ sh tools/check.sh .github/audit-cases/pass-open-items.typ "$tmp/o/open.pdf" . $f
 grep -qF "has 2 open items" "$tmp/out" || { cat "$tmp/out" >&2; fail "the audit did not count the open items"; }
 echo "audit-cases: open items are counted, and do not fail the audit"
 
+# Counting them needs only typst, so a build without the audit's tools still counts them.
+# shellcheck disable=SC2086
+PRESS_PDFTOTEXT=/nonexistent/pdftotext sh tools/stamp.sh .github/audit-cases/pass-open-items.typ "$tmp/b/open.pdf" $flags \
+    > "$tmp/out" 2>&1 || { cat "$tmp/out" >&2; fail "a build with open items and without poppler failed"; }
+grep -qF "has 2 open items" "$tmp/out" || { cat "$tmp/out" >&2; fail "a build without poppler did not count the open items"; }
+echo "audit-cases: a build without the audit's tools still counts the open items"
+
 # A python with no XML parser cannot run the text-on-text pass. A stand-in python, the real one
 # with expat taken away at startup, is named by PRESS_PYTHON: check fails, and says why, and a
 # build says it skipped the pass and is not recorded as audited.
