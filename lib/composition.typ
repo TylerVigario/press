@@ -32,16 +32,6 @@
       text(size: sz.micro, weight: 700, fill: pair.at(0))[#label])
 }
 
-// The colour legend under a document's head: what its colours mean, on the left, and the chips it
-// uses, on the right, so colour reads as state. The words are the document's own.
-//
-//   #legend([Colour is state.], chip([SETTLED], "ok"), chip([DECIDE], "bad"))
-#let legend(note, ..chips) = grid(
-  columns: (1fr, auto), align: (left + horizon, right + horizon),
-  text(size: sz.micro, fill: ink-faint, note),
-  chips.pos().join([ #h(3pt) ]),
-)
-
 // Reversed section band. `role` rides inside it — decide / design / reference —
 // so that skipping a section is a deliberate act rather than an accident.
 // `caps` as on `eyebrow` — see the note on it in parts.typ. A band titled "pH and conductivity"

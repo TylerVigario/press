@@ -36,7 +36,7 @@
   author: "Your name",
   meta: [scope · date],
   status: [status],
-  legend: legend([Colour is state. Bands carry a role — skip on purpose.],
+  legend: ([Colour is state. Bands carry a role — skip on purpose.],
     chip([SETTLED], "ok"), chip([CONDITIONAL], "warn"), chip([DECIDE], "bad")),
 )
 
