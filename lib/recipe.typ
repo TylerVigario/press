@@ -7,7 +7,7 @@
 
 // A recipe card: the card page, a head naming the dish with its yield, method and time, and a
 // line of introduction under it. The body is the cook and then the reference: the ingredients
-// and the method first, depth() where the reference starts, and writein() for what the cook
+// and the method first, a page break where the reference starts, and writein() for what the cook
 // changed. `footer` is the footer: none leaves it out.
 //
 //   #show: recipe.with(title: [Black beans], yield: [serves 8], method: [stovetop],
