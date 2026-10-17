@@ -8,9 +8,9 @@
 
 // The general-purpose document: a sheet, a guide, a brief. The title names the document once,
 // in the PDF's metadata and in the head, and the footer prints it beside the status, the
-// stamp and the page. `meta` sits at the right of the head; `legend` is the colour legend
-// under it: none, or one the document passes, legend(note, ..chips), for the states its pages
-// carry.
+// stamp and the page. `meta` sits at the right of the head; `legend` is the line under it that
+// says what its colours mean: none, or the note and then the chips for the states its pages
+// carry, legend: ([Colour is state.], chip([SETTLED], "ok"), chip([DECIDE], "bad")).
 // `footer` is the footer (auto, footer(status:); none; or your own, footer(edition: …) for
 // other words), passed here because a set page rule after the head would start a new page.
 // `preset` is the page.
@@ -35,10 +35,14 @@
   v(-3pt)
   line(length: 100%, stroke: 2pt + slate)
   v(4pt)
-  assert(legend != auto,
-    message: "brief(legend:) takes none, its default, or a legend: legend(note, chip(...), ...)")
+  assert(legend == none or (type(legend) == array and legend.len() > 1),
+    message: "brief(legend:) takes none, its default, or the note and then its chips: "
+      + "legend: ([Colour is state.], chip([DONE], \"ok\"))")
   if legend != none {
-    legend
+    let (note, ..chips) = legend
+    grid(columns: (1fr, auto), align: (left + horizon, right + horizon),
+      text(size: sz.micro, fill: ink-faint, note),
+      chips.join([ #h(3pt) ]))
     v(7pt)
   }
   body
