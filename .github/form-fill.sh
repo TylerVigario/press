@@ -13,7 +13,8 @@
 # .github/form-fill/probe.typ fills in the blank's first page with the measuring grid on, every
 # 18pt. Its lines must run from the page's top-left corner, the heavy ones every fourth step,
 # each crossing of two labelled beside it, and the audit must refuse the page for the grid and
-# for nothing else: the grid's lines and labels are left out of its passes, as a scan is.
+# for nothing else: the grid's lines and labels are left out of its passes, as a scan is. A build
+# without the audit's tools must still fail it, since finding the grid needs only typst.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -136,3 +137,10 @@ echo "form-fill: the measuring grid runs from the page's corner, every step, its
 grep -qF "has the measuring grid on" "$tmp/out" || { cat "$tmp/out" >&2; fail "the audit refused the grid, but not for it"; }
 [ "$(grep -c '^press:' "$tmp/out")" -eq 1 ] || { cat "$tmp/out" >&2; fail "the grid's lines and labels were audited as the document's"; }
 echo "form-fill: the audit refuses a form with the measuring grid on, for that alone"
+
+# The grid needs only typst to be found, so a build without the audit's tools still fails for it.
+# shellcheck disable=SC2086
+! PRESS_PDFTOTEXT=/nonexistent/pdftotext sh tools/stamp.sh .github/form-fill/probe.typ "$tmp/probe-build.pdf" $flags \
+    > "$tmp/out" 2>&1 || fail "a build without poppler passed a form with the measuring grid on"
+grep -qF "has the measuring grid on" "$tmp/out" || { cat "$tmp/out" >&2; fail "a build without poppler failed, but not for the grid"; }
+echo "form-fill: a build without the audit's tools still fails a form with the measuring grid on"

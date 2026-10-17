@@ -221,7 +221,9 @@ builds every one, then fails if any failed its audit. Export `PRESS_TZ` from the
 - **typst 0.14 or newer.** An older one is refused with a message naming both versions.
 - **`sh`** for the tools. On Windows it comes with Git for Windows.
 - **The audit** needs poppler (`pdffonts`, `pdftotext`, `pdftoppm`), a Python, and a grep
-  with PCRE (GNU grep; on macOS, `brew install grep`); a build without them is not audited.
+  with PCRE (GNU grep; on macOS, `brew install grep`); a build without them is not audited,
+  though it still counts the open items and fails while a form's measuring grid is on, which
+  need only typst.
   Where `PATH` finds the wrong one, name it: `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`,
   `PRESS_PDFTOPPM`, `PRESS_PYTHON`, `PRESS_GREP` (`ggrep` on macOS). The audit refuses a
   `pdftotext` that is not poppler's.

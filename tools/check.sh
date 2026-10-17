@@ -116,83 +116,16 @@ shift 3
 # written, and stamp.sh hands over the files its compile read and what typst printed
 # (PRESS_BUILT_DEPS, PRESS_BUILT_LOG), so nothing compiles twice. A tool the audit lacks is
 # then one line saying the audit was skipped and why, not a failure: building never depends
-# on these tools, and check itself still refuses without them.
+# on these tools, and check itself still refuses without them. press's marks, which need only
+# typst, are read before the tools are asked for, so a build without them still counts the open
+# items and still fails while the measuring grid is on: skip ends with the status so far.
 optional=
 [ "${PRESS_AUDIT:-}" != optional ] || optional=1
 skip() {
     echo "press: $pdf is not audited: $1; run check for the details" >&2
-    exit 0
+    exit "$rc"
 }
 
-# The glyph check needs a grep that speaks PCRE, honours the (*UTF) verb, and knows
-# \p{...} properties. Assert it here rather than relying on the pipeline to complain:
-# $? in `a | b | sort` belongs to sort, so a grep that rejects any of the three leaves
-# the character list empty and the check skips itself while check goes on to report
-# the document clean. Probing once, up front, is the difference between an unmet
-# dependency and a check that quietly does nothing.
-#
-# GNU grep has all three; macOS's BSD grep has no -P at all. PRESS_GREP names another,
-# as PRESS_PDFTOTEXT names a pdftotext: on macOS, `brew install grep` and PRESS_GREP=ggrep.
-#
-# The probe is the construct itself, not a proxy for it: a literal U+00A0 must match
-# the same class the extraction filters on. Without (*UTF) that is two bytes and the
-# anchored single-character class cannot match; without properties grep errors outright.
-# One assertion, and it fails for either missing piece.
-GREP=${PRESS_GREP:-grep}
-printf '\302\240\n' | "$GREP" -qP '(*UTF)^[\p{Z}\p{Cf}]$' 2>/dev/null \
-    || { [ -z "$optional" ] || skip "$GREP has no PCRE with (*UTF) and \\p{...}"
-         echo "press: check needs a grep whose PCRE supports the (*UTF) verb and \\p{...} properties;" >&2
-         echo "       $GREP does not. GNU grep does: on macOS, brew install grep and set PRESS_GREP=ggrep." >&2
-         exit 1; }
-# Poppler specifically, not merely a program answering to that name.
-#
-# pdftotext and pdffonts are also shipped by Xpdf and mupdf, and they do not agree.
-# Measured over one document: Xpdf's default output encoding is Latin-1, which loses
-# every non-ASCII character — so every glyph looks missing, and the glyph check
-# accuses a correct document sixteen times over. mupdf's copy reports a different
-# set again. The extractor is not an implementation detail here; it is the
-# instrument the verdict is read off, and three instruments give three verdicts
-# on identical input.
-#
-# This matters most where it is least visible: Git for Windows bundles Xpdf's
-# pdftotext in mingw64/bin and Git Bash puts that ahead of a system poppler, so a
-# Windows contributor and CI silently run different checks on the same commit.
-#
-# -v is the discriminator. Poppler prints "The Poppler Developers"; Xpdf prints
-# "[www.xpdfreader.com]". Both are checked because a PATH can resolve them to
-# different projects.
-#
-# PRESS_PDFTOTEXT and PRESS_PDFFONTS exist because on Windows PATH is not the
-# user's to order. Git for Windows' sh prepends its own /mingw64/bin and /usr/bin at
-# startup, so the Xpdf pdftotext it bundles wins inside every tool, no matter what
-# PowerShell or a .bashrc resolves: winget puts poppler's Library/bin on the user PATH,
-# and outside sh, where mingw64/bin is not on PATH at all, poppler's is the one found. A
-# Windows contributor has no reachable lever. Naming the executable directly is that
-# lever, and it is press-scoped: nothing else on the machine reads these names, so unlike
-# renaming the bundled binary it shifts no other tool's dependency. (Measured on Git
-# 2.55, which bundles no pdffonts or pdftoppm.)
-#
-# The assertion is unchanged either way. Being pointable does not mean being
-# trusted; whatever it is aimed at still has to say poppler.
-PDFTOTEXT=${PRESS_PDFTOTEXT:-pdftotext}
-PDFFONTS=${PRESS_PDFFONTS:-pdffonts}
-for spec in "PRESS_PDFTOTEXT $PDFTOTEXT" "PRESS_PDFFONTS $PDFFONTS"; do
-    var=${spec%% *}; tool=${spec#* }
-    command -v "$tool" >/dev/null 2>&1 \
-        || { [ -z "$optional" ] || skip "poppler's $tool is not found"
-             echo "press: check needs poppler; $tool not found" >&2
-             echo "       set $var to poppler's binary if it is not on PATH" >&2
-             exit 1; }
-    "$tool" -v 2>&1 | grep -qi poppler \
-        || { [ -z "$optional" ] || skip "$tool is not poppler's"
-             echo "press: $tool is not poppler's —" >&2
-             "$tool" -v 2>&1 | head -1 | sed 's/^/  /' >&2
-             echo "       extractors disagree about which glyphs a PDF contains, so the" >&2
-             echo "       glyph check is only meaningful against poppler." >&2
-             echo "       Put it first on PATH, or set $var to it directly. On Windows, Git's sh puts" >&2
-             echo "       its own /mingw64/bin, with Xpdf's pdftotext, ahead of PATH: set $var there." >&2
-             exit 1; }
-done
 # The vendored families, from the font files' names; fonts/ also holds their licences.
 allow=$(for f in "$press_root"/fonts/*.[ot]tf; do basename "$f"; done \
           | sed 's/-[A-Za-z]*\.[to]tf$//;s/\.[to]tf$//' | sort -u | paste -sd'|' -)
@@ -315,6 +248,76 @@ if [ -n "$want" ]; then
         esac
     fi
 fi
+
+# The glyph check needs a grep that speaks PCRE, honours the (*UTF) verb, and knows
+# \p{...} properties. Assert it here rather than relying on the pipeline to complain:
+# $? in `a | b | sort` belongs to sort, so a grep that rejects any of the three leaves
+# the character list empty and the check skips itself while check goes on to report
+# the document clean. Probing once, up front, is the difference between an unmet
+# dependency and a check that quietly does nothing.
+#
+# GNU grep has all three; macOS's BSD grep has no -P at all. PRESS_GREP names another,
+# as PRESS_PDFTOTEXT names a pdftotext: on macOS, `brew install grep` and PRESS_GREP=ggrep.
+#
+# The probe is the construct itself, not a proxy for it: a literal U+00A0 must match
+# the same class the extraction filters on. Without (*UTF) that is two bytes and the
+# anchored single-character class cannot match; without properties grep errors outright.
+# One assertion, and it fails for either missing piece.
+GREP=${PRESS_GREP:-grep}
+printf '\302\240\n' | "$GREP" -qP '(*UTF)^[\p{Z}\p{Cf}]$' 2>/dev/null \
+    || { [ -z "$optional" ] || skip "$GREP has no PCRE with (*UTF) and \\p{...}"
+         echo "press: check needs a grep whose PCRE supports the (*UTF) verb and \\p{...} properties;" >&2
+         echo "       $GREP does not. GNU grep does: on macOS, brew install grep and set PRESS_GREP=ggrep." >&2
+         exit 1; }
+# Poppler specifically, not merely a program answering to that name.
+#
+# pdftotext and pdffonts are also shipped by Xpdf and mupdf, and they do not agree.
+# Measured over one document: Xpdf's default output encoding is Latin-1, which loses
+# every non-ASCII character — so every glyph looks missing, and the glyph check
+# accuses a correct document sixteen times over. mupdf's copy reports a different
+# set again. The extractor is not an implementation detail here; it is the
+# instrument the verdict is read off, and three instruments give three verdicts
+# on identical input.
+#
+# This matters most where it is least visible: Git for Windows bundles Xpdf's
+# pdftotext in mingw64/bin and Git Bash puts that ahead of a system poppler, so a
+# Windows contributor and CI silently run different checks on the same commit.
+#
+# -v is the discriminator. Poppler prints "The Poppler Developers"; Xpdf prints
+# "[www.xpdfreader.com]". Both are checked because a PATH can resolve them to
+# different projects.
+#
+# PRESS_PDFTOTEXT and PRESS_PDFFONTS exist because on Windows PATH is not the
+# user's to order. Git for Windows' sh prepends its own /mingw64/bin and /usr/bin at
+# startup, so the Xpdf pdftotext it bundles wins inside every tool, no matter what
+# PowerShell or a .bashrc resolves: winget puts poppler's Library/bin on the user PATH,
+# and outside sh, where mingw64/bin is not on PATH at all, poppler's is the one found. A
+# Windows contributor has no reachable lever. Naming the executable directly is that
+# lever, and it is press-scoped: nothing else on the machine reads these names, so unlike
+# renaming the bundled binary it shifts no other tool's dependency. (Measured on Git
+# 2.55, which bundles no pdffonts or pdftoppm.)
+#
+# The assertion is unchanged either way. Being pointable does not mean being
+# trusted; whatever it is aimed at still has to say poppler.
+PDFTOTEXT=${PRESS_PDFTOTEXT:-pdftotext}
+PDFFONTS=${PRESS_PDFFONTS:-pdffonts}
+for spec in "PRESS_PDFTOTEXT $PDFTOTEXT" "PRESS_PDFFONTS $PDFFONTS"; do
+    var=${spec%% *}; tool=${spec#* }
+    command -v "$tool" >/dev/null 2>&1 \
+        || { [ -z "$optional" ] || skip "poppler's $tool is not found"
+             echo "press: check needs poppler; $tool not found" >&2
+             echo "       set $var to poppler's binary if it is not on PATH" >&2
+             exit 1; }
+    "$tool" -v 2>&1 | grep -qi poppler \
+        || { [ -z "$optional" ] || skip "$tool is not poppler's"
+             echo "press: $tool is not poppler's —" >&2
+             "$tool" -v 2>&1 | head -1 | sed 's/^/  /' >&2
+             echo "       extractors disagree about which glyphs a PDF contains, so the" >&2
+             echo "       glyph check is only meaningful against poppler." >&2
+             echo "       Put it first on PATH, or set $var to it directly. On Windows, Git's sh puts" >&2
+             echo "       its own /mingw64/bin, with Xpdf's pdftotext, ahead of PATH: set $var there." >&2
+             exit 1; }
+done
 
 # ACCEPTED FINDINGS. A document may accept a finding it keeps on purpose, a sent record that
 # will not be restyled, with a line in its own source naming the pass and why:
