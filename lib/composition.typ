@@ -125,6 +125,33 @@
     ..range(n).map(_ => row).flatten())
 }
 
+// Where a document is signed, with its closing (`closing: [Sincerely,]`) kept on the same page, so
+// a page break never strands it. By default, space for an ink signature over a line with the
+// signer's name beneath, and beside it a line to date by hand (`dated: false` leaves that out).
+// For a document sent as a file, `signed: false` is a typed sign-off: the name alone.
+//
+// `name` is who signs, the document's author unless it is given. A document several people sign
+// calls it once for each, with their names, and places them itself: with its date line a
+// signature is 4.4in wide, so two go one above the other on a letter's page, not side by side.
+//
+//   #signature(name: [Pat Example])
+//   #signature(name: [Sam Example], dated: false)
+#let signature(
+  name: auto, closing: none, signed: true, dated: true, words: (date: [Date]),
+) = block(breakable: false, context {
+  let name = if name == auto { _writer(what: "signature(), given no name,") } else { name }
+  if closing != none { closing }
+  if not signed {
+    if closing != none { parbreak() }
+    name
+  } else {
+    let slot(caption) = stack(spacing: 5pt, _hand-line, caption)
+    v(0.55in)
+    grid(columns: if dated { (2.6in, 0.4in, 1.4in) } else { (2.6in,) },
+      slot(name), ..if dated { ([], slot(_words("signature", words, "date").date)) } else { () })
+  }
+})
+
 // Pointer from the act layer to the depth layer, without a page number typed by hand:
 //
 //   #seedepth[quarter figures]                    -> detail: quarter figures
