@@ -30,7 +30,7 @@ cd "$(dirname "$0")/.."
 out=${1:?usage: sh .github/bundle.sh <out dir>}
 version=$(sed -n 's/^version *= *"\(.*\)"$/\1/p' press.toml)
 [ -n "$version" ] || { echo "bundle: press.toml has no version line" >&2; exit 1; }
-kit="lib.typ lib press.toml template calibration.typ fonts tools press.just README.md FONTS.md LICENSE .gitignore"
+kit="lib.typ lib press.toml template calibration.typ fonts tools press.just README.md FONTS.md LICENSE .gitignore .gitattributes"
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
