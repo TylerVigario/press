@@ -63,7 +63,7 @@
 #v(8pt)
 
 // ---- Reference ----
-#band-strong([Reference — skip unless you need it], "reference", color: steel)
+#band-strong([Reference — skip unless you need it], "reference", color: steel) <depth>
 
 #matrix(
   ([Axis], [Consequence]),

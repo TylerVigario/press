@@ -313,9 +313,9 @@ composes its own page uses the same parts: `letterhead`, `dateline` and `continu
 `#show: recipe.with(title:, yield:, method:, time:, intro:)` sets the card page and a head that
 says what the cook is in for, `serves 8 · stovetop · about 40 min`, with a line under it saying
 what the dish is. Page one is the whole cook: the ingredients in a `matrix`, the method in
-numbered `item`s, a costly step in `color: warn`. A `#pagebreak()` starts the reference on a page
-of its own, under a line saying page one is the whole job, and `writein()` leaves lines for what
-the cook changed.
+numbered `item`s, a costly step in `color: warn`. Whatever the card labels `<depth>` starts the
+reference on a page of its own, under a line saying page one is the whole job, and `writein()`
+leaves lines for what the cook changed.
 
 **A résumé** applies `resume`: `new.sh docs/resume resume` starts one.
 `#show: resume.with(title:, author:, headline:, contact:)` sets one column on a full sheet, with
@@ -340,9 +340,11 @@ their own, and a document of any other kind composes its pages as suits it.
 6. **No length cap.** If a unit needs depth, give it depth or push it to a second layer — never
    delete it to fit a layout. If it does not fit, *the layout* changes.
 
-From 1 and 6: **the act layer comes first, the depth layer after `depth()`**, a new page under
-an italic line saying nothing past it is needed to act, and `seedepth()` points into it from the
-act layer. The split is by role, not page number.
+From 1 and 6: **the act layer comes first, the depth layer after it.** The document labels
+whatever opens the depth layer `<depth>`, typst's own label, and brief starts it on a page of its
+own under an italic line saying nothing past it is needed to act. A pointer into it is typst's
+own page reference, `#ref(<label>, form: "page")`, which prints "page 2" and links there. The
+split is by role, not page number.
 
 ### Vocabulary
 
@@ -351,10 +353,10 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | Call | For |
 |---|---|
 | `base(title:, author:, preset: card)` | Template: the page, the document's name, the type and the show rules, with nothing drawn, for a document that lays out its own page. `#show: base.with(...)`. |
-| `brief(title:, author:, meta:, status:, legend: none, footer: auto, preset: card)` | Template: the general-purpose document's page, type, show rules, head and footer. `legend`, the note and then the chips for the states its pages carry, prints under the head and says what its colours mean: `legend: ([Colour is state.], chip([DONE], "ok"))`. `#show: brief.with(...)`. |
+| `brief(title:, author:, meta:, status:, legend: none, footer: auto, preset: card, depth: [...])` | Template: the general-purpose document's page, type, show rules, head and footer. Whatever the document labels `<depth>` starts its depth layer on a page of its own under `depth`, a line saying nothing past it is needed; none prints no line. `legend`, the note and then the chips for the states its pages carry, prints under the head and says what its colours mean: `legend: ([Colour is state.], chip([DONE], "ok"))`. `#show: brief.with(...)`. |
 | `letter(title:, author:, contact:, date:, face: face-text, centred: false, header: continued())` | Template: a letter's page, letterhead and date, and the page-two header. `#show: letter.with(...)`. |
 | `resume(title:, author:, headline:, contact:, face: face-text, centred: false, size: sz.small, accent: slate, caps: true, preset: (paper: "us-letter", margin: (x: 0.6in, y: 0.5in)))` | Template: a résumé's page, type and head, and its headings as ruled sections. `#show: resume.with(...)`. |
-| `recipe(title:, author:, yield:, method:, time:, intro:, preset: card, footer: footer())` | Template: a recipe card's page and head, its yield, method and time beside the dish. `#show: recipe.with(...)`. |
+| `recipe(title:, author:, yield:, method:, time:, intro:, preset: card, footer: footer(), depth: [...])` | Template: a recipe card's page and head, its yield, method and time beside the dish. Whatever the card labels `<depth>` starts its reference on a page of its own under `depth`. `#show: recipe.with(...)`. |
 | `unit(label, tone, lead, body, caps:, breakable: false)` | The workhorse. One idea: label, bold lead, body. |
 | `units(..items, pack: "stacks", gutter:, spacing:)` | A group of units. `"stacks"`: two columns balanced by measured height. `"grid"`: rows aligned, when the pairing means something. `"single"`: one column. |
 | `band-strong(title, role, color:, caps:)` | Section header carrying its role. |
@@ -381,8 +383,6 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `scan(body)` | Marks content the document did not set, a scanned or embedded page, for the audit to leave out; what is set over it is still audited. |
 | `form(blank, probe: none, body)` | One page of a flat PDF form, filled in: the page is the blank's own, its size and edge to edge, with none of the document's header, footer, background or foreground, and the blank a `scan()` under the answers. `#form(image("application.pdf", page: 2))[...]`; the document makes the image, so the path is its own. `probe: 18pt` draws a measuring grid over the page, a line every 18pt, every fourth one heavier, and where two heavy lines cross, that point's x and y in points, for reading where each blank is; the audit fails while it is on. |
 | `tick(x, y)` | A box marked with an X, centred on the point given. |
-| `seedepth(what, at: none, words: (detail: [detail], on: [on], page: [p.]))` | brief's: a pointer to its depth layer. Given a label it looks up the page and links to it — never type a page number. |
-| `depth(words: (note: [...]))` | brief's: where its depth layer starts: a new page, and a line saying what comes before it is the whole job. |
 | `letterhead(..contact, face: face-text)` | A letter's head: the writer (the document's author), a contact line, a rule. A link that shows its own address needs no footnote. |
 | `dateline(date)` | A letter's date, written once where it prints; `continued` reads it. |
 | `re(..refs, words: (re: [Re:]))` | A letter's subject line; each reference stays whole and copyable. |
