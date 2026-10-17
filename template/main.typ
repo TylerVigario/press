@@ -9,7 +9,7 @@
 // In press's own tree the import is relative, ../lib.typ, so the starter compiles there.
 //
 // ---------------------------------------------------------------------------
-// The conventions this starter encodes. They are what make a document
+// The conventions this starter encodes, brief's own. They are what make a brief
 // scannable; the tokens alone will not do it.
 //
 //   1. MEAT FIRST. Whatever the reader must act on goes at the top. Attention

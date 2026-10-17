@@ -325,9 +325,11 @@ on its last line. `size:` sets the body, `sz.small` by default, and the head and
 `face:` and `centred:` match a letter's. A heading's gaps are set rules after the show rule:
 `#show heading: set block(above: 8pt)`.
 
-### The six conventions
+### brief's conventions
 
-Tokens alone do not make a document readable. These do:
+`brief` and its starter, `template/main.typ`, are written to six conventions for a document
+someone acts on. They are brief's, not press's: the letter, recipe and résumé starters state
+their own, and a document of any other kind composes its pages as suits it.
 
 1. **Meat first.** Whatever the reader must act on goes at the top.
 2. **One idea per unit, opened by a bold lead.** The lead is the highlight, pre-made.
@@ -337,11 +339,8 @@ Tokens alone do not make a document readable. These do:
 6. **No length cap.** If a unit needs depth, give it depth or push it to a second layer — never
    delete it to fit a layout. If it does not fit, *the layout* changes.
 
-From 1 and 6: for a document someone acts on, **the act layer comes first, the depth layer
-after a `#pagebreak()`**, with an italic line saying nothing past it is needed to act. The
-split is by role, not page number. The conventions are for a page read by a person: a document
-whose first reader is a parser — an ATS résumé — stays single-column and takes press's tokens
-and fonts, not its layout.
+From 1 and 6: **the act layer comes first, the depth layer after a `#pagebreak()`**, with an
+italic line saying nothing past it is needed to act. The split is by role, not page number.
 
 ### Vocabulary
 

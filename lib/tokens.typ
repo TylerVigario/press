@@ -78,10 +78,10 @@
 // and put body at 9.6pt, which reads fine at 150% on a monitor and is mean at
 // arm's length on a sheet. Every step moved up roughly 13%, keeping the ratios.
 //
-// A document that no longer fits after this should lose content to its depth
-// layer, or change page preset — it must not drop back down the scale. Type too
-// small to read comfortably is not a document that fits; it is one that failed
-// in a way that only shows up on paper.
+// A document that no longer fits after this should change its layout or its page
+// preset — it must not drop back down the scale. Type too small to read
+// comfortably is not a document that fits; it is one that failed in a way that
+// only shows up on paper.
 #let sz = (
   micro: 8.6pt, fine: 9.4pt, small: 10.2pt, body: 11pt,
   lead: 12.5pt, head: 14.5pt, title: 21pt, hero: 28pt,
