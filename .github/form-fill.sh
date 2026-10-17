@@ -7,7 +7,7 @@
 # fills in a stand-in blank, a letter page and an A4 page, under brief, between two pages of its
 # own. Each form page must be its blank's size, without brief's footer, and each answer's ink must
 # be where the document put it, read off the page rendered at four pixels to the point: a box set
-# at() a point starts there, a tick() is centred on its point, and an answer given a width wraps
+# at a point starts there, a tick() is centred on its point, and an answer given a width wraps
 # inside it. The filled document must audit clean, the blank under its answers left out.
 #
 # .github/form-fill/probe.typ fills in the blank's first page with the measuring grid on, every
@@ -94,16 +94,16 @@ def near(a, b, within):
 
 box = ink(letter, (90, 190, 140, 220))
 if box is None or not near(box, (100, 200, 120, 210), 0.25):
-    bad.append(f"a 20pt by 10pt box at(100pt, 200pt) inked {box}")
+    bad.append(f"a 20pt by 10pt box placed at 100pt, 200pt inked {box}")
 mark = ink(letter, (285, 385, 315, 415))
 if mark is None or not near(((mark[0] + mark[2]) / 2, (mark[1] + mark[3]) / 2), (300, 400), 0.5):
     bad.append(f"tick(300pt, 400pt) inked {mark}, not centred on its point")
 wrap = ink(letter, (60, 480, 250, 640))
 if wrap is None or wrap[0] < 72 or wrap[2] > 132 or wrap[3] - wrap[1] < 30:
-    bad.append(f"an answer 60pt wide at(72pt, 500pt) inked {wrap}, not wrapped inside 72pt to 132pt")
+    bad.append(f"an answer 60pt wide placed at 72pt, 500pt inked {wrap}, not wrapped inside 72pt to 132pt")
 box = ink(a4, (290, 290, 340, 315))
 if box is None or not near(box, (300, 300, 330, 305), 0.25):
-    bad.append(f"a 30pt by 5pt box at(300pt, 300pt) on the A4 page inked {box}")
+    bad.append(f"a 30pt by 5pt box placed at 300pt, 300pt on the A4 page inked {box}")
 
 # The grid, every 18pt: each line where its step puts it, read between the crossings and clear of
 # the labels, where the blank has no ink of its own.
@@ -119,7 +119,7 @@ for b in bad:
 sys.exit(1 if bad else 0)
 PY
 echo "form-fill: a form page carries nothing of the document's own: no header, background or foreground"
-echo "form-fill: each answer lands where at() and tick() put it, and a wide one wraps inside its width"
+echo "form-fill: each answer lands where place() and tick() put it, and a wide one wraps inside its width"
 
 # shellcheck disable=SC2086
 sh tools/check.sh .github/form-fill.typ "$tmp/audit.pdf" . $flags > "$tmp/out" 2>&1 \

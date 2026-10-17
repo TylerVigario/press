@@ -12,12 +12,12 @@
 A page of the document's own, before the form.
 
 #form(image("form-fill/blank.pdf", page: 1))[
-  #at(100pt, 200pt, rect(width: 20pt, height: 10pt, fill: black, stroke: none))
+  #place(dx: 100pt, dy: 200pt, rect(width: 20pt, height: 10pt, fill: black, stroke: none))
   #tick(300pt, 400pt)
-  #at(72pt, 500pt, width: 60pt)[an answer much longer than the sixty points of its blank]
+  #place(dx: 72pt, dy: 500pt, box(width: 60pt)[an answer much longer than the sixty points of its blank])
 ]
 #form(image("form-fill/blank.pdf", page: 2))[
-  #at(300pt, 300pt, rect(width: 30pt, height: 5pt, fill: black, stroke: none))
+  #place(dx: 300pt, dy: 300pt, rect(width: 30pt, height: 5pt, fill: black, stroke: none))
 ]
 
 And one after it.
