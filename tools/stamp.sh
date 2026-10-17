@@ -1,12 +1,12 @@
 #!/bin/sh
 # stamp.sh — compile a document, stamped with when its content last changed.
 #
-# Run from the consumer root by whatever runs the repo's builds, press.just's `build`
-# among them, and by check.sh for its recompile:
+# Run from the consumer root by build.sh, which any runner calls, and by check.sh for its
+# recompile:
 #
 #   sh <press_root>/tools/stamp.sh <doc> <pdf> <typst flags...>
 #
-# On success it prints one line, which press.just's `build` hands to report.sh: what
+# On success it prints one line, which build.sh hands to report.sh: what
 # happened -- new (no stamped PDF was there), changed or unchanged -- then the time the page
 # now carries. typst's own output goes to stderr.
 #

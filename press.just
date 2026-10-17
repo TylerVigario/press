@@ -1,8 +1,8 @@
 # press — build recipes for Typst documents, read on screen or on paper.
 #
-# ONE WAY IN, for a repo that already builds with just. Underneath it is plain typst with
-# press's fonts, plus the files under tools/ — stamp, check, report, new — which any runner
-# calls the same way: an npm script, a Makefile, CI. A repo never adopts just for press.
+# ONE WAY IN, for a repo that already builds with just. Underneath, each recipe is one call to a
+# tool under tools/ — build, all, watch, new, clean — which any runner calls the same way: an npm
+# script, a Makefile, CI. A repo never adopts just for press.
 #
 # A consuming repo that does use just carries a one-line justfile. If it has no recipes of its
 # own:
@@ -27,7 +27,7 @@
 # rather than the destination. On Windows `sh` comes from Git for Windows,
 # which is already a prerequisite for cloning this repo at all.
 #
-# WHAT THIS DOES that a bare `typst compile` will not:
+# WHAT `build` DOES that a bare `typst compile` will not, in tools/build.sh and the tools it calls:
 #   · derives the output path, so print/ mirrors the source tree by rule
 #     rather than by every author remembering the convention;
 #   · creates that directory — typst refuses to write into one that does not

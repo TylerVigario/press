@@ -122,12 +122,16 @@ repository has.
   `bundle-check.sh` requires.
 - **Every build is audited through `check.sh`, from `stamp.sh`.** `stamp.sh` hands over the
   files its compile read and what typst printed (`PRESS_BUILT_DEPS`, `PRESS_BUILT_LOG`), with
-  `PRESS_AUDIT=optional`, so a missing tool skips the audit with one line instead of failing;
+  `PRESS_AUDIT=optional`, so a missing tool skips the audit with one line instead of failing,
+  after press's marks, which need only typst, are read: open items are still counted and the
+  measuring grid still fails;
   `check.sh`'s own compile sets `PRESS_IN_CHECK`, so it is not audited twice. A build's stdout
-  is its one status line, which `press.just` hands to `report.sh`; findings go to stderr.
+  is its one status line, which `build.sh` hands to `report.sh`; findings go to stderr.
 - **Every pass reports through `found <pass>`** in `check.sh`, so a document's
   `// press: accept <pass> — <why>` can apply to it. A new pass gets a name in `$passes` and
   in README's list, or a document can never accept it. Only the document's own file accepts.
+  The measuring grid, `form(probe:)`, is not a pass: no document may accept it, so it fails
+  through `rc` and never through `found`.
   The Python passes exit 1 for a finding and 2 when they cannot run (`die()`); keep that
   apart, or a missing tool reads as a finding a document has accepted.
 - **The build record is one file, `.build-record`, in press's folder**, kept out of git by the
@@ -148,8 +152,6 @@ repository has.
     carries an explicit `[doc("...")]` for that reason. Keep it, and check `just --list`.
   - `source_directory()` is press's own directory (`press_root`); `justfile_directory()` is
     the consuming repository's root (`root`). Swapping them sends output into press's tree.
-    Under `--justfile`, as `all` reaches `build`, `justfile_directory()` becomes press's
-    directory, which is why `all` passes `--set root`.
   - `[working-directory(root)]` on every recipe is required: without it a `mod` consumer
     resolves every path against press's directory.
   - `all` takes its directories as the shell's own arguments: it is `[positional-arguments]`
