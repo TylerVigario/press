@@ -5,5 +5,5 @@
 #show: base.with(title: [A form measured], author: "press")
 
 #form(image("blank.pdf", page: 1), probe: 18pt)[
-  #at(100pt, 200pt)[An answer]
+  #place(dx: 100pt, dy: 200pt)[An answer]
 ]

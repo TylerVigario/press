@@ -231,7 +231,7 @@
 
 // The measuring grid form(probe:) draws over its page, for reading where each blank is: a line
 // every step, every fourth one heavier, and where two heavy lines cross, that point's x and y in
-// points, as at() takes them. In the blue a layout guide is drawn in, over the blank and the
+// points, as place() takes them. In the blue a layout guide is drawn in, over the blank and the
 // answers both, so an answer can be checked against its blank. It is a scan(), so the audit
 // leaves it out, and the audit fails while it is on.
 #let _probe(step) = place(top + left, layout(size => {
@@ -260,18 +260,18 @@
 // a form(): the blank's own page, its size and edge to edge whatever the document's preset, with
 // none of the document's header, footer, background or foreground, since with no margin a header
 // and a footer still print, at the paper's edges. The blank is a scan() and the answers go over
-// it. at() places an answer where its blank is, measured from the page's top-left corner as a
-// ruler would: (x, y) is the answer's own top-left, where its capitals begin, so the text hangs
-// below y, and an answer meant to stand on a blank's line takes y above the line by its
-// capitals' height, about seven tenths of its text size. Given a width, a long answer wraps
-// inside it. tick() marks a box, centred on the point given. The document makes the image, so
-// its path is the document's own: a path handed to a part of press's is read from press's
+// it. An answer is typst's own place(dx:, dy:), measured from the page's top-left corner as a
+// ruler would: the point is the answer's own top-left, where its capitals begin, so the text
+// hangs below it, and an answer meant to stand on a blank's line goes above the line by its
+// capitals' height, about seven tenths of its text size. In a box with a width, a long answer
+// wraps inside it. tick() marks a box, centred on the point given. The document makes the image,
+// so its path is the document's own: a path handed to a part of press's is read from press's
 // folder. Given probe: and a step, form() draws a measuring grid over its page for reading where
 // each blank is, and the audit fails while it is on.
 //
 //   #form(image("application.pdf", page: 2))[
-//     #at(72pt, 144pt)[Jane Doe]
-//     #at(380pt, 144pt, width: 120pt)[an answer longer than its blank]
+//     #place(dx: 72pt, dy: 144pt)[Jane Doe]
+//     #place(dx: 380pt, dy: 144pt, box(width: 120pt)[an answer longer than its blank])
 //     #tick(96pt, 210pt)
 //   ]
 #let form(blank, probe: none, body) = {
@@ -282,9 +282,6 @@
     foreground: if probe != none { scan(_probe(probe)) },
     { block(scan(blank)); place(top + left, body); if probe != none { metadata("press-probe") } })
 }
-
-#let at(x, y, width: none, body) = place(top + left, dx: x, dy: y,
-  if width == none { body } else { box(width: width, body) })
 
 #let tick(x, y) = place(top + left, dx: x, dy: y,
   place(center + horizon, text(weight: 700, top-edge: "cap-height", bottom-edge: "baseline")[X]))
