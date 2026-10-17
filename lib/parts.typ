@@ -229,6 +229,31 @@
 #let scan(body) = if sys.inputs.at("press-scans", default: none) == "hidden" { hide(body) } else { body }
 
 
+// FILLING IN A FORM: a flat PDF form, or a scan of one, its blanks filled in. Each page of it is
+// a form(): the blank's own page, its size and edge to edge whatever the document's preset, with
+// none of the document's header, footer, background or foreground, since with no margin a header
+// and a footer still print, at the paper's edges. The blank is a scan() and the answers go over
+// it. at() places an answer where its blank is, measured from the page's top-left corner as a
+// ruler would, and given a width a long answer wraps inside it. tick() marks a box, centred on
+// the point given. The document makes the image, so its path is the document's own: a path
+// handed to a part of press's is read from press's folder.
+//
+//   #form(image("application.pdf", page: 2))[
+//     #at(72pt, 144pt)[Jane Doe]
+//     #at(380pt, 144pt, width: 120pt)[an answer longer than its blank]
+//     #tick(96pt, 210pt)
+//   ]
+#let form(blank, body) = std.page(width: auto, height: auto, margin: 0pt,
+  header: none, footer: none, background: none, foreground: none,
+  { block(scan(blank)); place(top + left, body) })
+
+#let at(x, y, width: none, body) = place(top + left, dx: x, dy: y,
+  if width == none { body } else { box(width: width, body) })
+
+#let tick(x, y) = place(top + left, dx: x, dy: y,
+  place(center + horizon, text(weight: 700, top-edge: "cap-height", bottom-edge: "baseline")[X]))
+
+
 // The writer's name, from the document's author. Called in context; `what` names the document
 // that needs it, for the message when no author is set.
 #let _writer(what: "a letter") = {
