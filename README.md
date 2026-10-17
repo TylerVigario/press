@@ -128,7 +128,8 @@ so a runner, CI and `all` see it and the page can still be looked at. Where the 
 are missing, the build says the audit was skipped and why, and succeeds: building never
 depends on them. `check.sh` is the same audit for when it must run, as in CI: without its tools
 it refuses. The audit also says how many open items a document still carries, marked with
-`open()` for its owner to supply, and does not fail for them: a draft carries them.
+`open()` for its owner to supply, and does not fail for them: a draft carries them. A form
+page with its measuring grid on, `form(probe:)`, does fail it: the grid is for measuring.
 
 **An unchanged document is not built again.** One file in press's folder, `.build-record`,
 records what each document's last build read — every file typst lists, the fonts, typst's
@@ -375,7 +376,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `footer(status: none, edition: updated())` | `brief`'s footer, for a document that lays out its own page: title and status, then `updated()` and the page. `#set page(footer: footer())`. |
 | `press-version` | The version of press a document was built with. Never typed by hand. |
 | `scan(body)` | Marks content the document did not set, a scanned or embedded page, for the audit to leave out; what is set over it is still audited. |
-| `form(blank, body)` | One page of a flat PDF form, filled in: the page is the blank's own, its size and edge to edge, with none of the document's header, footer, background or foreground, and the blank a `scan()` under the answers. `#form(image("application.pdf", page: 2))[...]`; the document makes the image, so the path is its own. |
+| `form(blank, probe: none, body)` | One page of a flat PDF form, filled in: the page is the blank's own, its size and edge to edge, with none of the document's header, footer, background or foreground, and the blank a `scan()` under the answers. `#form(image("application.pdf", page: 2))[...]`; the document makes the image, so the path is its own. `probe: 18pt` draws a measuring grid over the page, a line every 18pt, every fourth one heavier, and where two heavy lines cross, that point's x and y in points, for reading where each blank is; the audit fails while it is on. |
 | `at(x, y, width: none, body)` | An answer placed where its blank is, measured from the page's top-left corner. Given a width, a long answer wraps inside it. |
 | `tick(x, y)` | A box marked with an X, centred on the point given. |
 | `letterhead(..contact, face: face-text)` | A letter's head: the writer (the document's author), a contact line, a rule. A link that shows its own address needs no footnote. |

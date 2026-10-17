@@ -229,6 +229,33 @@
 #let scan(body) = if sys.inputs.at("press-scans", default: none) == "hidden" { hide(body) } else { body }
 
 
+// The measuring grid form(probe:) draws over its page, for reading where each blank is: a line
+// every step, every fourth one heavier, and where two heavy lines cross, that point's x and y in
+// points, as at() takes them. In the blue a layout guide is drawn in, over the blank and the
+// answers both, so an answer can be checked against its blank. It is a scan(), so the audit
+// leaves it out, and the audit fails while it is on.
+#let _probe(step) = place(top + left, layout(size => {
+  let step = step.to-absolute()
+  assert(step > 0pt, message: "form(probe:) takes a step greater than zero: probe: 18pt")
+  let guide = rgb("#4aa8d8")
+  let (nx, ny) = (int(size.width / step), int(size.height / step))
+  for i in range(nx + 1) {
+    place(top + left, dx: i * step, line(angle: 90deg, length: size.height,
+      stroke: if calc.rem(i, 4) == 0 { 0.6pt + guide } else { 0.3pt + guide.transparentize(50%) }))
+  }
+  for j in range(ny + 1) {
+    place(top + left, dy: j * step, line(length: size.width,
+      stroke: if calc.rem(j, 4) == 0 { 0.6pt + guide } else { 0.3pt + guide.transparentize(50%) }))
+  }
+  let pt(v) = str(calc.round(v.pt(), digits: 2))
+  for i in range(0, nx + 1, step: 4) {
+    for j in range(0, ny + 1, step: 4) {
+      place(top + left, dx: i * step + 1pt, dy: j * step + 1pt,
+        text(font: face-mono, size: 5pt, fill: guide.darken(40%), [#pt(i * step), #pt(j * step)]))
+    }
+  }
+}))
+
 // FILLING IN A FORM: a flat PDF form, or a scan of one, its blanks filled in. Each page of it is
 // a form(): the blank's own page, its size and edge to edge whatever the document's preset, with
 // none of the document's header, footer, background or foreground, since with no margin a header
@@ -236,16 +263,23 @@
 // it. at() places an answer where its blank is, measured from the page's top-left corner as a
 // ruler would, and given a width a long answer wraps inside it. tick() marks a box, centred on
 // the point given. The document makes the image, so its path is the document's own: a path
-// handed to a part of press's is read from press's folder.
+// handed to a part of press's is read from press's folder. Given probe: and a step, form() draws
+// a measuring grid over its page for reading where each blank is, and the audit fails while it
+// is on.
 //
 //   #form(image("application.pdf", page: 2))[
 //     #at(72pt, 144pt)[Jane Doe]
 //     #at(380pt, 144pt, width: 120pt)[an answer longer than its blank]
 //     #tick(96pt, 210pt)
 //   ]
-#let form(blank, body) = std.page(width: auto, height: auto, margin: 0pt,
-  header: none, footer: none, background: none, foreground: none,
-  { block(scan(blank)); place(top + left, body) })
+#let form(blank, probe: none, body) = {
+  assert(probe == none or type(probe) == length,
+    message: "form(probe:) takes none, its default, or the grid's step as a length: probe: 18pt")
+  std.page(width: auto, height: auto, margin: 0pt,
+    header: none, footer: none, background: none,
+    foreground: if probe != none { scan(_probe(probe)) },
+    { block(scan(blank)); place(top + left, body); if probe != none { metadata("press-probe") } })
+}
 
 #let at(x, y, width: none, body) = place(top + left, dx: x, dy: y,
   if width == none { body } else { box(width: width, body) })
