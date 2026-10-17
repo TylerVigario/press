@@ -44,7 +44,7 @@ needs it, built for both media, and offered to every document from the next rele
 | `template/` | the starters `tools/new.sh` copies, `main.typ` (applying `brief`), `letter.typ` (applying `letter`), `recipe.typ` (applying `recipe`) and `resume.typ` (applying `resume`); each imports `../lib.typ` so it compiles in place |
 | `calibration.typ` | the print calibration sheet; imports `lib.typ` |
 | `fonts/` | the vendored faces, and `fonts/licenses/` with each one's licence text |
-| `tools/` | `new.sh`, `stamp.sh`, `check.sh`, `report.sh`, and the audit's two Python passes |
+| `tools/` | what every runner calls, just among them: `new.sh`, `build.sh`, `all.sh`, `watch.sh`, `clean.sh`; beneath them `stamp.sh`, `check.sh`, `report.sh`, and the audit's two Python passes |
 | `press.just` | recipes for repositories that use just |
 | `README.md`, `FONTS.md`, `LICENSE` | the consumer guide, the font account, the AGPL |
 | `.gitignore` | ships in the kit, so a repository that commits press's folder ignores the build record in it |

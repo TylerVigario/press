@@ -114,6 +114,10 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 | tool | does |
 |---|---|
 | `sh third_party/press/tools/new.sh docs/guide` | scaffolds `docs/guide/main.typ` from the template, its import written for where press sits; add `letter`, `recipe` or `resume` for those templates |
+| `sh third_party/press/tools/build.sh docs/guide.typ` | builds and audits each document named to `print/<same path>.pdf` and says in one line what it made: new, changed or unchanged, pages, words, size and the stamp; given several, ends with the count. `--check` first runs the audit alone, refusing without its tools |
+| `sh third_party/press/tools/all.sh [dir...]` | builds every document under the directories named (default `docs/`), not the files they are made of and not press's own, then the count; fails if any failed. `--check` audits them instead |
+| `sh third_party/press/tools/watch.sh docs/guide.typ` | recompiles on every save to `print/<same path>.watch.pdf`, a preview beside the stamped PDF |
+| `sh third_party/press/tools/clean.sh` | deletes `print/` |
 | `sh third_party/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory; then audits it, where the audit's tools are installed |
 | `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | the audit alone, which refuses to run without its tools: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text printed on text |
 
@@ -155,26 +159,35 @@ fails the audit whatever the document accepts.
 
 The stamp prints in **`PRESS_TZ`**, an IANA zone name set for every build
 (`PRESS_TZ=America/Los_Angeles`, or `UTC` for documents read across zones), so every machine
-prints the same time and an unchanged page stays unchanged wherever it is built.
+prints the same time and an unchanged page stays unchanged wherever it is built. A runner that
+cannot set a variable on its command line, npm in `cmd.exe` on Windows, passes it to the tool
+instead: `build.sh --tz America/Los_Angeles`, `all.sh --tz America/Los_Angeles`.
 
 ### From your runner
 
 **npm** — on Windows npm runs scripts with `cmd.exe`, where `mkdir -p` makes a folder named
-`-p`; let `stamp.sh` make the output directory instead:
+`-p`; press's tools make the output directory themselves:
 
 ```json
 "scripts": {
-  "press": "sh third_party/press/tools/stamp.sh docs/guide.typ print/guide.pdf --root . --font-path third_party/press/fonts --ignore-system-fonts",
-  "press:check": "sh third_party/press/tools/check.sh docs/guide.typ print/guide.pdf third_party/press --root . --font-path third_party/press/fonts --ignore-system-fonts"
+  "press": "sh third_party/press/tools/all.sh --tz America/Los_Angeles",
+  "press:check": "sh third_party/press/tools/all.sh --check --tz America/Los_Angeles",
+  "press:watch": "sh third_party/press/tools/watch.sh"
 }
 ```
+
+`npm run press` builds every document under `docs/`, and `npm run press -- recipes` those under
+another directory; `npm run press:watch -- docs/guide.typ` previews one, and
+`sh third_party/press/tools/build.sh docs/guide.typ` builds one.
 
 **make:**
 
 ```make
-FLAGS = --root . --font-path third_party/press/fonts --ignore-system-fonts
-print/%.pdf: docs/%.typ
-	sh third_party/press/tools/stamp.sh $< $@ $(FLAGS)
+.PHONY: all
+all:
+	sh third_party/press/tools/all.sh
+print/%.pdf: %.typ
+	sh third_party/press/tools/build.sh $<
 ```
 
 **just** — `press.just` is ready-made recipes for a repository that already uses just. One
@@ -192,10 +205,12 @@ just clean                       # delete print/
 ```
 
 Under `mod` it is `just press build …`, and `just press` lists the recipes; under `import`,
-`just --list` does. `all` builds documents, not their parts: a file named `_*.typ` is a part,
-and so is everything beside a `main.typ`, at any depth; press's own folder is skipped, so
-`just all .` builds the repository's documents and not press's files. It builds every one, then
-fails if any failed its audit. Export `PRESS_TZ` from the justfile.
+`just --list` does. Each recipe is one call to a tool in `tools/`, which any runner can call:
+`build` is `build.sh`, `check` is `build.sh --check`, `all` is `all.sh`, `watch` is `watch.sh`,
+`new` is `new.sh` and `clean` is `clean.sh`. `all` builds documents, not their parts: a file
+named `_*.typ` is a part, and so is everything beside a `main.typ`, at any depth; press's own
+folder is skipped, so `just all .` builds the repository's documents and not press's files. It
+builds every one, then fails if any failed its audit. Export `PRESS_TZ` from the justfile.
 
 ### Requirements
 
