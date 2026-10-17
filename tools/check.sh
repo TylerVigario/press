@@ -268,13 +268,16 @@ tr '\000\\' '\n/' < "$tmp/deps" | awk '
 # At least $src itself; an empty list would skip the check and report the document clean.
 test -s "$tmp/sources" || { echo "press: typst listed no sources for $src" >&2; exit 1; }
 
-# OPEN ITEMS. open() marks what only the document's owner can supply, in red, and the audit says
-# how many remain, without failing: a draft carries them, and the count is what keeps one from
-# going out unnoticed. typst counts them, and only where a source of the document's own calls
-# open, as #open[...] or open(...), so no other document is compiled again: typst eval, or typst
-# query before 0.15, which has no eval. Neither takes the --deps a build passes, so the count
-# runs without it.
-open_count() {
+# PRESS'S MARKS. Two of press's parts leave a mark for the audit: open(), what only the
+# document's owner can supply, and form(probe:), the measuring grid. typst lists them, and only
+# where a source of the document's own calls one, as #open[...], open(...) or probe:, so no other
+# document is compiled again: typst eval, or typst query before 0.15, which has no eval. Neither
+# takes the --deps a build passes, so the query runs without it.
+#
+# Open items are counted, not failed: a draft carries them, and the count is what keeps one from
+# going out unnoticed. The measuring grid fails the audit while it is on: it is for reading where
+# a form's blanks are, and a page that still carries it is not finished.
+press_marks() {
     n=$#
     i=0
     while [ "$i" -lt "$n" ]; do
@@ -285,20 +288,31 @@ open_count() {
         esac
         set -- "$@" "$a"
     done
-    typst eval 'query(metadata).filter(m => m.value == "press-open").len()' --in "$src" "$@" \
-            2>/dev/null && return
-    found=$(typst query "$@" "$src" metadata --field value 2>/dev/null) || return 1
-    printf '%s\n' "$found" | grep -o '"press-open"' | wc -l | tr -d ' '
+    typst eval 'query(metadata).map(m => m.value).filter(v => type(v) == str and v.starts-with("press-"))' \
+        --in "$src" "$@" 2>/dev/null && return
+    typst query "$@" "$src" metadata --field value 2>/dev/null
 }
-if while IFS= read -r f; do grep -q 'open[[(]' "$f" && echo "$f"; done < "$tmp/sources" | grep -q .; then
-    if n=$(open_count "$@"); then
+want=$(while IFS= read -r f; do
+    if grep -q 'open[[(]' "$f"; then echo open; fi
+    if grep -q 'probe:' "$f"; then echo probe; fi
+done < "$tmp/sources")
+if [ -n "$want" ]; then
+    if marks=$(press_marks "$@"); then
+        n=$(printf '%s\n' "$marks" | grep -o '"press-open"' | wc -l | tr -d ' ')
         case $n in
             0) ;;
             1) echo "press: $pdf has 1 open item, in red, for its owner to supply" >&2 ;;
             *) echo "press: $pdf has $n open items, in red, for its owner to supply" >&2 ;;
         esac
+        if printf '%s\n' "$marks" | grep -qF '"press-probe"'; then
+            echo "press: $pdf has the measuring grid on; take form()'s probe: off once its blanks are measured" >&2
+            rc=1
+        fi
     else
-        echo "press: could not count the open items in $pdf" >&2
+        case $want in *open*) echo "press: could not count the open items in $pdf" >&2 ;; esac
+        case $want in
+            *probe*) echo "press: could not tell whether $pdf has the measuring grid on" >&2; rc=1 ;;
+        esac
     fi
 fi
 

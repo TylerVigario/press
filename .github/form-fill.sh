@@ -9,6 +9,11 @@
 # be where the document put it, read off the page rendered at four pixels to the point: a box set
 # at() a point starts there, a tick() is centred on its point, and an answer given a width wraps
 # inside it. The filled document must audit clean, the blank under its answers left out.
+#
+# .github/form-fill/probe.typ fills in the blank's first page with the measuring grid on, every
+# 18pt. Its lines must run from the page's top-left corner, the heavy ones every fourth step,
+# each crossing of two labelled beside it, and the audit must refuse the page for the grid and
+# for nothing else: the grid's lines and labels are left out of its passes, as a scan is.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -23,6 +28,8 @@ flags="--root . --font-path fonts --ignore-system-fonts"
 typst compile --root . --ignore-system-fonts .github/form-fill/blank.typ "$blank"
 # shellcheck disable=SC2086
 typst compile $flags .github/form-fill.typ "$tmp/filled.pdf"
+# shellcheck disable=SC2086
+typst compile $flags .github/form-fill/probe.typ "$tmp/probe.pdf"
 
 # size <page>: the page's size in points, as pdfinfo prints it.
 size() { pdfinfo -f "$1" -l "$1" "$tmp/filled.pdf" | sed -n "s/^Page *$1 size: *\([0-9.]* x [0-9.]*\) pts.*/\1/p"; }
@@ -36,7 +43,9 @@ pdftotext -f 1 -l 1 "$tmp/filled.pdf" - | grep -qF "A header of" || fail "the do
 ! pdftotext -f 2 -l 3 "$tmp/filled.pdf" - | grep -qF "A header of" || fail "a form page carries the document's header"
 
 pdftoppm -r 288 -gray -f 1 -l 3 "$tmp/filled.pdf" "$tmp/page"
-python3 -I - "$tmp/page-1.pgm" "$tmp/page-2.pgm" "$tmp/page-3.pgm" <<'PY' || fail "a form page is not as the document set it"
+pdftoppm -r 288 -gray "$tmp/probe.pdf" "$tmp/probe"
+python3 -I - "$tmp/page-1.pgm" "$tmp/page-2.pgm" "$tmp/page-3.pgm" "$tmp/probe-1.pgm" <<'PY' \
+    || fail "a form page is not as the document set it"
 import sys
 
 def load(path):
@@ -53,21 +62,22 @@ def load(path):
     width, height = int(fields[1]), int(fields[2])
     return width, data[i + 1:]
 
-# ink(page, area): the box, in points, round the dark pixels inside an area, in points.
-def ink(page, area):
+# ink(page, area): the box, in points, round the dark pixels inside an area, in points; with
+# faint, any pixel not white, as the grid's blue is.
+def ink(page, area, faint=False):
     width, px = page
     x0, y0, x1, y1 = (int(v * 4) for v in area)
     xs, ys = [], []
     for y in range(y0, y1):
         for x in range(x0, x1):
-            if px[y * width + x] < 128:
+            if px[y * width + x] < (230 if faint else 128):
                 xs.append(x)
                 ys.append(y)
     if not xs:
         return None
     return min(xs) / 4, min(ys) / 4, (max(xs) + 1) / 4, (max(ys) + 1) / 4
 
-own, letter, a4 = (load(p) for p in sys.argv[1:4])
+own, letter, a4, probe = (load(p) for p in sys.argv[1:5])
 bad = []
 
 # The document's background and foreground, on its own page and on neither form page.
@@ -94,6 +104,15 @@ box = ink(a4, (290, 290, 340, 315))
 if box is None or not near(box, (300, 300, 330, 305), 0.25):
     bad.append(f"a 30pt by 5pt box at(300pt, 300pt) on the A4 page inked {box}")
 
+# The grid, every 18pt: each line where its step puts it, read between the crossings and clear of
+# the labels, where the blank has no ink of its own.
+for what, area, at, axis in (("the heavy line at x 72pt", (70, 310, 74, 320), 72, 0),
+                             ("the light line at x 90pt", (88, 310, 92, 320), 90, 0),
+                             ("the heavy line at y 360pt", (330, 358, 340, 362), 360, 1)):
+    line = ink(probe, area, faint=True)
+    if line is None or abs((line[axis] + line[axis + 2]) / 2 - at) > 0.5:
+        bad.append(f"the measuring grid drew {what} at {line}")
+
 for b in bad:
     print("form-fill: " + b, file=sys.stderr)
 sys.exit(1 if bad else 0)
@@ -105,3 +124,15 @@ echo "form-fill: each answer lands where at() and tick() put it, and a wide one 
 sh tools/check.sh .github/form-fill.typ "$tmp/audit.pdf" . $flags > "$tmp/out" 2>&1 \
     || { cat "$tmp/out" >&2; fail "the filled form failed its audit"; }
 echo "form-fill: the filled form audits clean, its blank left out"
+
+pdftotext -bbox "$tmp/probe.pdf" - \
+    | awk -F '"' '/>216,</ && $2 >= 216 && $2 <= 220 && $4 >= 216 && $4 <= 220 { hit = 1 } END { exit !hit }' \
+    || fail "the grid's label for 216, 216 is not beside its crossing"
+echo "form-fill: the measuring grid runs from the page's corner, every step, its crossings labelled"
+
+# shellcheck disable=SC2086
+! sh tools/check.sh .github/form-fill/probe.typ "$tmp/probe-audit.pdf" . $flags > "$tmp/out" 2>&1 \
+    || fail "a form with the measuring grid on audited clean"
+grep -qF "has the measuring grid on" "$tmp/out" || { cat "$tmp/out" >&2; fail "the audit refused the grid, but not for it"; }
+[ "$(grep -c '^press:' "$tmp/out")" -eq 1 ] || { cat "$tmp/out" >&2; fail "the grid's lines and labels were audited as the document's"; }
+echo "form-fill: the audit refuses a form with the measuring grid on, for that alone"
