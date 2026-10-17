@@ -60,6 +60,13 @@ echo "audit-cases: the build audits as check does, and without poppler says it d
 ! grep -qF "accepted" "$tmp/out" || { cat "$tmp/out" >&2; fail "a pass that could not run was called accepted"; }
 echo "audit-cases: a pass that cannot run fails the audit, whatever the document accepts"
 
+# Open items are counted, not failed: the pass case above audited clean, and says how many.
+# shellcheck disable=SC2086
+sh tools/check.sh .github/audit-cases/pass-open-items.typ "$tmp/o/open.pdf" . $flags > "$tmp/out" 2>&1 \
+    || { cat "$tmp/out" >&2; fail "a document with open items failed its audit"; }
+grep -qF "has 2 open items" "$tmp/out" || { cat "$tmp/out" >&2; fail "the audit did not count the open items"; }
+echo "audit-cases: open items are counted, and do not fail the audit"
+
 # A python with no XML parser cannot run the text-on-text pass. A stand-in python, the real one
 # with expat taken away at startup, is named by PRESS_PYTHON: check fails, and says why, and a
 # build says it skipped the pass and is not recorded as audited.

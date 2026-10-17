@@ -172,6 +172,13 @@
 }
 
 
+// What only the document's owner can supply, still missing: an account number, a figure, a date.
+// It prints in red and bold so it cannot go out unnoticed, and the audit counts how many remain
+// ("2 open items") without failing, since a draft carries them.
+//
+//   Account #open[number from the statement].
+#let open(body) = [#metadata("press-open")#text(fill: bad, weight: 700, body)]
+
 // A part's own words, as a document passes them in `words`: every key the part prints must be
 // there, so a misspelt or missing one is a compile error naming it, not English left behind.
 #let _words(part, words, ..keys) = {
