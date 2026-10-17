@@ -261,11 +261,13 @@
 // none of the document's header, footer, background or foreground, since with no margin a header
 // and a footer still print, at the paper's edges. The blank is a scan() and the answers go over
 // it. at() places an answer where its blank is, measured from the page's top-left corner as a
-// ruler would, and given a width a long answer wraps inside it. tick() marks a box, centred on
-// the point given. The document makes the image, so its path is the document's own: a path
-// handed to a part of press's is read from press's folder. Given probe: and a step, form() draws
-// a measuring grid over its page for reading where each blank is, and the audit fails while it
-// is on.
+// ruler would: (x, y) is the answer's own top-left, where its capitals begin, so the text hangs
+// below y, and an answer meant to stand on a blank's line takes y above the line by its
+// capitals' height, about seven tenths of its text size. Given a width, a long answer wraps
+// inside it. tick() marks a box, centred on the point given. The document makes the image, so
+// its path is the document's own: a path handed to a part of press's is read from press's
+// folder. Given probe: and a step, form() draws a measuring grid over its page for reading where
+// each blank is, and the audit fails while it is on.
 //
 //   #form(image("application.pdf", page: 2))[
 //     #at(72pt, 144pt)[Jane Doe]
