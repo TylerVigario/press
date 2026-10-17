@@ -41,24 +41,6 @@
 #let re(..refs, words: (re: [Re:])) = block(above: 1.2em, below: 1.2em,
   [#text(weight: 700, _words("re", words, "re").re) #refs.pos().map(r => box(r)).join([; ])])
 
-// Where the letter is signed, with its closing (`closing: [Sincerely,]`) kept on the same page,
-// so a page break never strands it. By default, space for an ink signature over a line with the
-// writer's name beneath, and beside it a line to date by hand (`dated: false` leaves that out).
-// For a letter sent as a file, `signed: false` is a typed sign-off: the name alone.
-#let signature(closing: none, signed: true, dated: true, words: (date: [Date])) = block(breakable: false, context {
-  let name = _writer()
-  if closing != none { closing }
-  if not signed {
-    if closing != none { parbreak() }
-    name
-  } else {
-    let slot(caption) = stack(spacing: 5pt, _hand-line, caption)
-    v(0.55in)
-    grid(columns: if dated { (2.6in, 0.4in, 1.4in) } else { (2.6in,) },
-      slot(name), ..if dated { ([], slot(_words("signature", words, "date").date)) } else { () })
-  }
-})
-
 // What goes with the letter, one item to a line, under the singular word for one item and the
 // plural for more.
 #let enclosures(..items, words: (singular: [Enclosure], plural: [Enclosures])) = {
