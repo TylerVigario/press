@@ -268,6 +268,40 @@ tr '\000\\' '\n/' < "$tmp/deps" | awk '
 # At least $src itself; an empty list would skip the check and report the document clean.
 test -s "$tmp/sources" || { echo "press: typst listed no sources for $src" >&2; exit 1; }
 
+# OPEN ITEMS. open() marks what only the document's owner can supply, in red, and the audit says
+# how many remain, without failing: a draft carries them, and the count is what keeps one from
+# going out unnoticed. typst counts them, and only where a source of the document's own calls
+# open, as #open[...] or open(...), so no other document is compiled again: typst eval, or typst
+# query before 0.15, which has no eval. Neither takes the --deps a build passes, so the count
+# runs without it.
+open_count() {
+    n=$#
+    i=0
+    while [ "$i" -lt "$n" ]; do
+        a=$1; shift; i=$((i + 1))
+        case $a in
+            --deps | --deps-format) shift; i=$((i + 1)); continue ;;
+            --deps=* | --deps-format=*) continue ;;
+        esac
+        set -- "$@" "$a"
+    done
+    typst eval 'query(metadata).filter(m => m.value == "press-open").len()' --in "$src" "$@" \
+            2>/dev/null && return
+    found=$(typst query "$@" "$src" metadata --field value 2>/dev/null) || return 1
+    printf '%s\n' "$found" | grep -o '"press-open"' | wc -l | tr -d ' '
+}
+if while IFS= read -r f; do grep -q 'open[[(]' "$f" && echo "$f"; done < "$tmp/sources" | grep -q .; then
+    if n=$(open_count "$@"); then
+        case $n in
+            0) ;;
+            1) echo "press: $pdf has 1 open item, in red, for its owner to supply" >&2 ;;
+            *) echo "press: $pdf has $n open items, in red, for its owner to supply" >&2 ;;
+        esac
+    else
+        echo "press: could not count the open items in $pdf" >&2
+    fi
+fi
+
 # ACCEPTED FINDINGS. A document may accept a finding it keeps on purpose, a sent record that
 # will not be restyled, with a line in its own source naming the pass and why:
 #

@@ -127,7 +127,8 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 so a runner, CI and `all` see it and the page can still be looked at. Where the audit's tools
 are missing, the build says the audit was skipped and why, and succeeds: building never
 depends on them. `check.sh` is the same audit for when it must run, as in CI: without its tools
-it refuses.
+it refuses. The audit also says how many open items a document still carries, marked with
+`open()` for its owner to supply, and does not fail for them: a draft carries them.
 
 **An unchanged document is not built again.** One file in press's folder, `.build-record`,
 records what each document's last build read — every file typst lists, the fonts, typst's
@@ -367,6 +368,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `seedepth(what, at: none, words: (detail: [detail], on: [on], page: [p.]))` | Pointer to the depth layer. Given a label it looks up the page and links to it — never type a page number. |
 | `depth(words: (note: [...]))` | Where the depth layer starts: a new page, and a line saying what comes before it is the whole job. |
 | `stamp(body)` | Closing line — provenance, or a last caution. |
+| `open(body)` | What only the document's owner can supply, still missing, in red and bold. The audit says how many remain, without failing. |
 | `updated(words: (updated: [updated], unstamped: [...]))` | When the content last changed, as the stamp records it. For the footer. |
 | `footer(status: none, edition: updated())` | `brief`'s footer, for a document that lays out its own page: title and status, then `updated()` and the page. `#set page(footer: footer())`. |
 | `press-version` | The version of press a document was built with. Never typed by hand. |
