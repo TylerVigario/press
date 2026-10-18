@@ -36,7 +36,7 @@
 
 #band-strong([Ingredients], "gather first")
 
-#matrix(([Item], [Amount]),
+#sheet((auto, 1fr), ([Item], [Amount]), size: sz.fine,
   [First ingredient], [1 cup],
   [Second ingredient], [2 tbsp],
   [Third ingredient], [to taste],

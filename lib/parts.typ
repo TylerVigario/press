@@ -148,17 +148,6 @@
   #text(size: size)[#body]
 ]
 
-// Hairline table with a tinted header row. The header goes through `table.header`, so the
-// PDF marks it as one and a screen reader reads it as the column labels, not as data.
-#let matrix(head, ..rows) = table(
-  columns: (auto, 1fr),
-  stroke: 0.4pt + rule-hair,
-  inset: (x: 7pt, y: 5.5pt),
-  fill: (_, y) => if y == 0 { slate-tint } else { none },
-  table.header(..head.map(h => text(size: sz.fine, weight: 700)[#h])),
-  ..rows.pos().map(c => text(size: sz.fine)[#c]),
-)
-
 // a → b → c, for pipelines.
 #let flow(..steps) = align(center)[
   #box(inset: (x: 9pt, y: 6pt), stroke: 0.6pt + rule-mid, radius: 1pt)[
