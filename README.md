@@ -313,8 +313,9 @@ composes its own page uses the same parts: `letterhead`, `dateline` and `continu
 `#show: recipe.with(title:, yield:, method:, time:, intro:)` sets the card page and a head that
 says what the cook is in for, `serves 8 · stovetop · about 40 min`, with a line under it saying
 what the dish is. Page one is the whole cook: the ingredients in a `matrix`, the method in
-numbered `item`s, a costly step in `color: warn`. `depth()` starts the reference on a page of its
-own, and `writein()` leaves lines for what the cook changed.
+numbered `item`s, a costly step in `color: warn`. Whatever the card labels `<depth>` starts the
+reference on a page of its own, under a line saying page one is the whole job, and `writein()`
+leaves lines for what the cook changed.
 
 **A résumé** applies `resume`: `new.sh docs/resume resume` starts one.
 `#show: resume.with(title:, author:, headline:, contact:)` sets one column on a full sheet, with
@@ -339,8 +340,11 @@ their own, and a document of any other kind composes its pages as suits it.
 6. **No length cap.** If a unit needs depth, give it depth or push it to a second layer — never
    delete it to fit a layout. If it does not fit, *the layout* changes.
 
-From 1 and 6: **the act layer comes first, the depth layer after a `#pagebreak()`**, with an
-italic line saying nothing past it is needed to act. The split is by role, not page number.
+From 1 and 6: **the act layer comes first, the depth layer after it.** The document labels
+whatever opens the depth layer `<depth>`, typst's own label, and brief starts it on a page of its
+own under an italic line saying nothing past it is needed to act. A pointer into it is typst's
+own page reference, `#ref(<label>, form: "page")`, which prints "page 2" and links there. The
+split is by role, not page number.
 
 ### Vocabulary
 
@@ -349,10 +353,10 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | Call | For |
 |---|---|
 | `base(title:, author:, preset: card)` | Template: the page, the document's name, the type and the show rules, with nothing drawn, for a document that lays out its own page. `#show: base.with(...)`. |
-| `brief(title:, author:, meta:, status:, legend: none, footer: auto, preset: card)` | Template: the general-purpose document's page, type, show rules, head and footer. `legend`, the note and then the chips for the states its pages carry, prints under the head and says what its colours mean: `legend: ([Colour is state.], chip([DONE], "ok"))`. `#show: brief.with(...)`. |
+| `brief(title:, author:, meta:, status:, legend: none, footer: auto, preset: card, depth: [...])` | Template: the general-purpose document's page, type, show rules, head and footer. Whatever the document labels `<depth>` starts its depth layer on a page of its own under `depth`, a line saying nothing past it is needed; none prints no line. `legend`, the note and then the chips for the states its pages carry, prints under the head and says what its colours mean: `legend: ([Colour is state.], chip([DONE], "ok"))`. `#show: brief.with(...)`. |
 | `letter(title:, author:, contact:, date:, face: face-text, centred: false, header: continued())` | Template: a letter's page, letterhead and date, and the page-two header. `#show: letter.with(...)`. |
 | `resume(title:, author:, headline:, contact:, face: face-text, centred: false, size: sz.small, accent: slate, caps: true, preset: (paper: "us-letter", margin: (x: 0.6in, y: 0.5in)))` | Template: a résumé's page, type and head, and its headings as ruled sections. `#show: resume.with(...)`. |
-| `recipe(title:, author:, yield:, method:, time:, intro:, preset: card, footer: footer())` | Template: a recipe card's page and head, its yield, method and time beside the dish. `#show: recipe.with(...)`. |
+| `recipe(title:, author:, yield:, method:, time:, intro:, preset: card, footer: footer(), depth: [...])` | Template: a recipe card's page and head, its yield, method and time beside the dish. Whatever the card labels `<depth>` starts its reference on a page of its own under `depth`. `#show: recipe.with(...)`. |
 | `unit(label, tone, lead, body, caps:, breakable: false)` | The workhorse. One idea: label, bold lead, body. |
 | `units(..items, pack: "stacks", gutter:, spacing:)` | A group of units. `"stacks"`: two columns balanced by measured height. `"grid"`: rows aligned, when the pairing means something. `"single"`: one column. |
 | `band-strong(title, role, color:, caps:)` | Section header carrying its role. |
@@ -371,8 +375,6 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `signature(name: auto, closing: none, signed: true, dated: true, words: (date: [Date]))` | Where a document is signed: the closing, kept on its page, then lines for an ink signature over the signer's name and a hand-written date, or with `signed: false` a typed sign-off. `name` is the document's author unless given; a document several people sign calls it once for each, one above the other. |
 | `flow(..steps)` | Left-to-right stage sequence. |
 | `decision(n, q, note, color: bad)` / `dbadge(n, color:)` | Open question needing an answer. |
-| `seedepth(what, at: none, words: (detail: [detail], on: [on], page: [p.]))` | Pointer to the depth layer. Given a label it looks up the page and links to it — never type a page number. |
-| `depth(words: (note: [...]))` | Where the depth layer starts: a new page, and a line saying what comes before it is the whole job. |
 | `stamp(body)` | Closing line — provenance, or a last caution. |
 | `open(body)` | What only the document's owner can supply, still missing, in red and bold. The audit says how many remain, without failing. |
 | `updated(words: (updated: [updated], unstamped: [...]))` | When the content last changed, as the stamp records it. For the footer. |

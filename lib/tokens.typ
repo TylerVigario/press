@@ -29,7 +29,7 @@
 //                                    was lifted again against a printed sheet
 //
 // ink-faint was the reported failure: the lightest ink, at the smallest size,
-// in italic, doing real work (the seedepth pointers and the footer). Three
+// in italic, doing real work (the depth pointers and the footer). Three
 // legibility costs stacked on the same run. It is now above the body floor with
 // room to spare, and the hierarchy still reads because the gaps between the
 // three stayed wide.

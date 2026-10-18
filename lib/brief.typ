@@ -16,18 +16,37 @@
 // `preset` is the page.
 //
 //   #show: brief.with(title: [Rack power], author: "Your name", meta: [Site A · October 2026])
+//
+// The act layer comes first and the depth layer after it. A document marks where its depth
+// layer starts with typst's own label, <depth>, on whatever opens it, a band or a heading, and
+// brief starts it on a page of its own under `depth`, a line saying nothing past it is needed;
+// none prints no line. A pointer into the depth layer is typst's own page reference,
+// #ref(<label>, form: "page"), which prints "page 2" and links there: brief numbers its pages
+// so that typst can.
+//
+//   #band-strong([Reference], "reference", color: steel) <depth>
 #let brief(
   title: none, author: (), meta: none, status: none, legend: none, footer: auto, preset: card,
+  depth: [Nothing past this point is needed: what comes before it is the whole job.],
   body,
 ) = {
   set document(title: title, author: author)
-  set page(..preset, footer: if footer == auto { _footer(status: status) } else { footer })
+  set page(..preset, numbering: "1",
+    footer: if footer == auto { _footer(status: status) } else { footer })
   set text(font: face-text, size: sz.small, fill: ink, lang: "en")
   set par(leading: 0.52em, spacing: 0.55em)
   set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.32em)
   show raw: set text(font: face-mono, size: sz.fine)
   show raw.where(block: true): code
   show link: link-note
+  show <depth>: it => {
+    pagebreak(weak: true)
+    if depth != none {
+      text(size: sz.fine, style: "italic", fill: ink-soft, depth)
+      v(6pt)
+    }
+    it
+  }
 
   grid(columns: (auto, 1fr), align: (left + bottom, right + bottom),
     text(font: face-display, size: sz.title, weight: 700, title),

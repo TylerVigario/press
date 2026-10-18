@@ -12,7 +12,7 @@
 // What a card here does:
 //
 //   1. PAGE ONE IS THE WHOLE COOK. The ingredients and the method, and nothing a cook at the
-//      stove has to turn the page for. depth() starts everything else on a page of its own.
+//      stove has to turn the page for. <depth> starts everything else on a page of its own.
 //   2. THE HEAD SAYS WHAT YOU ARE IN FOR: how much it makes, how it is cooked, how long it
 //      takes. One line under it says what the dish is.
 //   3. THE COSTLY STEPS STAND OUT. A step a mistake ruins is coloured warn; the one move the
@@ -51,9 +51,7 @@
 
 #callout(tone: "warn", label: [The move that matters])[The one thing the dish turns on.]
 
-#depth(words: (note: [Nothing past this point is needed to cook. Page 1 is the whole job.]))
-
-#band([Notes and swaps])
+#band([Notes and swaps]) <depth>
 
 #units(
   unit([A swap], "note")[What to use instead.][What changes when you do.],
