@@ -65,8 +65,7 @@
 // ---- Reference ----
 #band-strong([Reference — skip unless you need it], "reference", color: steel) <depth>
 
-#matrix(
-  ([Axis], [Consequence]),
+#sheet((auto, 1fr), ([Axis], [Consequence]), size: sz.fine,
   [Something], [What follows from it.],
 )
 

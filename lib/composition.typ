@@ -71,8 +71,7 @@
 // The line a pen writes on, under a signature, a date or a note.
 #let _hand-line = line(length: 100%, stroke: 0.5pt + ink)
 
-// A wide data table, for more columns than `matrix`'s two. Promoted after the same helper
-// turned up, byte-identical, in five documents.
+// A table of any number of columns, two or twenty: `#sheet((auto, 1fr), ([Item], [Amount]), ..)`.
 //
 // `cols` is passed through to `table.columns` so the document keeps control of
 // widths. Header row is bold on a slate tint, body rows zebra-striped.
@@ -80,11 +79,10 @@
 // `size` exists because a fixed size pushed documents into writing their own per-cell
 // wrapper just to get a different one.
 //
-// The header goes through `table.header`, which repeats it on every page the table
-// spans. Without it a table crossing a page break leaves the reader with bare rows
-// and no column labels — and on paper there is no scrolling back. `matrix` gets away
-// without it because two-column comparisons are short; `sheet` is explicitly the
-// many-column data table, which is the shape that breaks.
+// The header goes through `table.header`, so the PDF marks it as one, a screen reader reads it
+// as the column labels rather than as data, and it repeats on every page the table spans.
+// Without it a table crossing a page break leaves the reader with bare rows and no column
+// labels — and on paper there is no scrolling back.
 //
 // `blank` adds that many empty rows after the given ones, each tall enough to write in, for a
 // log filled in by hand: `#sheet((auto, auto, 1fr), ([Date], [Size], [Notes]), blank: 6)`.

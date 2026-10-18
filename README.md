@@ -312,7 +312,7 @@ composes its own page uses the same parts: `letterhead`, `dateline` and `continu
 **A recipe** applies `recipe`: `new.sh recipes/black-beans recipe` starts a card.
 `#show: recipe.with(title:, yield:, method:, time:, intro:)` sets the card page and a header that
 says what the cook is in for, `serves 8 · stovetop · about 40 min`, with a line under it saying
-what the dish is. Page one is the whole cook: the ingredients in a `matrix`, the method in
+what the dish is. Page one is the whole cook: the ingredients in a `sheet`, the method in
 numbered `item`s, a costly step in `color: warn`. Whatever the card labels `<depth>` starts the
 reference on a page of its own, under a line saying page one is the whole job, and `writein()`
 leaves lines for what the cook changed.
@@ -369,8 +369,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `code(body, breakable: false)` | Code-block treatment; the document installs it as a show rule. |
 | `link-note` | Show rule for links: coloured and underlined, address footnoted for paper. |
 | `item(n, title, body, color:, size:)` | Numbered step. |
-| `matrix(head, ..rows)` | Two-column comparison table. |
-| `sheet(cols, head, ..rows, size:, blank: 0)` | Wide data table — any column count, zebra rows, header repeats across pages. `blank` adds empty rows tall enough to write in. |
+| `sheet(cols, head, ..rows, size:, blank: 0)` | A table of any number of columns: zebra rows, and a header that repeats across pages. `blank` adds empty rows tall enough to write in. |
 | `writein(n, label: none, pitch: 8mm)` | Lines to write on by hand, each after its label: `writein(3, label: [date])`. Print only; typst writes no PDF form fields. |
 | `signature(name: auto, closing: none, signed: true, dated: true, words: (date: [Date]))` | Where a document is signed: the closing, kept on its page, then lines for an ink signature over the signer's name and a hand-written date, or with `signed: false` a typed sign-off. `name` is the document's author unless given; a document several people sign calls it once for each, one above the other. |
 | `flow(..steps)` | Left-to-right stage sequence. |
