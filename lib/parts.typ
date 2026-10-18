@@ -30,15 +30,6 @@
   line(length: 100%, stroke: 2pt + color)
 }
 
-// A labelled hairline — cheaper than a heading when the label is enough.
-#let band(label, color: slate) = {
-  v(3pt)
-  eyebrow(label, color: color)
-  v(-2pt)
-  line(length: 100%, stroke: 0.7pt + rule-hair)
-  v(3pt)
-}
-
 #let tones = (
   note: (slate, slate-tint), ok: (ok, ok-tint),
   warn: (warn, warn-tint), bad: (bad, bad-tint),

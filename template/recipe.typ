@@ -34,7 +34,7 @@
   intro: [One line on what this is, and when to make it.],
 )
 
-#band-strong([Ingredients], "gather first")
+= Ingredients — gather first
 
 #sheet((auto, 1fr), ([Item], [Amount]), size: sz.fine,
   [First ingredient], [1 cup],
@@ -43,7 +43,7 @@
 )
 #v(8pt)
 
-#band-strong([Method], "in order")
+= Method — in order
 
 #item(1, [First step])[What to do, and how you know it is done.]
 #item(2, [The step a mistake ruins], color: warn)[What goes wrong, and how to keep it from going wrong.]
@@ -51,7 +51,9 @@
 
 #callout(tone: "warn", label: [The move that matters])[The one thing the dish turns on.]
 
-#band([Notes and swaps]) <depth>
+= Reference <depth>
+
+== Notes and swaps
 
 #units(
   unit([A swap], "note")[What to use instead.][What changes when you do.],
@@ -59,13 +61,13 @@
 )
 #v(8pt)
 
-#band([Troubleshooting])
+== Troubleshooting
 
 #sheet((auto, 1fr), ([Problem], [Cause and fix]),
   [A problem], [Its cause, and what to do about it.],
 )
 #v(8pt)
 
-#band([Your tweaks — write what you changed and what happened])
+== Your tweaks — write what you changed and what happened
 
 #writein(3, label: [date])
