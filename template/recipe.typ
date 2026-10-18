@@ -8,6 +8,9 @@
 // copies it to recipes/<name>/main.typ, with the import below rewritten to where press sits.
 // In press's own tree the import is relative, ../lib.typ, so the starter compiles there.
 //
+// What only you can supply, a name, a date, an address, is marked open(): it prints in red, and
+// every build says how many are left until each is replaced. The rest is an example to rewrite.
+//
 // ---------------------------------------------------------------------------
 // What a card here does:
 //
@@ -26,11 +29,11 @@
 #import "../lib.typ": *
 
 #show: recipe.with(
-  title: [Dish name],
+  title: open[Dish name],
   author: "Your name",
-  yield: [serves 4],
-  method: [stovetop],
-  time: [about 30 min],
+  yield: open[serves 4],
+  method: open[stovetop],
+  time: open[about 30 min],
   intro: [One line on what this is, and when to make it.],
 )
 
