@@ -5,7 +5,7 @@
 #import "tokens.typ": *
 #import "parts.typ": *
 
-// A recipe card: the card page, a head naming the dish with its yield, method and time, and a
+// A recipe card: the card page, a header naming the dish with its yield, method and time, and a
 // line of introduction under it. The body is the cook and then the reference: the ingredients
 // and the method first, then the reference, and writein() for what the cook changed. A card
 // marks where its reference starts with typst's own label, <depth>, on whatever opens it, and
@@ -35,7 +35,7 @@
     it
   }
 
-  titlebar(title, (yield, method, time).filter(x => x != none).join([ · ]))
+  header(meta: (yield, method, time).filter(x => x != none).join([ · ]))
   if intro != none {
     v(3pt)
     text(size: sz.micro, fill: ink-soft, intro)

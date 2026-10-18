@@ -7,12 +7,12 @@
 #import "composition.typ": *
 
 // The general-purpose document: a sheet, a guide, a brief. The title names the document once,
-// in the PDF's metadata and in the head, and the footer prints it beside the status, the
-// stamp and the page. `meta` sits at the right of the head; `legend` is the line under it that
+// in the PDF's metadata and in header(), and the footer prints it beside the status, the
+// stamp and the page. `meta` sits at the right of the header; `legend` is the line under it that
 // says what its colours mean: none, or the note and then the chips for the states its pages
 // carry, legend: ([Colour is state.], chip([SETTLED], "ok"), chip([DECIDE], "bad")).
 // `footer` is the footer (auto, footer(status:); none; or your own, footer(edition: …) for
-// other words), passed here because a set page rule after the head would start a new page.
+// other words), passed here because a set page rule after the header would start a new page.
 // `preset` is the page.
 //
 //   #show: brief.with(title: [Rack power], author: "Your name", meta: [Site A · October 2026])
@@ -48,11 +48,7 @@
     it
   }
 
-  grid(columns: (auto, 1fr), align: (left + bottom, right + bottom),
-    text(font: face-display, size: sz.title, weight: 700, title),
-    text(size: sz.fine, fill: ink-soft, meta))
-  v(-3pt)
-  line(length: 100%, stroke: 2pt + slate)
+  header(meta: meta)
   v(4pt)
   assert(legend == none or (type(legend) == array and legend.len() > 1),
     message: "brief(legend:) takes none, its default, or the note and then its chips: "

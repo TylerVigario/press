@@ -14,16 +14,20 @@
   if caps { upper(body) } else { body },
 )
 
-// Title row: name left, dateline right, rule beneath.
-#let titlebar(title, meta, color: slate, face: face-display, size: sz.title) = {
+// A document's header: its title on the left, `meta` on the right, and a rule beneath. The title
+// is the one the document names itself with, set document(title:) or a template's title, so it
+// is named once, as footer() names it.
+//
+//   #header(meta: [Site A · October 2026])
+#let header(meta: none, color: slate, face: face-display, size: sz.title) = context {
   grid(
     columns: (auto, 1fr),
     align: (left + bottom, right + bottom),
-    text(font: face, size: size, weight: 700, fill: ink)[#title],
-    text(size: sz.fine, fill: ink-soft)[#meta],
+    text(font: face, size: size, weight: 700, fill: ink, document.title),
+    text(size: sz.fine, fill: ink-soft, meta),
   )
   v(-3pt)
-  line(length: 100%, stroke: 1.6pt + color)
+  line(length: 100%, stroke: 2pt + color)
 }
 
 // A labelled hairline — cheaper than a heading when the label is enough.
