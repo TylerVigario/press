@@ -8,6 +8,41 @@ verbatim. 0.1.0 at the bottom is hand-written and reads "Initial release." becau
 release has no changes to list — there is nothing it changed from.
 
 - - -
+## [v0.6.0](https://github.com/TylerVigario/press/compare/v0.5.0..v0.6.0) - 2026-10-18
+#### Features
+- form(probe:) draws a measuring grid over a form's page, and the audit fails while it is on (#137) - ([1a5c0d7](https://github.com/TylerVigario/press/commit/1a5c0d772db154c4ccdb1f6b6a774a0856addade)) - Tyler Vigario, Claude Opus 5.5
+- form(), at() and tick() fill in a flat PDF form, each answer where its blank is (#136) - ([f8a980c](https://github.com/TylerVigario/press/commit/f8a980c3936eefb9f4ec4078054aa34ad13330a4)) - Tyler Vigario, Claude Opus 5.5
+- open(), what only the owner can supply, in red, and the audit says how many remain (#135) - ([72ca065](https://github.com/TylerVigario/press/commit/72ca06526e11318760d368d965ac91b26ae2d783)) - Tyler Vigario, Claude Opus 5.5
+- signature() takes the signer's name, so anyone can sign any document, once for each signer (#134) - ([d6bd394](https://github.com/TylerVigario/press/commit/d6bd394525efac9151edde67f285d78b971efff5)) - Tyler Vigario, Claude Opus 5.5
+- commands print at sz.fine, a size that can be typed from paper (#132) - ([ed15c86](https://github.com/TylerVigario/press/commit/ed15c865a99a03af4e3ff61ed745171400c961b1)) - Tyler Vigario, Claude Opus 5.5
+- legend(), the colour legend as a part, and brief prints none unless a document passes one (#131) - ([5437d0e](https://github.com/TylerVigario/press/commit/5437d0e6cb5b3ecffb5a2c8404103554b8bfc15a)) - Tyler Vigario, Claude Opus 5.5
+- every press.just recipe is one call to a tool any runner can call, build.sh and all.sh among them (#130) - ([714a2c0](https://github.com/TylerVigario/press/commit/714a2c05ac65f215a78e70024af726c8cff22f74)) - Tyler Vigario, Claude Opus 5.5
+#### Bug Fixes
+- a build without the audit's tools still counts open items and fails while a form's measuring grid is on (#138) - ([2c8310e](https://github.com/TylerVigario/press/commit/2c8310eb41aef2ee68cdb4043f1b074f8a3143da)) - Tyler Vigario, Claude Opus 5.5
+- a code block a document lets break breaks under brief and base, boxed once (#133) - ([d141b91](https://github.com/TylerVigario/press/commit/d141b91e2c621212f3a6244f692012f76cf8f6a5)) - Tyler Vigario, Claude Opus 5.5
+- the gap under a résumé's name clears its descenders at any body size (#126) - ([91a9b1a](https://github.com/TylerVigario/press/commit/91a9b1a4bfe35c7881a2d1a20c8e809a0bfc012f)) - Tyler Vigario, Claude Opus 5.5
+#### Documentation
+- set the poppler variables again after winget upgrades poppler (#152) - ([02d47f9](https://github.com/TylerVigario/press/commit/02d47f93727946e6f29a8efd85f6a10afb80a99e)) - Tyler Vigario, Claude Opus 5.5
+- ink-faint carries the footer and stamp's closing line, now that the depth pointers are gone (#150) - ([1f346b8](https://github.com/TylerVigario/press/commit/1f346b874d51e59f3485a98d325182c535083217)) - Tyler Vigario, Claude Opus 5.5
+- the six conventions are brief's, and press leaves a document's composition to its template or to the document (#144) - ([338c0aa](https://github.com/TylerVigario/press/commit/338c0aa696da764a04ae4813fa8e46c690980136)) - Tyler Vigario, Claude Opus 5.5
+- at() takes the answer's top-left, so an answer standing on a blank's line goes its capitals' height above it (#140) - ([9e2bd10](https://github.com/TylerVigario/press/commit/9e2bd105cb49bcbb4017d64deac22a80644e3fb2)) - Tyler Vigario, Claude Opus 5.5
+- the comments and guides say the tools do the build, as they have since every recipe became one call to a tool (#139) - ([cb12c5f](https://github.com/TylerVigario/press/commit/cb12c5f3c567f0da409871d103f8c5274fc7bdd4)) - Tyler Vigario, Claude Opus 5.5
+- a title given as a string keeps straight quotes, so give it as markup (#128) - ([1e74299](https://github.com/TylerVigario/press/commit/1e74299d3685b151db39a51eb4fabbb01092dd6b)) - Tyler Vigario, Claude Opus 5.5
+- a repository may apply press's template through a shared template of its own (#127) - ([69075a9](https://github.com/TylerVigario/press/commit/69075a9773492bb5d998607b2d175b6c597c70ea)) - Tyler Vigario, Claude Opus 5.5
+#### Refactoring
+- ![BREAKING](https://img.shields.io/badge/BREAKING-red) decision() draws its own badge, and dbadge() is gone (#151) - ([4ce550e](https://github.com/TylerVigario/press/commit/4ce550e6e828f01ac937a0ca44bd85a49878c567)) - Tyler Vigario, Claude Opus 5.5
+- ![BREAKING](https://img.shields.io/badge/BREAKING-red) a section is a typst heading, which brief and recipe draw as a band, and band() and band-strong() are gone (#149) - ([14cc15e](https://github.com/TylerVigario/press/commit/14cc15e40a157652a6b1f8d43e9d1dd0dc14b023)) - Tyler Vigario, Claude Opus 5.5
+- ![BREAKING](https://img.shields.io/badge/BREAKING-red) sheet() is press's one table, two columns or twenty, and matrix() is gone (#148) - ([dad81ce](https://github.com/TylerVigario/press/commit/dad81ce83a3c111450ba81f915ca29b12e40cd96)) - Tyler Vigario, Claude Opus 5.5
+- ![BREAKING](https://img.shields.io/badge/BREAKING-red) footer() is a page's footer, and brief places it as recipe does, footer: footer(status: [draft]), with no status argument of its own (#147) - ([b11c8c1](https://github.com/TylerVigario/press/commit/b11c8c1a0a6cb8604ee2cecb8174e5c1010bbad2)) - Tyler Vigario, Claude Opus 5.5
+- ![BREAKING](https://img.shields.io/badge/BREAKING-red) header() replaces titlebar, naming the document from its title, and brief and recipe draw their header with it (#146) - ([8ac84f2](https://github.com/TylerVigario/press/commit/8ac84f267db49d17fe1a53c3ea77e85e5902be27)) - Tyler Vigario, Claude Opus 5.5
+- brief and recipe lay out their own depth layer where a document labels it, with no depth() or seedepth() (#145) - ([688d315](https://github.com/TylerVigario/press/commit/688d315d10441e7ce2b0b21fa5e179cde257fc16)) - Tyler Vigario, Claude Opus 5.5
+- brief lays out the line under its head itself, since legend() was brief's arrangement and no legend (#143) - ([d177710](https://github.com/TylerVigario/press/commit/d177710d14292b0616bcf37fc8fc7150e1f3be68)) - Tyler Vigario, Claude Opus 5.5
+- a form's answers are typst's own place(), which at() only renamed (#142) - ([e2324f8](https://github.com/TylerVigario/press/commit/e2324f88b4b73ec4f1e15832b769b1eaee6863ef)) - Tyler Vigario, Claude Opus 5.5
+#### Miscellaneous Chores
+- the kit ships a .gitattributes, so press checks out with LF and its fonts as binary everywhere (#129) - ([ff6e1dd](https://github.com/TylerVigario/press/commit/ff6e1dd59719d9a12d3b16df4965849db62b71bd)) - Tyler Vigario, Claude Opus 5.5
+
+- - -
+
 ## [v0.5.0](https://github.com/TylerVigario/press/compare/v0.4.0..v0.5.0) - 2026-10-16
 #### Features
 - resume(), a résumé template, and entry(), a role that reads in the order it prints (#120) - ([210316f](https://github.com/TylerVigario/press/commit/210316ff09f64fce63b91dbe753c0a82b6f9972f)) - Tyler Vigario, Claude Opus 5.5
