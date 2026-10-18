@@ -252,7 +252,7 @@ builds every one, then fails if any failed its audit. Export `PRESS_TZ` from the
 
 **press sets nothing until something asks.** Importing it changes no page. **Its templates are
 functions a document applies**: `#show: brief.with(title: [...], author: "...")` sets the page,
-the type, the show rules and the head from press's general-purpose default, and `letter` does
+the type, the show rules and the header from press's general-purpose default, and `letter` does
 the same for a letter. A document uses one as it is. Or a repository keeps a template of its
 own that applies press's with what all its documents share, `docs/_template.typ`:
 
@@ -310,7 +310,7 @@ pass its face (`face: face-sans`) and centre the letterhead (`centred: true`). A
 composes its own page uses the same parts: `letterhead`, `dateline` and `continued()`.
 
 **A recipe** applies `recipe`: `new.sh recipes/black-beans recipe` starts a card.
-`#show: recipe.with(title:, yield:, method:, time:, intro:)` sets the card page and a head that
+`#show: recipe.with(title:, yield:, method:, time:, intro:)` sets the card page and a header that
 says what the cook is in for, `serves 8 · stovetop · about 40 min`, with a line under it saying
 what the dish is. Page one is the whole cook: the ingredients in a `matrix`, the method in
 numbered `item`s, a costly step in `color: warn`. Whatever the card labels `<depth>` starts the
@@ -353,15 +353,15 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | Call | For |
 |---|---|
 | `base(title:, author:, preset: card)` | Template: the page, the document's name, the type and the show rules, with nothing drawn, for a document that lays out its own page. `#show: base.with(...)`. |
-| `brief(title:, author:, meta:, status:, legend: none, footer: auto, preset: card, depth: [...])` | Template: the general-purpose document's page, type, show rules, head and footer. Whatever the document labels `<depth>` starts its depth layer on a page of its own under `depth`, a line saying nothing past it is needed; none prints no line. `legend`, the note and then the chips for the states its pages carry, prints under the head and says what its colours mean: `legend: ([Colour is state.], chip([DONE], "ok"))`. `#show: brief.with(...)`. |
+| `brief(title:, author:, meta:, status:, legend: none, footer: auto, preset: card, depth: [...])` | Template: the general-purpose document's page, type, show rules, header and footer. Whatever the document labels `<depth>` starts its depth layer on a page of its own under `depth`, a line saying nothing past it is needed; none prints no line. `legend`, the note and then the chips for the states its pages carry, prints under the header and says what its colours mean: `legend: ([Colour is state.], chip([DONE], "ok"))`. `#show: brief.with(...)`. |
 | `letter(title:, author:, contact:, date:, face: face-text, centred: false, header: continued())` | Template: a letter's page, letterhead and date, and the page-two header. `#show: letter.with(...)`. |
 | `resume(title:, author:, headline:, contact:, face: face-text, centred: false, size: sz.small, accent: slate, caps: true, preset: (paper: "us-letter", margin: (x: 0.6in, y: 0.5in)))` | Template: a résumé's page, type and head, and its headings as ruled sections. `#show: resume.with(...)`. |
-| `recipe(title:, author:, yield:, method:, time:, intro:, preset: card, footer: footer(), depth: [...])` | Template: a recipe card's page and head, its yield, method and time beside the dish. Whatever the card labels `<depth>` starts its reference on a page of its own under `depth`. `#show: recipe.with(...)`. |
+| `recipe(title:, author:, yield:, method:, time:, intro:, preset: card, footer: footer(), depth: [...])` | Template: a recipe card's page and header, its yield, method and time beside the dish. Whatever the card labels `<depth>` starts its reference on a page of its own under `depth`. `#show: recipe.with(...)`. |
 | `unit(label, tone, lead, body, caps:, breakable: false)` | The workhorse. One idea: label, bold lead, body. |
 | `units(..items, pack: "stacks", gutter:, spacing:)` | A group of units. `"stacks"`: two columns balanced by measured height. `"grid"`: rows aligned, when the pairing means something. `"single"`: one column. |
 | `band-strong(title, role, color:, caps:)` | Section header carrying its role. |
 | `band(label, color: slate)` | Lighter section header. |
-| `titlebar(title, meta, color:, face:, size:)` | Document head with right-aligned meta. |
+| `header(meta: none, color:, face:, size:)` | A document's header: its title, the one the document names itself with, on the left, `meta` on the right, and a rule beneath. |
 | `eyebrow(body, color:, caps:)` | Small tracked-out uppercase label. |
 | `chip(label, tone)` | Inline state pill — build legends from these. |
 | `callout(body, tone: "note", label: none, size:)` | Aside that must not be missed. |
