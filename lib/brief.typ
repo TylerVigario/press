@@ -14,20 +14,21 @@
 // `footer` is the footer: none leaves it out, footer(status: [draft]) gives it a status, and
 // footer(edition: …) other words. It is passed here because a set page rule after the header
 // would start a new page.
-// `preset` is the page.
+// `preset` is the page. A section is a heading, `= How it works`, drawn as a band, and `==` is a
+// labelled hairline under it; `caps: false` keeps the headings' case, which upper() would change.
 //
 //   #show: brief.with(title: [Rack power], author: "Your name", meta: [Site A · October 2026])
 //
 // The act layer comes first and the depth layer after it. A document marks where its depth
-// layer starts with typst's own label, <depth>, on whatever opens it, a band or a heading, and
-// brief starts it on a page of its own under `depth`, a line saying nothing past it is needed;
-// none prints no line. A pointer into the depth layer is typst's own page reference,
+// layer starts with typst's own label, <depth>, on the heading that opens it, and brief starts
+// it on a page of its own under `depth`, a line saying nothing past it is needed; none prints
+// no line. A pointer into the depth layer is typst's own page reference,
 // #ref(<label>, form: "page"), which prints "page 2" and links there: brief numbers its pages
 // so that typst can.
 //
-//   #band-strong([Reference], "reference", color: steel) <depth>
+//   = Reference — skip unless you need it <depth>
 #let brief(
-  title: none, author: (), meta: none, legend: none, footer: footer(), preset: card,
+  title: none, author: (), meta: none, legend: none, footer: footer(), preset: card, caps: true,
   depth: [Nothing past this point is needed: what comes before it is the whole job.],
   body,
 ) = {
@@ -39,6 +40,23 @@
   show raw: set text(font: face-mono, size: sz.fine)
   show raw.where(block: true): code
   show link: link-note
+  // A section is a heading: = draws it as a band in slate, and == as a labelled hairline. Its
+  // gaps are the paragraph gap at the body size, since a heading's own em is its larger size.
+  show heading: set block(above: 0.55 * sz.small, below: 0.55 * sz.small)
+  show heading.where(level: 1): it => {
+    v(2pt)
+    block(width: 100%, fill: slate, inset: (x: 8pt, y: 4.5pt), radius: 1pt,
+      text(size: sz.fine, weight: 700, tracking: 1.2pt, fill: white,
+        if caps { upper(it.body) } else { it.body }))
+    v(5pt)
+  }
+  show heading.where(level: 2): it => {
+    v(3pt)
+    eyebrow(it.body, caps: caps)
+    v(-2pt)
+    line(length: 100%, stroke: 0.7pt + rule-hair)
+    v(3pt)
+  }
   show <depth>: it => {
     pagebreak(weak: true)
     if depth != none {

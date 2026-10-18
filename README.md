@@ -335,7 +335,8 @@ their own, and a document of any other kind composes its pages as suits it.
 1. **Meat first.** Whatever the reader must act on goes at the top.
 2. **One idea per unit, opened by a bold lead.** The lead is the highlight, pre-made.
 3. **Units are self-contained.** Sections get read out of order and returned to weeks later.
-4. **Bands carry a role** — decide / design / reference — so skipping is deliberate.
+4. **A heading says what its section is for** — act on this, how it works, reference — so
+   skipping is deliberate.
 5. **Colour is state, never decoration, and it gets a legend.**
 6. **No length cap.** If a unit needs depth, give it depth or push it to a second layer — never
    delete it to fit a layout. If it does not fit, *the layout* changes.
@@ -353,14 +354,12 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | Call | For |
 |---|---|
 | `base(title:, author:, preset: card)` | Template: the page, the document's name, the type and the show rules, with nothing drawn, for a document that lays out its own page. `#show: base.with(...)`. |
-| `brief(title:, author:, meta:, legend: none, footer: footer(), preset: card, depth: [...])` | Template: the general-purpose document's page, type, show rules, header and footer. Whatever the document labels `<depth>` starts its depth layer on a page of its own under `depth`, a line saying nothing past it is needed; none prints no line. `legend`, the note and then the chips for the states its pages carry, prints under the header and says what its colours mean: `legend: ([Colour is state.], chip([DONE], "ok"))`. `#show: brief.with(...)`. |
+| `brief(title:, author:, meta:, legend: none, footer: footer(), preset: card, caps: true, depth: [...])` | Template: the general-purpose document's page, type, show rules, header and footer. A section is a heading: `=` draws a band, `==` a labelled hairline. Whatever the document labels `<depth>` starts its depth layer on a page of its own under `depth`, a line saying nothing past it is needed; none prints no line. `legend`, the note and then the chips for the states its pages carry, prints under the header and says what its colours mean: `legend: ([Colour is state.], chip([DONE], "ok"))`. `#show: brief.with(...)`. |
 | `letter(title:, author:, contact:, date:, face: face-text, centred: false, header: continued())` | Template: a letter's page, letterhead and date, and the page-two header. `#show: letter.with(...)`. |
 | `resume(title:, author:, headline:, contact:, face: face-text, centred: false, size: sz.small, accent: slate, caps: true, preset: (paper: "us-letter", margin: (x: 0.6in, y: 0.5in)))` | Template: a résumé's page, type and head, and its headings as ruled sections. `#show: resume.with(...)`. |
-| `recipe(title:, author:, yield:, method:, time:, intro:, preset: card, footer: footer(), depth: [...])` | Template: a recipe card's page and header, its yield, method and time beside the dish. Whatever the card labels `<depth>` starts its reference on a page of its own under `depth`. `#show: recipe.with(...)`. |
+| `recipe(title:, author:, yield:, method:, time:, intro:, preset: card, footer: footer(), caps: true, depth: [...])` | Template: a recipe card's page and header, its yield, method and time beside the dish, and its headings as brief draws them. Whatever the card labels `<depth>` starts its reference on a page of its own under `depth`. `#show: recipe.with(...)`. |
 | `unit(label, tone, lead, body, caps:, breakable: false)` | The workhorse. One idea: label, bold lead, body. |
 | `units(..items, pack: "stacks", gutter:, spacing:)` | A group of units. `"stacks"`: two columns balanced by measured height. `"grid"`: rows aligned, when the pairing means something. `"single"`: one column. |
-| `band-strong(title, role, color:, caps:)` | Section header carrying its role. |
-| `band(label, color: slate)` | Lighter section header. |
 | `header(meta: none, color:, face:, size:)` | A document's header: its title, the one the document names itself with, on the left, `meta` on the right, and a rule beneath. |
 | `eyebrow(body, color:, caps:)` | Small tracked-out uppercase label. |
 | `chip(label, tone)` | Inline state pill — build legends from these. |
@@ -405,7 +404,7 @@ build it in the document.
   **Read [`FONTS.md`](FONTS.md) before using any symbol.**
 - **Some symbols are in no vendored face.** `✓ ✗ ▸` render from typst's NewCMMath, `⚠ ⚡ ☐`
   from DejaVuSansMono, and **`⛔` and `📋` vanish** from the page. Build a probe and audit it.
-- **`unit`, `band-strong` and `eyebrow` uppercase their labels.** "pH" becomes "PH", "µS"
+- **`unit`, `eyebrow`, and brief's and recipe's headings uppercase their labels.** "pH" becomes "PH", "µS"
   becomes "ΜS" (a capital Mu). Pass `caps: false` whenever case means something.
 - **A link in a heading is footnoted twice once there is an outline.** The contents repeat the
   heading and its footnote. Keep links out of headings.
@@ -424,7 +423,7 @@ keep all ink at least 0.5in from every edge; a document that overrides the margi
 content absolutely can break that, and the audit measures it.
 
 `calibration.typ` prints the text inks at the four smallest sizes, the pale tints, the rule
-weights and both solid bands, where a printer gives out first. Build it like any document
+weights and a heading's solid band, where a printer gives out first. Build it like any document
 (`third_party/press/calibration.typ`), and print it on the paper and printer you actually use —
 once at normal quality and once in economy mode, duplexed on the long edge — to find where your
 hardware gives out before a real document does.

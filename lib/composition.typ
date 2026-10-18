@@ -4,8 +4,7 @@
 #import "parts.typ": *
 
 // ----------------------------------------------------------- composition ---
-// Generic by nature — a labelled bounded block, a state chip, a reversed band, a numbered
-// badge.
+// Generic by nature — a labelled bounded block, a state chip, a numbered badge.
 
 // The workhorse. A bounded unit of exactly one idea: a label to navigate by, a
 // bold LEAD that is the highlight pre-made, and a body as long as the idea
@@ -30,20 +29,6 @@
   let pair = tones.at(tone)
   box(fill: pair.at(1), stroke: 0.5pt + pair.at(0), inset: (x: 4pt, y: 2pt), radius: 1pt,
       text(size: sz.micro, weight: 700, fill: pair.at(0))[#label])
-}
-
-// Reversed section band. `role` rides inside it — decide / design / reference —
-// so that skipping a section is a deliberate act rather than an accident.
-// `caps` as on `eyebrow` — see the note on it in parts.typ. A band titled "pH and conductivity"
-// silently becomes "PH AND CONDUCTIVITY" without it.
-#let band-strong(title, role, color: slate, caps: true) = {
-  v(2pt)
-  block(width: 100%, fill: color, inset: (x: 8pt, y: 4.5pt), radius: 1pt)[
-    #grid(columns: (1fr, auto), align: (left + horizon, right + horizon),
-      text(size: sz.fine, weight: 700, tracking: 1.2pt, fill: white)[#if caps { upper(title) } else { title }],
-      text(size: sz.micro, fill: white.darken(12%), style: "italic")[#role])
-  ]
-  v(5pt)
 }
 
 #let dbadge(n, color: bad) = box(

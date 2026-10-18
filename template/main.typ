@@ -19,8 +19,9 @@
 //      pre-made, so nobody has to reach for a marker.
 //   3. UNITS ARE SELF-CONTAINED. Nothing may assume the unit above it was
 //      read. Sections get read out of order and returned to weeks later.
-//   4. BANDS CARRY A ROLE — decide / design / reference. Skipping a section
-//      should be a deliberate choice, not something discovered afterwards.
+//   4. A HEADING SAYS WHAT ITS SECTION IS FOR — act on this, how it works,
+//      reference. Skipping a section should be a deliberate choice, not
+//      something discovered afterwards.
 //   5. COLOUR IS STATE, never decoration, and it gets a legend.
 //   6. NO LENGTH CAP. If a unit needs depth, give it depth, or push the depth
 //      to a second layer — but never delete it to fit a layout. If it does not
@@ -36,12 +37,12 @@
   author: "Your name",
   meta: [scope · date],
   footer: footer(status: [status]),
-  legend: ([Colour is state. Bands carry a role — skip on purpose.],
+  legend: ([Colour is state. Each heading says what its section is for.],
     chip([SETTLED], "ok"), chip([CONDITIONAL], "warn"), chip([DECIDE], "bad")),
 )
 
 // ---- Meat first ----
-#band-strong([What the reader must act on], "decide — start here", color: bad)
+= What the reader must act on — start here
 
 #units(
   unit([First thing], "bad")[The lead states the point outright.][
@@ -54,7 +55,7 @@
 #v(8pt)
 
 // ---- Design ----
-#band-strong([How it works], "design")
+= How it works
 
 #units(
   unit([A property], "ok")[Settled, no action needed.][Detail here.],
@@ -63,7 +64,7 @@
 #v(8pt)
 
 // ---- Reference ----
-#band-strong([Reference — skip unless you need it], "reference", color: steel) <depth>
+= Reference — skip unless you need it <depth>
 
 #sheet((auto, 1fr), ([Axis], [Consequence]), size: sz.fine,
   [Something], [What follows from it.],
