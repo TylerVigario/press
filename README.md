@@ -247,6 +247,11 @@ builds every one, then fails if any failed its audit. Export `PRESS_TZ` from the
   poppler's `Library/bin` (under `%LOCALAPPDATA%/Microsoft/WinGet/Packages/`). Git bundles no
   `pdffonts` or `pdftoppm`; `PRESS_PDFFONTS` and `PRESS_PDFTOPPM` pin those the same way if you
   want all three fixed.
+- **Set them again after `winget upgrade` updates poppler.** The folder they name carries
+  poppler's version, `poppler-25.07.0`, and winget keeps no link to poppler that survives an
+  upgrade, so an upgrade leaves them naming a folder that is gone. Builds still succeed, now
+  saying each document "is not audited: poppler's … pdftotext.exe is not found", and `check`
+  refuses. Point the variables at the new version's `Library/bin`.
 
 ## Writing a document
 
