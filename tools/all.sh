@@ -30,7 +30,7 @@
 # did. It fails loudly on finding no document rather than reporting a green build that produced
 # nothing: the state a repo is in before it has adopted any layout, and the one where a false
 # success is most expensive. It ends with a count of what the run did (changed, new, unchanged,
-# failed), from the status each build adds to the file PRESS_TALLY names.
+# cached, failed), from the status each build adds to the file PRESS_TALLY names.
 #
 # --check audits every one instead, refusing without the audit's tools, and --tz names the
 # stamp's zone, as build.sh takes them.

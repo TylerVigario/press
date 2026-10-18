@@ -109,7 +109,7 @@ build() { (cd "$r" && PATH="$r/bin:$PATH" sh kit/tools/stamp.sh doc.typ print/do
 build > /dev/null || fail "the record case did not build"
 grep -q "^== doc.typ" "$r/kit/.build-record" 2>/dev/null || fail "a build that passed its audit left no record"
 : > "$r/compiles"
-case $(build) in unchanged*) ;; *) fail "an unchanged document did not build as unchanged" ;; esac
+case $(build) in cached*) ;; *) fail "an unchanged document did not build as cached" ;; esac
 [ ! -s "$r/compiles" ] || fail "an unchanged document was compiled again"
 echo 'Another line.' >> "$r/doc.typ"
 case $(build) in changed*) ;; *) fail "an edited document did not build as changed" ;; esac

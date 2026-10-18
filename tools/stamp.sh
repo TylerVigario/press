@@ -7,8 +7,9 @@
 #   sh <press_root>/tools/stamp.sh <doc> <pdf> <typst flags...>
 #
 # On success it prints one line, which build.sh hands to report.sh: what
-# happened -- new (no stamped PDF was there), changed or unchanged -- then the time the page
-# now carries. typst's own output goes to stderr.
+# happened -- new (no stamped PDF was there), changed, unchanged (built again, the same bytes)
+# or cached (the build record matched, so nothing was built) -- then the time the page now
+# carries. typst's own output goes to stderr.
 #
 # IT IS THE BUILD, not a wrapper around one: every runner calls it, and check.sh compiles
 # through it too, so the audit reads a PDF built exactly as the build makes it.
@@ -121,7 +122,7 @@ trap 'exit 143' TERM
 # document and PDF: what its last build read -- every file typst lists, the fonts in each font
 # path (typst does not list fonts), the typst version, press's tools, the flags, the zone --
 # with a SHA-256 of each, the PDF's own, its stamp, and what the audit said. When all of it still
-# matches, the build says unchanged without compiling or auditing again, and repeats what the
+# matches, the build says cached without compiling or auditing again, and repeats what the
 # audit said. Only a build whose audit ran every pass and passed is recorded: one that failed, or
 # skipped anything for want of a tool, has its entry removed, so the next build audits again.
 #
@@ -182,7 +183,7 @@ if [ -z "${PRESS_IN_CHECK:-}" ] && [ -z "${PRESS_STAMP_AS:-}" ]; then
         if head -n "$(wc -l < "$work/now")" "$work/entry" | cmp -s - "$work/now" \
                 && [ -s "$work/inputs" ] && $dig -c --status "$work/inputs" 2>/dev/null; then
             sed -n 's/^note //p' "$work/entry" >&2
-            printf 'unchanged %s\n' "$(when "$(sed -n 's/^stamp //p' "$work/entry")")"
+            printf 'cached %s\n' "$(when "$(sed -n 's/^stamp //p' "$work/entry")")"
             exit 0
         fi
     fi
