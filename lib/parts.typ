@@ -206,11 +206,11 @@
   if s == none { w.unstamped } else { [#w.updated #s] }
 }
 
-// The footer brief prints, for a document that lays out its own page: the document's title, and
-// its status where it has one, on the left; updated() and the page of the total on the right. The
-// title is the one the document names itself with, set document(title:) or base's title.
-// `edition` is what it says of the edition: none leaves it out, and updated(words: …) says
-// it in other words.
+// A page's footer, so a page parted from the rest still says what it is and which edition: the
+// document's title, and its status where it has one, on the left; updated() and the page of the
+// total on the right. The title is the one the document names itself with, set document(title:)
+// or a template's title, as header() names it. `edition` is what it says of the edition: none
+// leaves it out, and updated(words: …) says it in other words.
 //
 //   #set page(..dense, footer: footer(status: [draft]))
 #let footer(status: none, edition: updated()) = context {
@@ -219,8 +219,6 @@
     align(left)[#document.title#if status != none [ · #status]],
     align(right)[#if edition != none [#edition · ]#counter(page).display("1 / 1", both: true)])
 }
-// brief's own name for the part, since its `footer` argument hides this one inside it.
-#let _footer = footer
 
 
 // What the document did not set: a scanned form, an embedded PDF page, placed as it is. The
