@@ -9,9 +9,9 @@
 #
 # Each document goes through stamp.sh, which stamps the page with when its content last changed
 # and audits what it built, and then report.sh, which says in one line what was made: new,
-# changed or unchanged, pages, words where poppler is installed, size, and the stamp. A finding
-# prints above that line and fails the run, with the PDF still written to look at; a document
-# that does not compile made nothing to report. Given more than one document it builds every
+# changed, unchanged or cached, pages, words where poppler is installed, size, and the stamp.
+# A finding prints above that line and fails the run, with the PDF still written to look at; a
+# document that does not compile made nothing to report. Given more than one document it builds every
 # one, then ends with the count of what it did, and fails if any failed.
 #
 # --check runs the audit alone on each instead, as CI does: check.sh, which refuses to run

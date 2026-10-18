@@ -114,7 +114,7 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 | tool | does |
 |---|---|
 | `sh third_party/press/tools/new.sh docs/guide` | scaffolds `docs/guide/main.typ` from the template, its import written for where press sits; add `letter`, `recipe` or `resume` for those templates |
-| `sh third_party/press/tools/build.sh docs/guide.typ` | builds and audits each document named to `print/<same path>.pdf` and says in one line what it made: new, changed or unchanged, pages, words, size and the stamp; given several, ends with the count. `--check` first runs the audit alone, refusing without its tools |
+| `sh third_party/press/tools/build.sh docs/guide.typ` | builds and audits each document named to `print/<same path>.pdf` and says in one line what it made: new, changed, unchanged or cached, pages, words, size and the stamp; given several, ends with the count. `--check` first runs the audit alone, refusing without its tools |
 | `sh third_party/press/tools/all.sh [dir...]` | builds every document under the directories named (default `docs/`), not the files they are made of and not press's own, then the count; fails if any failed. `--check` audits them instead |
 | `sh third_party/press/tools/watch.sh docs/guide.typ` | recompiles on every save to `print/<same path>.watch.pdf`, a preview beside the stamped PDF |
 | `sh third_party/press/tools/clean.sh` | deletes `print/` |
@@ -134,8 +134,9 @@ page with its measuring grid on, `form(probe:)`, does fail it: the grid is for m
 **An unchanged document is not built again.** One file in press's folder, `.build-record`,
 records what each document's last build read — every file typst lists, the fonts, typst's
 version, press's tools, the flags and the zone — each with a checksum, and what its audit said.
-When all of it still matches, the build says unchanged at once, without compiling or auditing,
-and repeats what the audit said. Only a build whose audit ran in full and passed is recorded,
+When all of it still matches, the build says cached at once, without compiling or auditing,
+and repeats what the audit said. Unchanged is a different answer: the document was built again
+and came out the same bytes. Only a build whose audit ran in full and passed is recorded,
 so a failing document, or one built without the audit's tools, is built and audited every time.
 The kit's own `.gitignore` keeps the record out of git, an update replaces it with press's
 folder, and deleting it costs one full build per document, never a wrong answer.
