@@ -372,7 +372,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `writein(n, label: none, pitch: 8mm)` | Lines to write on by hand, each after its label: `writein(3, label: [date])`. Print only; typst writes no PDF form fields. |
 | `signature(name: auto, closing: none, signed: true, dated: true, words: (date: [Date]))` | Where a document is signed: the closing, kept on its page, then lines for an ink signature over the signer's name and a hand-written date, or with `signed: false` a typed sign-off. `name` is the document's author unless given; a document several people sign calls it once for each, one above the other. |
 | `flow(..steps)` | Left-to-right stage sequence. |
-| `decision(n, q, note, color: bad)` / `dbadge(n, color:)` | Open question needing an answer. |
+| `decision(n, q, note, color: bad)` | Open question needing an answer, under its number in a filled badge. |
 | `stamp(body)` | Closing line — provenance, or a last caution. |
 | `open(body)` | What only the document's owner can supply, still missing, in red and bold. The audit says how many remain, without failing. |
 | `updated(words: (updated: [updated], unstamped: [...]))` | When the content last changed, as the stamp records it. For the footer. |

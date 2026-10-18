@@ -4,7 +4,7 @@
 #import "parts.typ": *
 
 // ----------------------------------------------------------- composition ---
-// Generic by nature — a labelled bounded block, a state chip, a numbered badge.
+// Generic by nature — a labelled bounded block, a state chip, a question awaiting its answer.
 
 // The workhorse. A bounded unit of exactly one idea: a label to navigate by, a
 // bold LEAD that is the highlight pre-made, and a body as long as the idea
@@ -31,17 +31,14 @@
       text(size: sz.micro, weight: 700, fill: pair.at(0))[#label])
 }
 
-#let dbadge(n, color: bad) = box(
-  fill: color, radius: 50%, inset: (x: 4.5pt, y: 3pt),
-  text(size: sz.fine, weight: 700, fill: white)[#n],
-)
-
-// A badged question with its note — for anything the reader must answer.
+// A question with its note, under its number in a filled badge — for anything the reader must
+// answer.
 #let decision(n, q, note, color: bad) = block(
   width: 100%, breakable: false, inset: (bottom: 5.5pt),
 )[
   #grid(columns: (auto, 1fr), gutter: 6pt, align: (left + top, left + top),
-    dbadge(n, color: color),
+    box(fill: color, radius: 50%, inset: (x: 4.5pt, y: 3pt),
+      text(size: sz.fine, weight: 700, fill: white)[#n]),
     [
       #text(size: sz.fine, weight: 700)[#q]
       #v(1.5pt)
