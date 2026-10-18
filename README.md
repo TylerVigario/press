@@ -404,8 +404,9 @@ build it in the document.
   **Read [`FONTS.md`](FONTS.md) before using any symbol.**
 - **Some symbols are in no vendored face.** `✓ ✗ ▸` render from typst's NewCMMath, `⚠ ⚡ ☐`
   from DejaVuSansMono, and **`⛔` and `📋` vanish** from the page. Build a probe and audit it.
-- **`unit`, `eyebrow`, and brief's and recipe's headings uppercase their labels.** "pH" becomes "PH", "µS"
-  becomes "ΜS" (a capital Mu). Pass `caps: false` whenever case means something.
+- **`unit`, `eyebrow`, and brief's and recipe's headings uppercase their labels.** "pH" becomes
+  "PH", "µS" becomes "ΜS" (a capital Mu). Pass `caps: false`, to the template for its headings,
+  whenever case means something.
 - **A link in a heading is footnoted twice once there is an outline.** The contents repeat the
   heading and its footnote. Keep links out of headings.
 - **A table that crosses a page loses its header unless it uses `table.header`.** `sheet`
