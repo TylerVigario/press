@@ -155,6 +155,19 @@
   text(size: sz.micro, fill: ink-faint, style: "italic")[#body]
 }
 
+// A note set under an entry later, beside what it amends rather than over it: a revisit, a
+// retelling, a correction to a record that keeps what was first written. Its label and date stay
+// on the page with its body, so a page never ends on them alone. `label` says what kind of note
+// it is, `color` draws its edge and label, and `caps: false` keeps its case.
+//
+//   #addendum([2026-10-15 21:11], label: [Retold])[What was told the second time.]
+#let addendum(date, body, label: [Later], color: ink-faint, caps: true) = block(
+  width: 100%, above: 0.9em, inset: (left: 0.8em), stroke: (left: 0.6pt + color),
+)[
+  #block(sticky: true, below: 0.75em, eyebrow([#label · #date], color: color, caps: caps))
+  #text(fill: ink-soft, body)
+]
+
 
 // What only the document's owner can supply, still missing: an account number, a figure, a date.
 // It prints in red and bold so it cannot go out unnoticed, and the audit counts how many remain
