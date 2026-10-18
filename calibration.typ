@@ -60,8 +60,8 @@
 #v(3pt)
 #text(size: sz.micro, fill: ink-soft)[
   `ink-faint` is the one to watch. It is the lightest ink in the set and it carries the
-  italic depth pointers, so it fails first in economy mode. If it survives here, nothing
-  else in the library is at risk.
+  footer and the italic closing line of `stamp`, so it fails first in economy mode. If it
+  survives here, nothing else in the library is at risk.
 ]
 #v(8pt)
 
