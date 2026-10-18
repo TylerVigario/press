@@ -30,12 +30,12 @@
 #import "../lib.typ": *
 
 // The document's name, set once: a PDF viewer shows it in its title bar and lists the file by
-// it, and the head and footer print it from here.
+// it, and the header and footer print it from here.
 #show: brief.with(
   title: [Document title],
   author: "Your name",
   meta: [scope · date],
-  status: [status],
+  footer: footer(status: [status]),
   legend: ([Colour is state. Bands carry a role — skip on purpose.],
     chip([SETTLED], "ok"), chip([CONDITIONAL], "warn"), chip([DECIDE], "bad")),
 )

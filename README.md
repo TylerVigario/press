@@ -281,9 +281,9 @@ rule written after its head would start a new page.
 once, sets the body type, and installs the show rules for code and links, from press's
 defaults, and draws nothing. A set rule written after the show rule changes any of these for
 that document — `#set par(leading: 0.58em)` wins over `base`'s own — so a repository with
-spacing of its own writes only the lines that differ. `footer` puts `brief`'s footer on its
-pages, `#set page(footer: footer(status: [draft]))`: the title and status, then the stamp and
-page, so a page parted from the rest still says what it is and which edition.
+spacing of its own writes only the lines that differ. `footer` is a page's footer,
+`#set page(footer: footer(status: [draft]))`: the title and status, then the stamp and page,
+so a page parted from the rest still says what it is and which edition.
 
 Without `base`, a document sets these itself: its body font, `#set text(font: face-text, ...)`
 (without it the body renders in typst's own Libertinus Serif, without a word); its name, with
@@ -353,7 +353,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | Call | For |
 |---|---|
 | `base(title:, author:, preset: card)` | Template: the page, the document's name, the type and the show rules, with nothing drawn, for a document that lays out its own page. `#show: base.with(...)`. |
-| `brief(title:, author:, meta:, status:, legend: none, footer: auto, preset: card, depth: [...])` | Template: the general-purpose document's page, type, show rules, header and footer. Whatever the document labels `<depth>` starts its depth layer on a page of its own under `depth`, a line saying nothing past it is needed; none prints no line. `legend`, the note and then the chips for the states its pages carry, prints under the header and says what its colours mean: `legend: ([Colour is state.], chip([DONE], "ok"))`. `#show: brief.with(...)`. |
+| `brief(title:, author:, meta:, legend: none, footer: footer(), preset: card, depth: [...])` | Template: the general-purpose document's page, type, show rules, header and footer. Whatever the document labels `<depth>` starts its depth layer on a page of its own under `depth`, a line saying nothing past it is needed; none prints no line. `legend`, the note and then the chips for the states its pages carry, prints under the header and says what its colours mean: `legend: ([Colour is state.], chip([DONE], "ok"))`. `#show: brief.with(...)`. |
 | `letter(title:, author:, contact:, date:, face: face-text, centred: false, header: continued())` | Template: a letter's page, letterhead and date, and the page-two header. `#show: letter.with(...)`. |
 | `resume(title:, author:, headline:, contact:, face: face-text, centred: false, size: sz.small, accent: slate, caps: true, preset: (paper: "us-letter", margin: (x: 0.6in, y: 0.5in)))` | Template: a résumé's page, type and head, and its headings as ruled sections. `#show: resume.with(...)`. |
 | `recipe(title:, author:, yield:, method:, time:, intro:, preset: card, footer: footer(), depth: [...])` | Template: a recipe card's page and header, its yield, method and time beside the dish. Whatever the card labels `<depth>` starts its reference on a page of its own under `depth`. `#show: recipe.with(...)`. |
@@ -378,7 +378,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `stamp(body)` | Closing line — provenance, or a last caution. |
 | `open(body)` | What only the document's owner can supply, still missing, in red and bold. The audit says how many remain, without failing. |
 | `updated(words: (updated: [updated], unstamped: [...]))` | When the content last changed, as the stamp records it. For the footer. |
-| `footer(status: none, edition: updated())` | `brief`'s footer, for a document that lays out its own page: title and status, then `updated()` and the page. `#set page(footer: footer())`. |
+| `footer(status: none, edition: updated())` | A page's footer: the title and status, then `updated()` and the page of the total. `#set page(footer: footer())`, or a template's `footer: footer(status: [draft])`. |
 | `press-version` | The version of press a document was built with. Never typed by hand. |
 | `scan(body)` | Marks content the document did not set, a scanned or embedded page, for the audit to leave out; what is set over it is still audited. |
 | `form(blank, probe: none, body)` | One page of a flat PDF form, filled in: the page is the blank's own, its size and edge to edge, with none of the document's header, footer, background or foreground, and the blank a `scan()` under the answers. `#form(image("application.pdf", page: 2))[...]`; the document makes the image, so the path is its own. `probe: 18pt` draws a measuring grid over the page, a line every 18pt, every fourth one heavier, and where two heavy lines cross, that point's x and y in points, for reading where each blank is; the audit fails while it is on. |
@@ -416,7 +416,7 @@ build it in the document.
   line start becomes a list, `/ thing` is a compile error. Reword rather than escape.
 - **A title given as a string keeps straight quotes.** typst curls quotes and apostrophes in
   markup only, so `title: "God's Promises"` prints a straight apostrophe wherever the title
-  prints, in the head and in `footer()`. Give it as markup: `title: [God's Promises]`.
+  prints, in `header()` and in `footer()`. Give it as markup: `title: [God's Promises]`.
 
 ## Printing
 
