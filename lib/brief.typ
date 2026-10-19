@@ -50,13 +50,15 @@
         if caps { upper(it.body) } else { it.body }))
     v(5pt)
   }
-  show heading.where(level: 2): it => context {
+  // One block, so the label and its hairline are one piece: a heading drawn by a show rule
+  // gets no block of its own, and loose, a page could end between them.
+  show heading.where(level: 2): it => context block(breakable: false, {
     v(3pt)
     eyebrow(it.body, color: _section-color(), caps: caps)
     v(-2pt)
     line(length: 100%, stroke: 0.7pt + rule-hair)
     v(3pt)
-  }
+  })
   show <depth>: it => {
     pagebreak(weak: true)
     if depth != none {
