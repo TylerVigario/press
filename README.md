@@ -179,14 +179,15 @@ instead: `build.sh --tz America/Los_Angeles`, `all.sh --tz America/Los_Angeles`.
 ```json
 "scripts": {
   "press": "sh third_party/press/tools/all.sh --tz America/Los_Angeles",
+  "press:build": "sh third_party/press/tools/build.sh --tz America/Los_Angeles",
   "press:check": "sh third_party/press/tools/all.sh --check --tz America/Los_Angeles",
   "press:watch": "sh third_party/press/tools/watch.sh"
 }
 ```
 
 `npm run press` builds every document under `docs/`, and `npm run press -- recipes` those under
-another directory; `npm run press:watch -- docs/guide.typ` previews one, and
-`sh third_party/press/tools/build.sh docs/guide.typ` builds one.
+another directory; `npm run press:build -- docs/guide.typ` builds one, and
+`npm run press:watch -- docs/guide.typ` previews it.
 
 **make:**
 
