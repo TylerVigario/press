@@ -14,6 +14,21 @@
   if caps { upper(body) } else { body },
 )
 
+// A section whose headings show its state: inside it, a template's `=` band and `==` label take
+// `color`, any colour, where every other heading stays slate. Wrap the one heading or the whole
+// section. A label on the heading, `<depth>` among them, stays where it is; a section inside
+// another takes its own colour; `#show: section.with(color: steel)` colours a whole document's.
+//
+//   #section(color: bad)[= Red-flag signs]
+#let _section-colors = state("press-section-colors", ())
+#let section(body, color: slate) = {
+  _section-colors.update(s => s + (color,))
+  body
+  _section-colors.update(s => s.slice(0, -1))
+}
+// The colour of a heading where it stands, which a template's heading rules read in context.
+#let _section-color() = _section-colors.get().at(-1, default: slate)
+
 // A document's header: its title on the left, `meta` on the right, and a rule beneath. The title
 // is the one the document names itself with, set document(title:) or a template's title, so it
 // is named once, as footer() names it.

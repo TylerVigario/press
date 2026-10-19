@@ -43,16 +43,16 @@
   // A section is a heading: = draws it as a band in slate, and == as a labelled hairline. Its
   // gaps are the paragraph gap at the body size, since a heading's own em is its larger size.
   show heading: set block(above: 0.55 * sz.small, below: 0.55 * sz.small)
-  show heading.where(level: 1): it => {
+  show heading.where(level: 1): it => context {
     v(2pt)
-    block(width: 100%, fill: slate, inset: (x: 8pt, y: 4.5pt), radius: 1pt,
+    block(width: 100%, fill: _section-color(), inset: (x: 8pt, y: 4.5pt), radius: 1pt,
       text(size: sz.fine, weight: 700, tracking: 1.2pt, fill: white,
         if caps { upper(it.body) } else { it.body }))
     v(5pt)
   }
-  show heading.where(level: 2): it => {
+  show heading.where(level: 2): it => context {
     v(3pt)
-    eyebrow(it.body, caps: caps)
+    eyebrow(it.body, color: _section-color(), caps: caps)
     v(-2pt)
     line(length: 100%, stroke: 0.7pt + rule-hair)
     v(3pt)
