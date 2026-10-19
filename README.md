@@ -380,6 +380,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `flow(..steps)` | Left-to-right stage sequence. |
 | `decision(n, q, note, color: bad)` | Open question needing an answer, under its number in a filled badge. |
 | `stamp(body)` | Closing line — provenance, or a last caution. |
+| `addendum(date, body, label: [Later], color: ink-faint, caps: true)` | A note set under an entry later, beside what it amends rather than over it: a revisit, a retelling, a correction. `color` draws its edge and label. Its label and date stay with its body across a page break. |
 | `open(body)` | What only the document's owner can supply, still missing, in red and bold. The audit says how many remain, without failing. |
 | `updated(words: (updated: [updated], unstamped: [...]))` | When the content last changed, as the stamp records it. For the footer. |
 | `footer(status: none, edition: updated())` | A page's footer: the title and status, then `updated()` and the page of the total. `#set page(footer: footer())`, or a template's `footer: footer(status: [draft])`. |
