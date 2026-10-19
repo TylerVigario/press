@@ -72,16 +72,16 @@ on:
   workflow_dispatch:
     inputs:
       bump:
-        description: "How far to move from the last release. auto lets the commits decide; patch, minor or major overrides them."
-        required: true
+        description: "The step from the last release: auto lets the commits decide; patch, minor or major overrides them"
         type: choice
         options: [auto, patch, minor, major]
         default: auto
+        required: true
       dry-run:
-        description: "Derive, lint and gate; publish nothing"
-        required: false
-        default: false
+        description: "Decide the version, preview the changelog and run the gate; write nothing"
         type: boolean
+        default: false
+        required: false
 
 concurrency:
   group: release
