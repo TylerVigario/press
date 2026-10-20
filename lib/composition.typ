@@ -96,6 +96,22 @@
     ..range(n).map(_ => row).flatten())
 }
 
+// A box to tick by hand, sized in em so it follows the text it sits in: inline, in a sheet()
+// cell, or as a list's marker, where the list gives a checklist its hanging indent.
+// It is centred on the face's x-height, measured, so it sits with the lowercase beside it in any
+// face. press draws it because ☐ is in no vendored face. `checked: true` marks it with an X, as
+// tick() does, for a copy filled in ahead of time. The audit does not count an empty box, unlike
+// open(): on paper, an empty box is what the reader is there to fill.
+//
+//   #set list(marker: checkbox())
+//   - Shut the water off at the street.
+#let checkbox(checked: false, size: 0.7em, stroke: 0.6pt + ink, radius: 1pt) = context {
+  let x = measure(text(top-edge: "x-height", bottom-edge: "baseline")[x]).height
+  box(width: size, height: size, baseline: size / 2 - x / 2, stroke: stroke, radius: radius,
+    if checked { place(center + horizon,
+      text(size: size, weight: 700, top-edge: "cap-height", bottom-edge: "baseline")[X]) })
+}
+
 // Where a document is signed, with its closing (`closing: [Sincerely,]`) kept on the same page, so
 // a page break never strands it. By default, space for an ink signature over a line with the
 // signer's name beneath, and beside it a line to date by hand (`dated: false` leaves that out).

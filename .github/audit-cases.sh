@@ -65,7 +65,7 @@ echo "audit-cases: a pass that cannot run fails the audit, whatever the document
 sh tools/check.sh .github/audit-cases/pass-open-items.typ "$tmp/o/open.pdf" . $flags > "$tmp/out" 2>&1 \
     || { cat "$tmp/out" >&2; fail "a document with open items failed its audit"; }
 grep -qF "has 2 open items" "$tmp/out" || { cat "$tmp/out" >&2; fail "the audit did not count the open items"; }
-echo "audit-cases: open items are counted, a missing value is not, and neither fails the audit"
+echo "audit-cases: open items are counted, a missing value and an empty box are not, and none fails the audit"
 
 # Counting them needs only typst, so a build without the audit's tools still counts them.
 # shellcheck disable=SC2086

@@ -378,6 +378,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `item(n, title, body, color:, size:)` | Numbered step. |
 | `sheet(cols, head, ..rows, size:, blank: 0)` | A table of any number of columns: zebra rows, and a header that repeats across pages. `blank` adds empty rows tall enough to write in. |
 | `writein(n, label: none, pitch: 8mm)` | Lines to write on by hand, each after its label: `writein(3, label: [date])`. Print only; typst writes no PDF form fields. |
+| `checkbox(checked: false, size: 0.7em, stroke: 0.6pt + ink, radius: 1pt)` | A box to tick by hand, sized to the text it sits in: inline, in a `sheet()` cell, or as a list's marker, `#set list(marker: checkbox())`, for a checklist. `checked: true` marks it with an X. The audit does not count an empty box. |
 | `signature(name: auto, closing: none, signed: true, dated: true, words: (date: [Date]))` | Where a document is signed: the closing, kept on its page, then lines for an ink signature over the signer's name and a hand-written date, or with `signed: false` a typed sign-off. `name` is the document's author unless given; a document several people sign calls it once for each, one above the other. |
 | `flow(..steps)` | Left-to-right stage sequence. |
 | `decision(n, q, note, color: bad)` | Open question needing an answer, under its number in a filled badge. |
