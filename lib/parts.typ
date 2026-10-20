@@ -50,23 +50,26 @@
   warn: (warn, warn-tint), bad: (bad, bad-tint),
 )
 
-// Tinted callout with a weighted left edge.
+// Tinted callout with a weighted left edge. Its label is kept with the body under it, so a page
+// never ends on the label alone. The label's block is set at the label's own size, as a line of
+// it would be, so the space under it is measured in that size and not the callout's.
 #let callout(body, tone: "note", label: none, size: sz.small) = {
   let pair = tones.at(tone)
   block(
     width: 100%, fill: pair.at(1), stroke: (left: 3pt + pair.at(0)),
     inset: (x: 10pt, y: 8pt),
   )[
-    #if label != none [#eyebrow(label, color: pair.at(0)) #v(3pt)]
+    #if label != none [#text(size: sz.fine, block(sticky: true, eyebrow(label, color: pair.at(0)))) #v(3pt)]
     #text(size: size)[#body]
   ]
 }
 
-// Bordered panel — for grids where a tint would shout.
+// Bordered panel — for grids where a tint would shout. Its label is kept with the body, as a
+// callout's is.
 #let panel(body, label: none, color: slate) = block(
   width: 100%, stroke: 0.6pt + rule-mid, inset: 10pt, radius: 1pt,
 )[
-  #if label != none [#eyebrow(label, color: color) #v(4pt)]
+  #if label != none [#text(size: sz.fine, block(sticky: true, eyebrow(label, color: color))) #v(4pt)]
   #body
 ]
 

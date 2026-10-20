@@ -12,12 +12,13 @@
 // format decide what the reader is allowed to know.
 // `caps` forwards to the label's `eyebrow` — see the note on it in parts.typ. This is the
 // most-used call in the vocabulary, so it is where the uppercasing does the most
-// damage: `unit([pH], "warn")` renders "PH" with nothing to indicate it happened.
+// damage: `unit([pH], "warn")` renders "PH" with nothing to indicate it happened. A unit
+// `breakable: true` lets break keeps its label with the lead, as a callout does.
 #let unit(label, tone, lead, body, caps: true, breakable: false) = {
   let pair = tones.at(tone)
   block(width: 100%, breakable: breakable, stroke: (left: 2.5pt + pair.at(0)),
         fill: paper-tint, inset: (x: 8pt, y: 6.5pt))[
-    #eyebrow(label, color: pair.at(0), caps: caps)
+    #text(size: sz.fine, block(sticky: true, eyebrow(label, color: pair.at(0), caps: caps)))
     #v(2.5pt)
     #text(size: sz.fine, weight: 700)[#lead]
     #if body != none [ #v(2.5pt) #text(size: sz.fine)[#body] ]
