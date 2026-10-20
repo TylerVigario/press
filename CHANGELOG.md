@@ -8,6 +8,26 @@ verbatim. 0.1.0 at the bottom is hand-written and reads "Initial release." becau
 release has no changes to list — there is nothing it changed from.
 
 - - -
+## [v0.7.0](https://github.com/TylerVigario/press/compare/v0.6.0..v0.7.0) - 2026-10-20
+#### Features
+- missing() prints a value a document does not have in faint italic, where a blank would read as none (#166) - ([52553d6](https://github.com/TylerVigario/press/commit/52553d6a64768333ea44d012b35c2683f75c478b)) - Tyler Vigario, Claude Opus 5.5
+- section(color:) gives a section's headings a colour, so a heading can show state again (#160) - ([d343141](https://github.com/TylerVigario/press/commit/d343141dd39483cd8aee7779f315391d5c90ce1a)) - Tyler Vigario, Claude Opus 5.5
+- addendum() sets a later note under an entry, beside what it amends rather than over it (#159) - ([12c6cb2](https://github.com/TylerVigario/press/commit/12c6cb26bb5d3b234a9a4c12a3c737b5a95c7d83)) - Tyler Vigario, Claude Opus 5.5
+- the starters mark with open() what only their owner can supply, so a new document's build counts what is left to fill (#155) - ([10c2767](https://github.com/TylerVigario/press/commit/10c276710d0ed065a86f9ab56fb6a3d50609b469)) - Tyler Vigario, Claude Opus 5.5
+#### Bug Fixes
+- a callout's, a panel's or a unit's label is kept on the page with what it heads (#169) - ([83da7b4](https://github.com/TylerVigario/press/commit/83da7b40e625c824aa0a24815da8c761d1dc15ee)) - Tyler Vigario, Claude Opus 5.5
+- a == heading stays whole at the foot of a page, its label with its hairline and the text it heads (#162) - ([65ff8d8](https://github.com/TylerVigario/press/commit/65ff8d876c6ffa161c3112fb38d63e221e64fc86)) - Tyler Vigario, Claude Opus 5.5
+- a build the record answers says cached, so unchanged always means it was built again and came out the same (#153) - ([3b45f8c](https://github.com/TylerVigario/press/commit/3b45f8ce757477a103fb6975aa7475b62e9bf4bc)) - Tyler Vigario, Claude Opus 5.5
+#### Documentation
+- the minus-sign trap shows an invented coordinate (#168) - ([b665249](https://github.com/TylerVigario/press/commit/b6652494d7387b8595384d65ac04ce4aabf337e6)) - Tyler Vigario, Claude Opus 5.5
+- the npm example builds one document with press:build, stamped in the zone the others name (#165) - ([41a0c7f](https://github.com/TylerVigario/press/commit/41a0c7feb4d6db4b3973fd7da7322b5e5cb86ae3)) - Tyler Vigario, Claude Opus 5.5
+- a trap says typst prints a minus sign, not a hyphen, before a digit, so copied numbers will not paste (#163) - ([9945b42](https://github.com/TylerVigario/press/commit/9945b429fbf3a935a234a05fdd55dc2735873e9b)) - Tyler Vigario, Claude Opus 5.5
+- FONTS.md says which scripts the faces carry, and where a word changes face partway (#154) - ([c529965](https://github.com/TylerVigario/press/commit/c529965493ab0886148fd334173af3b7b6f37216)) - Tyler Vigario, Claude Opus 5.5
+#### Continuous Integration
+- the release's two inputs take the repo standard's words, keys and order (#167) - ([1bd7de7](https://github.com/TylerVigario/press/commit/1bd7de75b4c2a7fa1747b53260b64d693e304c46)) - Tyler Vigario, Claude Opus 5.5
+
+- - -
+
 ## [v0.6.0](https://github.com/TylerVigario/press/compare/v0.5.0..v0.6.0) - 2026-10-18
 #### Features
 - form(probe:) draws a measuring grid over a form's page, and the audit fails while it is on (#137) - ([1a5c0d7](https://github.com/TylerVigario/press/commit/1a5c0d772db154c4ccdb1f6b6a774a0856addade)) - Tyler Vigario, Claude Opus 5.5
