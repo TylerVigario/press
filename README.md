@@ -427,7 +427,7 @@ build it in the document.
   markup only, so `title: "God's Promises"` prints a straight apostrophe wherever the title
   prints, in `header()` and in `footer()`. Give it as markup: `title: [God's Promises]`.
 - **A minus sign is not a hyphen.** typst prints U+2212, the typographic minus, for a hyphen
-  typed before a digit (`ls -1`, `-119.99626`) and for a negative number it shows, in content or
+  typed before a digit (`ls -1`, `-12.34567`) and for a negative number it shows, in content or
   through `str()`. No keyboard has it, so a coordinate, a command or a code copied from the PDF
   will not paste into a map or a shell. Raw text and a string shown as is (`#"-1"`) keep the
   hyphen. For a number, `str(n).replace("\u{2212}", "-")` keeps `str()`'s format, where `repr()`
