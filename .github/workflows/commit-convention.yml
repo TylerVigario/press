@@ -1,6 +1,6 @@
 name: Commit convention
 
-# Both ends of the convention — rule 7.
+# Both ends of the convention — rule 4.
 #
 #   Validate PR title   pull_request.  A gate: it can block the merge.
 #   Lint main           push.          A notification: the commit already exists.
@@ -19,7 +19,7 @@ name: Commit convention
 #
 # Lint main MUST NOT become a required status check. It cannot report on a
 # pull_request event, so requiring it would leave every PR waiting on a context
-# that will never arrive — rule 12 names that trap explicitly.
+# that will never arrive — rule 4 names that trap explicitly.
 #
 # WHY COCOGITTO. This repository is Typst, shell and fonts. It has no package.json,
 # no lockfile and no node, and the alternative would mean adding all three so that
@@ -39,7 +39,7 @@ name: Commit convention
 #
 # cog.toml configures the changelog, the tag prefix and one added type, `release`, which
 # the release's own commit uses; a pull request titled `release: ...` therefore passes
-# too. It restates none of the eleven defaults, which rule 6 says no repository should
+# too. It restates none of the eleven defaults, which rule 2 says no repository should
 # do. What is worth pinning — which cog — is pinned below by digest.
 #
 # `cog check` reads merge commits unless told not to, and nothing here tells it:

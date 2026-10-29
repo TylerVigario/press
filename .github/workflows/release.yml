@@ -31,7 +31,7 @@ name: Release
 #   publish  skipped on a dry run. Writes the version into press.toml,
 #            writes the changelog, builds the bundle, mints the App token, asks the
 #            forge for the commit that records the version and the changelog (repo
-#            standard rule 15: it does not push one), then publishes the release on
+#            standard rule 16: it does not push one), then publishes the release on
 #            that commit with the bundle attached. Publishing is what creates the
 #            tag, so a failure before it leaves no tag.
 #
@@ -46,10 +46,10 @@ name: Release
 #
 # WHY AN APP. main takes no direct push (rule 6), and recording the release writes
 # main. The one exemption is a GitHub App installed on this repository alone (rule
-# 16). Its credentials are environment secrets on `release`, not repository secrets,
+# 17). Its credentials are environment secrets on `release`, not repository secrets,
 # and the environment admits only main, so only the publish job running on main can
 # reach them: a workflow on any other branch cannot read them, however it is changed
-# (rule 20). There is no required reviewer. With one maintainer it would confirm only
+# (rule 21). There is no required reviewer. With one maintainer it would confirm only
 # what that maintainer already decided by dispatching the run, and the token that can
 # dispatch a run can approve it.
 #
