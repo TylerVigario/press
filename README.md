@@ -136,10 +136,14 @@ records what each document's last build read — every file typst lists, the fon
 version, press's tools, the flags and the zone — each with a checksum, and what its audit said.
 When all of it still matches, the build says cached at once, without compiling or auditing,
 and repeats what the audit said. Unchanged is a different answer: the document was built again
-and came out the same bytes. Only a build whose audit ran in full and passed is recorded,
-so a failing document, or one built without the audit's tools, is built and audited every time.
-The kit's own `.gitignore` keeps the record out of git, an update replaces it with press's
-folder, and deleting it costs one full build per document, never a wrong answer.
+and came out the same bytes, or other bytes whose every page draws the same pixels, and it keeps
+its time. A press update that builds a part another way, a different typst, or a font file
+rewritten without a glyph changing, changes the bytes and not the page; telling the two apart
+takes poppler's `pdftoppm`, and without it other bytes count as changed. Only a build whose
+audit ran in full and passed is recorded, so a failing document, or one built without the
+audit's tools, is built and audited every time. The kit's own `.gitignore` keeps the record out
+of git, an update replaces it with press's folder, and deleting it costs one full build per
+document, never a wrong answer.
 
 **A page the document did not set** — a scanned form it fills in, an embedded PDF page — is
 marked with `scan(...)`. The audit then reads a copy with every scan hidden, so the scan's own
