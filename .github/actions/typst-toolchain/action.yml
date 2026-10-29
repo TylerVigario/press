@@ -29,8 +29,8 @@ runs:
         # not see these; a bump changes a version and its digest together.
         TYPST_VERSION=0.15.1
         TYPST_SHA256=a6d077d0a95eed5a2eba715b2dae06be954f624ccbf85758a03f389ded33118c
-        JUST_VERSION=1.57.0
-        JUST_SHA256=45b548094283cb9739af8f13273b8cddeee869f5b4ef2bb631b1f311cb566155
+        JUST_VERSION=1.59.0
+        JUST_SHA256=409044617b6f06517c1035e55ca38c8c856ff8b650e41bc2aa1ef82d5903a23e
         # The floors press declares: press.toml's typst, and press.just's minimum-version. CI's
         # oldest-toolchain job installs these and refuses to run if press names
         # others, so raising a floor is an edit here too. Old on purpose, so the Pins
