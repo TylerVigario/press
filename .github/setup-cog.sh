@@ -9,9 +9,8 @@
 # places and drift apart at the first bump, which is the failure the digest exists to
 # prevent.
 #
-# A plain script rather than a composite action, even though rule 5 asks for a
-# composite for anything used twice. A composite is right for the typst toolchain
-# beside it, which has inputs and conditional steps. This has neither, and a
+# A plain script rather than a composite action. A composite is right for the typst
+# toolchain beside it, which has inputs and conditional steps. This has neither, and a
 # directory plus an action.yml to wrap five lines of curl costs a reader one more
 # file before they learn what runs.
 #

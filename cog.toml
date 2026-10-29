@@ -4,7 +4,7 @@
 # only say what the history says. The one exception is the first release, kept by hand as
 # "Initial release." because cog lists the whole history for it (cocogitto/cocogitto#580;
 # .github/write-changelog.sh). `tag_prefix` because tags carry the `v` and version
-# fields do not (repo standard rule 17).
+# fields do not (repo standard rule 18).
 #
 # No `ignore_merge_commits`: it would also switch off Lint main's report of a merge
 # reaching main. The release passes --ignore-merge-commits where it wants that.

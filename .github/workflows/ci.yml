@@ -308,7 +308,7 @@ jobs:
           persist-credentials: false
       - name: markdownlint-cli2
         # The CLI through npx at an exact version, not the markdownlint action:
-        # only GitHub-owned actions may run here (rule 10), and the node on the
+        # only GitHub-owned actions may run here (rule 11), and the node on the
         # hosted runner is enough. Rules and ignores are .markdownlint-cli2.jsonc.
         # Dependabot does not see this pin; a bump is a deliberate edit.
         run: npx --yes markdownlint-cli2@0.24.0

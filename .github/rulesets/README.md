@@ -79,7 +79,7 @@ The title, not a part of it. "Subject" is avoided above because it means two dif
 things in a repository that lints commits: git's subject is the whole first line, while
 Conventional Commits calls the text after the colon the description and commitlint calls
 that the subject. What the gate reads is the entire title string. Under squash that title
-becomes the commit subject in git's sense, which is rule 9.
+becomes the commit subject in git's sense, which is rule 3.
 
 **`code_scanning`, CodeQL** — findings, not jobs, are what gate here. *Analyze actions* and
 *Analyze python* pass whenever the analysis ran, whatever it found, so requiring them as
