@@ -118,14 +118,31 @@
 // For a document sent as a file, `signed: false` is a typed sign-off: the name alone.
 //
 // `name` is who signs, the document's author unless it is given. A document several people sign
-// calls it once for each, with their names, and places them itself: with its date line a
-// signature is 4.4in wide, so two go one above the other on a letter's page, not side by side.
+// calls it once for each, with their names, and places them itself. With its date line beside, a
+// signature is 4.4in wide, too wide for two side by side, so the arrangement is the document's:
+//
+//   `width` is the ink line's length, 2.6in by default. A relative width is of the room the line
+//   has, which beside a date line is what the date leaves: `width: 100%` fills a grid's cell.
+//   `dated` is true for the date line beside the name's, "below" for it under the name, with a
+//   pen's room above it, or false for none. The date line is 1.4in either way, so it never reads
+//   as a second line to sign.
+//
+// Two signers side by side, each with a date, fit any of press's measures:
+//
+//   #grid(columns: (1fr, 1fr), gutter: 22pt,
+//     signature(name: [Pat Example], width: 100%, dated: "below"),
+//     signature(name: [Sam Example], width: 100%, dated: "below"))
 //
 //   #signature(name: [Pat Example])
 //   #signature(name: [Sam Example], dated: false)
 #let signature(
-  name: auto, closing: none, signed: true, dated: true, words: (date: [Date]),
+  name: auto, closing: none, signed: true, dated: true, width: 2.6in, words: (date: [Date]),
 ) = block(breakable: false, context {
+  // An unknown arrangement fails rather than falling through to one that looks deliberate.
+  assert(dated in (true, false, "below"),
+    message: "signature(dated:) expects true, false or \"below\"; got " + repr(dated))
+  assert(type(width) in (length, ratio, relative),
+    message: "signature(width:) takes a length or a relative width: width: 2.9in, width: 100%")
   let name = if name == auto { _writer(what: "signature(), given no name,") } else { name }
   if closing != none { closing }
   if not signed {
@@ -133,9 +150,21 @@
     name
   } else {
     let slot(caption) = stack(spacing: 5pt, _hand-line, caption)
+    let date = slot(_words("signature", words, "date").date)
     v(0.55in)
-    grid(columns: if dated { (2.6in, 0.4in, 1.4in) } else { (2.6in,) },
-      slot(name), ..if dated { ([], slot(_words("signature", words, "date").date)) } else { () })
+    layout(size => {
+      // The room the ink line has: all of it, or what a date line beside it leaves.
+      let room = if dated == true { size.width - 1.8in } else { size.width }
+      let ink = if type(width) == ratio { width * room }
+        else if type(width) == relative { width.ratio * room + width.length.to-absolute() }
+        else { width.to-absolute() }
+      if dated == "below" {
+        stack(block(width: ink, slot(name)), _pen, block(width: 1.4in, date))
+      } else {
+        grid(columns: if dated { (ink, 0.4in, 1.4in) } else { (ink,) },
+          slot(name), ..if dated { ([], date) } else { () })
+      }
+    })
   }
 })
 
