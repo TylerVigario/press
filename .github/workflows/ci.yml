@@ -17,7 +17,8 @@ name: CI
 #                            résumé's text, which must read in the order it prints; and
 #                            a code block that breaks across a page only when let;
 #                            and a label that a page never ends on apart from what
-#                            it heads.
+#                            it heads; and a sheet set across columns, which must
+#                            read down each in turn and end its last page level.
 #   The release bundle installs and works
 #                            the archives the release attaches, built from this
 #                            tree: the kit and nothing of press's machinery,
@@ -114,6 +115,8 @@ jobs:
         run: sh .github/code-break.sh
       - name: A callout's, a panel's or a unit's label stays on the page with what it heads
         run: sh .github/label-break.sh
+      - name: A sheet across columns reads down each in turn, and its last page is shared by height
+        run: sh .github/sheet-across.sh
       - name: A form page is its blank's, and each answer lands where it is put
         run: sh .github/form-fill.sh
 
@@ -192,6 +195,8 @@ jobs:
         run: sh .github/code-break.sh
       - name: A callout's, a panel's or a unit's label stays on the page with what it heads
         run: sh .github/label-break.sh
+      - name: A sheet across columns reads down each in turn, and its last page is shared by height
+        run: sh .github/sheet-across.sh
       - name: A form page is its blank's, and each answer lands where it is put
         run: sh .github/form-fill.sh
       - name: The template compiles, in place and scaffolded
