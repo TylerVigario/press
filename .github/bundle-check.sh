@@ -48,7 +48,7 @@ for f in lib.typ press.toml .gitignore .gitattributes calibration.typ press.just
          lib/base.typ lib/brief.typ lib/letter.typ lib/recipe.typ lib/resume.typ \
          template/main.typ template/letter.typ template/recipe.typ template/resume.typ \
          tools/new.sh tools/build.sh tools/all.sh tools/watch.sh tools/clean.sh \
-         tools/stamp.sh tools/check.sh tools/report.sh fonts/licenses; do
+         tools/stamp.sh tools/check.sh tools/report.sh tools/install-typst.sh fonts/licenses; do
     grep -qx "press/$f" "$tmp/tar.list" || fail "press/$f is missing from the bundle"
 done
 
@@ -60,6 +60,11 @@ mkdir -p "$tmp/zip"
 diff -r "$repo/third_party/press" "$tmp/zip/press" >/dev/null || fail "the zip unpacks to different files than the tarball"
 
 cd "$repo"
+# The typst that builds here is the one the kit installs, as a repository's CI installs it:
+# the kit's own pin, verified, into a directory first on PATH.
+sh third_party/press/tools/install-typst.sh "$tmp/bin"
+PATH=$tmp/bin:$PATH
+[ "$(command -v typst)" = "$tmp/bin/typst" ] || fail "the typst the kit installed is not the one on PATH"
 flags="--root . --font-path third_party/press/fonts --ignore-system-fonts"
 sh third_party/press/tools/new.sh docs/guide
 # shellcheck disable=SC2086  # $flags is a list of flags

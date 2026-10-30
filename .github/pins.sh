@@ -106,7 +106,7 @@ check() {
 }
 
 printf '%-18s %-9s %s\n' tool pinned latest
-check typst .github/actions/typst-toolchain/action.yml 's/^ *TYPST_VERSION=//p' gh:typst/typst
+check typst tools/install-typst.sh 's/^TYPST_VERSION=//p' gh:typst/typst
 check just .github/actions/typst-toolchain/action.yml 's/^ *JUST_VERSION=//p' gh:casey/just
 check cocogitto .github/setup-cog.sh 's/^COG_VERSION=//p' gh:cocogitto/cocogitto
 check actionlint .github/workflows/ci.yml \
