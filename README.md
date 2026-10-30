@@ -375,7 +375,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `header(meta: none, color:, face:, size:)` | A document's header: its title, the one the document names itself with, on the left, `meta` on the right, and a rule beneath. |
 | `eyebrow(body, color:, caps:)` | Small tracked-out uppercase label. |
 | `section(body, color: slate)` | A section whose headings show its state: inside it, a template's `=` band and `==` label take `color`, any colour, where every other heading stays slate. Wrap one heading, `#section(color: bad)[= Red-flag signs]`, or the whole section; a label on the heading stays, `<depth>` among them. `#show: section.with(color: steel)` colours a whole document's. |
-| `chip(label, tone)` | Inline state pill — build legends from these. |
+| `chip(label, tone, boxed: true, shape: auto)` | A state, shown by its tone's colour and a shape drawn before its label, so it reads on a grey printout too: a circle for ok, a triangle for warn, a square for bad, a diamond for note. Boxed, a pill for a legend; `boxed: false`, the shape and the label alone, bold in the tone's colour at the text's own size, for a value in a table whose every cell has a state: `chip([4], "ok", boxed: false)`. `shape` takes another of the four, or none. |
 | `callout(body, tone: "note", label: none, size:)` | Aside that must not be missed. |
 | `panel(body, label: none, color: slate)` | Boxed block, no tone semantics. |
 | `code(body, breakable: false)` | Code-block treatment; the document installs it as a show rule. |

@@ -25,11 +25,46 @@
   ]
 }
 
-// Inline state marker — use in a legend so colour reads as meaning.
-#let chip(label, tone) = {
+// The shape each tone draws beside a state, so the state reads without its colour. Printed in
+// grey, ok and warn come out nearly the same, about 96 and 102 of 255 in Rec. 601 luma, and on
+// paper colour alone carries nothing that a monochrome printer or a reader's eyes may lose.
+#let _tone-shapes = (note: "diamond", ok: "circle", warn: "triangle", bad: "square")
+
+// A shape filled with `color`, about as tall as a capital, centred on the capitals of the text it
+// sits in, as checkbox() centres on the lowercase. Each is drawn to look the same size as the
+// others, so a square is a little smaller than a circle and a triangle a little wider.
+#let _shape(name, color) = context {
+  let cap = measure(text(top-edge: "cap-height", bottom-edge: "baseline")[X]).height
+  let s = 0.85 * cap
+  let drawn = if name == "circle" { circle(radius: s / 2, fill: color) }
+    else if name == "square" { square(size: 0.88 * s, fill: color) }
+    else if name == "triangle" { polygon(fill: color, (0pt, s), (0.6 * s, 0pt), (1.2 * s, s)) }
+    else { polygon(fill: color, (0.6 * s, 0pt), (1.2 * s, 0.6 * s), (0.6 * s, 1.2 * s), (0pt, 0.6 * s)) }
+  let h = measure(drawn).height
+  box(baseline: h / 2 - cap / 2, drawn)
+}
+
+// A state, shown by its tone's colour and its shape: the circle is ok, the triangle warn, the
+// square bad, the diamond note. Boxed, it is a pill with its label, for a legend:
+// `chip([MATCHES], "ok")`. `boxed: false` sets the shape and the label alone, bold in the tone's
+// colour at the size of the text around it, for a value in a table whose every cell has a state,
+// where a pill in each would be too heavy: `chip([4], "ok", boxed: false)`. The legend's pills
+// draw the same shapes, so a reader matches a cell to its state on a grey printout too.
+// `shape` changes the tone's shape, "circle", "triangle", "square" or "diamond", and none leaves
+// it out.
+#let chip(label, tone, boxed: true, shape: auto) = {
   let pair = tones.at(tone)
-  box(fill: pair.at(1), stroke: 0.5pt + pair.at(0), inset: (x: 4pt, y: 2pt), radius: 1pt,
-      text(size: sz.micro, weight: 700, fill: pair.at(0))[#label])
+  let shape = if shape == auto { _tone-shapes.at(tone) } else { shape }
+  assert(shape == none or shape in _tone-shapes.values(),
+    message: "chip(shape:) expects \"circle\", \"triangle\", \"square\", \"diamond\" or none; got "
+      + repr(shape))
+  let shown = if shape == none { label } else [#_shape(shape, pair.at(0))#h(0.3em)#label]
+  if boxed {
+    box(fill: pair.at(1), stroke: 0.5pt + pair.at(0), inset: (x: 4pt, y: 2pt), radius: 1pt,
+        text(size: sz.micro, weight: 700, fill: pair.at(0), shown))
+  } else {
+    text(weight: 700, fill: pair.at(0), shown)
+  }
 }
 
 // A question with its note, under its number in a filled badge — for anything the reader must
