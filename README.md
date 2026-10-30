@@ -331,6 +331,31 @@ typst's headings and `#outline()`, and import press in every chapter that uses i
 preset margins are absolute, and the audit measures them on any page size. **Landscape** is
 `(..card, flipped: true)`.
 
+**A document built from data reads the data itself.** `json()`, `csv()`, `yaml()`, `toml()` and
+`xml()` read a file, by a path from the document or from the root, into typst values, and a string
+shown as a value, `#r.note` or a cell of a `sheet`, is set as text and never read as markup. So
+nothing in the data needs escaping: `//`, a hyphen before a digit, a line that starts with `=` or
+`-`, and every character typst's markup uses print as written.
+
+```typst
+#import "/third_party/press/lib.typ": *
+#show: brief.with(title: [Stock], author: "Sam Example")
+
+#let items = json("stock.json")
+#sheet((auto, auto, 1fr), ([Item], [Count], [Note]),
+  ..items.map(r => (r.item, r.count, r.note)).flatten())
+
+In all, #items.map(r => r.count).sum() items.
+```
+
+Counts, sums, filters, sorting and dates are typst's own: an array's `sum`, `filter` and
+`sorted`, `calc` and `datetime`. Logic that typst does not suit stays in a script, which writes
+what it works out as data, a JSON file the document reads, and never as markup: a script that
+writes `.typ` must escape every value it writes, and an escape that misses one case prints that
+value wrong, or drops the rest of its line. The build follows the data. typst lists every file a
+document reads, so a changed data file builds the document again and moves its stamp, with no
+script to run first, and an unchanged one leaves it cached.
+
 **A letter** applies `letter`: `new.sh docs/to-landlord letter` starts one.
 `#show: letter.with(title:, author:, contact:, date:)` **names the writer and the date once**,
 sets the reading page and the letterhead, and heads page two onward with the writer, the date
