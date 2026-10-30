@@ -127,9 +127,10 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 so a runner, CI and `all` see it and the page can still be looked at. Where the audit's tools
 are missing, the build says the audit was skipped and why, and succeeds: building never
 depends on them. `check.sh` is the same audit for when it must run, as in CI: without its tools
-it refuses. The audit also says how many open items a document still carries, marked with
-`open()` for its owner to supply, and does not fail for them: a draft carries them. A form
-page with its measuring grid on, `form(probe:)`, does fail it: the grid is for measuring.
+it refuses. The audit also says how many open items a document still carries for its owner
+to supply, and how many estimates it prints, each marked with `unsourced()`, and fails for
+neither: a draft carries them. A form page with its measuring grid on, `form(probe:)`, does
+fail it: the grid is for measuring.
 
 **An unchanged document is not built again.** One file in press's folder, `.build-record`,
 records what each document's last build read — every file typst lists, the fonts, typst's
@@ -231,8 +232,8 @@ builds every one, then fails if any failed its audit. Export `PRESS_TZ` from the
 - **`sh`** for the tools. On Windows it comes with Git for Windows.
 - **The audit** needs poppler (`pdffonts`, `pdftotext`, `pdftoppm`), a Python, and a grep
   with PCRE (GNU grep; on macOS, `brew install grep`); a build without them is not audited,
-  though it still counts the open items and fails while a form's measuring grid is on, which
-  need only typst.
+  though it still counts the open items and estimates and fails while a form's measuring grid
+  is on, which need only typst.
   Where `PATH` finds the wrong one, name it: `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`,
   `PRESS_PDFTOPPM`, `PRESS_PYTHON`, `PRESS_GREP` (`ggrep` on macOS). The audit refuses a
   `pdftotext` that is not poppler's.
@@ -388,8 +389,7 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `decision(n, q, note, color: bad)` | Open question needing an answer, under its number in a filled badge. |
 | `stamp(body)` | Closing line — provenance, or a last caution. |
 | `addendum(date, body, label: [Later], color: ink-faint, caps: true)` | A note set under an entry later, beside what it amends rather than over it: a revisit, a retelling, a correction. `color` draws its edge and label. Its label and date stay with its body across a page break. |
-| `open(body)` | What only the document's owner can supply, left to fill in, in red and bold. The audit says how many remain, without failing. |
-| `missing(body, color: ink-faint, style: "italic")` | A value the document does not have and no one will supply, `#missing[not recorded]`, printed where a blank would read as none. The audit does not count it: nothing is left to do. |
+| `unsourced(body, kind: "open", color: auto, weight: auto, style: auto, words: (estimate: [estimate]))` | A value the document prints without having read it from a source, marked by its kind. `"open"`: what only the owner can supply, left to fill in, in red and bold; the audit says how many remain. `"missing"`: what no one will supply, `#unsourced(kind: "missing")[not recorded]`, in faint italic where a blank would read as none; the audit does not count it. `"estimate"`: a figure printed but guessed, `#unsourced(kind: "estimate")[\$18.00]`, followed by the word estimate, in amber and bold; the audit says how many. The audit fails for none of them. `color`, `weight` and `style` change the kind's look; `#let est = unsourced.with(kind: "estimate")` names a kind used often. |
 | `updated(words: (updated: [updated], unstamped: [...]))` | When the content last changed, as the stamp records it. For the footer. |
 | `footer(status: none, edition: updated())` | A page's footer: the title and status, then `updated()` and the page of the total. `#set page(footer: footer())`, or a template's `footer: footer(status: [draft])`. |
 | `press-version` | The version of press a document was built with. Never typed by hand. |

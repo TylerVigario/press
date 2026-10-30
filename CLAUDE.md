@@ -123,8 +123,8 @@ repository has.
 - **Every build is audited through `check.sh`, from `stamp.sh`.** `stamp.sh` hands over the
   files its compile read and what typst printed (`PRESS_BUILT_DEPS`, `PRESS_BUILT_LOG`), with
   `PRESS_AUDIT=optional`, so a missing tool skips the audit with one line instead of failing,
-  after press's marks, which need only typst, are read: open items are still counted and the
-  measuring grid still fails;
+  after press's marks, which need only typst, are read: open items and estimates are still
+  counted and the measuring grid still fails;
   `check.sh`'s own compile sets `PRESS_IN_CHECK`, so it is not audited twice. A build's stdout
   is its one status line, which `build.sh` hands to `report.sh`; findings go to stderr.
 - **Every pass reports through `found <pass>`** in `check.sh`, so a document's
