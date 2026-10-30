@@ -44,7 +44,7 @@ needs it, built for both media, and offered to every document from the next rele
 | `template/` | the starters `tools/new.sh` copies, `main.typ` (applying `brief`), `letter.typ` (applying `letter`), `recipe.typ` (applying `recipe`) and `resume.typ` (applying `resume`); each imports `../lib.typ` so it compiles in place |
 | `calibration.typ` | the print calibration sheet; imports `lib.typ` |
 | `fonts/` | the vendored faces, and `fonts/licenses/` with each one's licence text |
-| `tools/` | what every runner calls, just among them: `new.sh`, `build.sh`, `all.sh`, `watch.sh`, `clean.sh`; beneath them `stamp.sh`, `check.sh`, `report.sh`, and the audit's two Python passes |
+| `tools/` | what every runner calls, just among them: `new.sh`, `build.sh`, `all.sh`, `watch.sh`, `clean.sh`; beneath them `stamp.sh`, `check.sh`, `report.sh`, and the audit's two Python passes; and `install-typst.sh`, which a repository's CI installs typst with |
 | `press.just` | recipes for repositories that use just |
 | `README.md`, `FONTS.md`, `LICENSE` | the consumer guide, the font account, the AGPL |
 | `.gitignore` | ships in the kit, so a repository that commits press's folder ignores the build record in it |
@@ -84,7 +84,10 @@ locally (install, update, refusals), and runs shellcheck, markdownlint (lines â‰
 actionlint, a JSON parse, an invisible-character scan and CodeQL. A false finding fixed gets a
 `pass-*` case.
 The tools CI installs are pinned by hand, with digests; the weekly Pins workflow opens an issue
-for each release a pin is behind (`sh .github/pins.sh` shows the same comparison).
+for each release a pin is behind (`sh .github/pins.sh` shows the same comparison). typst's pin is
+the kit's own, `tools/install-typst.sh`, which the toolchain action runs and every repository's CI
+runs too, so a bump reaches them all with the next release; it carries a digest for each
+architecture it installs, and `.github/typst-digests.sh` checks every one against typst's release.
 
 **The floors** are `press.toml`'s `typst` and `press.just`'s `set minimum-version`. CI's
 oldest-toolchain job installs exactly those, from the toolchain action's `OLDEST_` pins, and

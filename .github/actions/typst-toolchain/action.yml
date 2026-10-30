@@ -19,16 +19,17 @@ runs:
         OLDEST: ${{ inputs.oldest }}
       run: |
         set -euo pipefail
-        # Release binaries rather than apt. Ubuntu's `just` is old enough to lack
-        # source_directory(), which press.just needs to locate itself when
-        # vendored. Pin to what the host that prints these documents runs.
+        # typst comes from tools/install-typst.sh, press's one pin of it, which a repository
+        # that uses press runs in its own CI. Installing it here proves the file every one of
+        # them runs.
+        #
+        # just from its release binary rather than apt: Ubuntu's `just` is old enough to lack
+        # source_directory(), which press.just needs to locate itself when vendored.
         #
         # Pinned by version AND by digest, as cocogitto and actionlint are: a
         # version alone is a pin against accident, not against substitution, and
         # this runs on every pull request and in the release's gate. Dependabot does
         # not see these; a bump changes a version and its digest together.
-        TYPST_VERSION=0.15.1
-        TYPST_SHA256=a6d077d0a95eed5a2eba715b2dae06be954f624ccbf85758a03f389ded33118c
         JUST_VERSION=1.59.0
         JUST_SHA256=409044617b6f06517c1035e55ca38c8c856ff8b650e41bc2aa1ef82d5903a23e
         # The floors press declares: press.toml's typst, and press.just's minimum-version. CI's
@@ -39,26 +40,25 @@ runs:
         OLDEST_TYPST_SHA256=99816d2982de08d2b091bac56b59b2faa523a10e1378ad3cdd68e35b8eb74b3d
         OLDEST_JUST_VERSION=1.55.0
         OLDEST_JUST_SHA256=978178d9b20d2017ae7efdd29b204afc2ba75d103b4ab9d2c4e1a6407bbd648a
-        if [ "$OLDEST" = true ]; then
-          typst_version=$OLDEST_TYPST_VERSION typst_sha256=$OLDEST_TYPST_SHA256
-          just_version=$OLDEST_JUST_VERSION just_sha256=$OLDEST_JUST_SHA256
-        else
-          typst_version=$TYPST_VERSION typst_sha256=$TYPST_SHA256
-          just_version=$JUST_VERSION just_sha256=$JUST_SHA256
-        fi
         tmp=$(mktemp -d)
-        curl --fail --silent --show-error --location \
-          "https://github.com/typst/typst/releases/download/v${typst_version}/typst-x86_64-unknown-linux-musl.tar.xz" \
-          --output "$tmp/typst.tar.xz"
+        if [ "$OLDEST" = true ]; then
+          just_version=$OLDEST_JUST_VERSION just_sha256=$OLDEST_JUST_SHA256
+          curl --fail --silent --show-error --location \
+            "https://github.com/typst/typst/releases/download/v${OLDEST_TYPST_VERSION}/typst-x86_64-unknown-linux-musl.tar.xz" \
+            --output "$tmp/typst.tar.xz"
+          # Verified before extraction: an archive checked after unpacking has already
+          # chosen its own paths.
+          printf '%s  %s\n' "$OLDEST_TYPST_SHA256" "$tmp/typst.tar.xz" | sha256sum -c -
+          sudo tar -xJf "$tmp/typst.tar.xz" --strip-components=1 -C /usr/local/bin \
+            typst-x86_64-unknown-linux-musl/typst
+        else
+          just_version=$JUST_VERSION just_sha256=$JUST_SHA256
+          sudo sh tools/install-typst.sh /usr/local/bin
+        fi
         curl --fail --silent --show-error --location \
           "https://github.com/casey/just/releases/download/${just_version}/just-${just_version}-x86_64-unknown-linux-musl.tar.gz" \
           --output "$tmp/just.tar.gz"
-        # Verified before extraction: an archive checked after unpacking has already
-        # chosen its own paths.
-        printf '%s  %s\n' "$typst_sha256" "$tmp/typst.tar.xz" "$just_sha256" "$tmp/just.tar.gz" \
-          | sha256sum -c -
-        sudo tar -xJf "$tmp/typst.tar.xz" --strip-components=1 -C /usr/local/bin \
-          typst-x86_64-unknown-linux-musl/typst
+        printf '%s  %s\n' "$just_sha256" "$tmp/just.tar.gz" | sha256sum -c -
         sudo tar -xzf "$tmp/just.tar.gz" -C /usr/local/bin just
         typst --version
         just --version

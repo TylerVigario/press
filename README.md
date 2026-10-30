@@ -120,6 +120,7 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 | `sh third_party/press/tools/clean.sh` | deletes `print/` |
 | `sh third_party/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory; then audits it, where the audit's tools are installed |
 | `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | the audit alone, which refuses to run without its tools: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text printed on text |
+| `sh third_party/press/tools/install-typst.sh <dir>` | installs the typst press is built and audited with into `<dir>`, pinned by version and digest, on Linux x86_64 or aarch64: for a repository's CI (see In CI below) |
 
 `<flags>` are the three above: `--root . --font-path third_party/press/fonts --ignore-system-fonts`.
 
@@ -259,6 +260,25 @@ builds every one, then fails if any failed its audit. Export `PRESS_TZ` from the
   upgrade, so an upgrade leaves them naming a folder that is gone. Builds still succeed, now
   saying each document "is not audited: poppler's … pdftotext.exe is not found", and `check`
   refuses. Point the variables at the new version's `Library/bin`.
+
+### In CI
+
+A repository's CI installs typst with press's own tool, which holds press's pin of it: the
+version press is built and audited with, checked against its digest. The pin is in press's
+folder, so the repository keeps no copy to fall behind; moving to a press release moves its typst
+with it. poppler comes from the runner's packages; GitHub's Ubuntu runners already have Python 3
+and GNU grep. The audit runs as `check` there, which refuses without its tools rather than
+skipping it. On GitHub Actions, for a repository that builds with npm:
+
+```yaml
+- run: sh third_party/press/tools/install-typst.sh "$RUNNER_TEMP/bin"
+- run: echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+- run: sudo apt-get install -y poppler-utils
+- run: npm run press:check
+```
+
+`install-typst.sh` runs on Linux, x86_64 or aarch64, and refuses anywhere else; a workstation
+installs typst from its own packages.
 
 ## Writing a document
 
