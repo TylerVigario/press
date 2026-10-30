@@ -51,6 +51,17 @@
 // handwriting. A blank table row is otherwise only as tall as its inset, about 3 mm.
 #let _pen = 8mm
 
+// How far below the page's top edge its text area starts, as typst places it: a relative margin
+// is of the page's height, and auto is typst's 2.5/21 of the page's shorter side. Read in context.
+#let _text-top() = {
+  let m = page.margin
+  let top = if type(m) == dictionary { m.at("top", default: auto) } else { m }
+  if top == auto { 2.5 / 21 * calc.min(page.width, page.height) }
+  else if type(top) == ratio { top * page.height }
+  else if type(top) == relative { top.ratio * page.height + top.length.to-absolute() }
+  else { top.to-absolute() }
+}
+
 // The line a pen writes on, under a signature, a date or a note.
 #let _hand-line = line(length: 100%, stroke: 0.5pt + ink)
 
@@ -69,18 +80,112 @@
 //
 // `blank` adds that many empty rows after the given ones, each tall enough to write in, for a
 // log filled in by hand: `#sheet((auto, auto, 1fr), ([Date], [Size], [Notes]), blank: 6)`.
-#let sheet(cols, head, size: sz.micro, blank: 0, ..rows) = {
+//
+// `across` sets the sheet in that many columns, `gutter` apart, for a long, narrow list that would
+// otherwise fill half the page's width: `#sheet((1fr, auto), ([Room], [Key]), across: 2, ..keys)`.
+// It reads down each column, then the next, then the next page, with the header atop every column.
+// typst flows the full pages, which keeps that order, but cannot balance columns, so where the sheet
+// ends press splits its last rows between the columns by their measured height, not their count,
+// and the columns end level, a row that wraps counted at its height. A sheet that fits on one page
+// is balanced the same way.
+#let sheet(cols, head, size: sz.micro, blank: 0, across: 1, gutter: 9pt, ..rows) = {
+  assert(type(across) == int and across >= 1,
+    message: "sheet(across:) takes a number of columns, 1 or more; got " + repr(across))
   let inset = (x: 5pt, y: 4pt)
   let n = if type(cols) == int { cols } else { cols.len() }
-  table(
-    columns: cols,
-    stroke: 0.4pt + rule-hair,
-    inset: inset,
-    fill: (_, y) => if y == 0 { slate-tint } else if calc.odd(y) { paper-tint } else { none },
-    table.header(..head.map(h => text(size: size, weight: 700)[#h])),
+  let cells = (
     ..rows.pos().map(c => text(size: size)[#c]),
     ..range(blank * n).map(_ => box(height: _pen - 2 * inset.y)),
   )
+  // The sheet, or the part of it a column holds: `before` rows come ahead of these, so the
+  // stripes run on from column to column.
+  let part(cells, before: 0) = table(
+    columns: cols,
+    stroke: 0.4pt + rule-hair,
+    inset: inset,
+    fill: (_, y) => if y == 0 { slate-tint }
+      else if calc.odd(y + before) { paper-tint } else { none },
+    table.header(..head.map(h => text(size: size, weight: 700)[#h])),
+    ..cells,
+  )
+  if across == 1 or cells.len() == 0 { return part(cells) }
+
+  let lines = range(0, cells.len(), step: n).map(i => cells.slice(i, calc.min(i + n, cells.len())))
+  layout(region => context {
+    let w = (region.width - gutter * (across - 1)) / across
+    let head-h = measure(block(width: w, part(()))).height
+    let tall = lines.map(l => measure(block(width: w, part(l))).height - head-h)
+    // A column's height on a full page, and on the page the sheet starts on, what is left of it.
+    // Measured, as inside units(), the height has no end, and the sheet is one page.
+    let full = region.height
+    let first = if full.pt() == calc.inf { full } else {
+      full - (here().position().y - _text-top())
+    }
+
+    // The page each row lands on, filling as typst's columns do: a column takes rows while they
+    // fit, and the sheet moves on from a column too short for its header and first row. A row
+    // taller than a whole page's column goes where it is, as typst breaks it there.
+    let room(leaf) = (if leaf == 0 { first } else { full }) - head-h
+    let leaf = 0
+    let col = 0
+    let used = 0pt
+    let on = ()
+    for h in tall {
+      while used + h > room(leaf) and not (used == 0pt and leaf > 0) {
+        used = 0pt
+        col += 1
+        if col == across { col = 0; leaf += 1 }
+      }
+      on.push(leaf)
+      used += h
+    }
+
+    // The last page's rows, shared between its columns by height. `most` is the shortest the
+    // tallest column can be, found by halving between what an even share would be and all of
+    // them. Then each column takes rows until it holds its share of what is left, never past
+    // `most`, so where the rows cannot come out even, an earlier column is the longer.
+    let t = on.position(p => p == leaf)
+    let rest = tall.slice(t)
+    let total = rest.sum()
+    let slack = 0.01pt
+    let needs(most) = {
+      let count = 1
+      let held = 0pt
+      for h in rest {
+        if held > 0pt and held + h > most + slack { count += 1; held = 0pt }
+        held += h
+      }
+      count
+    }
+    let low = calc.max(..rest, total / across)
+    let most = total
+    for _ in range(24) {
+      let mid = (low + most) / 2
+      if needs(mid) <= across { most = mid } else { low = mid }
+    }
+    let shares = ()
+    let i = 0
+    for c in range(across) {
+      let share = rest.slice(i).sum(default: 0pt) / (across - c)
+      let held = 0pt
+      let from = i
+      while i < rest.len() and (c == across - 1
+          or (held < share - slack and held + rest.at(i) <= most + slack)) {
+        held += rest.at(i)
+        i += 1
+      }
+      shares.push(range(from, i))
+    }
+    let fits = shares.all(s => s.map(i => rest.at(i)).sum(default: 0pt) <= room(leaf) + slack)
+
+    let flowed = if t > 0 { (part(lines.slice(0, t).flatten()), colbreak()) } else { () }
+    let ending = if not fits { (part(lines.slice(t).flatten(), before: t),) } else {
+      shares.filter(s => s.len() > 0).map(s =>
+        part(s.map(i => lines.at(t + i)).flatten(), before: t + s.first())
+      ).intersperse(colbreak())
+    }
+    columns(across, gutter: gutter, (..flowed, ..ending).join())
+  })
 }
 
 // Lines to write on by hand, `n` of them, `pitch` apart, each after `label` where one is given:
