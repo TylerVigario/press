@@ -60,19 +60,22 @@ echo "audit-cases: the build audits as check does, and without poppler says it d
 ! grep -qF "accepted" "$tmp/out" || { cat "$tmp/out" >&2; fail "a pass that could not run was called accepted"; }
 echo "audit-cases: a pass that cannot run fails the audit, whatever the document accepts"
 
-# Open items are counted, not failed: the pass case above audited clean, and says how many.
+# Open items and estimates are counted, not failed: the pass case above audited clean, and says
+# how many of each.
 # shellcheck disable=SC2086
-sh tools/check.sh .github/audit-cases/pass-open-items.typ "$tmp/o/open.pdf" . $flags > "$tmp/out" 2>&1 \
-    || { cat "$tmp/out" >&2; fail "a document with open items failed its audit"; }
+sh tools/check.sh .github/audit-cases/pass-unsourced.typ "$tmp/o/open.pdf" . $flags > "$tmp/out" 2>&1 \
+    || { cat "$tmp/out" >&2; fail "a document with open items and an estimate failed its audit"; }
 grep -qF "has 2 open items" "$tmp/out" || { cat "$tmp/out" >&2; fail "the audit did not count the open items"; }
-echo "audit-cases: open items are counted, a missing value and an empty box are not, and none fails the audit"
+grep -qF "prints 1 estimate," "$tmp/out" || { cat "$tmp/out" >&2; fail "the audit did not count the estimate"; }
+echo "audit-cases: open items and estimates are counted, a missing value and an empty box are not, and none fails the audit"
 
 # Counting them needs only typst, so a build without the audit's tools still counts them.
 # shellcheck disable=SC2086
-PRESS_PDFTOTEXT=/nonexistent/pdftotext sh tools/stamp.sh .github/audit-cases/pass-open-items.typ "$tmp/b/open.pdf" $flags \
+PRESS_PDFTOTEXT=/nonexistent/pdftotext sh tools/stamp.sh .github/audit-cases/pass-unsourced.typ "$tmp/b/open.pdf" $flags \
     > "$tmp/out" 2>&1 || { cat "$tmp/out" >&2; fail "a build with open items and without poppler failed"; }
 grep -qF "has 2 open items" "$tmp/out" || { cat "$tmp/out" >&2; fail "a build without poppler did not count the open items"; }
-echo "audit-cases: a build without the audit's tools still counts the open items"
+grep -qF "prints 1 estimate," "$tmp/out" || { cat "$tmp/out" >&2; fail "a build without poppler did not count the estimate"; }
+echo "audit-cases: a build without the audit's tools still counts the open items and estimates"
 
 # A python with no XML parser cannot run the text-on-text pass. A stand-in python, the real one
 # with expat taken away at startup, is named by PRESS_PYTHON: check fails, and says why, and a

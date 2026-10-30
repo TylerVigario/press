@@ -101,7 +101,7 @@
 // It is centred on the face's x-height, measured, so it sits with the lowercase beside it in any
 // face. press draws it because ☐ is in no vendored face. `checked: true` marks it with an X, as
 // tick() does, for a copy filled in ahead of time. The audit does not count an empty box, unlike
-// open(): on paper, an empty box is what the reader is there to fill.
+// an open item: on paper, an empty box is what the reader is there to fill.
 //
 //   #set list(marker: checkbox())
 //   - Shut the water off at the street.
