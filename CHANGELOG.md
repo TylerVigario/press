@@ -8,6 +8,27 @@ verbatim. 0.1.0 at the bottom is hand-written and reads "Initial release." becau
 release has no changes to list — there is nothing it changed from.
 
 - - -
+## [v0.8.0](https://github.com/TylerVigario/press/compare/v0.7.0..v0.8.0) - 2026-11-02
+#### Features
+- tools/install-typst.sh installs press's pinned typst, so a repository's CI runs the audit with no pin of its own (#185) - ([fb32870](https://github.com/TylerVigario/press/commit/fb3287075e01569195fc843e9e066dc8cbcd5396)) - Tyler Vigario, Claude Opus 5.5
+- chip() draws a shape for its state, so the state reads on a grey printout, and boxed: false sets it in a table's cells (#184) - ([fd7c978](https://github.com/TylerVigario/press/commit/fd7c978e41e68d993c5c7b25caa643bc3521af70)) - Tyler Vigario, Claude Opus 5.5
+- sheet() takes across: to set a long, narrow table in columns, read down each in turn and ended level (#183) - ([bb7cce8](https://github.com/TylerVigario/press/commit/bb7cce8ed6e0ae3c955a2103b3b4a6501ac52c43)) - Tyler Vigario, Claude Opus 5.5
+- ![BREAKING](https://img.shields.io/badge/BREAKING-red) unsourced() marks a value not read from a source as open, missing or an estimate, and open() and missing() are gone (#182) - ([c0a5522](https://github.com/TylerVigario/press/commit/c0a552246faac4f3fab7c58e9761721f36be9a69)) - Tyler Vigario, Claude Opus 5.5
+- signature() takes width: for its ink line and dated: "below", so two signers sit side by side (#181) - ([34911a7](https://github.com/TylerVigario/press/commit/34911a7af9b29220662d70d8b5db5117caa09618)) - Tyler Vigario, Claude Opus 5.5
+- checkbox() draws a box to tick by hand, sized to the text it sits in (#170) - ([dbf1914](https://github.com/TylerVigario/press/commit/dbf19148f16ee697584d8a9182f71d125593a4f0)) - Tyler Vigario, Claude Opus 5.5
+#### Bug Fixes
+- a rebuild whose pages draw the same keeps its time, though its bytes differ (#179) - ([8ccc89d](https://github.com/TylerVigario/press/commit/8ccc89daeba05ba8e1d0593832ef2a9c6c17bf0f)) - Tyler Vigario, Claude Opus 5.5
+#### Documentation
+- a document built from data reads the data in typst, and a script that works something out writes data, never markup (#186) - ([7a65168](https://github.com/TylerVigario/press/commit/7a65168a8cfdb08f6992830dd511014bda218bb2)) - Tyler Vigario, Claude Opus 5.5
+- press's comments cite the repo standard's rules by their numbers now (#180) - ([499a680](https://github.com/TylerVigario/press/commit/499a6807454236e0a0b7adb1f51044da0c1fd578)) - Tyler Vigario, Claude Opus 5.5
+#### Continuous Integration
+- Markdown lint runs markdownlint-cli2 0.24.0 (#178) - ([82c2335](https://github.com/TylerVigario/press/commit/82c23358d61306e0344490cd3152a4d1a8f6708e)) - Tyler Vigario, Claude Opus 5.5
+- CI installs just 1.59.0, the version the host that prints these documents runs (#177) - ([d8d259c](https://github.com/TylerVigario/press/commit/d8d259c8abb42fcf90b6c57a4205fa8397b766bc)) - Tyler Vigario, Claude Opus 5.5
+#### Miscellaneous Chores
+- bump the codeql-action group with 2 updates (#187) - ([7137fcf](https://github.com/TylerVigario/press/commit/7137fcfbd786ae6b4510f5887c0f5e6687d6167a)) - dependabot[bot], dependabot[bot]
+
+- - -
+
 ## [v0.7.0](https://github.com/TylerVigario/press/compare/v0.6.0..v0.7.0) - 2026-10-20
 #### Features
 - missing() prints a value a document does not have in faint italic, where a blank would read as none (#166) - ([52553d6](https://github.com/TylerVigario/press/commit/52553d6a64768333ea44d012b35c2683f75c478b)) - Tyler Vigario, Claude Opus 5.5
