@@ -77,6 +77,17 @@ grep -qF "has 2 open items" "$tmp/out" || { cat "$tmp/out" >&2; fail "a build wi
 grep -qF "prints 1 estimate," "$tmp/out" || { cat "$tmp/out" >&2; fail "a build without poppler did not count the estimate"; }
 echo "audit-cases: a build without the audit's tools still counts the open items and estimates"
 
+# A title still to be named is one open item, though the footer prints it on every page: counted
+# once where a header prints it too, and once where only the footer does.
+for c in pass-unsourced-title pass-unsourced-title-footer; do
+    # shellcheck disable=SC2086
+    sh tools/check.sh ".github/audit-cases/$c.typ" "$tmp/o/$c.pdf" . $flags > "$tmp/out" 2>&1 \
+        || { cat "$tmp/out" >&2; fail "$c failed its audit"; }
+    grep -qF "has 1 open item " "$tmp/out" \
+        || { cat "$tmp/out" >&2; fail "$c did not count its title once"; }
+done
+echo "audit-cases: a title still to be named is counted once, however many pages print it"
+
 # A python with no XML parser cannot run the text-on-text pass. A stand-in python, the real one
 # with expat taken away at startup, is named by PRESS_PYTHON: check fails, and says why, and a
 # build says it skipped the pass and is not recorded as audited.
