@@ -16,7 +16,9 @@
   set document(title: title, author: author)
   set page(..preset)
   set text(font: face-text, size: sz.small, fill: ink, lang: "en")
-  set par(leading: 0.52em, spacing: 0.55em)
+  // Paragraphs further apart than a list's items, and items than lines, so each reads as one:
+  // a paragraph ends where its gap shows, and the one after a list is not its last item's.
+  set par(leading: 0.52em, spacing: 0.8em)
   // A list's items are further apart than the lines within one, so a wrapped item reads as one.
   set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.65em)
   set enum(spacing: 0.65em)

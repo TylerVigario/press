@@ -1,13 +1,16 @@
 #!/bin/sh
-# list-spacing.sh — a list's items are further apart than the lines within one, so an item that
-# runs to a second line reads as one item, not as part of the next.
+# list-spacing.sh — a paragraph's lines are closer than a list's items, and its items closer
+# than paragraphs, so each reads as one: an item that runs to a second line is not part of the
+# next, a paragraph ends where its gap shows, and the paragraph after a list is not its last item.
 #
 #   sh .github/list-spacing.sh
 #
 # Run by CI's audit job and the oldest-toolchain job, which have poppler. Under each template
-# that sets its lists, .github/list-spacing.typ sets a bulleted list, a numbered one and a
-# checklist whose first item has a second line; the gap from that line to the next item must be
-# wider than the gap between the item's own two lines.
+# that sets its lists, .github/list-spacing.typ sets two paragraphs, a bulleted list, a numbered
+# one and a checklist whose first item has a second line, and a paragraph after them. Each gap
+# is read from the tops of the lines' first words, and must be wider than the one before it in
+# that order: lines, then items, then paragraphs; a list's own gap from the text after it is a
+# paragraph's.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -26,6 +29,15 @@ for template in brief base recipe resume; do
     typst compile --root . --font-path fonts --ignore-system-fonts --input "template=$template" \
         .github/list-spacing.typ "$tmp/probe.pdf"
     pdftotext -bbox "$tmp/probe.pdf" "$tmp/boxes.html"
+    p1=$(top_of Paraone) pl=$(top_of Paraline) p2=$(top_of Paratwo)
+    b1=$(top_of Bulletline) b2=$(top_of Bullettwo) c2=$(top_of Checktwo) after=$(top_of Paraafter)
+    [ -n "$p1" ] && [ -n "$pl" ] && [ -n "$p2" ] && [ -n "$after" ] || fail "$template: a paragraph is missing"
+    awk -v line="$(awk -v a="$p1" -v b="$pl" 'BEGIN { print b - a }')" \
+        -v item="$(awk -v a="$b1" -v b="$b2" 'BEGIN { print b - a }')" \
+        -v para="$(awk -v a="$pl" -v b="$p2" 'BEGIN { print b - a }')" \
+        -v tail="$(awk -v a="$c2" -v b="$after" 'BEGIN { print b - a }')" \
+        'BEGIN { exit !(item > line + 0.5 && para > item + 0.5 && tail > para - 0.5) }' ||
+        fail "$template: lines, items and paragraphs are not each further apart than the last"
     for case in "Bullet:bulleted list" "Enum:numbered list" "Check:checklist"; do
         list=${case%%:*} name=${case#*:}
         one=$(top_of "${list}one") line=$(top_of "${list}line") two=$(top_of "${list}two")
@@ -35,4 +47,4 @@ for template in brief base recipe resume; do
                 'BEGIN { printf "%.2f", c - b }')pt below an item's last line, no further than its lines"
     done
 done
-echo "list-spacing: a list's items are further apart than the lines within one, in every template"
+echo "list-spacing: lines, then items, then paragraphs, each further apart than the last, in every template"
