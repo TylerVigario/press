@@ -423,8 +423,8 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 | `eyebrow(body, color:, caps:, size: sz.fine)` | Small tracked-out uppercase label. |
 | `section(body, color: slate)` | A section whose headings show its state: inside it, a template's `=` band and `==` label take `color`, any colour, where every other heading stays slate, and where it is ok, warn or bad they draw that state's shape too. Wrap one heading, `#section(color: bad)[= Red-flag signs]`, or the whole section; a label on the heading stays, `<depth>` among them. `#show: section.with(color: steel)` colours a whole document's. |
 | `chip(label, tone, boxed: true, shape: auto)` | A state, shown by its tone's colour and a shape drawn before its label, so it reads on a grey printout too: a circle for ok, a triangle for warn, a square for bad, a diamond for note. Boxed, a pill for a legend; `boxed: false`, the shape and the label alone, bold in the tone's colour at the text's own size, for a value in a table whose every cell has a state: `chip([4], "ok", boxed: false)`. `shape` takes another of the four, or none. |
-| `callout(body, tone: "note", label: none, size:, shape: auto)` | Aside that must not be missed. Its tone's shape goes before its label, or before its body where it has none; `shape` takes another of the four, or none. |
-| `panel(body, label: none, color: slate)` | Boxed block, no tone semantics. |
+| `callout(body, tone: "note", label: none, size:, shape: auto, caps: true)` | Aside that must not be missed. Its tone's shape goes before its label, or before its body where it has none; `shape` takes another of the four, or none. |
+| `panel(body, label: none, color: slate, caps: true)` | Boxed block, no tone semantics. |
 | `code(body, breakable: false)` | Code-block treatment; the document installs it as a show rule. |
 | `link-note` | Show rule for links: coloured and underlined, address footnoted for paper. |
 | `item(n, title, body, color:, size:)` | Numbered step. |
@@ -467,9 +467,9 @@ build it in the document.
   **Read [`FONTS.md`](FONTS.md) before using any symbol.**
 - **Some symbols are in no vendored face.** `✓ ✗ ▸` render from typst's NewCMMath, `⚠ ⚡ ☐`
   from DejaVuSansMono, and **`⛔` and `📋` vanish** from the page. Build a probe and audit it.
-- **`unit`, `eyebrow`, and brief's and recipe's headings uppercase their labels.** "pH" becomes
-  "PH", "µS" becomes "ΜS" (a capital Mu). Pass `caps: false`, to the template for its headings,
-  whenever case means something.
+- **`unit`, `callout`, `panel`, `addendum`, `eyebrow`, and brief's, recipe's and résumé's
+  headings uppercase their labels.** "pH" becomes "PH", "µS" becomes "ΜS" (a capital Mu). Pass
+  `caps: false` to the part, or to the template for its headings, whenever case means something.
 - **A link in a heading is footnoted twice once there is an outline.** The contents repeat the
   heading and its footnote. Keep links out of headings.
 - **A table that crosses a page loses its header unless it uses `table.header`.** `sheet`

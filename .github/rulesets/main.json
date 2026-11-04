@@ -79,6 +79,9 @@
             "context": "A callout's, panel's or unit's label stays on the page with what it heads"
           },
           {
+            "context": "Every label press uppercases keeps its case under caps: false"
+          },
+          {
             "context": "A stamp's hairline stays on the page with its words"
           },
           {
@@ -146,6 +149,9 @@
           },
           {
             "context": "A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain"
+          },
+          {
+            "context": "Every label press uppercases keeps its case under caps: false, on the oldest toolchain"
           },
           {
             "context": "A stamp's hairline stays on the page with its words, on the oldest toolchain"
