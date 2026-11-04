@@ -13,35 +13,18 @@
 // `caps` forwards to the label's `eyebrow` — see the note on it in parts.typ. This is the
 // most-used call in the vocabulary, so it is where the uppercasing does the most
 // damage: `unit([pH], "warn")` renders "PH" with nothing to indicate it happened. A unit
-// `breakable: true` lets break keeps its label with the lead, as a callout does.
-#let unit(label, tone, lead, body, caps: true, breakable: false) = {
+// `breakable: true` lets break keeps its label with the lead, as a callout does. Its tone's shape
+// goes before its label, as a callout's does, and `shape` changes it.
+#let unit(label, tone, lead, body, caps: true, breakable: false, shape: auto) = {
   let pair = tones.at(tone)
   block(width: 100%, breakable: breakable, stroke: (left: 2.5pt + pair.at(0)),
         fill: paper-tint, inset: (x: 8pt, y: 6.5pt))[
-    #text(size: sz.fine, block(sticky: true, eyebrow(label, color: pair.at(0), caps: caps)))
+    #text(size: sz.fine, block(sticky: true,
+      [#_shaped("unit", tone, shape)#eyebrow(label, color: pair.at(0), caps: caps)]))
     #v(2.5pt)
     #text(size: sz.fine, weight: 700)[#lead]
     #if body != none [ #v(2.5pt) #text(size: sz.fine)[#body] ]
   ]
-}
-
-// The shape each tone draws beside a state, so the state reads without its colour. Printed in
-// grey, ok and warn come out nearly the same, about 96 and 102 of 255 in Rec. 601 luma, and on
-// paper colour alone carries nothing that a monochrome printer or a reader's eyes may lose.
-#let _tone-shapes = (note: "diamond", ok: "circle", warn: "triangle", bad: "square")
-
-// A shape filled with `color`, about as tall as a capital, centred on the capitals of the text it
-// sits in, as checkbox() centres on the lowercase. Each is drawn to look the same size as the
-// others, so a square is a little smaller than a circle and a triangle a little wider.
-#let _shape(name, color) = context {
-  let cap = measure(text(top-edge: "cap-height", bottom-edge: "baseline")[X]).height
-  let s = 0.85 * cap
-  let drawn = if name == "circle" { circle(radius: s / 2, fill: color) }
-    else if name == "square" { square(size: 0.88 * s, fill: color) }
-    else if name == "triangle" { polygon(fill: color, (0pt, s), (0.6 * s, 0pt), (1.2 * s, s)) }
-    else { polygon(fill: color, (0.6 * s, 0pt), (1.2 * s, 0.6 * s), (0.6 * s, 1.2 * s), (0pt, 0.6 * s)) }
-  let h = measure(drawn).height
-  box(baseline: h / 2 - cap / 2, drawn)
 }
 
 // A state, shown by its tone's colour and its shape: the circle is ok, the triangle warn, the
