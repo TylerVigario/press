@@ -161,7 +161,7 @@
   #_body(spacing, body)
 ]
 
-// Code block treatment. The document installs it; press never does:
+// Code block treatment. Every template installs it, and a document without one installs it:
 //
 //   #show raw: set text(font: face-mono, size: sz.fine / sz.small / 0.8 * 1em)
 //   #show raw.where(block: true): code
@@ -209,8 +209,8 @@
   )
 }
 
-// Links that work on a screen and on paper, in the one PDF. A document installs it, as it
-// installs `code`:
+// Links that work on a screen and on paper, in the one PDF. Every template installs it, as it
+// installs `code`, and a document without one installs it:
 //
 //   #show link: link-note
 //

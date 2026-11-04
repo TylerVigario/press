@@ -379,11 +379,11 @@ found() {
     case " $accepted " in *" $1 "*) ;; *) rc=1 ;; esac
 }
 
-# SCANS (lib.typ's scan()). A document that reads an image file may have marked some of it as a
-# scan, content it did not set. The passes that read the page — fonts, ink near the edge, text
+# SCANS (scan(), in lib/parts.typ). A document that reads an image file may have marked some of it
+# as a scan, content it did not set. The passes that read the page — fonts, ink near the edge, text
 # on text — then read a copy compiled with every scan hidden, its space kept and its stamp the
-# same, so the page lays out exactly as the document's does, without the scans. A document
-# that reads no image is read as it is, with no second compile.
+# same, so the page lays out exactly as the document's does, without the scans. A document that
+# reads no image is read as it is, with no second compile.
 page=$pdf
 if tr '\000' '\n' < "$tmp/deps" | grep -qiE '\.(pdf|png|jpe?g|gif|svg|webp)$'; then
     if PRESS_IN_CHECK=1 PRESS_STAMP_AS="$pdf" sh "$press_root/tools/stamp.sh" "$src" "$tmp/scans-hidden.pdf" \

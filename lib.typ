@@ -38,10 +38,10 @@
 // --font-path, rather than named from the system.
 // Typst does NOT perform metric substitution the way fontconfig does: on a box
 // without Arial, `#set text(font: "Arial")` emits only `warning: unknown font
-// family` and silently falls back to an embedded serif. Since 0.15 has no
-// deny-warnings flag, that mistake ships. Hence: faces are exported constants,
-// in lib/tokens.typ, so a typo is an unknown-variable ERROR, and callers pass `face-*`
-// rather than a string.
+// family` and silently falls back to an embedded serif. typst has no deny-warnings
+// flag, so outside press's audit, which fails on the warning, that mistake ships.
+// Hence: faces are exported constants, in lib/tokens.typ, so a typo is an
+// unknown-variable ERROR, and callers pass `face-*` rather than a string.
 //
 // That covers the FAMILY level only, which is the loudest of three. A missing
 // WEIGHT and a missing GLYPH each report nothing at all, and
