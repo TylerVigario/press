@@ -87,6 +87,10 @@
   set page(..reading, header: header)
   set text(font: face, size: sz.body, fill: ink, lang: "en")
   set par(leading: 0.6em, spacing: 1.05em)
+  // Code is set a step below the text around it, as sz.fine is to sz.small; typst's own rule for
+  // raw sets it at 0.8em first, which this is relative to.
+  show raw: set text(font: face-mono, size: sz.fine / sz.small / 0.8 * 1em)
+  show raw.where(block: true): code
   show link: link-note
 
   let head = letterhead(..if type(contact) == array { contact } else { (contact,) }, face: face)

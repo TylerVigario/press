@@ -1,6 +1,7 @@
 #!/bin/sh
 # code-size.sh — inline code is set to the text around it: sz.fine in body text, a sheet's own
 # size in its cells, a step below a larger text, and a document's own rule for raw still wins.
+# Every template sets it so, in press's mono face rather than typst's own.
 #
 #   sh .github/code-size.sh
 #
@@ -35,4 +36,19 @@ for case in "codebody:9.40:in body text" "codesheet:8.60:in a sheet's cell" \
     [ -n "$got" ] || fail "\"$word\" is on no page"
     [ "$got" = "$want" ] || fail "code $where is ${got}pt, not ${want}pt"
 done
+# Under each template: the PDF embeds Liberation Mono and not typst's DejaVu Sans Mono, which
+# the audit refuses, and body code is a step below the template's body size, 10.2pt in all
+# but letter, whose body is 11pt.
+for case in brief:9.40 base:9.40 recipe:9.40 letter:10.14 resume:9.40; do
+    template=${case%%:*} want=${case#*:}
+    typst compile --root . --font-path fonts --ignore-system-fonts --input "template=$template" \
+        .github/code-face.typ "$tmp/face.pdf"
+    fonts=$(pdffonts "$tmp/face.pdf")
+    printf '%s\n' "$fonts" | grep -q 'LiberationMono' || fail "$template sets code in no Liberation Mono"
+    ! printf '%s\n' "$fonts" | grep -q 'DejaVu' || fail "$template sets code in typst's DejaVu Sans Mono"
+    pdftotext -bbox "$tmp/face.pdf" "$tmp/boxes.html"
+    got=$(size_of codeface)
+    [ "$got" = "$want" ] || fail "$template sets body code at ${got}pt, not ${want}pt"
+done
 echo "code-size: inline code is set to the text around it, and a document's own rule wins"
+echo "code-size: every template sets code in press's mono face, a step below its body text"

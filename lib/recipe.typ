@@ -29,6 +29,10 @@
   // A list's items are further apart than the lines within one, so a wrapped item reads as one.
   set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.65em)
   set enum(spacing: 0.65em)
+  // Code is set a step below the text around it, as sz.fine is to sz.small; typst's own rule for
+  // raw sets it at 0.8em first, which this is relative to.
+  show raw: set text(font: face-mono, size: sz.fine / sz.small / 0.8 * 1em)
+  show raw.where(block: true): code
   show link: link-note
   // A section is a heading: = draws it as a band in slate, and == as a labelled hairline. Its
   // gaps are the paragraph gap at the body size, since a heading's own em is its larger size.
