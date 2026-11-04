@@ -19,14 +19,10 @@ trap 'exit 143' TERM
 
 typst compile --root . --font-path fonts --ignore-system-fonts .github/code-size.typ "$tmp/probe.pdf"
 pdftotext -bbox "$tmp/probe.pdf" "$tmp/boxes.html"
+. .github/word-box.sh
 # size_of <word>: the size in points its box's width gives, to two places.
 size_of() {
-    awk -v w="$1" '
-        index($0, ">" w "<") {
-            match($0, /xMin="[0-9.]+"/); x0 = substr($0, RSTART + 6, RLENGTH - 7)
-            match($0, /xMax="[0-9.]+"/); x1 = substr($0, RSTART + 6, RLENGTH - 7)
-            printf "%.2f\n", (x1 - x0) / (0.6 * length(w)); exit
-        }' "$tmp/boxes.html"
+    word_box "$tmp/boxes.html" "$1" | awk -v n="${#1}" '{ printf "%.2f\n", ($3 - $1) / (0.6 * n) }'
 }
 for case in "codebody:9.40:in body text" "codesheet:8.60:in a sheet's cell" \
             "codesheetsmall:10.20:in a sheet at sz.small" "codelead:11.52:in a lead at sz.lead" \
@@ -38,10 +34,7 @@ for case in "codebody:9.40:in body text" "codesheet:8.60:in a sheet's cell" \
     [ "$got" = "$want" ] || fail "code $where is ${got}pt, not ${want}pt"
 done
 # left_of <word>: the left edge of its box, in points from the page's.
-left_of() {
-    awk -v w="$1" 'index($0, ">" w "<") {
-        match($0, /xMin="[0-9.]+"/); print substr($0, RSTART + 6, RLENGTH - 7); exit }' "$tmp/boxes.html"
-}
+left_of() { word_box "$tmp/boxes.html" "$1" | awk '{ print $1 }'; }
 # Under each template: the PDF embeds Liberation Mono and not typst's DejaVu Sans Mono, which
 # the audit refuses, body code is a step below the template's body size, 10.2pt in all but
 # letter, whose body is 11pt, and a code block is boxed by code(), its words 7pt in from the

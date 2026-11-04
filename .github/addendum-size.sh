@@ -18,13 +18,9 @@ trap 'exit 143' TERM
 
 typst compile --root . --font-path fonts --ignore-system-fonts .github/addendum-size.typ "$tmp/probe.pdf"
 pdftotext -bbox "$tmp/probe.pdf" "$tmp/boxes.html"
+. .github/word-box.sh
 # height_of <word>: its box's height, to two places.
-height_of() {
-    awk -v w="$1" 'index($0, ">" w "<") {
-        match($0, /yMin="[0-9.]+"/); y0 = substr($0, RSTART + 6, RLENGTH - 7)
-        match($0, /yMax="[0-9.]+"/); y1 = substr($0, RSTART + 6, RLENGTH - 7)
-        printf "%.2f\n", y1 - y0; exit }' "$tmp/boxes.html"
-}
+height_of() { word_box "$tmp/boxes.html" "$1" | awk '{ printf "%.2f\n", $4 - $2 }'; }
 entry=$(height_of Sheetentry) label=$(height_of Sheetlabel)
 [ -n "$entry" ] && [ -n "$label" ] || fail "the sheet's entry or its addendum is missing"
 [ "$label" = "$entry" ] || fail "in a sheet, the label is ${label}pt tall and its entry ${entry}pt"
