@@ -76,6 +76,8 @@
       (text(size: 0.95 * size, fill: ink-soft, contact.join(text(fill: ink-faint)[ #sym.dot.c ])),)
     },
   ))
+  // The title is counted here when nothing in the document prints it.
+  _title-start()
   if centred { align(center, head) } else { head }
   body
 }

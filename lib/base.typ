@@ -27,5 +27,7 @@
   show raw: set text(font: face-mono, size: sz.fine / sz.small / 0.8 * 1em)
   show raw.where(block: true): code
   show link: link-note
+  // The title is counted here when nothing in the document prints it.
+  _title-start()
   body
 }

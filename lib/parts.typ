@@ -43,6 +43,31 @@
 // for whatever gap a template sets between a document's paragraphs.
 #let _part-gap = 0.55em
 
+// press's marks in a title, unsourced()'s, and the title without them. footer() prints the title
+// on every page, and a mark printed with it each time would count one item once a page.
+#let _is-mark(it) = (type(it) == content and it.func() == metadata and type(it.value) == str
+  and it.value.starts-with("press-"))
+#let _marks(it) = {
+  if type(it) != content { () } else if _is-mark(it) { (it,) }
+  else if it.has("children") { it.children.map(_marks).flatten() } else { () }
+}
+#let _unmarked(it) = {
+  if type(it) != content { it } else if _is-mark(it) { none }
+  else if it.has("children") { it.children.map(_unmarked).join() } else { it }
+}
+
+// A title marked with unsourced() is counted once, wherever it prints, and where it prints
+// nowhere, as a letter's: typst's title() with the document's own title counts it, printing it;
+// else header(); else the footer() on the first page that has one; else the start of the
+// document, which every template marks. The others print it without its marks.
+#let _titled() = query(title).any(t => t.body == auto or t.body == document.title)
+
+// The start of a template's document, where the title is counted when nothing prints it.
+#let _title-start() = context if (not _titled() and query(<press-header>).len() == 0
+  and query(<press-footer>).len() == 0) {
+  _marks(document.title).join()
+}
+
 // A document's header: its title on the left, `meta` on the right, and a rule beneath. The title
 // is the one the document names itself with, set document(title:) or a template's title, so it
 // is named once, as footer() names it.
@@ -52,12 +77,13 @@
   // Its rule sits under the title by the part's own gap, whatever a template sets between
   // paragraphs.
   set par(spacing: _part-gap)
-  // Tells footer() the title's marks are counted here.
+  // Tells footer() and the document's start the title's marks are counted here.
   [#metadata(none)<press-header>]
+  if not _titled() { _marks(document.title).join() }
   grid(
     columns: (auto, 1fr),
     align: (left + bottom, right + bottom),
-    text(font: face, size: size, weight: 700, fill: ink, document.title),
+    text(font: face, size: size, weight: 700, fill: ink, _unmarked(document.title)),
     text(size: sz.fine, fill: ink-soft, meta),
   )
   v(-3pt)
@@ -337,19 +363,6 @@
   [#sign#groups.join(sep)#if decimals.len() > 0 [.#decimals.join()]]
 }
 
-// press's marks in a title, unsourced()'s, and the title without them. footer() prints the title
-// on every page, and a mark printed with it each time would count one item once a page.
-#let _is-mark(it) = (type(it) == content and it.func() == metadata and type(it.value) == str
-  and it.value.starts-with("press-"))
-#let _marks(it) = {
-  if type(it) != content { () } else if _is-mark(it) { (it,) }
-  else if it.has("children") { it.children.map(_marks).flatten() } else { () }
-}
-#let _unmarked(it) = {
-  if type(it) != content { it } else if _is-mark(it) { none }
-  else if it.has("children") { it.children.map(_unmarked).join() } else { it }
-}
-
 // When the page's content last changed, as tools/stamp.sh stamps it.
 // A rebuild that changes nothing on the page keeps the old time, so a newer time than the
 // copy on the shelf means reprint, and the same time means that copy is current. Put it in
@@ -367,13 +380,17 @@
 // total on the right. The title is the one the document names itself with, set document(title:)
 // or a template's title, as header() names it. `edition` is what it says of the edition: none
 // leaves it out, and updated(words: …) says it in other words. A title marked with unsourced()
-// counts once: header() counts it, or typst's title() in a head of the document's own, or with
-// neither, the footer on the first page.
+// counts once: typst's title() with the document's own title counts it, or header(), or with
+// neither, the footer on the first page that has one.
 //
 //   #set page(..dense, footer: footer(status: [draft]))
 #let footer(status: none, edition: updated()) = context {
   set text(size: sz.micro, fill: ink-faint)
-  if here().page() == 1 and query(<press-header>).len() == 0 and query(title).len() == 0 {
+  // Tells the document's start, and the footers after this one, the title's marks are counted.
+  [#metadata(none)<press-footer>]
+  let footers = query(<press-footer>)
+  if (footers.len() > 0 and footers.first().location().page() == here().page()
+      and query(<press-header>).len() == 0 and not _titled()) {
     _marks(document.title).join()
   }
   grid(columns: (1fr, auto),
