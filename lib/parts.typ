@@ -56,6 +56,11 @@
   line(length: 100%, stroke: 2pt + color)
 }
 
+// The gap between the paragraphs inside a part: its label, title or lead and its body, and a
+// body's own paragraphs. Each part sets it for itself, so a part keeps the layout it was drawn
+// for whatever gap a template sets between a document's paragraphs.
+#let _part-gap = 0.55em
+
 #let tones = (
   note: (slate, slate-tint), ok: (ok, ok-tint),
   warn: (warn, warn-tint), bad: (bad, bad-tint),
@@ -102,6 +107,7 @@
     width: 100%, fill: pair.at(1), stroke: (left: 3pt + pair.at(0)),
     inset: (x: 10pt, y: 8pt),
   )[
+    #set par(spacing: _part-gap)
     #if label != none [#text(size: sz.fine, block(sticky: true,
       [#mark#eyebrow(label, color: pair.at(0))])) #v(3pt)]
     #text(size: size)[#if label == none { mark }#body]
@@ -113,6 +119,7 @@
 #let panel(body, label: none, color: slate) = block(
   width: 100%, stroke: 0.6pt + rule-mid, inset: 10pt, radius: 1pt,
 )[
+  #set par(spacing: _part-gap)
   #if label != none [#text(size: sz.fine, block(sticky: true, eyebrow(label, color: color))) #v(4pt)]
   #body
 ]
@@ -197,6 +204,7 @@
 #let item(n, title, body, color: slate, size: sz.small) = block(
   width: 100%, breakable: false, inset: (bottom: 6pt),
 )[
+  #set par(spacing: _part-gap)
   #text(size: size, weight: 700, fill: color)[#n]
   #h(5pt)
   #text(size: size, weight: 700)[#title]
@@ -215,8 +223,8 @@
 
 #let stamp(body) = {
   // The hairline is a sticky block, which typst keeps with the words after it, so a page never
-  // ends on the rule alone.
-  block(sticky: true, {
+  // ends on the rule alone. The gap under it is the part's own, as inside every other part.
+  block(sticky: true, below: _part-gap, {
     v(4pt)
     line(length: 100%, stroke: 0.5pt + rule-hair)
     v(2pt)
@@ -235,6 +243,7 @@
 #let addendum(date, body, label: [Later], color: ink-faint, caps: true) = block(
   width: 100%, above: 0.9em, inset: (left: 0.8em), stroke: (left: 0.6pt + color),
 )[
+  #set par(spacing: _part-gap)
   #block(sticky: true, below: 0.75em, context eyebrow([#label · #date], color: color, caps: caps,
     size: calc.min(sz.fine, text.size)))
   #text(fill: ink-soft, body)

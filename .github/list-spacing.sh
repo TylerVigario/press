@@ -38,6 +38,15 @@ for template in brief base recipe resume; do
         -v tail="$(awk -v a="$c2" -v b="$after" 'BEGIN { print b - a }')" \
         'BEGIN { exit !(item > line + 0.5 && para > item + 0.5 && tail > para - 0.5) }' ||
         fail "$template: lines, items and paragraphs are not each further apart than the last"
+    # A part's own pieces are no further apart than paragraphs: a unit's lead from its body, an
+    # item's title from its body.
+    for pair in Unitlead:Unitbody Itemtitle:Itembody; do
+        a=$(top_of "${pair%%:*}") b=$(top_of "${pair#*:}")
+        [ -n "$a" ] && [ -n "$b" ] || fail "$template: ${pair%%:*} is missing"
+        awk -v gap="$(awk -v a="$a" -v b="$b" 'BEGIN { print b - a }')" \
+            -v para="$(awk -v a="$pl" -v b="$p2" 'BEGIN { print b - a }')" 'BEGIN { exit !(gap < para) }' ||
+            fail "$template: ${pair%%:*} is further from ${pair#*:} than paragraphs are apart"
+    done
     for case in "Bullet:bulleted list" "Enum:numbered list" "Check:checklist"; do
         list=${case%%:*} name=${case#*:}
         one=$(top_of "${list}one") line=$(top_of "${list}line") two=$(top_of "${list}two")
@@ -47,4 +56,4 @@ for template in brief base recipe resume; do
                 'BEGIN { printf "%.2f", c - b }')pt below an item's last line, no further than its lines"
     done
 done
-echo "list-spacing: lines, then items, then paragraphs, each further apart than the last, in every template"
+echo "list-spacing: lines, then items, then paragraphs, each further apart than the last, and a part's own pieces closer than paragraphs, in every template"

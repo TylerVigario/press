@@ -8,6 +8,6 @@
 #show: brief.with(title: [Probe], author: "press")
 
 = A section
-#block(height: 8.7in, width: 100%, stroke: 0.5pt + ink-faint)
+#block(height: 8.5in, width: 100%, stroke: 0.5pt + ink-faint)
 #if sys.inputs.at("break", default: "no") == "yes" { pagebreak() }
 #stamp[Stamp words begin. #lorem(25)]
