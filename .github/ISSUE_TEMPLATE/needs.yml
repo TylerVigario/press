@@ -1,0 +1,28 @@
+name: A document needs something press lacks
+description: A part, a template or a tool a real document needs, and press does not have.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        press grows from the documents that use it: a part or a template is added when a real
+        document needs it, built for screen and paper both. Start from that document.
+  - type: textarea
+    id: document
+    attributes:
+      label: The document
+      description: What it is, who reads it, and whether on paper, on a screen or both.
+    validations:
+      required: true
+  - type: textarea
+    id: lacks
+    attributes:
+      label: What it needs that press does not do
+      description: And what the document does in its place now.
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: An example
+      description: A page, a sketch or the document's source as it stands.

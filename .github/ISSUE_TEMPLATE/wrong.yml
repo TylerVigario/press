@@ -1,0 +1,73 @@
+name: Something builds or prints wrong
+description: A page set wrong, a build or the audit failing, or a tool that does not do what the README says.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Say what goes wrong, and give the document that shows it. A flaw that could be used
+        against someone who builds with press is not reported here: see the
+        [security policy](https://github.com/TylerVigario/press/security/policy).
+  - type: input
+    id: press
+    attributes:
+      label: press version
+      description: The `version` in your copy's `press.toml`.
+      placeholder: 0.9.1
+    validations:
+      required: true
+  - type: input
+    id: typst
+    attributes:
+      label: typst version
+      description: What `typst --version` prints.
+      placeholder: typst 0.15.1
+    validations:
+      required: true
+  - type: dropdown
+    id: template
+    attributes:
+      label: Template
+      options:
+        - brief
+        - base
+        - letter
+        - recipe
+        - resume
+        - None, a page the document lays out itself
+        - It is not about a document
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: System
+      description: Where it runs, and for the audit, its poppler and Python.
+      placeholder: Fedora 44, poppler 25.02, Python 3.13
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens
+      description: >-
+        What you see, measured where you can: a gap in points, a page count, the line the build
+        or the audit prints.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: And where press says so, if it does.
+    validations:
+      required: true
+  - type: textarea
+    id: document
+    attributes:
+      label: A document that shows it
+      description: The smallest one, as it would sit in your repository, `docs/<name>.typ`.
+      render: typ
+  - type: textarea
+    id: command
+    attributes:
+      label: The command, and what it printed
+      render: shell
