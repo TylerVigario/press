@@ -61,6 +61,7 @@ kinds:
 | `The release bundle installs and works`; `Every typst digest the kit pins is the release's`; `Both installers install, update and refuse as they should, install.ps1 through PowerShell 7`; `A release's commit rebuilds the bundle it published` | the bundle holds the kit and nothing else, installs as the README says and works with no just; its pins, installers and rebuild |
 | each build and audit context above but the version's, again with `, on the oldest toolchain`, or as `Documents build on the oldest toolchain` and `Documents pass on the oldest toolchain`; and `The oldest toolchain is the floors press declares` | the same at the oldest typst and just `press.just` accepts, and that those are the floors press declares |
 | `No invisible characters` | no soft hyphens or zero-width characters in any tracked file |
+| `Every CI job is a required context, by a name GitHub keeps whole` | the jobs' names and the title check's are exactly the contexts required here, each 100 characters or fewer |
 | `JSON parses` | every tracked `*.json`, including these payloads, parses |
 | `Markdown lint` | every tracked `*.md` passes markdownlint |
 | `Workflows lint` | every workflow passes actionlint, with shellcheck on each `run:` block |
@@ -74,8 +75,10 @@ whenever main moves under an open pull request, which the one-at-a-time flow alr
 
 These are **job names**, taken from each job's `name:` field. Renaming a job disables
 that gate without a word of warning, and adding a job without adding its context here
-leaves protection reading as complete while covering less. To change one: relax the
-rule, merge the change, tighten it again, then verify against the rules endpoint.
+leaves protection reading as complete while covering less. `.github/contexts.sh` fails on
+either, and on a name past 100 characters, where GitHub cuts a check's name to 97 and `...`
+so the context required never arrives. To change one: relax the rule, merge the change,
+tighten it again, then verify against the rules endpoint.
 
 The title, not a part of it. "Subject" is avoided above because it means two different
 things in a repository that lints commits: git's subject is the whole first line, while

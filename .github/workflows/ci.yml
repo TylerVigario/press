@@ -46,6 +46,11 @@ name: CI
 #   Markdown lint            markdownlint over every tracked *.md. README.md and
 #                            CLAUDE.md are how press is learned, by people and by
 #                            agents, and a broken fence or table misleads both.
+#   Every CI job is a required context, by a name GitHub keeps whole
+#                            each job's name above, and the title check's, is one main.json
+#                            requires, and each it requires is one of them, at 100 characters
+#                            or fewer, past which GitHub cuts a check's name and the one required
+#                            never arrives.
 #   JSON parses              every tracked *.json. The ruleset payloads are applied
 #                            by hand with gh api, and a payload that does not parse
 #                            is found at the moment protection is being changed.
@@ -164,7 +169,7 @@ jobs:
       - run: sh .github/code-break.sh
 
   label-break:
-    name: A callout's, a panel's or a unit's label stays on the page with what it heads
+    name: A callout's, panel's or unit's label stays on the page with what it heads
     runs-on: ubuntu-latest
     steps:
       - *checkout
@@ -180,7 +185,7 @@ jobs:
       - run: sh .github/stamp-break.sh
 
   code-size:
-    name: Inline code is set to the text around it, in press's face, and a code block is boxed under every template
+    name: Code is set in press's face, inline to the text around it, a block boxed
     runs-on: ubuntu-latest
     steps:
       - *checkout
@@ -228,7 +233,7 @@ jobs:
       - run: sh .github/units-gap.sh
 
   sheet-across:
-    name: A sheet across columns reads down each in turn, and its last page is shared by height
+    name: A sheet across columns reads down each in turn, its last page balanced
     runs-on: ubuntu-latest
     steps:
       - *checkout
@@ -381,7 +386,7 @@ jobs:
       - run: sh .github/code-break.sh
 
   oldest-label-break:
-    name: A callout's, a panel's or a unit's label stays on the page with what it heads, on the oldest toolchain
+    name: A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain
     runs-on: ubuntu-latest
     steps:
       - *checkout
@@ -397,7 +402,7 @@ jobs:
       - run: sh .github/stamp-break.sh
 
   oldest-code-size:
-    name: Inline code is set to the text around it, in press's face, and a code block is boxed under every template, on the oldest toolchain
+    name: Code is set in press's face, inline to the text around it, a block boxed, on the oldest toolchain
     runs-on: ubuntu-latest
     steps:
       - *checkout
@@ -445,7 +450,7 @@ jobs:
       - run: sh .github/units-gap.sh
 
   oldest-sheet-across:
-    name: A sheet across columns reads down each in turn, and its last page is shared by height, on the oldest toolchain
+    name: A sheet across columns reads down each in turn, its last page balanced, on the oldest toolchain
     runs-on: ubuntu-latest
     steps:
       - *checkout
@@ -571,6 +576,13 @@ jobs:
         # hosted runner is enough. Rules and ignores are .markdownlint-cli2.jsonc.
         # Dependabot does not see this pin; a bump is a deliberate edit.
         run: npx --yes markdownlint-cli2@0.24.0
+
+  contexts:
+    name: Every CI job is a required context, by a name GitHub keeps whole
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - run: sh .github/contexts.sh
 
   json:
     name: JSON parses

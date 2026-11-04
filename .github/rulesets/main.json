@@ -76,13 +76,13 @@
             "context": "A code block a document lets break breaks, and only that one"
           },
           {
-            "context": "A callout's, a panel's or a unit's label stays on the page with what it heads"
+            "context": "A callout's, panel's or unit's label stays on the page with what it heads"
           },
           {
             "context": "A stamp's hairline stays on the page with its words"
           },
           {
-            "context": "Inline code is set to the text around it, in press's face, and a code block is boxed under every template"
+            "context": "Code is set in press's face, inline to the text around it, a block boxed"
           },
           {
             "context": "Lines, list items and paragraphs are each further apart than the last"
@@ -100,7 +100,7 @@
             "context": "Units sit their spacing apart under every pack, and \"stacks\" balances by it"
           },
           {
-            "context": "A sheet across columns reads down each in turn, and its last page is shared by height"
+            "context": "A sheet across columns reads down each in turn, its last page balanced"
           },
           {
             "context": "A form page is its blank's, and each answer lands where it is put"
@@ -145,13 +145,13 @@
             "context": "A code block a document lets break breaks, and only that one, on the oldest toolchain"
           },
           {
-            "context": "A callout's, a panel's or a unit's label stays on the page with what it heads, on the oldest toolchain"
+            "context": "A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain"
           },
           {
             "context": "A stamp's hairline stays on the page with its words, on the oldest toolchain"
           },
           {
-            "context": "Inline code is set to the text around it, in press's face, and a code block is boxed under every template, on the oldest toolchain"
+            "context": "Code is set in press's face, inline to the text around it, a block boxed, on the oldest toolchain"
           },
           {
             "context": "Lines, list items and paragraphs are each further apart than the last, on the oldest toolchain"
@@ -169,7 +169,7 @@
             "context": "Units sit their spacing apart under every pack, and \"stacks\" balances by it, on the oldest toolchain"
           },
           {
-            "context": "A sheet across columns reads down each in turn, and its last page is shared by height, on the oldest toolchain"
+            "context": "A sheet across columns reads down each in turn, its last page balanced, on the oldest toolchain"
           },
           {
             "context": "A form page is its blank's, and each answer lands where it is put, on the oldest toolchain"
@@ -185,6 +185,9 @@
           },
           {
             "context": "Markdown lint"
+          },
+          {
+            "context": "Every CI job is a required context, by a name GitHub keeps whole"
           },
           {
             "context": "JSON parses"
