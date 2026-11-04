@@ -323,12 +323,9 @@
   assert(pack in ("stacks", "grid", "single"),
          message: "units(pack:) expects \"stacks\", \"grid\" or \"single\"; got \"" + pack + "\"")
   let us = items.pos()
-  let stack(col) = {
-    for (i, u) in col.enumerate() {
-      u
-      if i + 1 < col.len() { v(spacing) }
-    }
-  }
+  // One column of units, `spacing` apart. Its gutter is the gap, as it is under "grid": units set
+  // one after another as blocks would take the paragraph gap around each as well.
+  let stack(col) = grid(columns: (1fr,), row-gutter: spacing, ..col)
 
   if us.len() == 0 { return }
   if pack == "single" { return stack(us) }
@@ -343,9 +340,16 @@
     let right = ()
     let hl = 0pt
     let hr = 0pt
+    // A column is as tall as its units and the gaps between them.
     for u in us {
       let h = measure(box(width: w, u)).height
-      if hl <= hr { left.push(u); hl += h } else { right.push(u); hr += h }
+      if hl <= hr {
+        hl += h + if left.len() > 0 { spacing } else { 0pt }
+        left.push(u)
+      } else {
+        hr += h + if right.len() > 0 { spacing } else { 0pt }
+        right.push(u)
+      }
     }
     grid(columns: (1fr, 1fr), gutter: gutter, align: top,
          stack(left), stack(right))

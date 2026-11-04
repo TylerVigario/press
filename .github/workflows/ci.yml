@@ -129,6 +129,8 @@ jobs:
         run: sh .github/addendum-size.sh
       - name: A header, a == heading and a résumé entry keep their own gaps
         run: sh .github/head-gaps.sh
+      - name: Units sit their spacing apart under every pack, and "stacks" balances by it
+        run: sh .github/units-gap.sh
       - name: A sheet across columns reads down each in turn, and its last page is shared by height
         run: sh .github/sheet-across.sh
       - name: A form page is its blank's, and each answer lands where it is put
@@ -223,6 +225,8 @@ jobs:
         run: sh .github/addendum-size.sh
       - name: A header, a == heading and a résumé entry keep their own gaps
         run: sh .github/head-gaps.sh
+      - name: Units sit their spacing apart under every pack, and "stacks" balances by it
+        run: sh .github/units-gap.sh
       - name: A sheet across columns reads down each in turn, and its last page is shared by height
         run: sh .github/sheet-across.sh
       - name: A form page is its blank's, and each answer lands where it is put
