@@ -10,7 +10,8 @@
 # one and a checklist whose first item has a second line, and a paragraph after them. Each gap
 # is read from the tops of the lines' first words, and must be wider than the one before it in
 # that order: lines, then items, then paragraphs; a list's own gap from the text after it is a
-# paragraph's.
+# paragraph's. The same holds in the body of each part a document writes one in, callout(),
+# panel(), unit(), item(), decision() and addendum(), each on a page of its own.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -45,6 +46,20 @@ for template in brief base recipe resume letter; do
             -v para="$(awk -v a="$pl" -v b="$p2" 'BEGIN { print b - a }')" 'BEGIN { exit !(gap < para) }' ||
             fail "$template: ${pair%%:*} is further from ${pair#*:} than paragraphs are apart"
     done
+    # Inside each part whose body a document writes, its body spaces as the text around it does.
+    for part in Callout Panel Unit Item Decision Addendum; do
+        name=$(printf '%s' "$part" | tr '[:upper:]' '[:lower:]')
+        one=$(top_of "${part}one") line=$(top_of "${part}line") two=$(top_of "${part}two")
+        bline=$(top_of "${part}bline") btwo=$(top_of "${part}btwo") after=$(top_of "${part}after")
+        [ -n "$one" ] && [ -n "$line" ] && [ -n "$two" ] && [ -n "$bline" ] && [ -n "$btwo" ] &&
+            [ -n "$after" ] || fail "$template: ${name}()'s body is missing"
+        awk -v line="$(awk -v a="$one" -v b="$line" 'BEGIN { print b - a }')" \
+            -v item="$(awk -v a="$bline" -v b="$btwo" 'BEGIN { print b - a }')" \
+            -v para="$(awk -v a="$line" -v b="$two" 'BEGIN { print b - a }')" \
+            -v tail="$(awk -v a="$btwo" -v b="$after" 'BEGIN { print b - a }')" \
+            'BEGIN { exit !(item > line + 0.5 && para > item + 0.5 && tail > para - 0.5) }' ||
+            fail "$template: in ${name}()'s body, lines, items and paragraphs are not each further apart than the last"
+    done
     for case in "Bullet:bulleted list" "Enum:numbered list" "Check:checklist"; do
         list=${case%%:*} name=${case#*:}
         one=$(top_of "${list}one") line=$(top_of "${list}line") two=$(top_of "${list}two")
@@ -54,4 +69,4 @@ for template in brief base recipe resume letter; do
                 'BEGIN { printf "%.2f", c - b }')pt below an item's last line, no further than its lines"
     done
 done
-echo "list-spacing: lines, then items, then paragraphs, each further apart than the last, and a part's own pieces closer than paragraphs, in every template"
+echo "list-spacing: lines, then items, then paragraphs, each further apart than the last, in the text and inside a part, and a part's own pieces closer than paragraphs, in every template"
