@@ -348,12 +348,15 @@
 // total on the right. The title is the one the document names itself with, set document(title:)
 // or a template's title, as header() names it. `edition` is what it says of the edition: none
 // leaves it out, and updated(words: …) says it in other words. A title marked with unsourced()
-// counts once: header() counts it, or with no header(), the footer on the first page.
+// counts once: header() counts it, or typst's title() in a head of the document's own, or with
+// neither, the footer on the first page.
 //
 //   #set page(..dense, footer: footer(status: [draft]))
 #let footer(status: none, edition: updated()) = context {
   set text(size: sz.micro, fill: ink-faint)
-  if here().page() == 1 and query(<press-header>).len() == 0 { _marks(document.title).join() }
+  if here().page() == 1 and query(<press-header>).len() == 0 and query(title).len() == 0 {
+    _marks(document.title).join()
+  }
   grid(columns: (1fr, auto),
     align(left)[#_unmarked(document.title)#if status != none [ · #status]],
     align(right)[#if edition != none [#edition · ]#counter(page).display("1 / 1", both: true)])

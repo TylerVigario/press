@@ -78,8 +78,9 @@ grep -qF "prints 1 estimate," "$tmp/out" || { cat "$tmp/out" >&2; fail "a build 
 echo "audit-cases: a build without the audit's tools still counts the open items and estimates"
 
 # A title still to be named is one open item, though the footer prints it on every page: counted
-# once where a header prints it too, and once where only the footer does.
-for c in pass-unsourced-title pass-unsourced-title-footer; do
+# once where a header prints it too, once where a head of the document's own prints it with
+# title(), and once where only the footer does.
+for c in pass-unsourced-title pass-unsourced-title-own-head pass-unsourced-title-footer; do
     # shellcheck disable=SC2086
     sh tools/check.sh ".github/audit-cases/$c.typ" "$tmp/o/$c.pdf" . $flags > "$tmp/out" 2>&1 \
         || { cat "$tmp/out" >&2; fail "$c failed its audit"; }
