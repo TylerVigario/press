@@ -8,6 +8,17 @@ verbatim. 0.1.0 at the bottom is hand-written and reads "Initial release." becau
 release has no changes to list — there is nothing it changed from.
 
 - - -
+## [v0.9.1](https://github.com/TylerVigario/press/compare/v0.9.0..v0.9.1) - 2026-11-04
+#### Bug Fixes
+- paragraphs are further apart than a list's items, so each reads as one (#209) - ([4838a70](https://github.com/TylerVigario/press/commit/4838a701a9ef7cfc8984ecb864ee5cd6281dac44)) - Tyler Vigario, Claude Opus 5.5
+- an addendum's label is no larger than the entry it is under, in a sheet's cell too (#207) - ([e1a0e42](https://github.com/TylerVigario/press/commit/e1a0e42dcec1de8c272ff309b60a58722a1b8b66)) - Tyler Vigario, Claude Opus 5.5
+- a title still to be named is counted once in a head of the document's own that prints it with title() (#206) - ([6541299](https://github.com/TylerVigario/press/commit/6541299f18ee413e24c51a760467753e1d6cbc77)) - Tyler Vigario, Claude Opus 5.5
+- recipe, letter and resume set code in press's mono face, as brief and base do (#205) - ([df91d55](https://github.com/TylerVigario/press/commit/df91d5598fbfca41bbfff1b4a8f2d616e5091926)) - Tyler Vigario, Claude Opus 5.5
+#### Documentation
+- num() says a sum of money is a decimal, since a float prints in its shortest form (#208) - ([cde752b](https://github.com/TylerVigario/press/commit/cde752b657dd8efaf2f229fddbd67d28b0603d55)) - Tyler Vigario, Claude Opus 5.5
+
+- - -
+
 ## [v0.9.0](https://github.com/TylerVigario/press/compare/v0.8.0..v0.9.0) - 2026-11-04
 #### Features
 - num() groups a number by thousands, so a figure read from data reads at a glance (#198) - ([0a73fb0](https://github.com/TylerVigario/press/commit/0a73fb0397a9158ec41a97e4b6beaa14bc2450d8)) - Tyler Vigario, Claude Opus 5.5
