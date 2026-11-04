@@ -8,6 +8,18 @@ verbatim. 0.1.0 at the bottom is hand-written and reads "Initial release." becau
 release has no changes to list — there is nothing it changed from.
 
 - - -
+## [v0.9.0](https://github.com/TylerVigario/press/compare/v0.8.0..v0.9.0) - 2026-11-04
+#### Features
+- num() groups a number by thousands, so a figure read from data reads at a glance (#198) - ([0a73fb0](https://github.com/TylerVigario/press/commit/0a73fb0397a9158ec41a97e4b6beaa14bc2450d8)) - Tyler Vigario, Claude Opus 5.5
+#### Bug Fixes
+- units, callouts and a coloured section's headings draw their state's shape, as the legend's chips do (#199) - ([a60026c](https://github.com/TylerVigario/press/commit/a60026cb61432230c343e1c71c505aa53720df2e)) - Tyler Vigario, Claude Opus 5.5
+- a list's items are further apart than the lines within one, so a wrapped item reads as one (#197) - ([cfd9a78](https://github.com/TylerVigario/press/commit/cfd9a782d801c3c300a91eeebec3ea850ccc39e2)) - Tyler Vigario, Claude Opus 5.5
+- inline code is set to the text around it, and a sheet's cells set theirs at the sheet's size (#196) - ([56c4552](https://github.com/TylerVigario/press/commit/56c4552cdb1bb64200416a90335a562f400292e1)) - Tyler Vigario, Claude Opus 5.5
+- a title still to be named is one open item, not one for every page that prints it (#195) - ([2a36695](https://github.com/TylerVigario/press/commit/2a366959d336f93953e595038871eb3ab3388c26)) - Tyler Vigario, Claude Opus 5.5
+- a stamp stays whole at the foot of a page, its hairline with its words (#194) - ([c2fe964](https://github.com/TylerVigario/press/commit/c2fe964077b0a3bc03ee2a2eba57820561c26c5d)) - Tyler Vigario, Claude Opus 5.5
+
+- - -
+
 ## [v0.8.0](https://github.com/TylerVigario/press/compare/v0.7.0..v0.8.0) - 2026-11-02
 #### Features
 - tools/install-typst.sh installs press's pinned typst, so a repository's CI runs the audit with no pin of its own (#185) - ([fb32870](https://github.com/TylerVigario/press/commit/fb3287075e01569195fc843e9e066dc8cbcd5396)) - Tyler Vigario, Claude Opus 5.5
