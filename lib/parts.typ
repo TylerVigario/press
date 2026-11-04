@@ -299,7 +299,11 @@
 // glance is not misread: 3465 prints 3,465, and decimal("1234567.50") prints 1,234,567.50. Its
 // decimals stay as typst prints them, and so does its sign, typst's minus. It takes an int, a
 // float or a decimal; a figure read from data as text is converted first, `num(int(row.cows))`.
-// `words: (thousands: [ ])` groups it with a space instead.
+// A sum of money is a decimal, `num(decimal(row.amount))`: typst prints a float in its shortest
+// form, so 12480.50 read as a float prints 12,480.5, and a sum of floats can print
+// 0.30000000000000004, where a decimal keeps its places through arithmetic. In TOML or JSON,
+// where a number with cents is a float, write the sum as a string. `words: (thousands: [ ])`
+// groups it with a space instead.
 //
 //   #sheet((1fr, auto), ([Dairy], [Cows]), [North], num(3465), [South], num(12480))
 #let num(n, words: (thousands: [,])) = {
