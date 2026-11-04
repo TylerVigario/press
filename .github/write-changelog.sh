@@ -27,9 +27,6 @@
 # closes it with.
 #
 # The same method as greenroom-win's ci/write-changelog.ps1. Both go when #580 is fixed.
-#
-# COG_CHANGELOG names a file to read cog's output from instead of running cog, so the
-# joining can be tested without a repository.
 set -eu
 
 tag=${1:?usage: write-changelog.sh <tag> [CHANGELOG.md]}
@@ -47,21 +44,17 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-if [ -n "${COG_CHANGELOG:-}" ]; then
-    cp "$COG_CHANGELOG" "$gen"
+# Signing is off for both: they are never pushed, and a machine that signs by default would
+# otherwise stop here asking for a tag message.
+if [ "$(git log -1 --format=%s)" = "release: $tag" ]; then
+    made=tag
 else
-    # Signing is off for both: they are never pushed, and a machine that signs by default
-    # would otherwise stop here asking for a tag message.
-    if [ "$(git log -1 --format=%s)" = "release: $tag" ]; then
-        made=tag
-    else
-        git -c user.name=press-release -c user.email=noreply@github.com -c commit.gpgSign=false \
-            commit -q --allow-empty --no-verify -m "release: $tag (local, never pushed)"
-        made=commit
-    fi
-    git -c tag.gpgSign=false tag "$tag"
-    cog changelog > "$gen"
+    git -c user.name=press-release -c user.email=noreply@github.com -c commit.gpgSign=false \
+        commit -q --allow-empty --no-verify -m "release: $tag (local, never pushed)"
+    made=commit
 fi
+git -c tag.gpgSign=false tag "$tag"
+cog changelog > "$gen"
 
 awk -v gen="$gen" -v path="$path" '
     function fail(msg) { print "write-changelog: " msg > "/dev/stderr"; exit 1 }

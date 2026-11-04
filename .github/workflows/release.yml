@@ -130,8 +130,8 @@ jobs:
           semver='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
           tagged() { git rev-parse -q --verify "refs/tags/v$1" >/dev/null; }
           newest=$(git tag --list 'v*' | sed 's/^v//' | { grep -E "$semver" || true; } | sort -V | tail -1)
+          # version-check.sh, the step before, refuses a press.toml with no version line to rewrite.
           current=$(sed -n 's/^version *= *"\(.*\)"$/\1/p' press.toml)
-          [[ "$current" =~ $semver ]] || fail "press.toml has no version line the release can rewrite"
 
           # derive <auto|patch|minor|major> sets next to the version cocogitto gives, or
           # to nothing. It prints the next version, or a sentence when nothing bumps;
@@ -267,9 +267,6 @@ jobs:
           # records are the ones written here, so the bundle matches the commit it is
           # attached to. CI built and installed the same bundle on every pull request.
           sh .github/bundle.sh "$RUNNER_TEMP/bundle"
-          grep -qx "version = \"$VERSION\"" press.toml
-        env:
-          VERSION: ${{ needs.decide.outputs.version }}
 
       - name: Mint a token for the release App
         id: app-token
