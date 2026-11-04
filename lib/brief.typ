@@ -46,8 +46,9 @@
   show raw: set text(font: face-mono, size: sz.fine / sz.small / 0.8 * 1em)
   show raw.where(block: true): code
   show link: link-note
-  // A section is a heading: = draws it as a band in slate, and == as a labelled hairline. Its
-  // gaps are the paragraph gap at the body size, since a heading's own em is its larger size.
+  // A section is a heading: = draws it as a band in the section's colour, slate unless
+  // section(color:) says otherwise, and == as a labelled hairline. Its gaps are the paragraph gap
+  // at the body size, since a heading's own em is its larger size.
   show heading: set block(above: 0.8 * sz.small, below: 0.8 * sz.small)
   show heading.where(level: 1): it => context {
     v(2pt)

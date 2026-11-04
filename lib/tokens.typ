@@ -53,7 +53,7 @@
 #let bad = rgb("#a3271d")
 #let bad-tint = rgb("#f7e6e4")
 
-// Faces — constants, never strings at the call site (see header).
+// Faces — constants, never strings at the call site (lib.typ's header says why).
 //
 // Each is a STACK: the head is the intended face, the tail is a vendored
 // fallback for glyphs the head does not carry. The tail is not cosmetic. Typst
@@ -87,8 +87,9 @@
   lead: 12.5pt, head: 14.5pt, title: 21pt, hero: 28pt,
 )
 
-// Page geometry presets. Spread at the call site — `#set page(..dense)` —
-// so the page is visibly set where it is composed.
+// Page geometry presets. A template takes one as its `preset`, `brief.with(preset: dense)`, and
+// a document that lays out its own page spreads one, `#set page(..dense)`, so the page is
+// visibly set where it is composed.
 //
 // Sized so that PRINTING AT 100% IS SAFE. The page is exactly US Letter, so
 // "actual size" needs no scaling — but consumer printers cannot print to the

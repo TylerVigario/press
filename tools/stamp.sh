@@ -22,7 +22,7 @@
 # audited again (PRESS_IN_CHECK).
 #
 # WHY A STAMP. A printed sheet goes stale without saying so. The stamp is passed in as
-# sys.inputs.press-updated, and a document shows it with lib.typ's updated() — in
+# sys.inputs.press-updated, and a document shows it with updated(), in lib/parts.typ — in
 # its footer, so every page carries it. Comparing the shelf copy with the latest build
 # then answers "reprint?" at a glance.
 #

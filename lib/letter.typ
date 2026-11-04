@@ -7,7 +7,8 @@
 #import "composition.typ": *
 
 // --------------------------------------------------------------- letters ---
-// A letter's own parts, which template/letter.typ composes and a letter takes as it needs.
+// A letter's own parts: letter() sets the letterhead, the date and continued(), and a letter takes
+// the rest as it needs.
 // The writer is the document's author, set once with `set document(author: "…")`, and the date
 // is written once, with dateline(), where the letter prints it; no part takes either again. The
 // date is never the build stamp: a letter is dated the day it goes out, and its reader is
