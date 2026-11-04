@@ -343,13 +343,15 @@ nothing in the data needs escaping: `//`, a hyphen before a digit, a line that s
 
 #let items = json("stock.json")
 #sheet((auto, auto, 1fr), ([Item], [Count], [Note]),
-  ..items.map(r => (r.item, r.count, r.note)).flatten())
+  ..items.map(r => (r.item, num(r.count), r.note)).flatten())
 
-In all, #items.map(r => r.count).sum() items.
+In all, #num(items.map(r => r.count).sum(default: 0)) items.
 ```
 
 Counts, sums, filters, sorting and dates are typst's own: an array's `sum`, `filter` and
-`sorted`, `calc` and `datetime`. Logic that typst does not suit stays in a script, which writes
+`sorted`, `calc` and `datetime`. A sum takes a default, `sum(default: 0)`, since data can have no
+rows, a month with no entries, and `sum()` of none stops the build; `num()` groups a count by
+thousands. Logic that typst does not suit stays in a script, which writes
 what it works out as data, a JSON file the document reads, and never as markup: a script that
 writes `.typ` must escape every value it writes, and an escape that misses one case prints that
 value wrong, or drops the rest of its line. The build follows the data. typst lists every file a
