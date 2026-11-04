@@ -9,8 +9,8 @@
 // "pH" becomes "PH", "iOS" becomes "IOS", and "µS" becomes "ΜS" — micro-sign
 // turned into capital Mu, a different character entirely. Pass `caps: false`
 // whenever the case of the label means something.
-#let eyebrow(body, color: slate, caps: true) = text(
-  size: sz.fine, weight: 700, tracking: 1.2pt, fill: color,
+#let eyebrow(body, color: slate, caps: true, size: sz.fine) = text(
+  size: size, weight: 700, tracking: 1.2pt, fill: color,
   if caps { upper(body) } else { body },
 )
 
@@ -227,13 +227,16 @@
 // A note set under an entry later, beside what it amends rather than over it: a revisit, a
 // retelling, a correction to a record that keeps what was first written. Its label and date stay
 // on the page with its body, so a page never ends on them alone. `label` says what kind of note
-// it is, `color` draws its edge and label, and `caps: false` keeps its case.
+// it is, `color` draws its edge and label, and `caps: false` keeps its case. Its label is
+// sz.fine, or the size of the text around it where that is smaller, as in a sheet's cell, so it
+// never outweighs the entry it is under.
 //
 //   #addendum([2026-10-15 21:11], label: [Retold])[What was told the second time.]
 #let addendum(date, body, label: [Later], color: ink-faint, caps: true) = block(
   width: 100%, above: 0.9em, inset: (left: 0.8em), stroke: (left: 0.6pt + color),
 )[
-  #block(sticky: true, below: 0.75em, eyebrow([#label · #date], color: color, caps: caps))
+  #block(sticky: true, below: 0.75em, context eyebrow([#label · #date], color: color, caps: caps,
+    size: calc.min(sz.fine, text.size)))
   #text(fill: ink-soft, body)
 ]
 
