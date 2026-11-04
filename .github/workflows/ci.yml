@@ -121,6 +121,8 @@ jobs:
         run: sh .github/stamp-break.sh
       - name: Inline code is set to the text around it
         run: sh .github/code-size.sh
+      - name: A list's items are further apart than the lines within one
+        run: sh .github/list-spacing.sh
       - name: A sheet across columns reads down each in turn, and its last page is shared by height
         run: sh .github/sheet-across.sh
       - name: A form page is its blank's, and each answer lands where it is put
@@ -207,6 +209,8 @@ jobs:
         run: sh .github/stamp-break.sh
       - name: Inline code is set to the text around it
         run: sh .github/code-size.sh
+      - name: A list's items are further apart than the lines within one
+        run: sh .github/list-spacing.sh
       - name: A sheet across columns reads down each in turn, and its last page is shared by height
         run: sh .github/sheet-across.sh
       - name: A form page is its blank's, and each answer lands where it is put

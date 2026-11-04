@@ -239,13 +239,14 @@
 }
 
 // A box to tick by hand, sized in em so it follows the text it sits in: inline, in a sheet()
-// cell, or as a list's marker, where the list gives a checklist its hanging indent.
+// cell, or as a list's marker, where the list gives a checklist its hanging indent. As a marker it
+// is wider than a bullet, so the list sets its text further from it, `body-indent: 0.6em`.
 // It is centred on the face's x-height, measured, so it sits with the lowercase beside it in any
 // face. press draws it because ☐ is in no vendored face. `checked: true` marks it with an X, as
 // tick() does, for a copy filled in ahead of time. The audit does not count an empty box, unlike
 // an open item: on paper, an empty box is what the reader is there to fill.
 //
-//   #set list(marker: checkbox())
+//   #set list(marker: checkbox(), body-indent: 0.6em)
 //   - Shut the water off at the street.
 #let checkbox(checked: false, size: 0.7em, stroke: 0.6pt + ink, radius: 1pt) = context {
   let x = measure(text(top-edge: "x-height", bottom-edge: "baseline")[x]).height
