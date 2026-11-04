@@ -38,12 +38,20 @@
   else { none }
 }
 
+// The gap between the paragraphs inside a part: its label, title or lead and its body, and a
+// body's own paragraphs. Each part sets it for itself, so a part keeps the layout it was drawn
+// for whatever gap a template sets between a document's paragraphs.
+#let _part-gap = 0.55em
+
 // A document's header: its title on the left, `meta` on the right, and a rule beneath. The title
 // is the one the document names itself with, set document(title:) or a template's title, so it
 // is named once, as footer() names it.
 //
 //   #header(meta: [Site A · October 2026])
-#let header(meta: none, color: slate, face: face-display, size: sz.title) = context {
+#let header(meta: none, color: slate, face: face-display, size: sz.title) = context block(width: 100%, {
+  // Its rule sits under the title by the part's own gap, whatever a template sets between
+  // paragraphs.
+  set par(spacing: _part-gap)
   // Tells footer() the title's marks are counted here.
   [#metadata(none)<press-header>]
   grid(
@@ -54,12 +62,7 @@
   )
   v(-3pt)
   line(length: 100%, stroke: 2pt + color)
-}
-
-// The gap between the paragraphs inside a part: its label, title or lead and its body, and a
-// body's own paragraphs. Each part sets it for itself, so a part keeps the layout it was drawn
-// for whatever gap a template sets between a document's paragraphs.
-#let _part-gap = 0.55em
+})
 
 #let tones = (
   note: (slate, slate-tint), ok: (ok, ok-tint),

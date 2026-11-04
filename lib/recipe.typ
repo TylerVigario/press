@@ -52,6 +52,9 @@
   // One block, so the label and its hairline are one piece: a heading drawn by a show rule
   // gets no block of its own, and loose, a page could end between them.
   show heading.where(level: 2): it => context block(breakable: false, {
+    // The label sits over its hairline by the part's own gap, at the body size as the heading's
+    // gaps are: the heading's own block spacing would reach the hairline too.
+    set block(spacing: 0.55 * sz.small)
     v(3pt)
     let shape = _section-shape()
     if shape != none [#_shape(shape, _section-color())#h(0.35em)]
@@ -69,11 +72,15 @@
     it
   }
 
-  header(meta: (yield, method, time).filter(x => x != none).join([ · ]))
-  if intro != none {
-    v(3pt)
-    text(size: sz.micro, fill: ink-soft, intro)
-  }
+  // The head, its header and intro, is one part, with the part's own gaps inside.
+  block(width: 100%, {
+    set par(spacing: _part-gap)
+    header(meta: (yield, method, time).filter(x => x != none).join([ · ]))
+    if intro != none {
+      v(3pt)
+      text(size: sz.micro, fill: ink-soft, intro)
+    }
+  })
   v(7pt)
   body
 }

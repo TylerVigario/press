@@ -17,7 +17,8 @@
 // entry stays with what follows it.
 //
 //   #entry([Network technician], [Valley Broadband], [2021 – present])
-#let entry(role, org, dates, stacked: false) = block(width: 100%, above: 1em, sticky: true, {
+#let entry(role, org, dates, stacked: false) = block(width: 100%, above: 1em, below: _part-gap,
+  sticky: true, {
   // The dates, pushed right. Joined to an empty box, so dates that do not fit on the line go to
   // the next one whole and still at the right: a line drops space that starts it, not a box.
   let when = [#box(width: 0pt)#sym.wj#h(1fr)#sym.wj#box(text(fill: ink-soft, dates))]
