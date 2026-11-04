@@ -3,12 +3,12 @@
 #
 #   sh .github/audit-cases.sh
 #
-# Run by CI's audit job. Each file in .github/audit-cases/ is a document with one known answer:
-# a pass-*.typ must audit clean, and a fail-*.typ must be refused with the words its
-# `// expect:` line gives. A pass case is a false finding the audit once made, kept so it is not
-# made again; a fail case is a fault a pass exists to catch, kept so a fix for the first does not
-# blind it. Then the build, stamp.sh, audits as check does: it fails a fail case with its PDF
-# written, and without poppler it says the audit was skipped and succeeds.
+# Run by CI on press's typst and on the oldest toolchain. Each file in .github/audit-cases/ is a
+# document with one known answer: a pass-*.typ must audit clean, and a fail-*.typ must be refused
+# with the words its `// expect:` line gives. A pass case is a false finding the audit once made,
+# kept so it is not made again; a fail case is a fault a pass exists to catch, kept so a fix for the
+# first does not blind it. Then the build, stamp.sh, audits as check does: it fails a fail case with
+# its PDF written, and without poppler it says the audit was skipped and succeeds.
 set -eu
 cd "$(dirname "$0")/.."
 

@@ -3,7 +3,7 @@
 #
 #   sh .github/typst-digests.sh
 #
-# Run by CI's bundle job. The toolchain action installs typst through install-typst.sh, which
+# Run by CI. The toolchain action installs typst through install-typst.sh, which
 # proves the digest for the runner's own architecture, x86_64. The script pins one for each
 # architecture it installs, and a repository whose CI runs on another would be the first to find
 # a wrong one. Each archive is downloaded and checked here, and none is run.

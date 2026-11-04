@@ -3,7 +3,7 @@
 #
 #   sh .github/stamp-break.sh
 #
-# Run by CI's audit job and the oldest-toolchain job. A stamp is a hairline and the words under
+# Run by CI on press's typst and on the oldest toolchain. A stamp is a hairline and the words under
 # it, and the hairline is a sticky block, which typst keeps with what follows it.
 # .github/stamp-break.typ starts a stamp where its hairline fits at the foot of a page and its
 # first line does not. The hairline is not text, so the probe is drawn twice, once with a page

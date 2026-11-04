@@ -3,7 +3,7 @@
 #
 #   sh .github/templates.sh
 #
-# Run by CI's two build jobs, at the pinned typst and at the oldest press accepts.
+# Run by CI on press's typst and on the oldest toolchain.
 #
 # Two compiles of each, because a template lives two lives. In press's tree it imports press
 # relatively, ../lib.typ, so it compiles in place. A repo gets it through tools/new.sh, which

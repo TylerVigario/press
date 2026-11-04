@@ -50,14 +50,16 @@ repository settings. Merge methods are settings: one API call re-enables them, t
 no ruleset and leaving nothing in the ruleset history. The rule holds the shape against
 a setting drifting back.
 
-**`required_status_checks`** — one context per assertion, no aggregate:
+**`required_status_checks`** — one context per assertion, no aggregate: every job in `ci.yml`
+is required by its name, and `Validate PR title` from `commit-convention.yml`. They are of these
+kinds:
 
-| context | asserts |
+| contexts | assert |
 | --- | --- |
-| `Documents build` | typst compiles every document |
-| `The release bundle installs and works` | the bundle holds the kit and nothing else, installs as the README says and works with no just, and its installers install, update and refuse as they should |
-| `Documents pass the audit` | the warning, font and printable-area passes |
-| `Documents pass on the oldest toolchain` | the same build and audit at the oldest typst and just `press.just` accepts |
+| `Documents build`; `press.toml's version is the one the last release wrote`; `The templates compile, in place and scaffolded`; `A rebuild leaves the document unchanged`; `all builds the documents, not their parts or press's files` | the calibration sheet compiles, and each of the rest on its own |
+| `Documents pass the audit`; `The audit passes and refuses its known cases`; one context for each layout check, named for what it asserts | the audit's passes against the calibration sheet, its known cases, and each `.github/<name>.sh` with the `.typ` it measures |
+| `The release bundle installs and works`; `Every typst digest the kit pins is the release's`; `Both installers install, update and refuse as they should, install.ps1 through PowerShell 7`; `A release's commit rebuilds the bundle it published` | the bundle holds the kit and nothing else, installs as the README says and works with no just; its pins, installers and rebuild |
+| each build and audit context above but the version's, again with `, on the oldest toolchain`, or as `Documents build on the oldest toolchain` and `Documents pass on the oldest toolchain`; and `The oldest toolchain is the floors press declares` | the same at the oldest typst and just `press.just` accepts, and that those are the floors press declares |
 | `No invisible characters` | no soft hyphens or zero-width characters in any tracked file |
 | `JSON parses` | every tracked `*.json`, including these payloads, parses |
 | `Markdown lint` | every tracked `*.md` passes markdownlint |

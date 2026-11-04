@@ -52,31 +52,145 @@
             "context": "Documents build"
           },
           {
+            "context": "press.toml's version is the one the last release wrote"
+          },
+          {
+            "context": "The templates compile, in place and scaffolded"
+          },
+          {
+            "context": "A rebuild leaves the document unchanged"
+          },
+          {
+            "context": "all builds the documents, not their parts or press's files"
+          },
+          {
             "context": "Documents pass the audit"
           },
           {
-            "context": "No invisible characters"
+            "context": "The audit passes and refuses its known cases"
           },
           {
-            "context": "JSON parses"
+            "context": "A résumé reads in the order it prints"
           },
           {
-            "context": "Markdown lint"
+            "context": "A code block a document lets break breaks, and only that one"
           },
           {
-            "context": "Workflows lint"
+            "context": "A callout's, a panel's or a unit's label stays on the page with what it heads"
           },
           {
-            "context": "Shell scripts lint"
+            "context": "A stamp's hairline stays on the page with its words"
           },
           {
-            "context": "Validate PR title"
+            "context": "Inline code is set to the text around it, in press's face, and a code block is boxed under every template"
+          },
+          {
+            "context": "Lines, list items and paragraphs are each further apart than the last"
+          },
+          {
+            "context": "num() groups a number by thousands, and keeps its decimals and sign"
+          },
+          {
+            "context": "An addendum's label is no larger than the entry it is under"
+          },
+          {
+            "context": "A header, a == heading and a résumé entry keep their own gaps"
+          },
+          {
+            "context": "Units sit their spacing apart under every pack, and \"stacks\" balances by it"
+          },
+          {
+            "context": "A sheet across columns reads down each in turn, and its last page is shared by height"
+          },
+          {
+            "context": "A form page is its blank's, and each answer lands where it is put"
+          },
+          {
+            "context": "The release bundle installs and works"
+          },
+          {
+            "context": "Every typst digest the kit pins is the release's"
+          },
+          {
+            "context": "Both installers install, update and refuse as they should, install.ps1 through PowerShell 7"
+          },
+          {
+            "context": "A release's commit rebuilds the bundle it published"
+          },
+          {
+            "context": "The oldest toolchain is the floors press declares"
+          },
+          {
+            "context": "Documents build on the oldest toolchain"
           },
           {
             "context": "Documents pass on the oldest toolchain"
           },
           {
-            "context": "The release bundle installs and works"
+            "context": "The templates compile, in place and scaffolded, on the oldest toolchain"
+          },
+          {
+            "context": "A rebuild leaves the document unchanged, on the oldest toolchain"
+          },
+          {
+            "context": "all builds the documents, not their parts or press's files, on the oldest toolchain"
+          },
+          {
+            "context": "The audit passes and refuses its known cases, on the oldest toolchain"
+          },
+          {
+            "context": "A résumé reads in the order it prints, on the oldest toolchain"
+          },
+          {
+            "context": "A code block a document lets break breaks, and only that one, on the oldest toolchain"
+          },
+          {
+            "context": "A callout's, a panel's or a unit's label stays on the page with what it heads, on the oldest toolchain"
+          },
+          {
+            "context": "A stamp's hairline stays on the page with its words, on the oldest toolchain"
+          },
+          {
+            "context": "Inline code is set to the text around it, in press's face, and a code block is boxed under every template, on the oldest toolchain"
+          },
+          {
+            "context": "Lines, list items and paragraphs are each further apart than the last, on the oldest toolchain"
+          },
+          {
+            "context": "num() groups a number by thousands, and keeps its decimals and sign, on the oldest toolchain"
+          },
+          {
+            "context": "An addendum's label is no larger than the entry it is under, on the oldest toolchain"
+          },
+          {
+            "context": "A header, a == heading and a résumé entry keep their own gaps, on the oldest toolchain"
+          },
+          {
+            "context": "Units sit their spacing apart under every pack, and \"stacks\" balances by it, on the oldest toolchain"
+          },
+          {
+            "context": "A sheet across columns reads down each in turn, and its last page is shared by height, on the oldest toolchain"
+          },
+          {
+            "context": "A form page is its blank's, and each answer lands where it is put, on the oldest toolchain"
+          },
+          {
+            "context": "No invisible characters"
+          },
+          {
+            "context": "Shell scripts lint"
+          },
+          {
+            "context": "Workflows lint"
+          },
+          {
+            "context": "Markdown lint"
+          },
+          {
+            "context": "JSON parses"
+          },
+          {
+            "context": "Validate PR title"
           }
         ]
       }

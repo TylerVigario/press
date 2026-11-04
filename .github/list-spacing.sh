@@ -5,7 +5,7 @@
 #
 #   sh .github/list-spacing.sh
 #
-# Run by CI's audit job and the oldest-toolchain job, which have poppler. Under each template
+# Run by CI on press's typst and on the oldest toolchain, with poppler. Under each template
 # that sets its lists, .github/list-spacing.typ sets two paragraphs, a bulleted list, a numbered
 # one and a checklist whose first item has a second line, and a paragraph after them. Each gap
 # is read from the tops of the lines' first words, and must be wider than the one before it in

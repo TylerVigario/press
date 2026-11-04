@@ -1,38 +1,36 @@
 name: CI
 
-# Public repository, so minutes are free and uncapped, and rule 9 fans out to one
-# job per assertion rather than grouping them to save minutes.
+# Public repository, so minutes are free and uncapped, and rule 9 fans out to one job per
+# assertion: each job is a required context of its own, named for what it asserts, so a red one
+# names the failure, and an assertion removed leaves a context that wedges the branch until the
+# ruleset changes too. .github/rulesets/main.json requires every job here by its name.
 #
-#   Documents build          typst compile errors in the calibration sheet, a
-#                            rebuild that re-stamps it though its page did not
-#                            change, a template that does not compile where it
-#                            stands or as the document new.sh scaffolds from it, an
-#                            `all` that builds anything but a repo's documents, and
-#                            a press.toml version no release wrote.
-#   Documents pass the audit press's own passes, run against its calibration sheet:
-#                            typst warnings that exit 0 and ship, fonts that are
-#                            not vendored, and ink inside the unprintable band; and
-#                            against .github/audit-cases/, documents with one known
-#                            answer, so a false finding fixed once stays fixed; a
-#                            résumé's text, which must read in the order it prints; and
-#                            a code block that breaks across a page only when let;
-#                            and a label that a page never ends on apart from what
-#                            it heads; and a sheet set across columns, which must
-#                            read down each in turn and end its last page level.
-#   The release bundle installs and works
-#                            the archives the release attaches, built from this
-#                            tree: the kit and nothing of press's machinery,
-#                            installed in a scratch repo as the README says, then
-#                            used there with no just, and with the typst the kit
-#                            installs, to scaffold, build and audit; every typst
-#                            digest the kit pins, against typst's release;
-#                            and both installers, served the bundle locally, install,
-#                            update and refuse as they should.
-#   Documents pass on the oldest toolchain
-#                            the same build and audit, known cases and résumé
-#                            reading order at the oldest typst and just press.just
-#                            accepts, so a change that needs a newer one fails here,
-#                            not on a machine still at the floor.
+#   On press's typst
+#     Documents build        the calibration sheet compiles; and in jobs of their own, a rebuild
+#                            leaves it unchanged, each template compiles where it stands and as
+#                            new.sh scaffolds it, `all` builds a repo's documents and nothing
+#                            else, and press.toml's version is the one the last release wrote.
+#     Documents pass the audit
+#                            press's own passes against the calibration sheet: typst warnings
+#                            that exit 0 and ship, fonts that are not vendored, glyphs that
+#                            vanished, ink inside the unprintable band, text on text; and in jobs
+#                            of their own, .github/audit-cases/, documents with one known answer,
+#                            so a false finding fixed once stays fixed, and each layout check, a
+#                            .github/<name>.sh and the .typ it measures.
+#     The release bundle installs and works
+#                            the archives the release attaches, built from this tree: the kit
+#                            and nothing of press's machinery, installed in a scratch repo as the
+#                            README says, then used there with no just, and with the typst the
+#                            kit installs, to scaffold, build and audit; and in jobs of their own,
+#                            every typst digest the kit pins, against typst's release; both
+#                            installers, served the bundle locally, installing, updating and
+#                            refusing as they should; and a release's commit rebuilding the
+#                            bundle it published.
+#   On the oldest toolchain  each job above that builds or audits, again at the oldest typst and
+#                            just press.just accepts, named the same with ", on the oldest
+#                            toolchain", so a change that needs a newer one fails here, not on a
+#                            machine still at the floor; and one that those are the floors press
+#                            declares.
 #   No invisible characters  soft hyphens and zero-width characters in any tracked
 #                            file, which reach paper unseen and survive review.
 #   Shell scripts lint       every *.sh in the tree. tools/check.sh is the audit
@@ -73,124 +71,240 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # On press's typst. The first job of each kind of setup names its steps, and the others
+  # repeat them by name.
   build:
     name: Documents build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - &checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # The history and the tags, for the version check.
+          persist-credentials: false
+      - &toolchain
+        uses: ./.github/actions/typst-toolchain
+      - run: just build calibration.typ
+
+  version:
+    name: press.toml's version is the one the last release wrote
+    runs-on: ubuntu-latest
+    steps:
+      - &history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The history and the tags. The version check reads the tags, and bundle.sh
+          # takes its time from the newest commit that is not a release's own: on the
+          # push of a release: commit, that commit is all a one-commit checkout holds.
           fetch-depth: 0
           persist-credentials: false
-      - name: press.toml's version is the one the last release wrote
-        run: sh .github/version-check.sh
-      - uses: ./.github/actions/typst-toolchain
+      - run: sh .github/version-check.sh
+
+  templates:
+    name: The templates compile, in place and scaffolded
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain
+      - run: sh .github/templates.sh
+
+  rebuild:
+    name: A rebuild leaves the document unchanged
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain
       - run: just build calibration.typ
-      - name: The template compiles, in place and scaffolded
-        run: sh .github/templates.sh
-      - name: A rebuild leaves the document unchanged
-        run: sh .github/rebuild-unchanged.sh calibration.typ
-      - name: all builds the documents, not their parts or press's files
-        run: sh .github/all-check.sh
+      - run: sh .github/rebuild-unchanged.sh calibration.typ
+
+  all:
+    name: all builds the documents, not their parts or press's files
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain
+      - run: sh .github/all-check.sh
 
   audit:
     name: Documents pass the audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/typst-toolchain
+      - *checkout
+      - &toolchain-poppler
+        uses: ./.github/actions/typst-toolchain
         with:
           poppler: "true"
-      - name: Audit
-        run: |
+      - run: |
           set -euo pipefail
           # check compiles the document through stamp.sh, as build does, so it needs
           # no build ahead of it. A compile failure is Documents build's to report.
           just check calibration.typ
-      - name: The audit passes and refuses its known cases
-        run: sh .github/audit-cases.sh
-      - name: A résumé reads in the order it prints
-        run: sh .github/reading-order.sh
-      - name: A code block a document lets break breaks, and only that one
-        run: sh .github/code-break.sh
-      - name: A callout's, a panel's or a unit's label stays on the page with what it heads
-        run: sh .github/label-break.sh
-      - name: A stamp's hairline stays on the page with its words
-        run: sh .github/stamp-break.sh
-      - name: Inline code is set to the text around it, in press's face, and a code block is boxed under every template
-        run: sh .github/code-size.sh
-      - name: Lines, list items and paragraphs are each further apart than the last
-        run: sh .github/list-spacing.sh
-      - name: num() groups a number by thousands, and keeps its decimals and sign
-        run: sh .github/num.sh
-      - name: An addendum's label is no larger than the entry it is under
-        run: sh .github/addendum-size.sh
-      - name: A header, a == heading and a résumé entry keep their own gaps
-        run: sh .github/head-gaps.sh
-      - name: Units sit their spacing apart under every pack, and "stacks" balances by it
-        run: sh .github/units-gap.sh
-      - name: A sheet across columns reads down each in turn, and its last page is shared by height
-        run: sh .github/sheet-across.sh
-      - name: A form page is its blank's, and each answer lands where it is put
-        run: sh .github/form-fill.sh
+
+  audit-cases:
+    name: The audit passes and refuses its known cases
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/audit-cases.sh
+
+  reading-order:
+    name: A résumé reads in the order it prints
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/reading-order.sh
+
+  code-break:
+    name: A code block a document lets break breaks, and only that one
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/code-break.sh
+
+  label-break:
+    name: A callout's, a panel's or a unit's label stays on the page with what it heads
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/label-break.sh
+
+  stamp-break:
+    name: A stamp's hairline stays on the page with its words
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/stamp-break.sh
+
+  code-size:
+    name: Inline code is set to the text around it, in press's face, and a code block is boxed under every template
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/code-size.sh
+
+  list-spacing:
+    name: Lines, list items and paragraphs are each further apart than the last
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/list-spacing.sh
+
+  num:
+    name: num() groups a number by thousands, and keeps its decimals and sign
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/num.sh
+
+  addendum-size:
+    name: An addendum's label is no larger than the entry it is under
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/addendum-size.sh
+
+  head-gaps:
+    name: A header, a == heading and a résumé entry keep their own gaps
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/head-gaps.sh
+
+  units-gap:
+    name: Units sit their spacing apart under every pack, and "stacks" balances by it
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/units-gap.sh
+
+  sheet-across:
+    name: A sheet across columns reads down each in turn, and its last page is shared by height
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/sheet-across.sh
+
+  form-fill:
+    name: A form page is its blank's, and each answer lands where it is put
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/form-fill.sh
 
   bundle:
     name: The release bundle installs and works
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          # The history, not one commit. bundle.sh takes its time from the newest commit that
-          # is not a release's own, and on the push of a release: commit that commit is all a
-          # one-commit checkout holds.
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: ./.github/actions/typst-toolchain
-        with:
-          poppler: "true"
-      - name: Build the bundle
-        run: sh .github/bundle.sh "$RUNNER_TEMP/bundle"
-      - name: Install it in a scratch repo and use it there
-        run: sh .github/bundle-check.sh "$RUNNER_TEMP/bundle"
-      - name: Every typst digest the kit pins is the release's
-        run: sh .github/typst-digests.sh
-      - name: Run the installers, install.ps1 through PowerShell 7
-        run: |
+      - *history
+      - *toolchain-poppler
+      - run: sh .github/bundle.sh "$RUNNER_TEMP/bundle"
+      - run: sh .github/bundle-check.sh "$RUNNER_TEMP/bundle"
+
+  digests:
+    name: Every typst digest the kit pins is the release's
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - run: sh .github/typst-digests.sh
+
+  installers:
+    name: Both installers install, update and refuse as they should, install.ps1 through PowerShell 7
+    runs-on: ubuntu-latest
+    steps:
+      - *history
+      - run: sh .github/bundle.sh "$RUNNER_TEMP/bundle"
+      - run: |
           set -euo pipefail
           # The runner image carries pwsh; install-check runs install.ps1 only where there is
           # one, so its absence here must fail rather than skip.
           pwsh --version
           sh .github/install-check.sh "$RUNNER_TEMP/bundle"
-      - name: A release's commit rebuilds the bundle it published
-        run: |
+
+  bundle-rebuilds:
+    name: A release's commit rebuilds the bundle it published
+    runs-on: ubuntu-latest
+    steps:
+      - *history
+      - run: sh .github/bundle.sh "$RUNNER_TEMP/bundle"
+      - run: |
           set -euo pipefail
           # The release run builds the bundle, then the forge records its release: commit, a
           # later one. Rebuilt from that commit, the bundle must still match its published sums.
-          # Dated an hour on, so the two times differ. Last, because it commits to the checkout.
+          # Dated an hour on, so the two times differ.
           GIT_COMMITTER_DATE="@$(( $(git log -1 --format=%ct) + 3600 ))" \
             git -c user.name=ci -c user.email=ci@invalid commit -q --allow-empty -m "release: v0.0.0"
           sh .github/bundle.sh "$RUNNER_TEMP/rebuilt"
           diff "$RUNNER_TEMP/bundle/SHA256SUMS" "$RUNNER_TEMP/rebuilt/SHA256SUMS"
 
-  oldest:
-    name: Documents pass on the oldest toolchain
+  # On the oldest typst and just press accepts: the same checks, so a change that needs a newer
+  # one fails here, not on a machine still at the floor.
+  oldest-floors:
+    name: The oldest toolchain is the floors press declares
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/typst-toolchain
+      - *checkout
+      - &toolchain-oldest
+        uses: ./.github/actions/typst-toolchain
         with:
           poppler: "true"
           oldest: "true"
-      - name: Confirm these are the floors press declares
-        run: |
+      - run: |
           set -euo pipefail
           # The toolchain action pins the floors by digest; press.toml declares typst's and
-          # press.just just's. They must name the same versions, or this job tests a floor
-          # nobody declared.
+          # press.just just's. They must name the same versions, or the jobs on the oldest
+          # toolchain test a floor nobody declared.
           want_typst=$(sed -n 's/^typst *= *"\(.*\)"$/\1/p' press.toml)
           want_just=$(sed -n "s/^set minimum-version := '\(.*\)'$/\1/p" press.just)
           have_typst=$(typst --version | cut -d' ' -f2)
@@ -200,43 +314,151 @@ jobs:
             exit 1
           fi
           echo "typst $have_typst and just $have_just, the floors press declares"
-      - name: Build, then audit
-        run: |
-          set -euo pipefail
-          just build calibration.typ
-          just check calibration.typ
-      - name: The audit passes and refuses its known cases
-        run: sh .github/audit-cases.sh
-      - name: A résumé reads in the order it prints
-        run: sh .github/reading-order.sh
-      - name: A code block a document lets break breaks, and only that one
-        run: sh .github/code-break.sh
-      - name: A callout's, a panel's or a unit's label stays on the page with what it heads
-        run: sh .github/label-break.sh
-      - name: A stamp's hairline stays on the page with its words
-        run: sh .github/stamp-break.sh
-      - name: Inline code is set to the text around it, in press's face, and a code block is boxed under every template
-        run: sh .github/code-size.sh
-      - name: Lines, list items and paragraphs are each further apart than the last
-        run: sh .github/list-spacing.sh
-      - name: num() groups a number by thousands, and keeps its decimals and sign
-        run: sh .github/num.sh
-      - name: An addendum's label is no larger than the entry it is under
-        run: sh .github/addendum-size.sh
-      - name: A header, a == heading and a résumé entry keep their own gaps
-        run: sh .github/head-gaps.sh
-      - name: Units sit their spacing apart under every pack, and "stacks" balances by it
-        run: sh .github/units-gap.sh
-      - name: A sheet across columns reads down each in turn, and its last page is shared by height
-        run: sh .github/sheet-across.sh
-      - name: A form page is its blank's, and each answer lands where it is put
-        run: sh .github/form-fill.sh
-      - name: The template compiles, in place and scaffolded
-        run: sh .github/templates.sh
-      - name: A rebuild leaves the document unchanged
-        run: sh .github/rebuild-unchanged.sh calibration.typ
-      - name: all builds the documents, not their parts or press's files
-        run: sh .github/all-check.sh
+
+  oldest-build:
+    name: Documents build on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: just build calibration.typ
+
+  oldest:
+    name: Documents pass on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: just check calibration.typ
+
+  oldest-templates:
+    name: The templates compile, in place and scaffolded, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/templates.sh
+
+  oldest-rebuild:
+    name: A rebuild leaves the document unchanged, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: just build calibration.typ
+      - run: sh .github/rebuild-unchanged.sh calibration.typ
+
+  oldest-all:
+    name: all builds the documents, not their parts or press's files, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/all-check.sh
+
+  oldest-audit-cases:
+    name: The audit passes and refuses its known cases, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/audit-cases.sh
+
+  oldest-reading-order:
+    name: A résumé reads in the order it prints, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/reading-order.sh
+
+  oldest-code-break:
+    name: A code block a document lets break breaks, and only that one, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/code-break.sh
+
+  oldest-label-break:
+    name: A callout's, a panel's or a unit's label stays on the page with what it heads, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/label-break.sh
+
+  oldest-stamp-break:
+    name: A stamp's hairline stays on the page with its words, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/stamp-break.sh
+
+  oldest-code-size:
+    name: Inline code is set to the text around it, in press's face, and a code block is boxed under every template, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/code-size.sh
+
+  oldest-list-spacing:
+    name: Lines, list items and paragraphs are each further apart than the last, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/list-spacing.sh
+
+  oldest-num:
+    name: num() groups a number by thousands, and keeps its decimals and sign, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/num.sh
+
+  oldest-addendum-size:
+    name: An addendum's label is no larger than the entry it is under, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/addendum-size.sh
+
+  oldest-head-gaps:
+    name: A header, a == heading and a résumé entry keep their own gaps, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/head-gaps.sh
+
+  oldest-units-gap:
+    name: Units sit their spacing apart under every pack, and "stacks" balances by it, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/units-gap.sh
+
+  oldest-sheet-across:
+    name: A sheet across columns reads down each in turn, and its last page is shared by height, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/sheet-across.sh
+
+  oldest-form-fill:
+    name: A form page is its blank's, and each answer lands where it is put, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/form-fill.sh
 
   invisible:
     name: No invisible characters

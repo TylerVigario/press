@@ -4,7 +4,7 @@
 #
 #   sh .github/head-gaps.sh
 #
-# Run by CI's audit job and the oldest-toolchain job. typst takes a block's spacing from the
+# Run by CI on press's typst and on the oldest toolchain. typst takes a block's spacing from the
 # paragraph spacing, and a heading's inner blocks take the heading's, so a part that left its
 # inside to them would grow with every document's spacing. .github/head-gaps.typ measures each
 # under a tight spacing and a loose one, and each must measure the same under both.

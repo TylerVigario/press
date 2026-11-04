@@ -3,7 +3,7 @@
 #
 #   sh .github/form-fill.sh
 #
-# Run by CI's audit job and the oldest-toolchain job, which have poppler. .github/form-fill.typ
+# Run by CI on press's typst and on the oldest toolchain, with poppler. .github/form-fill.typ
 # fills in a stand-in blank, a letter page and an A4 page, under brief, between two pages of its
 # own. Each form page must be its blank's size, without brief's footer, and each answer's ink must
 # be where the document put it, read off the page rendered at four pixels to the point: a box set

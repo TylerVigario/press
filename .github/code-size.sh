@@ -6,7 +6,7 @@
 #
 #   sh .github/code-size.sh
 #
-# Run by CI's audit job and the oldest-toolchain job, which have poppler. Every glyph of
+# Run by CI on press's typst and on the oldest toolchain, with poppler. Every glyph of
 # Liberation Mono is 0.6em wide, so a word of code's width in pdftotext's boxes gives its size.
 set -eu
 cd "$(dirname "$0")/.."

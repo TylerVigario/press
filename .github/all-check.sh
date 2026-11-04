@@ -4,12 +4,12 @@
 #
 #   sh .github/all-check.sh
 #
-# Run by CI's two build jobs, which have just. A scratch repository holds a copy of the kit under
-# third_party/press, as the README installs it, and imports press.just; its docs/ holds a
-# document, a book (main.typ beside a chapter) and a shared part (_shared.typ). `just all .`
-# reaches press's folder too, and must build the document and the book and nothing else: a
-# library file built on its own fails its audit, and a starter or the calibration sheet is not
-# the repository's document.
+# Run by CI on press's typst and on the oldest toolchain, with just. A scratch repository holds a
+# copy of the kit under third_party/press, as the README installs it, and imports press.just; its
+# docs/ holds a document, a book (main.typ beside a chapter) and a shared part (_shared.typ). `just
+# all .` reaches press's folder too, and must build the document and the book and nothing else: a
+# library file built on its own fails its audit, and a starter or the calibration sheet is not the
+# repository's document.
 set -eu
 cd "$(dirname "$0")/.."
 

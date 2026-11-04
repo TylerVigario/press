@@ -4,7 +4,7 @@
 #
 #   sh .github/addendum-size.sh
 #
-# Run by CI's audit job and the oldest-toolchain job, which have poppler. A word's box in
+# Run by CI on press's typst and on the oldest toolchain, with poppler. A word's box in
 # pdftotext is as tall as its size sets it, so each label is read against its entry: in a sheet,
 # at sz.micro, the same height; in body text, at sz.small, sz.fine's, which is shorter.
 set -eu

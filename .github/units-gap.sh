@@ -4,9 +4,10 @@
 #
 #   sh .github/units-gap.sh
 #
-# Run by CI's audit job and the oldest-toolchain job. .github/units-gap.typ measures the gap under
-# "single", "stacks" and "grid" under a tight spacing and a loose one, and sets four units under
-# "stacks" whose last goes in the left column only if the gap between the two on the right counts.
+# Run by CI on press's typst and on the oldest toolchain. .github/units-gap.typ measures the gap
+# under "single", "stacks" and "grid" under a tight spacing and a loose one, and sets four units
+# under "stacks" whose last goes in the left column only if the gap between the two on the right
+# counts.
 set -eu
 cd "$(dirname "$0")/.."
 
