@@ -38,10 +38,15 @@
   else { none }
 }
 
-// The gap between the paragraphs inside a part: its label, title or lead and its body, and a
-// body's own paragraphs. Each part sets it for itself, so a part keeps the layout it was drawn
-// for whatever gap a template sets between a document's paragraphs.
+// The gap between a part's pieces: its label, title or lead and its body. Each part sets it for
+// itself, so a part keeps the layout it was drawn for whatever gap a template sets between a
+// document's paragraphs; the body's own paragraphs and lists keep the document's, as _body sets.
 #let _part-gap = 0.55em
+
+// A part's body, its paragraphs and lists spaced as the document spaces them: `spacing` is the
+// document's paragraph spacing, read before the part sets its own. The part's own gap stays around
+// the body, so a body of one paragraph sits as it did, and the part's other pieces with it.
+#let _body(spacing, body) = block(spacing: _part-gap, { set par(spacing: spacing); body })
 
 // press's marks in a title, unsourced()'s, and the title without them. footer() prints the title
 // on every page, and a mark printed with it each time would count one item once a page.
@@ -132,25 +137,27 @@
 #let callout(body, tone: "note", label: none, size: sz.small, shape: auto) = {
   let pair = tones.at(tone)
   let mark = _shaped("callout", tone, shape)
-  block(
+  context block(
     width: 100%, fill: pair.at(1), stroke: (left: 3pt + pair.at(0)),
     inset: (x: 10pt, y: 8pt),
   )[
+    #let spacing = par.spacing
     #set par(spacing: _part-gap)
     #if label != none [#text(size: sz.fine, block(sticky: true,
       [#mark#eyebrow(label, color: pair.at(0))])) #v(3pt)]
-    #text(size: size)[#if label == none { mark }#body]
+    #text(size: size, _body(spacing, [#if label == none { mark }#body]))
   ]
 }
 
 // Bordered panel — for grids where a tint would shout. Its label is kept with the body, as a
 // callout's is.
-#let panel(body, label: none, color: slate) = block(
+#let panel(body, label: none, color: slate) = context block(
   width: 100%, stroke: 0.6pt + rule-mid, inset: 10pt, radius: 1pt,
 )[
+  #let spacing = par.spacing
   #set par(spacing: _part-gap)
   #if label != none [#text(size: sz.fine, block(sticky: true, eyebrow(label, color: color))) #v(4pt)]
-  #body
+  #_body(spacing, body)
 ]
 
 // Code block treatment. The document installs it; press never does:
@@ -230,15 +237,16 @@
 }
 
 // Numbered entry: marker, title, explanation.
-#let item(n, title, body, color: slate, size: sz.small) = block(
+#let item(n, title, body, color: slate, size: sz.small) = context block(
   width: 100%, breakable: false, inset: (bottom: 6pt),
 )[
+  #let spacing = par.spacing
   #set par(spacing: _part-gap)
   #text(size: size, weight: 700, fill: color)[#n]
   #h(5pt)
   #text(size: size, weight: 700)[#title]
   #v(2pt)
-  #text(size: size)[#body]
+  #text(size: size, _body(spacing, body))
 ]
 
 // a → b → c, for pipelines.
@@ -269,13 +277,14 @@
 // never outweighs the entry it is under.
 //
 //   #addendum([2026-10-15 21:11], label: [Retold])[What was told the second time.]
-#let addendum(date, body, label: [Later], color: ink-faint, caps: true) = block(
+#let addendum(date, body, label: [Later], color: ink-faint, caps: true) = context block(
   width: 100%, above: 0.9em, inset: (left: 0.8em), stroke: (left: 0.6pt + color),
 )[
+  #let spacing = par.spacing
   #set par(spacing: _part-gap)
   #block(sticky: true, below: 0.75em, context eyebrow([#label · #date], color: color, caps: caps,
     size: calc.min(sz.fine, text.size)))
-  #text(fill: ink-soft, body)
+  #text(fill: ink-soft, _body(spacing, body))
 ]
 
 

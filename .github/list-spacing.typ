@@ -27,3 +27,29 @@ Paraafter follows the lists
 
 #unit([Unitlabel], "note", caps: false)[Unitlead holds.][Unitbody under it.]
 #item(1, [Itemtitle of a step], [Itembody under it.])
+
+// Inside each part whose body a document writes, the same: two paragraphs, a list whose first item
+// has a second line, and a paragraph after it, its words beginning with the part's name. Each
+// part has a page of its own, so none breaks across one under a template's larger type.
+#let prose(p) = [
+  #(p + "one") opens a paragraph \ #(p + "line") continues it
+
+  #(p + "two") is the next paragraph
+
+  - #(p + "bone") opens the item \ #(p + "bline") continues it
+  - #(p + "btwo") is the next item
+
+  #(p + "after") follows the list
+]
+#pagebreak()
+#callout(label: [Calloutlabel], prose("Callout"))
+#pagebreak()
+#panel(label: [Panellabel], prose("Panel"))
+#pagebreak()
+#unit([Unitlabel], "note", caps: false)[Unitleadagain holds.][#prose("Unit")]
+#pagebreak()
+#item(2, [Itemtitleagain], prose("Item"))
+#pagebreak()
+#decision(1, [Decisionquestion], prose("Decision"))
+#pagebreak()
+#addendum([2026-10-21], prose("Addendum"), label: [Addendumlabel], caps: false)

@@ -17,14 +17,15 @@
 // goes before its label, as a callout's does, and `shape` changes it.
 #let unit(label, tone, lead, body, caps: true, breakable: false, shape: auto) = {
   let pair = tones.at(tone)
-  block(width: 100%, breakable: breakable, stroke: (left: 2.5pt + pair.at(0)),
+  context block(width: 100%, breakable: breakable, stroke: (left: 2.5pt + pair.at(0)),
         fill: paper-tint, inset: (x: 8pt, y: 6.5pt))[
+    #let spacing = par.spacing
     #set par(spacing: _part-gap)
     #text(size: sz.fine, block(sticky: true,
       [#_shaped("unit", tone, shape)#eyebrow(label, color: pair.at(0), caps: caps)]))
     #v(2.5pt)
     #text(size: sz.fine, weight: 700)[#lead]
-    #if body != none [ #v(2.5pt) #text(size: sz.fine)[#body] ]
+    #if body != none [ #v(2.5pt) #text(size: sz.fine, _body(spacing, body)) ]
   ]
 }
 
@@ -53,9 +54,10 @@
 
 // A question with its note, under its number in a filled badge — for anything the reader must
 // answer.
-#let decision(n, q, note, color: bad) = block(
+#let decision(n, q, note, color: bad) = context block(
   width: 100%, breakable: false, inset: (bottom: 5.5pt),
 )[
+  #let spacing = par.spacing
   #set par(spacing: _part-gap)
   #grid(columns: (auto, 1fr), gutter: 6pt, align: (left + top, left + top),
     box(fill: color, radius: 50%, inset: (x: 4.5pt, y: 3pt),
@@ -63,7 +65,7 @@
     [
       #text(size: sz.fine, weight: 700)[#q]
       #v(1.5pt)
-      #text(size: sz.fine, fill: ink-soft)[#note]
+      #text(size: sz.fine, fill: ink-soft, _body(spacing, note))
     ])
 ]
 
