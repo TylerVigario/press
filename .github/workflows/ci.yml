@@ -33,7 +33,8 @@ name: CI
 #                            declares.
 #   No invisible characters  soft hyphens and zero-width characters in any tracked
 #                            file, which reach paper unseen and survive review.
-#   Shell scripts lint       every *.sh in the tree. tools/check.sh is the audit
+#   Shell scripts lint       every *.sh in the tree, press.just's recipes and the
+#                            toolchain action's run: blocks. tools/check.sh is the audit
 #                            itself, and every defect found in it this far has been
 #                            a shell defect — a pipeline exit masked by sort, a
 #                            guard that asserted existence where ancestry was the
@@ -538,6 +539,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # just, to dump press.just's recipes as it reads them.
+      - *toolchain
       - name: shellcheck
         run: |
           set -euo pipefail
@@ -549,6 +552,11 @@ jobs:
           # width of whatever was added last.
           find . -path ./.git -prune -o -name '*.sh' -print0 \
             | xargs -0 --no-run-if-empty shellcheck --severity=warning
+          # And the shell outside a *.sh file: press.just's recipes, and the toolchain action's
+          # run: blocks, which actionlint does not read.
+          out=$(mktemp -d)
+          sh .github/embedded-shell.sh "$out"
+          shellcheck --severity=warning "$out"/*.sh
 
   workflows:
     name: Workflows lint

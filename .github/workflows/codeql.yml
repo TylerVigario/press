@@ -12,8 +12,9 @@ name: CodeQL
 # WHAT THIS DOES NOT SEE. Stated first, because a comment claiming a check exists is
 # what stops anyone checking by hand.
 #
-# - The shell: tools/*.sh, .github/*.sh and press.just. CodeQL has no shell extractor;
-#   Shell scripts lint (shellcheck) and Workflows lint (actionlint) cover them.
+# - The shell: tools/*.sh, .github/*.sh, press.just's recipes and the toolchain action's run:
+#   blocks. CodeQL has no shell extractor; Shell scripts lint (shellcheck) covers them, and
+#   Workflows lint (actionlint) the workflows' own run: blocks.
 # - lib.typ, lib/ and the documents. Nothing analyses Typst; its gate is that the documents
 #   build and pass the audit.
 # - workflow_dispatch inputs. The actions queries treat data an outsider controls

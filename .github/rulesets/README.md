@@ -65,7 +65,7 @@ kinds:
 | `JSON parses` | every tracked `*.json`, including these payloads, parses |
 | `Markdown lint` | every tracked `*.md` passes markdownlint |
 | `Workflows lint` | every workflow passes actionlint, with shellcheck on each `run:` block |
-| `Shell scripts lint` | every `*.sh` in the tree passes shellcheck |
+| `Shell scripts lint` | every `*.sh` in the tree, `press.just`'s recipes and the toolchain action's `run:` blocks pass shellcheck |
 | `Validate PR title` | the pull request title parses as a Conventional Commit |
 
 **`strict_required_status_checks_policy: true`** — a pull request merges only once its
