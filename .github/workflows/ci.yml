@@ -121,7 +121,7 @@ jobs:
         run: sh .github/stamp-break.sh
       - name: Inline code is set to the text around it, in press's face under every template
         run: sh .github/code-size.sh
-      - name: A list's items are further apart than the lines within one
+      - name: Lines, list items and paragraphs are each further apart than the last
         run: sh .github/list-spacing.sh
       - name: num() groups a number by thousands, and keeps its decimals and sign
         run: sh .github/num.sh
@@ -213,7 +213,7 @@ jobs:
         run: sh .github/stamp-break.sh
       - name: Inline code is set to the text around it, in press's face under every template
         run: sh .github/code-size.sh
-      - name: A list's items are further apart than the lines within one
+      - name: Lines, list items and paragraphs are each further apart than the last
         run: sh .github/list-spacing.sh
       - name: num() groups a number by thousands, and keeps its decimals and sign
         run: sh .github/num.sh

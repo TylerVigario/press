@@ -25,7 +25,9 @@
   set document(title: title, author: author)
   set page(..preset, footer: footer)
   set text(font: face-text, size: sz.small, fill: ink, lang: "en")
-  set par(leading: 0.52em, spacing: 0.55em)
+  // Paragraphs further apart than a list's items, and items than lines, so each reads as one:
+  // a paragraph ends where its gap shows, and the one after a list is not its last item's.
+  set par(leading: 0.52em, spacing: 0.8em)
   // A list's items are further apart than the lines within one, so a wrapped item reads as one.
   set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.65em)
   set enum(spacing: 0.65em)
@@ -36,7 +38,7 @@
   show link: link-note
   // A section is a heading: = draws it as a band in slate, and == as a labelled hairline. Its
   // gaps are the paragraph gap at the body size, since a heading's own em is its larger size.
-  show heading: set block(above: 0.55 * sz.small, below: 0.55 * sz.small)
+  show heading: set block(above: 0.8 * sz.small, below: 0.8 * sz.small)
   show heading.where(level: 1): it => context {
     v(2pt)
     block(width: 100%, fill: _section-color(), inset: (x: 8pt, y: 4.5pt), radius: 1pt,
