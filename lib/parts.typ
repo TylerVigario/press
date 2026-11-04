@@ -133,8 +133,9 @@
 // never ends on the label alone. The label's block is set at the label's own size, as a line of
 // it would be, so the space under it is measured in that size and not the callout's. Its tone's
 // shape goes before its label, or before its body where it has none, so its state reads on a
-// grey printout as a chip's does; `shape` changes it, as chip(shape:) does.
-#let callout(body, tone: "note", label: none, size: sz.small, shape: auto) = {
+// grey printout as a chip's does; `shape` changes it, as chip(shape:) does. `caps: false` keeps
+// its label's case.
+#let callout(body, tone: "note", label: none, size: sz.small, shape: auto, caps: true) = {
   let pair = tones.at(tone)
   let mark = _shaped("callout", tone, shape)
   context block(
@@ -144,19 +145,19 @@
     #let spacing = par.spacing
     #set par(spacing: _part-gap)
     #if label != none [#text(size: sz.fine, block(sticky: true,
-      [#mark#eyebrow(label, color: pair.at(0))])) #v(3pt)]
+      [#mark#eyebrow(label, color: pair.at(0), caps: caps)])) #v(3pt)]
     #text(size: size, _body(spacing, [#if label == none { mark }#body]))
   ]
 }
 
 // Bordered panel — for grids where a tint would shout. Its label is kept with the body, as a
-// callout's is.
-#let panel(body, label: none, color: slate) = context block(
+// callout's is, and `caps: false` keeps its case.
+#let panel(body, label: none, color: slate, caps: true) = context block(
   width: 100%, stroke: 0.6pt + rule-mid, inset: 10pt, radius: 1pt,
 )[
   #let spacing = par.spacing
   #set par(spacing: _part-gap)
-  #if label != none [#text(size: sz.fine, block(sticky: true, eyebrow(label, color: color))) #v(4pt)]
+  #if label != none [#text(size: sz.fine, block(sticky: true, eyebrow(label, color: color, caps: caps))) #v(4pt)]
   #_body(spacing, body)
 ]
 

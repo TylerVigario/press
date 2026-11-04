@@ -176,6 +176,14 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/label-break.sh
 
+  caps:
+    name: 'Every label press uppercases keeps its case under caps: false'
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/caps.sh
+
   stamp-break:
     name: A stamp's hairline stays on the page with its words
     runs-on: ubuntu-latest
@@ -392,6 +400,14 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/label-break.sh
+
+  oldest-caps:
+    name: 'Every label press uppercases keeps its case under caps: false, on the oldest toolchain'
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/caps.sh
 
   oldest-stamp-break:
     name: A stamp's hairline stays on the page with its words, on the oldest toolchain
