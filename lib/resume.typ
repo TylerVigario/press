@@ -34,11 +34,11 @@
 // document's author, with the headline and a line of contact details under it; `centred` centres
 // it, and a letter that goes with it passes centred: true and the same face. A section is a
 // heading, `= Experience`, in the accent and ruled beneath, and a role is an entry(). `size` is
-// the body text, and the head and headings are sized from it. `caps: false` keeps the headings'
-// case, which upper() would change. A set rule after the show rule changes a heading's gaps:
-// `#show heading: set block(above: 8pt)` for the space above, `below:` for the space under the
-// rule, and `inset: (bottom: 2pt)` for the space between the title and its rule. `contact` is a
-// list of items, or one item alone.
+// the body text, and the headline, the contact line and the headings are sized from it; the name
+// is sz.title whatever it is. `caps: false` keeps the headings' case, which upper() would change.
+// A set rule after the show rule changes a heading's gaps: `#show heading: set block(above: 8pt)`
+// for the space above, `below:` for the space under the rule, and `inset: (bottom: 2pt)` for the
+// space between the title and its rule. `contact` is a list of items, or one item alone.
 //
 //   #show: resume.with(title: [Your Name — Résumé], author: "Your Name",
 //     headline: [Network and systems], contact: ([Town, ST], link("mailto:you@example.com")))

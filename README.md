@@ -381,7 +381,8 @@ leaves lines for what the cook changed.
 no footer, under a head of the writer's name, the headline and the contact line. A section is a
 heading, `= Experience`, and a role is `entry(role, org, dates)`: one paragraph, so a parser reads
 the role, the organisation and the dates in that order, and a role that wraps carries its dates
-on its last line. `size:` sets the body, `sz.small` by default, and the head and headings follow it;
+on its last line. `size:` sets the body, `sz.small` by default, and the headline, the contact line
+and the headings follow it, while the name stays at `sz.title`;
 `face:` and `centred:` match a letter's. A heading's gaps are set rules after the show rule:
 `#show heading: set block(above: 8pt)`.
 
@@ -463,7 +464,8 @@ build it in the document.
 
 - **Fonts fail in three ways, and only one warns.** A missing *family* warns and still ships;
   a missing *weight or style* substitutes the nearest face silently; a missing *glyph* is drawn
-  from typst's own fonts silently (`→` is absent from Open Sans). Only the audit catches them.
+  from typst's own fonts silently (`✓` is in none of press's faces, and comes from typst's
+  NewCMMath). Only the audit catches them.
   **Read [`FONTS.md`](FONTS.md) before using any symbol.**
 - **Some symbols are in no vendored face.** `✓ ✗ ▸` render from typst's NewCMMath, `⚠ ⚡ ☐`
   from DejaVuSansMono, and **`⛔` and `📋` vanish** from the page. Build a probe and audit it.

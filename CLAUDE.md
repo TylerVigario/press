@@ -50,7 +50,7 @@ needs it, built for both media, and offered to every document from the next rele
 | `.gitignore` | ships in the kit, so a repository that commits press's folder ignores the build record in it |
 | `.gitattributes` | ships in the kit, so a repository that commits press's folder checks it out with LF, which `sh` needs, and its fonts as binary |
 | `install.sh`, `install.ps1` | the installers each release attaches beside the kit, not inside it |
-| `.github/`, `CLAUDE.md`, `CHANGELOG.md`, `cog.toml`, `justfile` | press's own machinery |
+| `.github/`, `CLAUDE.md`, `CHANGELOG.md`, `cog.toml`, `justfile`, `.markdownlint-cli2.jsonc` | press's own machinery |
 
 **The release bundle is an allowlist** in `.github/bundle.sh`: the kit rows above, nothing of
 the machinery. A file the kit needs is added there on purpose; anything else stays out.
@@ -74,15 +74,21 @@ as a package's.
 only once its checks ran against the current main. Pull requests squash-merge with the title
 as the commit, so the title must be a conventional commit; the type decides the next version.
 
-**CI** builds and audits the calibration sheet and the audit's known cases in
-`.github/audit-cases/` (a `pass-*` document is a false finding fixed once, a `fail-*` one a
-fault a pass must catch), compiles each template in place and as `new.sh` scaffolds it,
-rebuilds to prove an unchanged page keeps its stamp, does all of that again at the oldest typst
-and just press accepts, builds the release bundle and installs it in a scratch repository to
-scaffold, build and audit there with no just, runs both installers against the bundle served
-locally (install, update, refusals), and runs shellcheck, markdownlint (lines ≤ 100),
-actionlint, a JSON parse, an invisible-character scan and CodeQL. A false finding fixed gets a
-`pass-*` case.
+**CI** runs each assertion as a job of its own, named for what it asserts, and
+`.github/rulesets/main.json` requires each by that name; `.github/contexts.sh` fails when the
+two disagree, or a name passes 100 characters, where GitHub cuts it. It builds and audits the
+calibration sheet and the audit's known cases in `.github/audit-cases/` (a `pass-*` document is
+a false finding fixed once, a `fail-*` one a fault a pass must catch), compiles each template in
+place and as `new.sh` scaffolds it, rebuilds to prove an unchanged page keeps its stamp, checks
+`all` and the version, and runs each layout check, a `.github/<name>.sh` and the `.typ` it
+measures; does all of that again at the oldest typst and just press accepts; builds the release
+bundle and installs it in a scratch repository to scaffold, build and audit there with no just,
+checks every typst digest the kit pins, and runs both installers against the bundle served
+locally (install, update, refusals); and runs shellcheck, over `press.just`'s recipes and the
+toolchain action's `run:` blocks too, markdownlint (lines ≤ 100), actionlint, a JSON parse, an
+invisible-character scan and CodeQL. A false finding fixed gets a `pass-*` case. A layout fix
+gets a `.github/<name>.sh` and its `.typ`, run by a job on press's typst and one on the oldest,
+each a context in `main.json`, which is applied with `gh api` once the change is merged.
 The tools CI installs are pinned by hand, with digests; the weekly Pins workflow opens an issue
 for each release a pin is behind (`sh .github/pins.sh` shows the same comparison). typst's pin is
 the kit's own, `tools/install-typst.sh`, which the toolchain action runs and every repository's CI
@@ -144,9 +150,9 @@ repository has.
   environment; typst's `--deps` lists the rest. A new thing a build depends on goes into
   `key()`, or an unchanged record hides its change from every build after.
 - **The page passes read a copy with every scan hidden** when the document reads an image file
-  (`lib.typ`'s `scan()`, `--input press-scans=hidden`). `stamp.sh` compiles that copy at the
-  document PDF's own stamp (`PRESS_STAMP_AS`), so it lays out exactly as the document does; the
-  Python passes take the document's PDF as a name to report findings against.
+  (`scan()`, in `lib/parts.typ`, and `--input press-scans=hidden`). `stamp.sh` compiles that
+  copy at the document PDF's own stamp (`PRESS_STAMP_AS`), so it lays out exactly as the
+  document does; the Python passes take the document's PDF as a name to report findings against.
 - **The audit's glyph scan leaves out exactly press's `lib.typ` and the files in its `lib/`**,
   found beside `press.toml`, and the files of any Typst package, found beside a `typst.toml`. A
   document kept in press's directory, such as the calibration sheet, is still scanned.
@@ -167,7 +173,7 @@ repository has.
   the system's code page. It throws instead of exiting: run through `irm | iex` in someone's
   session, `exit` would close it.
 - **The tools run in Git's `sh` on Windows**, from `cmd.exe`, PowerShell and npm alike. Keep
-  them POSIX `sh`, and test Windows through the laptop before claiming it works.
+  them POSIX `sh`, and run them on Windows before claiming they work there.
 
 ## Do not
 
@@ -176,10 +182,8 @@ repository has.
   repository holds already says.
 - **Do not make a repository need just,** or any one runner. Whatever press does must be
   reachable with plain typst and `sh`.
-- **Do not point the guides at `vendor/`.** Go and Composer own it: `go mod vendor` deletes
-  whatever else is in it, its presence alone breaks `go build` in a module with dependencies
-  it does not vendor, and Composer projects keep it out of git. The guides use
-  `third_party/press`.
+- **Do not point the guides at `vendor/`.** Other toolchains own it, as the README's *Any
+  directory under the project root works* says. The guides use `third_party/press`.
 - **Do not add a markdown path.** Markdown-to-PDF was tried and removed. Documents are `.typ`.
 - **Do not make a template specific.** A template is press's universal default for a kind of
   document, and stays generic: what one repository alone needs belongs in that repository's
