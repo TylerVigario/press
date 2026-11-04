@@ -35,6 +35,8 @@
 //
 //   #header(meta: [Site A · October 2026])
 #let header(meta: none, color: slate, face: face-display, size: sz.title) = context {
+  // Tells footer() the title's marks are counted here.
+  [#metadata(none)<press-header>]
   grid(
     columns: (auto, 1fr),
     align: (left + bottom, right + bottom),
@@ -245,6 +247,19 @@
   [#metadata("press-" + kind)#text(..look, if kind == "estimate" [#body #word] else { body })]
 }
 
+// press's marks in a title, unsourced()'s, and the title without them. footer() prints the title
+// on every page, and a mark printed with it each time would count one item once a page.
+#let _is-mark(it) = (type(it) == content and it.func() == metadata and type(it.value) == str
+  and it.value.starts-with("press-"))
+#let _marks(it) = {
+  if type(it) != content { () } else if _is-mark(it) { (it,) }
+  else if it.has("children") { it.children.map(_marks).flatten() } else { () }
+}
+#let _unmarked(it) = {
+  if type(it) != content { it } else if _is-mark(it) { none }
+  else if it.has("children") { it.children.map(_unmarked).join() } else { it }
+}
+
 // When the page's content last changed, as tools/stamp.sh stamps it.
 // A rebuild that changes nothing on the page keeps the old time, so a newer time than the
 // copy on the shelf means reprint, and the same time means that copy is current. Put it in
@@ -261,13 +276,15 @@
 // document's title, and its status where it has one, on the left; updated() and the page of the
 // total on the right. The title is the one the document names itself with, set document(title:)
 // or a template's title, as header() names it. `edition` is what it says of the edition: none
-// leaves it out, and updated(words: …) says it in other words.
+// leaves it out, and updated(words: …) says it in other words. A title marked with unsourced()
+// counts once: header() counts it, or with no header(), the footer on the first page.
 //
 //   #set page(..dense, footer: footer(status: [draft]))
 #let footer(status: none, edition: updated()) = context {
   set text(size: sz.micro, fill: ink-faint)
+  if here().page() == 1 and query(<press-header>).len() == 0 { _marks(document.title).join() }
   grid(columns: (1fr, auto),
-    align(left)[#document.title#if status != none [ · #status]],
+    align(left)[#_unmarked(document.title)#if status != none [ · #status]],
     align(right)[#if edition != none [#edition · ]#counter(page).display("1 / 1", both: true)])
 }
 
