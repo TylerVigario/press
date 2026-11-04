@@ -250,6 +250,32 @@
   [#metadata("press-" + kind)#text(..look, if kind == "estimate" [#body #word] else { body })]
 }
 
+// A number with its whole part grouped by thousands, from four digits, so a figure read at a
+// glance is not misread: 3465 prints 3,465, and decimal("1234567.50") prints 1,234,567.50. Its
+// decimals stay as typst prints them, and so does its sign, typst's minus. It takes an int, a
+// float or a decimal; a figure read from data as text is converted first, `num(int(row.cows))`.
+// `words: (thousands: [ ])` groups it with a space instead.
+//
+//   #sheet((1fr, auto), ([Dairy], [Cows]), [North], num(3465), [South], num(12480))
+#let num(n, words: (thousands: [,])) = {
+  assert(type(n) in (int, float, decimal),
+    message: "num() takes an int, a float or a decimal; got " + repr(n))
+  let sep = _words("num", words, "thousands").thousands
+  let s = str(n)
+  let sign = if s.starts-with("\u{2212}") or s.starts-with("-") { s.clusters().first() } else { "" }
+  let (whole, ..decimals) = s.slice(sign.len()).split(".")
+  assert(whole.match(regex("^[0-9]+$")) != none,
+    message: "num() groups the digits typst prints, and it prints " + s)
+  let digits = whole.clusters()
+  let groups = ()
+  let end = digits.len()
+  while end > 0 {
+    groups.insert(0, digits.slice(calc.max(0, end - 3), end).join())
+    end -= 3
+  }
+  [#sign#groups.join(sep)#if decimals.len() > 0 [.#decimals.join()]]
+}
+
 // press's marks in a title, unsourced()'s, and the title without them. footer() prints the title
 // on every page, and a mark printed with it each time would count one item once a page.
 #let _is-mark(it) = (type(it) == content and it.func() == metadata and type(it.value) == str
