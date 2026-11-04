@@ -25,7 +25,7 @@ top_of() {
     awk -v w="$1" 'index($0, ">" w "<") {
         match($0, /yMin="[0-9.]+"/); print substr($0, RSTART + 6, RLENGTH - 7); exit }' "$tmp/boxes.html"
 }
-for template in brief base recipe resume; do
+for template in brief base recipe resume letter; do
     typst compile --root . --font-path fonts --ignore-system-fonts --input "template=$template" \
         .github/list-spacing.typ "$tmp/probe.pdf"
     pdftotext -bbox "$tmp/probe.pdf" "$tmp/boxes.html"

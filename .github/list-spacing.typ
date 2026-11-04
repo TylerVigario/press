@@ -3,7 +3,7 @@
 // first item has a second line, a paragraph after the lists, and a unit and an item.
 #import "/lib.typ": *
 
-#let template = (brief: brief, base: base, recipe: recipe, resume: resume).at(
+#let template = (brief: brief, base: base, recipe: recipe, resume: resume, letter: letter).at(
   sys.inputs.at("template", default: "brief"))
 #show: template.with(title: [Probe], author: "press")
 

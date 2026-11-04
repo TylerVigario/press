@@ -87,6 +87,10 @@
   set page(..reading, header: header)
   set text(font: face, size: sz.body, fill: ink, lang: "en")
   set par(leading: 0.6em, spacing: 1.05em)
+  // A list's items are further apart than the lines within one, so a wrapped item reads as one,
+  // and nearer than paragraphs, so the paragraph after a list is not its last item.
+  set list(spacing: 0.8em)
+  set enum(spacing: 0.8em)
   // Code is set a step below the text around it, as sz.fine is to sz.small; typst's own rule for
   // raw sets it at 0.8em first, which this is relative to.
   show raw: set text(font: face-mono, size: sz.fine / sz.small / 0.8 * 1em)
