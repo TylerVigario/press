@@ -3,8 +3,6 @@
 
 #import "tokens.typ": *
 
-// ----------------------------------------------------------------- parts ---
-
 // `caps` is opt-out because upper() CORRUPTS case-carrying strings, and silently:
 // "pH" becomes "PH", "iOS" becomes "IOS", and "µS" becomes "ΜS" — micro-sign
 // turned into capital Mu, a different character entirely. Pass `caps: false`
@@ -30,13 +28,6 @@
 }
 // The colour of a heading where it stands, which a template's heading rules read in context.
 #let _section-color() = _section-colors.get().at(-1, default: slate)
-// The shape a template's headings draw where the section's colour is a state's, ok, warn or bad,
-// and none for any other: slate is every heading's colour, so note's diamond would mark them all.
-#let _section-shape() = {
-  let c = _section-color()
-  if c == ok { "circle" } else if c == warn { "triangle" } else if c == bad { "square" }
-  else { none }
-}
 
 // The gap between a part's pieces: its label, title or lead and its body. Each part sets it for
 // itself, so a part keeps the layout it was drawn for whatever gap a template sets between a
@@ -105,6 +96,14 @@
 // paper colour alone carries nothing that a monochrome printer or a reader's eyes may lose.
 #let _tone-shapes = (note: "diamond", ok: "circle", warn: "triangle", bad: "square")
 
+// The shape a template's headings draw where the section's colour is a state's, ok, warn or bad,
+// and none for any other: slate is every heading's colour, so note's diamond would mark them all.
+#let _section-shape() = {
+  let c = _section-color()
+  let tone = tones.keys().find(t => t != "note" and tones.at(t).at(0) == c)
+  if tone == none { none } else { _tone-shapes.at(tone) }
+}
+
 // A shape filled with `color`, about as tall as a capital, centred on the capitals of the text it
 // sits in, as checkbox() centres on the lowercase. Each is drawn to look the same size as the
 // others, so a square is a little smaller than a circle and a triangle a little wider.
@@ -121,12 +120,12 @@
 
 // A state's shape and a space, set before a part's label in the tone's colour: the tone's own
 // shape where `shape` is auto, another of the four by name, or nothing where it is none.
-#let _shaped(part, tone, shape) = {
+#let _shaped(part, tone, shape, gap: 0.35em) = {
   let shape = if shape == auto { _tone-shapes.at(tone) } else { shape }
   assert(shape == none or shape in _tone-shapes.values(),
     message: part + "(shape:) expects \"circle\", \"triangle\", \"square\", \"diamond\" or "
       + "none; got " + repr(shape))
-  if shape != none [#_shape(shape, tones.at(tone).at(0))#h(0.35em)]
+  if shape != none [#_shape(shape, tones.at(tone).at(0))#h(gap)]
 }
 
 // Tinted callout with a weighted left edge. Its label is kept with the body under it, so a page
@@ -359,7 +358,7 @@
     message: "num() takes an int, a float or a decimal; got " + repr(n))
   let sep = _words("num", words, "thousands").thousands
   let s = str(n)
-  let sign = if s.starts-with("\u{2212}") or s.starts-with("-") { s.clusters().first() } else { "" }
+  let sign = if s.starts-with("\u{2212}") { "\u{2212}" } else { "" }
   let (whole, ..decimals) = s.slice(sign.len()).split(".")
   assert(whole.match(regex("^[0-9]+$")) != none,
     message: "num() groups the digits typst prints, and it prints " + s)

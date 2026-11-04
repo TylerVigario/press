@@ -13,8 +13,6 @@
 // typst's own, and `import *` would shadow it.
 #let press-version = _manifest.version
 
-// ---------------------------------------------------------------- tokens ---
-
 // Ink & rules
 //
 // Contrast on white, measured, because a page must read on PAPER too, and a
