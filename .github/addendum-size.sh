@@ -29,6 +29,7 @@ entry=$(height_of Sheetentry) label=$(height_of Sheetlabel)
 [ -n "$entry" ] && [ -n "$label" ] || fail "the sheet's entry or its addendum is missing"
 [ "$label" = "$entry" ] || fail "in a sheet, the label is ${label}pt tall and its entry ${entry}pt"
 body=$(height_of Bodyentry) label=$(height_of Bodylabel)
+[ -n "$body" ] && [ -n "$label" ] || fail "the body text's entry or its addendum is missing"
 awk -v l="$label" -v b="$body" 'BEGIN { exit !(l < b) }' ||
     fail "in body text, the label is ${label}pt tall, no shorter than the text's ${body}pt"
 echo "addendum-size: an addendum's label is no larger than the entry it is under"

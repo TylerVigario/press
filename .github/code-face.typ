@@ -1,5 +1,5 @@
 // Inline code and a code block under the template `--input template=` names, for code-size.sh:
-// each template sets code in press's mono face, a step below its body text.
+// each template sets code in press's mono face, a step below its body text, and boxes the block.
 #import "/lib.typ": *
 
 #let template = (brief: brief, base: base, recipe: recipe, letter: letter, resume: resume).at(

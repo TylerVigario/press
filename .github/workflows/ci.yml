@@ -119,7 +119,7 @@ jobs:
         run: sh .github/label-break.sh
       - name: A stamp's hairline stays on the page with its words
         run: sh .github/stamp-break.sh
-      - name: Inline code is set to the text around it, in press's face under every template
+      - name: Inline code is set to the text around it, in press's face, and a code block is boxed under every template
         run: sh .github/code-size.sh
       - name: Lines, list items and paragraphs are each further apart than the last
         run: sh .github/list-spacing.sh
@@ -215,7 +215,7 @@ jobs:
         run: sh .github/label-break.sh
       - name: A stamp's hairline stays on the page with its words
         run: sh .github/stamp-break.sh
-      - name: Inline code is set to the text around it, in press's face under every template
+      - name: Inline code is set to the text around it, in press's face, and a code block is boxed under every template
         run: sh .github/code-size.sh
       - name: Lines, list items and paragraphs are each further apart than the last
         run: sh .github/list-spacing.sh
