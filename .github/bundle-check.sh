@@ -12,9 +12,11 @@
 #   · a scratch repo installs the tarball the way the README's line without the installer
 #     does, streamed into tar in the directory it should land in, and the zip unpacks to the
 #     same files (the installers themselves are .github/install-check.sh's);
-#   · in that repo, with no just: new.sh scaffolds a document and a letter, stamp.sh builds
-#     them, check.sh audits them clean, plain typst builds the document from environment
-#     variables, and the calibration sheet builds and audits clean from inside the installed kit.
+#   · in that repo, with no just and with the typst the kit's install-typst.sh installs: new.sh
+#     scaffolds a document and a letter, stamp.sh builds them, check.sh audits them clean, plain
+#     typst builds the document from environment variables, build.sh builds it to print/, all.sh
+#     builds both under docs/, build.sh --check audits it, and the calibration sheet builds and
+#     audits clean from inside the installed kit.
 set -eu
 
 b=$(cd "${1:?usage: sh .github/bundle-check.sh <bundle dir>}" && pwd)

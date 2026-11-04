@@ -8,7 +8,11 @@
 # with the words its `// expect:` line gives. A pass case is a false finding the audit once made,
 # kept so it is not made again; a fail case is a fault a pass exists to catch, kept so a fix for the
 # first does not blind it. Then the build, stamp.sh, audits as check does: it fails a fail case with
-# its PDF written, and without poppler it says the audit was skipped and succeeds.
+# its PDF written, and without poppler it says the audit was skipped and succeeds. And: a pass that
+# cannot run fails the audit whatever the document accepts; open items and estimates are counted,
+# with the audit's tools or without them; a title still to be named is counted once, however many
+# pages print it, or none; with no XML parser, or no python, check refuses and a build skips the
+# passes that need one, unrecorded; and an unchanged document is not compiled again.
 set -eu
 cd "$(dirname "$0")/.."
 

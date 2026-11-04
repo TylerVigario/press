@@ -44,9 +44,10 @@ name: CI
 #                            job needs, action inputs, and shellcheck on each run:
 #                            block. A workflow's own mistakes surface only when it
 #                            runs, and the release workflow runs rarely.
-#   Markdown lint            markdownlint over every tracked *.md. README.md and
-#                            CLAUDE.md are how press is learned, by people and by
-#                            agents, and a broken fence or table misleads both.
+#   Markdown lint            markdownlint over every tracked *.md but CHANGELOG.md, which
+#                            the release writes. README.md and CLAUDE.md are how press is
+#                            learned, by people and by agents, and a broken fence or table
+#                            misleads both.
 #   Every CI job is a required context, by a name GitHub keeps whole
 #                            each job's name above, and the title check's, is one main.json
 #                            requires, and each it requires is one of them, at 100 characters

@@ -1,9 +1,9 @@
 name: Pins
 
-# The tools CI installs at a version pinned by hand: typst and just in the toolchain action,
-# cocogitto in setup-cog.sh, actionlint and markdownlint-cli2 in ci.yml. Dependabot cannot
-# see them, so nothing reported a new release; just was two minors behind before anyone
-# looked.
+# The tools CI installs at a version pinned by hand: typst in tools/install-typst.sh, just in
+# the toolchain action, cocogitto in setup-cog.sh, actionlint and markdownlint-cli2 in ci.yml.
+# Dependabot cannot see them, so nothing reported a new release; just was two minors behind
+# before anyone looked.
 #
 # Each week .github/pins.sh compares every pin with its upstream's latest release and opens
 # an issue for each release a pin is behind. It keeps that issue's numbers current, closes it
