@@ -77,8 +77,11 @@
 
 // Code block treatment. The document installs it; press never does:
 //
-//   #show raw: set text(font: face-mono, size: sz.fine)
+//   #show raw: set text(font: face-mono, size: sz.fine / sz.small / 0.8 * 1em)
 //   #show raw.where(block: true): code
+//
+// The first sets code a step below the text around it, sz.fine in body text: typst's own rule
+// for raw sets it at 0.8em, and an em in a rule for raw is that 0.8em.
 //
 // Shading and a border, commands as plain lines, nothing per line. That is what
 // documentation actually does — Google's developer style guide, MDN and GitLab

@@ -128,8 +128,10 @@
     message: "sheet(across:) takes a number of columns, 1 or more; got " + repr(across))
   let inset = (x: 5pt, y: 4pt)
   let n = if type(cols) == int { cols } else { cols.len() }
+  // A cell's code is set at the sheet's size, as its words are.
+  let at-size(c, ..style) = { show raw: set text(size: size); text(size: size, ..style, c) }
   let cells = (
-    ..rows.pos().map(c => text(size: size)[#c]),
+    ..rows.pos().map(c => at-size[#c]),
     ..range(blank * n).map(_ => box(height: _pen - 2 * inset.y)),
   )
   // The sheet, or the part of it a column holds: `before` rows come ahead of these, so the
@@ -140,7 +142,7 @@
     inset: inset,
     fill: (_, y) => if y == 0 { slate-tint }
       else if calc.odd(y + before) { paper-tint } else { none },
-    table.header(..head.map(h => text(size: size, weight: 700)[#h])),
+    table.header(..head.map(h => at-size(weight: 700)[#h])),
     ..cells,
   )
   if across == 1 or cells.len() == 0 { return part(cells) }
