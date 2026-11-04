@@ -123,6 +123,8 @@ mkdir -p "$np"
 printf '%s\n' "$PATH" | tr ':' '\n' | while IFS= read -r d; do
     [ -d "$d" ] || continue
     for f in "$d"/*; do
+        # An empty directory leaves the pattern itself, which names nothing.
+        [ -e "$f" ] || continue
         n=${f##*/}
         case $n in python*) continue ;; esac
         [ -e "$np/$n" ] || ln -s "$f" "$np/$n"
