@@ -117,6 +117,8 @@ jobs:
         run: sh .github/code-break.sh
       - name: A callout's, a panel's or a unit's label stays on the page with what it heads
         run: sh .github/label-break.sh
+      - name: A stamp's hairline stays on the page with its words
+        run: sh .github/stamp-break.sh
       - name: A sheet across columns reads down each in turn, and its last page is shared by height
         run: sh .github/sheet-across.sh
       - name: A form page is its blank's, and each answer lands where it is put
@@ -199,6 +201,8 @@ jobs:
         run: sh .github/code-break.sh
       - name: A callout's, a panel's or a unit's label stays on the page with what it heads
         run: sh .github/label-break.sh
+      - name: A stamp's hairline stays on the page with its words
+        run: sh .github/stamp-break.sh
       - name: A sheet across columns reads down each in turn, and its last page is shared by height
         run: sh .github/sheet-across.sh
       - name: A form page is its blank's, and each answer lands where it is put

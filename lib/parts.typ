@@ -167,9 +167,13 @@
 ]
 
 #let stamp(body) = {
-  v(4pt)
-  line(length: 100%, stroke: 0.5pt + rule-hair)
-  v(2pt)
+  // The hairline is a sticky block, which typst keeps with the words after it, so a page never
+  // ends on the rule alone.
+  block(sticky: true, {
+    v(4pt)
+    line(length: 100%, stroke: 0.5pt + rule-hair)
+    v(2pt)
+  })
   text(size: sz.micro, fill: ink-faint, style: "italic")[#body]
 }
 
