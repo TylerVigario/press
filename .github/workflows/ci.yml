@@ -545,8 +545,8 @@ jobs:
       - name: shellcheck
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq shellcheck
+          # The runner's own shellcheck, which actionlint uses too.
+          shellcheck --version | sed -n 2p
           # Every shell script in the tree, found rather than listed. A glob of
           # tools/*.sh was correct until a script appeared under .github/, and a
           # job called "Shell scripts lint" that misses one is overclaiming by the
