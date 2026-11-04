@@ -62,6 +62,9 @@
   // One block, so the label and its hairline are one piece: a heading drawn by a show rule
   // gets no block of its own, and loose, a page could end between them.
   show heading.where(level: 2): it => context block(breakable: false, {
+    // The label sits over its hairline by the part's own gap, at the body size as the heading's
+    // gaps are: the heading's own block spacing would reach the hairline too.
+    set block(spacing: 0.55 * sz.small)
     v(3pt)
     let shape = _section-shape()
     if shape != none [#_shape(shape, _section-color())#h(0.35em)]
@@ -79,17 +82,21 @@
     it
   }
 
-  header(meta: meta)
-  v(4pt)
   assert(legend == none or (type(legend) == array and legend.len() > 1),
     message: "brief(legend:) takes none, its default, or the note and then its chips: "
       + "legend: ([Colour is state.], chip([DONE], \"ok\"))")
-  if legend != none {
-    let (note, ..chips) = legend
-    grid(columns: (1fr, auto), align: (left + horizon, right + horizon),
-      text(size: sz.micro, fill: ink-faint, note),
-      chips.join([ #h(3pt) ]))
-    v(7pt)
-  }
+  // The head, its header and legend, is one part, with the part's own gaps inside.
+  block(width: 100%, {
+    set par(spacing: _part-gap)
+    header(meta: meta)
+    v(4pt)
+    if legend != none {
+      let (note, ..chips) = legend
+      grid(columns: (1fr, auto), align: (left + horizon, right + horizon),
+        text(size: sz.micro, fill: ink-faint, note),
+        chips.join([ #h(3pt) ]))
+      v(7pt)
+    }
+  })
   body
 }

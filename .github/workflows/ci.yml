@@ -127,6 +127,8 @@ jobs:
         run: sh .github/num.sh
       - name: An addendum's label is no larger than the entry it is under
         run: sh .github/addendum-size.sh
+      - name: A header, a == heading and a résumé entry keep their own gaps
+        run: sh .github/head-gaps.sh
       - name: A sheet across columns reads down each in turn, and its last page is shared by height
         run: sh .github/sheet-across.sh
       - name: A form page is its blank's, and each answer lands where it is put
@@ -219,6 +221,8 @@ jobs:
         run: sh .github/num.sh
       - name: An addendum's label is no larger than the entry it is under
         run: sh .github/addendum-size.sh
+      - name: A header, a == heading and a résumé entry keep their own gaps
+        run: sh .github/head-gaps.sh
       - name: A sheet across columns reads down each in turn, and its last page is shared by height
         run: sh .github/sheet-across.sh
       - name: A form page is its blank's, and each answer lands where it is put
