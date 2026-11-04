@@ -115,6 +115,37 @@ grep -qF "skipping the line-overlap check" "$tmp/out" \
     || fail "a build that skipped a pass was recorded as audited"
 echo "audit-cases: with no XML parser, check fails and a build skips the pass, unrecorded"
 
+# With no python at all, check refuses, as it does without poppler, and a build skips the two
+# passes that need one, says so and is not recorded as audited. The PATH they run with is one
+# directory linking every program on PATH but python.
+np=$tmp/no-python
+mkdir -p "$np"
+printf '%s\n' "$PATH" | tr ':' '\n' | while IFS= read -r d; do
+    [ -d "$d" ] || continue
+    for f in "$d"/*; do
+        n=${f##*/}
+        case $n in python*) continue ;; esac
+        [ -e "$np/$n" ] || ln -s "$f" "$np/$n"
+    done
+done
+if (PATH=$np; command -v python3 || command -v python) >/dev/null 2>&1; then
+    fail "the PATH with no python has one"
+fi
+# shellcheck disable=SC2086
+! PATH=$np PRESS_PYTHON='' sh tools/check.sh .github/audit-cases/pass-marker-beside-word.typ \
+    "$tmp/np/check.pdf" . $flags > "$tmp/out" 2>&1 || { cat "$tmp/out" >&2; fail "check passed with no python"; }
+grep -qF "check needs a python" "$tmp/out" \
+    || { cat "$tmp/out" >&2; fail "check failed with no python, but did not say why"; }
+# shellcheck disable=SC2086
+PATH=$np PRESS_PYTHON='' sh tools/stamp.sh .github/audit-cases/pass-marker-beside-word.typ "$tmp/np/build.pdf" \
+    $flags > "$tmp/out" 2>&1 || { cat "$tmp/out" >&2; fail "a build with no python failed"; }
+grep -qF "skipping the printable-area check (no working python found)" "$tmp/out" \
+    && grep -qF "skipping the line-overlap check (no working python found)" "$tmp/out" \
+    || { cat "$tmp/out" >&2; fail "a build with no python did not say it skipped both passes"; }
+! grep -qF "== .github/audit-cases/pass-marker-beside-word.typ	$tmp/np/build.pdf" .build-record 2>/dev/null \
+    || fail "a build that skipped its passes was recorded as audited"
+echo "audit-cases: with no python, check refuses and a build skips its two passes, unrecorded"
+
 # The build record: a document whose inputs are unchanged is not compiled again, and an edit
 # to it is. typst runs through a wrapper that notes each compile.
 r=$tmp/record
