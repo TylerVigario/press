@@ -50,14 +50,19 @@
   show heading.where(level: 1): it => context {
     v(2pt)
     block(width: 100%, fill: _section-color(), inset: (x: 8pt, y: 4.5pt), radius: 1pt,
-      text(size: sz.fine, weight: 700, tracking: 1.2pt, fill: white,
-        if caps { upper(it.body) } else { it.body }))
+      text(size: sz.fine, weight: 700, tracking: 1.2pt, fill: white, {
+        let shape = _section-shape()
+        if shape != none [#_shape(shape, white)#h(0.4em)]
+        if caps { upper(it.body) } else { it.body }
+      }))
     v(5pt)
   }
   // One block, so the label and its hairline are one piece: a heading drawn by a show rule
   // gets no block of its own, and loose, a page could end between them.
   show heading.where(level: 2): it => context block(breakable: false, {
     v(3pt)
+    let shape = _section-shape()
+    if shape != none [#_shape(shape, _section-color())#h(0.35em)]
     eyebrow(it.body, color: _section-color(), caps: caps)
     v(-2pt)
     line(length: 100%, stroke: 0.7pt + rule-hair)

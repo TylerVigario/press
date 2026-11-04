@@ -15,9 +15,11 @@
 )
 
 // A section whose headings show its state: inside it, a template's `=` band and `==` label take
-// `color`, any colour, where every other heading stays slate. Wrap the one heading or the whole
-// section. A label on the heading, `<depth>` among them, stays where it is; a section inside
-// another takes its own colour; `#show: section.with(color: steel)` colours a whole document's.
+// `color`, any colour, where every other heading stays slate. Where it is ok, warn or bad, they
+// draw that state's shape too, as a chip does, so the state reads on a grey printout. Wrap the
+// one heading or the whole section. A label on the heading, `<depth>` among them, stays where it
+// is; a section inside another takes its own colour; `#show: section.with(color: steel)` colours
+// a whole document's.
 //
 //   #section(color: bad)[= Red-flag signs]
 #let _section-colors = state("press-section-colors", ())
@@ -28,6 +30,13 @@
 }
 // The colour of a heading where it stands, which a template's heading rules read in context.
 #let _section-color() = _section-colors.get().at(-1, default: slate)
+// The shape a template's headings draw where the section's colour is a state's, ok, warn or bad,
+// and none for any other: slate is every heading's colour, so note's diamond would mark them all.
+#let _section-shape() = {
+  let c = _section-color()
+  if c == ok { "circle" } else if c == warn { "triangle" } else if c == bad { "square" }
+  else { none }
+}
 
 // A document's header: its title on the left, `meta` on the right, and a rule beneath. The title
 // is the one the document names itself with, set document(title:) or a template's title, so it
@@ -52,17 +61,50 @@
   warn: (warn, warn-tint), bad: (bad, bad-tint),
 )
 
+// The shape each tone draws beside a state, so the state reads without its colour. Printed in
+// grey, ok and warn come out nearly the same, about 96 and 102 of 255 in Rec. 601 luma, and on
+// paper colour alone carries nothing that a monochrome printer or a reader's eyes may lose.
+#let _tone-shapes = (note: "diamond", ok: "circle", warn: "triangle", bad: "square")
+
+// A shape filled with `color`, about as tall as a capital, centred on the capitals of the text it
+// sits in, as checkbox() centres on the lowercase. Each is drawn to look the same size as the
+// others, so a square is a little smaller than a circle and a triangle a little wider.
+#let _shape(name, color) = context {
+  let cap = measure(text(top-edge: "cap-height", bottom-edge: "baseline")[X]).height
+  let s = 0.85 * cap
+  let drawn = if name == "circle" { circle(radius: s / 2, fill: color) }
+    else if name == "square" { square(size: 0.88 * s, fill: color) }
+    else if name == "triangle" { polygon(fill: color, (0pt, s), (0.6 * s, 0pt), (1.2 * s, s)) }
+    else { polygon(fill: color, (0.6 * s, 0pt), (1.2 * s, 0.6 * s), (0.6 * s, 1.2 * s), (0pt, 0.6 * s)) }
+  let h = measure(drawn).height
+  box(baseline: h / 2 - cap / 2, drawn)
+}
+
+// A state's shape and a space, set before a part's label in the tone's colour: the tone's own
+// shape where `shape` is auto, another of the four by name, or nothing where it is none.
+#let _shaped(part, tone, shape) = {
+  let shape = if shape == auto { _tone-shapes.at(tone) } else { shape }
+  assert(shape == none or shape in _tone-shapes.values(),
+    message: part + "(shape:) expects \"circle\", \"triangle\", \"square\", \"diamond\" or "
+      + "none; got " + repr(shape))
+  if shape != none [#_shape(shape, tones.at(tone).at(0))#h(0.35em)]
+}
+
 // Tinted callout with a weighted left edge. Its label is kept with the body under it, so a page
 // never ends on the label alone. The label's block is set at the label's own size, as a line of
-// it would be, so the space under it is measured in that size and not the callout's.
-#let callout(body, tone: "note", label: none, size: sz.small) = {
+// it would be, so the space under it is measured in that size and not the callout's. Its tone's
+// shape goes before its label, or before its body where it has none, so its state reads on a
+// grey printout as a chip's does; `shape` changes it, as chip(shape:) does.
+#let callout(body, tone: "note", label: none, size: sz.small, shape: auto) = {
   let pair = tones.at(tone)
+  let mark = _shaped("callout", tone, shape)
   block(
     width: 100%, fill: pair.at(1), stroke: (left: 3pt + pair.at(0)),
     inset: (x: 10pt, y: 8pt),
   )[
-    #if label != none [#text(size: sz.fine, block(sticky: true, eyebrow(label, color: pair.at(0)))) #v(3pt)]
-    #text(size: size)[#body]
+    #if label != none [#text(size: sz.fine, block(sticky: true,
+      [#mark#eyebrow(label, color: pair.at(0))])) #v(3pt)]
+    #text(size: size)[#if label == none { mark }#body]
   ]
 }
 
