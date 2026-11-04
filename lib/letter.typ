@@ -4,9 +4,7 @@
 
 #import "tokens.typ": *
 #import "parts.typ": *
-#import "composition.typ": *
 
-// --------------------------------------------------------------- letters ---
 // A letter's own parts: letter() sets the letterhead, the date and continued(), and a letter takes
 // the rest as it needs.
 // The writer is the document's author, set once with `set document(author: "…")`, and the date

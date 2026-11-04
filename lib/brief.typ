@@ -4,7 +4,6 @@
 
 #import "tokens.typ": *
 #import "parts.typ": *
-#import "composition.typ": *
 
 // The general-purpose document: a sheet, a guide, a brief. The title names the document once,
 // in the PDF's metadata and in header(), and footer() prints it beside the status, the stamp

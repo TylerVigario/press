@@ -5,7 +5,6 @@
 #import "tokens.typ": *
 #import "parts.typ": *
 
-// --------------------------------------------------------------- résumés ---
 // A résumé is read first by an applicant-tracking parser, which takes its text in the order the
 // page gives it, and then by a person. So it keeps to one column: a section is a heading, and a
 // role is one paragraph, read in the order it is printed.

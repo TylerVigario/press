@@ -3,7 +3,6 @@
 #import "tokens.typ": *
 #import "parts.typ": *
 
-// ----------------------------------------------------------- composition ---
 // Generic by nature — a labelled bounded block, a state chip, a question awaiting its answer.
 
 // The workhorse. A bounded unit of exactly one idea: a label to navigate by, a
@@ -39,11 +38,7 @@
 // it out.
 #let chip(label, tone, boxed: true, shape: auto) = {
   let pair = tones.at(tone)
-  let shape = if shape == auto { _tone-shapes.at(tone) } else { shape }
-  assert(shape == none or shape in _tone-shapes.values(),
-    message: "chip(shape:) expects \"circle\", \"triangle\", \"square\", \"diamond\" or none; got "
-      + repr(shape))
-  let shown = if shape == none { label } else [#_shape(shape, pair.at(0))#h(0.3em)#label]
+  let shown = [#_shaped("chip", tone, shape, gap: 0.3em)#label]
   if boxed {
     box(fill: pair.at(1), stroke: 0.5pt + pair.at(0), inset: (x: 4pt, y: 2pt), radius: 1pt,
         text(size: sz.micro, weight: 700, fill: pair.at(0), shown))
@@ -78,10 +73,11 @@
 #let _text-top() = {
   let m = page.margin
   let top = if type(m) == dictionary { m.at("top", default: auto) } else { m }
-  if top == auto { 2.5 / 21 * calc.min(page.width, page.height) }
-  else if type(top) == ratio { top * page.height }
-  else if type(top) == relative { top.ratio * page.height + top.length.to-absolute() }
-  else { top.to-absolute() }
+  if top == auto { 2.5 / 21 * calc.min(page.width, page.height) } else {
+    // A length, a ratio or both, as one relative length.
+    let top = 0% + top
+    top.ratio * page.height + top.length.to-absolute()
+  }
 }
 
 // The line a pen writes on, under a signature, a date or a note.
