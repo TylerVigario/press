@@ -50,7 +50,9 @@
   set page(..preset)
   set text(font: face, size: size, fill: ink, lang: "en")
   set par(leading: 0.52em, spacing: 0.55em)
-  set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.32em)
+  // A list's items are further apart than the lines within one, so a wrapped item reads as one.
+  set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.65em)
+  set enum(spacing: 0.65em)
   show link: link-note
   let contact = if type(contact) == array { contact } else { (contact,) }
   show heading: set block(above: 1.1em, below: 0.6em, inset: (bottom: 0.3em),

@@ -26,7 +26,9 @@
   set page(..preset, footer: footer)
   set text(font: face-text, size: sz.small, fill: ink, lang: "en")
   set par(leading: 0.52em, spacing: 0.55em)
-  set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.32em)
+  // A list's items are further apart than the lines within one, so a wrapped item reads as one.
+  set list(indent: 0.65em, body-indent: 0.34em, spacing: 0.65em)
+  set enum(spacing: 0.65em)
   show link: link-note
   // A section is a heading: = draws it as a band in slate, and == as a labelled hairline. Its
   // gaps are the paragraph gap at the body size, since a heading's own em is its larger size.
