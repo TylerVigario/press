@@ -1,6 +1,6 @@
 // Paragraphs and lists under the template `--input template=` names, for list-spacing.sh: a
 // paragraph of two lines and the next, then a bulleted list, a numbered one and a checklist whose
-// first item has a second line, and a paragraph after the lists.
+// first item has a second line, a paragraph after the lists, and a unit and an item.
 #import "/lib.typ": *
 
 #let template = (brief: brief, base: base, recipe: recipe, resume: resume).at(
@@ -24,3 +24,6 @@ Paratwo is the next paragraph
 ]
 
 Paraafter follows the lists
+
+#unit([Unitlabel], "note", caps: false)[Unitlead holds.][Unitbody under it.]
+#item(1, [Itemtitle of a step], [Itembody under it.])

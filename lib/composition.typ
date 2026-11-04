@@ -19,6 +19,7 @@
   let pair = tones.at(tone)
   block(width: 100%, breakable: breakable, stroke: (left: 2.5pt + pair.at(0)),
         fill: paper-tint, inset: (x: 8pt, y: 6.5pt))[
+    #set par(spacing: _part-gap)
     #text(size: sz.fine, block(sticky: true,
       [#_shaped("unit", tone, shape)#eyebrow(label, color: pair.at(0), caps: caps)]))
     #v(2.5pt)
@@ -55,6 +56,7 @@
 #let decision(n, q, note, color: bad) = block(
   width: 100%, breakable: false, inset: (bottom: 5.5pt),
 )[
+  #set par(spacing: _part-gap)
   #grid(columns: (auto, 1fr), gutter: 6pt, align: (left + top, left + top),
     box(fill: color, radius: 50%, inset: (x: 4.5pt, y: 3pt),
       text(size: sz.fine, weight: 700, fill: white)[#n]),
@@ -112,7 +114,11 @@
   let inset = (x: 5pt, y: 4pt)
   let n = if type(cols) == int { cols } else { cols.len() }
   // A cell's code is set at the sheet's size, as its words are.
-  let at-size(c, ..style) = { show raw: set text(size: size); text(size: size, ..style, c) }
+  let at-size(c, ..style) = {
+    show raw: set text(size: size)
+    set par(spacing: _part-gap)
+    text(size: size, ..style, c)
+  }
   let cells = (
     ..rows.pos().map(c => at-size[#c]),
     ..range(blank * n).map(_ => box(height: _pen - 2 * inset.y)),
@@ -270,6 +276,7 @@
   assert(type(width) in (length, ratio, relative),
     message: "signature(width:) takes a length or a relative width: width: 2.9in, width: 100%")
   let name = if name == auto { _writer(what: "signature(), given no name,") } else { name }
+  set par(spacing: _part-gap)
   if closing != none { closing }
   if not signed {
     if closing != none { parbreak() }
