@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: A vulnerability
+    url: https://github.com/TylerVigario/press/security/advisories/new
+    about: Report it privately, as the security policy says, not in an issue.
+  - name: How to use press
+    url: https://github.com/TylerVigario/press#readme
+    about: Installing press, writing a document, and the traps, are the README's.
