@@ -20,11 +20,9 @@ trap 'rm -rf "$tmp"' EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
+. .github/word-box.sh
 # top_of <word>: the top of the word's box, in points from the top of the page.
-top_of() {
-    awk -v w="$1" 'index($0, ">" w "<") {
-        match($0, /yMin="[0-9.]+"/); print substr($0, RSTART + 6, RLENGTH - 7); exit }' "$tmp/boxes.html"
-}
+top_of() { word_box "$tmp/boxes.html" "$1" | awk '{ print $2 }'; }
 for template in brief base recipe resume letter; do
     typst compile --root . --font-path fonts --ignore-system-fonts --input "template=$template" \
         .github/list-spacing.typ "$tmp/probe.pdf"

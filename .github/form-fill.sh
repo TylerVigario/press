@@ -126,8 +126,10 @@ sh tools/check.sh .github/form-fill.typ "$tmp/audit.pdf" . $flags > "$tmp/out" 2
     || { cat "$tmp/out" >&2; fail "the filled form failed its audit"; }
 echo "form-fill: the filled form audits clean, its blank left out"
 
-pdftotext -bbox "$tmp/probe.pdf" - \
-    | awk -F '"' '/>216,</ && $2 >= 216 && $2 <= 220 && $4 >= 216 && $4 <= 220 { hit = 1 } END { exit !hit }' \
+. .github/word-box.sh
+pdftotext -bbox "$tmp/probe.pdf" "$tmp/boxes.html"
+word_boxes "$tmp/boxes.html" "216," \
+    | awk '$1 >= 216 && $1 <= 220 && $2 >= 216 && $2 <= 220 { hit = 1 } END { exit !hit }' \
     || fail "the grid's label for 216, 216 is not beside its crossing"
 echo "form-fill: the measuring grid runs from the page's corner, every step, its crossings labelled"
 
