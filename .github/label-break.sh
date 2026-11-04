@@ -4,7 +4,7 @@
 #
 #   sh .github/label-break.sh
 #
-# Run by CI's audit job and the oldest-toolchain job, which have poppler. Each of these parts is
+# Run by CI on press's typst and on the oldest toolchain, with poppler. Each of these parts is
 # one block that may break across a page, and typst would break it straight after its label as
 # readily as anywhere else; the label is a sticky block, which typst keeps with what follows it.
 # .github/label-break.typ starts each part where its label fits at the foot of a page and the line

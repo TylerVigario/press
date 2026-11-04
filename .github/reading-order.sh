@@ -4,12 +4,12 @@
 #
 #   sh .github/reading-order.sh
 #
-# Run by CI's audit job, which has poppler. A résumé is read first by an applicant-tracking
-# parser, and a role read beside another role's dates is a wrong work history. .github/resume.typ
-# holds the entries a résumé has. Its text is read twice, laid out as pdftotext -layout lays it,
-# and in the order it is written, as pdftotext -raw reads it; each must give the strings below in
-# order. Then the layout itself: a wrapped role's dates sit on its last line, and dates that do
-# not fit there take a line of their own, still at the right.
+# Run by CI on press's typst and on the oldest toolchain, with poppler. A résumé is read first by an
+# applicant-tracking parser, and a role read beside another role's dates is a wrong work history.
+# .github/resume.typ holds the entries a résumé has. Its text is read twice, laid out as pdftotext
+# -layout lays it, and in the order it is written, as pdftotext -raw reads it; each must give the
+# strings below in order. Then the layout itself: a wrapped role's dates sit on its last line, and
+# dates that do not fit there take a line of their own, still at the right.
 set -eu
 cd "$(dirname "$0")/.."
 

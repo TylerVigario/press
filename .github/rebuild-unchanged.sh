@@ -3,9 +3,9 @@
 #
 #   sh .github/rebuild-unchanged.sh <document>...
 #
-# Run by CI's two build jobs, after a first build. An unchanged page keeps its stamp: build
-# reads the old one back from the PDF. A second build must therefore report each document
-# unchanged, and a stamp it cannot read back re-stamps the page and shows here.
+# Run by CI on press's typst and on the oldest toolchain, after a first build. An unchanged page
+# keeps its stamp: build reads the old one back from the PDF. A second build must therefore report
+# each document unchanged, and a stamp it cannot read back re-stamps the page and shows here.
 #
 # Each document's own report line must say unchanged. A run that printed no line for one
 # fails too, rather than passing for want of anything to object to.

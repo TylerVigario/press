@@ -4,7 +4,7 @@
 #
 #   sh .github/code-break.sh
 #
-# Run by CI's audit job and the oldest-toolchain job, which have poppler. brief and base box
+# Run by CI on press's typst and on the oldest toolchain, with poppler. brief and base box
 # every code block with code(), unbreakable; a document lets one break with its own rule,
 # `it => code(it, breakable: true)`, as parts.typ shows. .github/code-break.typ has a block that
 # opts in and one that does not, each too long for the space left on its page. The first must

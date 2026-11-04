@@ -4,7 +4,7 @@
 #
 #   sh .github/num.sh
 #
-# Run by CI's audit job and the oldest-toolchain job, which have poppler. .github/num.typ prints
+# Run by CI on press's typst and on the oldest toolchain, with poppler. .github/num.typ prints
 # one number to a line, and each line must read as below; the minus is typst's, U+2212.
 set -eu
 cd "$(dirname "$0")/.."

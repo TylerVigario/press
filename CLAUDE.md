@@ -90,8 +90,8 @@ runs too, so a bump reaches them all with the next release; it carries a digest 
 architecture it installs, and `.github/typst-digests.sh` checks every one against typst's release.
 
 **The floors** are `press.toml`'s `typst` and `press.just`'s `set minimum-version`. CI's
-oldest-toolchain job installs exactly those, from the toolchain action's `OLDEST_` pins, and
-refuses to run if they disagree. Raising a floor is a deliberate edit in both places.
+jobs on the oldest toolchain install exactly those, from the toolchain action's `OLDEST_` pins,
+and one fails if they disagree. Raising a floor is a deliberate edit in both places.
 
 **Versions are tags.** Nothing in the tree is named for a version, so a change is made where
 the file is, with nothing to copy or rename. Only the Release workflow writes `press.toml`'s

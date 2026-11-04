@@ -33,8 +33,8 @@ runs:
         JUST_VERSION=1.59.0
         JUST_SHA256=409044617b6f06517c1035e55ca38c8c856ff8b650e41bc2aa1ef82d5903a23e
         # The floors press declares: press.toml's typst, and press.just's minimum-version. CI's
-        # oldest-toolchain job installs these and refuses to run if press names
-        # others, so raising a floor is an edit here too. Old on purpose, so the Pins
+        # jobs on the oldest toolchain install these, and one refuses to pass if press
+        # names others, so raising a floor is an edit here too. Old on purpose, so the Pins
         # workflow leaves them out.
         OLDEST_TYPST_VERSION=0.14.0
         OLDEST_TYPST_SHA256=99816d2982de08d2b091bac56b59b2faa523a10e1378ad3cdd68e35b8eb74b3d

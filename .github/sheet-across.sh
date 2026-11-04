@@ -4,7 +4,7 @@
 #
 #   sh .github/sheet-across.sh
 #
-# Run by CI's audit job and the oldest-toolchain job, which have poppler. typst flows a sheet's
+# Run by CI on press's typst and on the oldest toolchain, with poppler. typst flows a sheet's
 # full pages through its columns, and press balances the last page by measuring every row, which
 # depends on where the sheet starts on its page and on the page's margins. .github/sheet-across.typ
 # holds two sheets: 120 rows that run onto a second page, which must read in order, with the
