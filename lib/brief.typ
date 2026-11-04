@@ -85,6 +85,8 @@
   assert(legend == none or (type(legend) == array and legend.len() > 1),
     message: "brief(legend:) takes none, its default, or the note and then its chips: "
       + "legend: ([Colour is state.], chip([DONE], \"ok\"))")
+  // The title is counted here when nothing in the document prints it.
+  _title-start()
   // The head, its header and legend, is one part, with the part's own gaps inside.
   block(width: 100%, {
     set par(spacing: _part-gap)

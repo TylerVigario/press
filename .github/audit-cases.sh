@@ -79,15 +79,18 @@ echo "audit-cases: a build without the audit's tools still counts the open items
 
 # A title still to be named is one open item, though the footer prints it on every page: counted
 # once where a header prints it too, once where a head of the document's own prints it with
-# title(), and once where only the footer does.
-for c in pass-unsourced-title pass-unsourced-title-own-head pass-unsourced-title-footer; do
+# title(), and once where only the footer does, from a later page where the first has none, or
+# beside a title() with its own words. A letter and a résumé print it nowhere, and count it once.
+for c in pass-unsourced-title pass-unsourced-title-own-head pass-unsourced-title-footer \
+    pass-unsourced-title-cover pass-unsourced-title-own-text pass-unsourced-title-letter \
+    pass-unsourced-title-resume; do
     # shellcheck disable=SC2086
     sh tools/check.sh ".github/audit-cases/$c.typ" "$tmp/o/$c.pdf" . $flags > "$tmp/out" 2>&1 \
         || { cat "$tmp/out" >&2; fail "$c failed its audit"; }
     grep -qF "has 1 open item " "$tmp/out" \
         || { cat "$tmp/out" >&2; fail "$c did not count its title once"; }
 done
-echo "audit-cases: a title still to be named is counted once, however many pages print it"
+echo "audit-cases: a title still to be named is counted once, however many pages print it, or none"
 
 # A python with no XML parser cannot run the text-on-text pass. A stand-in python, the real one
 # with expat taken away at startup, is named by PRESS_PYTHON: check fails, and says why, and a

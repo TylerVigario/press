@@ -93,6 +93,8 @@
   show raw.where(block: true): code
   show link: link-note
 
+  // The title is counted here when nothing in the document prints it.
+  _title-start()
   let head = letterhead(..if type(contact) == array { contact } else { (contact,) }, face: face)
   if centred { align(center, head) } else { head }
   if date != none { dateline(date); parbreak() }

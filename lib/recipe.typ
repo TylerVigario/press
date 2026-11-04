@@ -72,6 +72,8 @@
     it
   }
 
+  // The title is counted here when nothing in the document prints it.
+  _title-start()
   // The head, its header and intro, is one part, with the part's own gaps inside.
   block(width: 100%, {
     set par(spacing: _part-gap)
