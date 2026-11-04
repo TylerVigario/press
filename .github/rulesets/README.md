@@ -63,7 +63,7 @@ kinds:
 | `No invisible characters` | no soft hyphens or zero-width characters in any tracked file |
 | `Every CI job is a required context, by a name GitHub keeps whole` | the jobs' names and the title check's are exactly the contexts required here, each 100 characters or fewer |
 | `JSON parses` | every tracked `*.json`, including these payloads, parses |
-| `Markdown lint` | every tracked `*.md` passes markdownlint |
+| `Markdown lint` | every tracked `*.md` but `CHANGELOG.md`, which the release writes, passes markdownlint |
 | `Workflows lint` | every workflow passes actionlint, with shellcheck on each `run:` block |
 | `Shell scripts lint` | every `*.sh` in the tree, `press.just`'s recipes and the toolchain action's `run:` blocks pass shellcheck |
 | `Validate PR title` | the pull request title parses as a Conventional Commit |

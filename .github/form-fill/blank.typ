@@ -1,5 +1,5 @@
 // The stand-in blank .github/form-fill.sh fills in, in typst's own Libertinus, a face press does
-// not vendor: a letter page and an A4 page, each with a label and a box, as a form has.
+// not vendor: a letter page with a label and a box, as a form has, and an A4 page with a label.
 #set page(width: 8.5in, height: 11in, margin: 0pt)
 #set text(size: 9pt)
 #place(top + left, dx: 72pt, dy: 72pt)[Name]

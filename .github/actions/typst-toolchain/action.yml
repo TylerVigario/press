@@ -1,11 +1,11 @@
 name: Typst toolchain
 description: >
-  Install typst, just and optionally poppler, pinned to the versions the host
-  that prints these documents runs, or to the oldest press.just accepts.
+  Install typst, just and optionally poppler: typst at the version tools/install-typst.sh
+  pins, just at the one pinned here, or each at the oldest press accepts.
 
 inputs:
   poppler:
-    description: Install poppler-utils, needed only by check's audit passes.
+    description: Install poppler-utils, for the audit's passes and the checks that read a PDF.
     default: "false"
   oldest:
     description: Install the oldest typst and just press.just accepts instead.

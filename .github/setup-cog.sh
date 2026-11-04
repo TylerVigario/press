@@ -14,7 +14,7 @@
 # directory plus an action.yml to wrap five lines of curl costs a reader one more
 # file before they learn what runs.
 #
-# Invoked as `sh .github/setup-cog.sh`, the same way press.just runs tools/check.sh
+# Invoked as `sh .github/setup-cog.sh`, the same way press.just runs tools/build.sh
 # and for the same reason: handing the file to an interpreter depends on nothing
 # about the file itself. The mode bit is set and the shebang is here so it can also
 # be run directly, but neither is load-bearing — a mode lost through an archive, an

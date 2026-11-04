@@ -11,7 +11,8 @@
 # is read from the tops of the lines' first words, and must be wider than the one before it in
 # that order: lines, then items, then paragraphs; a list's own gap from the text after it is a
 # paragraph's. The same holds in the body of each part a document writes one in, callout(),
-# panel(), unit(), item(), decision() and addendum(), each on a page of its own.
+# panel(), unit(), item(), decision() and addendum(), each on a page of its own. And a part's own
+# pieces, a unit's lead and its body and an item's title and its body, sit closer than paragraphs.
 set -eu
 cd "$(dirname "$0")/.."
 
