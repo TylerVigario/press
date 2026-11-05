@@ -266,6 +266,14 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/sheet-row.sh
 
+  sources:
+    name: A source is numbered by the list, which prints it short, its link whole
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/sources.sh
+
   form-fill:
     name: A form page is its blank's, and each answer lands where it is put
     runs-on: ubuntu-latest
@@ -513,6 +521,14 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/sheet-row.sh
+
+  oldest-sources:
+    name: A source is numbered by the list, which prints it short, its link whole, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/sources.sh
 
   oldest-form-fill:
     name: A form page is its blank's, and each answer lands where it is put, on the oldest toolchain
