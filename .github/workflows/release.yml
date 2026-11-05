@@ -28,12 +28,11 @@ name: Release
 #            the commits the changelog is built from, and previews the entry. No
 #            credentials.
 #   gate     ci.yml, called: nothing is released that a merge would refuse.
-#   publish  skipped on a dry run. Writes the version into press.toml,
-#            writes the changelog, builds the bundle, mints the App token, asks the
-#            forge for the commit that records the version and the changelog (repo
-#            standard rule 16: it does not push one), then publishes the release on
-#            that commit with the bundle attached. Publishing is what creates the
-#            tag, so a failure before it leaves no tag.
+#   publish  skipped on a dry run. Writes the version into press.toml, writes the
+#            changelog, builds the bundle, mints the App token, asks the forge for the
+#            commit that records the version and the changelog (it does not push one),
+#            then publishes the release on that commit with the bundle attached.
+#            Publishing is what creates the tag, so a failure before it leaves no tag.
 #
 # RECOVERING FROM A FAILED PUBLISH. Once the release commit has landed, start a new
 # run; do not re-run the failed one. A re-run checks out the commit the original run
@@ -44,14 +43,14 @@ name: Release
 # version and leave it unreleased, so it is refused until that one is out. Before the
 # commit lands, a re-run is fine.
 #
-# WHY AN APP. main takes no direct push (rule 6), and recording the release writes
-# main. The one exemption is a GitHub App installed on this repository alone (rule
-# 17). Its credentials are environment secrets on `release`, not repository secrets,
-# and the environment admits only main, so only the publish job running on main can
-# reach them: a workflow on any other branch cannot read them, however it is changed
-# (rule 21). There is no required reviewer. With one maintainer it would confirm only
-# what that maintainer already decided by dispatching the run, and the token that can
-# dispatch a run can approve it.
+# WHY AN APP. main takes no direct push, and recording the release writes main. The
+# one exemption is a GitHub App installed on this repository alone. Its credentials
+# are environment secrets on `release`, not repository secrets, and the environment
+# admits only main, so only the publish job running on main can reach them: a workflow
+# on any other branch cannot read them, however it is changed. There is no required
+# reviewer. With one maintainer it would confirm only what that maintainer already
+# decided by dispatching the run, and the token that can dispatch a run can approve
+# it.
 #
 # SETUP, once, by the owner — recorded so it can be rebuilt:
 #   1. A GitHub App owned by @TylerVigario, `vigario-press-release` (App ID 5116805;

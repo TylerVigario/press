@@ -3,13 +3,13 @@
 #
 #   sh .github/contexts.sh
 #
-# Run by CI. Rule 9 makes each job of .github/workflows/ci.yml a required context of its own, by
-# its name, and .github/rulesets/main.json requires each one, and the title check. A job added
-# without its context covers less while protection reads as complete, and a context left with no
-# job holds every pull request. GitHub cuts a check's name past 100 characters, to 97 and "...",
-# so a longer one never arrives under the name required. The jobs' names and the title check's
-# must be exactly the contexts main.json requires, each 100 characters or fewer. awk counts bytes
-# where its locale does, so a name holding é is held to a little less, never more.
+# Run by CI. Each job of .github/workflows/ci.yml is a required context of its own, by its name:
+# .github/rulesets/main.json requires each one, and the title check. A job added without its context
+# covers less while protection reads as complete, and a context left with no job holds every pull
+# request. GitHub cuts a check's name past 100 characters, to 97 and "...", so a longer one never
+# arrives under the name required. The jobs' names and the title check's must be exactly the
+# contexts main.json requires, each 100 characters or fewer. awk counts bytes where its locale does,
+# so a name holding é is held to a little less, never more.
 set -eu
 cd "$(dirname "$0")/.."
 
