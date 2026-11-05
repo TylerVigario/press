@@ -1,6 +1,7 @@
 #!/bin/sh
 # check.sh — audit a built document for what typst lets through without a word: warnings that
-# exit 0, fonts that are not vendored, glyphs that vanish, ink too near the edge, text on text.
+# exit 0, fonts that are not vendored, glyphs that vanish, ink too near the edge, text on text,
+# code that wraps.
 #
 # Run from the consumer root by build.sh --check, which any runner calls, and by stamp.sh after
 # every build:
@@ -202,10 +203,11 @@ tr '\000\\' '\n/' < "$tmp/deps" | awk '
 # At least $src itself; an empty list would skip the check and report the document clean.
 test -s "$tmp/sources" || { echo "press: typst listed no sources for $src" >&2; exit 1; }
 
-# PRESS'S MARKS. Two of press's parts leave a mark for the audit: unsourced(), a value the
-# document prints without having read it from a source, marked with its kind, and form(probe:),
-# the measuring grid. typst lists them, and only where a source of the document's own names one,
-# as unsourced or probe:, so no other document is compiled again: typst eval, or typst query
+# PRESS'S MARKS. Three of press's parts leave a mark for the audit: unsourced(), a value the
+# document prints without having read it from a source, marked with its kind; form(probe:), the
+# measuring grid; and code(), a line of a code block too long for it. typst lists them, and only
+# where a source of the document's own names one, as unsourced or probe:, or holds a code block,
+# so no other document is compiled again: typst eval, or typst query
 # before 0.15, which has no eval. Neither takes the --deps a build passes, so the query runs
 # without it. Any mention of unsourced asks, a shorthand's `unsourced.with(...)` among them: a
 # query too many costs a compile, and one too few would leave a document's open items uncounted.
@@ -232,9 +234,13 @@ press_marks() {
 want=$(while IFS= read -r f; do
     if grep -q 'unsourced' "$f"; then echo unsourced; fi
     if grep -q 'probe:' "$f"; then echo probe; fi
+    if grep -qE '```|raw\(' "$f"; then echo code; fi
 done < "$tmp/sources")
+wraps=
 if [ -n "$want" ]; then
     if marks=$(press_marks "$@"); then
+        wraps=$(printf '%s\n' "$marks" | grep -o '"press-code-wrap [^"]*"' \
+            | sed 's/^"press-code-wrap //; s/"$//' || true)
         n=$(printf '%s\n' "$marks" | grep -o '"press-open"' | wc -l | tr -d ' ')
         case $n in
             0) ;;
@@ -257,6 +263,9 @@ if [ -n "$want" ]; then
         esac
         case $want in
             *probe*) echo "press: could not tell whether $pdf has the measuring grid on" >&2; rc=1 ;;
+        esac
+        case $want in
+            *code*) echo "press: could not tell whether a line of code wraps in $pdf" >&2; rc=1 ;;
         esac
     fi
 fi
@@ -343,7 +352,7 @@ done
 # Only the document's own file accepts. An acceptance in a file it imports or includes, a
 # shared template, would speak for every document that uses the file; a finding that file
 # causes is the file's to fix, so such a line is refused.
-passes="warnings fonts glyphs ink-margin text-on-text"
+passes="warnings fonts glyphs ink-margin text-on-text code-wrap"
 accepted=
 hit=
 skipped=
@@ -480,6 +489,17 @@ elif [ -n "$PY" ]; then
 else
     echo "press: skipping the line-overlap check (no working python found)" >&2
     skipped="$skipped text-on-text"
+fi
+# CODE THAT WRAPS. A line of a code block too long for it wraps without a word from typst: it
+# copies with a break in it, and on paper it reads as two lines. The PDF cannot tell a wrapped
+# line from two, so code() measures each line against its block and marks the ones that wrap,
+# with the page the block starts on and how the line starts, and this reads the marks.
+if [ -n "$wraps" ]; then
+    printf '%s\n' "$wraps" | while IFS=' ' read -r p start; do
+        echo "press: $pdf: a line of the code block on page $p is too long for it and wraps: $start" >&2
+    done
+    echo "       it copies with a break in it; shorten it, or split it where its language allows" >&2
+    found code-wrap
 fi
 warns=$(printf '%s\n' "$out" | grep '^warning:' || true)
 if [ -n "$warns" ] && [ -n "${PRESS_BUILT_DEPS:-}" ]; then

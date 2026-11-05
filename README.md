@@ -119,7 +119,7 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 | `sh third_party/press/tools/watch.sh docs/guide.typ` | recompiles on every save to `print/<same path>.watch.pdf`, a preview beside the stamped PDF |
 | `sh third_party/press/tools/clean.sh` | deletes `print/` |
 | `sh third_party/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory; then audits it, where the audit's tools are installed |
-| `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | the audit alone, which refuses to run without its tools: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text printed on text |
+| `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | the audit alone, which refuses to run without its tools: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text printed on text, code that wraps |
 | `sh third_party/press/tools/install-typst.sh <dir>` | installs the typst press is built and audited with into `<dir>`, pinned by version and digest, on Linux x86_64 or aarch64: for a repository's CI (see In CI below) |
 
 `<flags>` are the three above: `--root . --font-path third_party/press/fonts --ignore-system-fonts`.
@@ -131,7 +131,8 @@ depends on them. `check.sh` is the same audit for when it must run, as in CI: wi
 it refuses. The audit also says how many open items a document still carries for its owner
 to supply, and how many estimates it prints, each marked with `unsourced()`, and fails for
 neither: a draft carries them. A form page with its measuring grid on, `form(probe:)`, does
-fail it: the grid is for measuring.
+fail it: the grid is for measuring. So does a line of a code block too long for it, which wraps:
+a command copies with a break in it, and on paper reads as two.
 
 **An unchanged document is not built again.** One file in press's folder, `.build-record`,
 records what each document's last build read — every file typst lists, the fonts, typst's
@@ -166,10 +167,10 @@ cannot accept for it, since a finding a shared file causes is that file's to fix
 ```
 
 Its findings still print, then a line saying they are accepted and why, and they do not fail
-the build. The passes are `warnings`, `fonts`, `glyphs`, `ink-margin` and `text-on-text`. An
-acceptance with no reason fails, and so does one its pass finds nothing for: left standing, it
-would hide that pass's next real finding. A pass that cannot run, for a missing or broken tool,
-fails the audit whatever the document accepts.
+the build. The passes are `warnings`, `fonts`, `glyphs`, `ink-margin`, `text-on-text` and
+`code-wrap`. An acceptance with no reason fails, and so does one its pass finds nothing for: left
+standing, it would hide that pass's next real finding. A pass that cannot run, for a missing or
+broken tool, fails the audit whatever the document accepts.
 
 The stamp prints in **`PRESS_TZ`**, an IANA zone name set for every build
 (`PRESS_TZ=America/Los_Angeles`, or `UTC` for documents read across zones), so every machine
@@ -428,7 +429,7 @@ is `(ok, ok-tint)`.
 | `chip(label, tone, boxed: true, shape: auto)` | A state, shown by its tone's colour and a shape drawn before its label, so it reads on a grey printout too: a circle for ok, a triangle for warn, a square for bad, a diamond for note. Boxed, a pill for a legend; `boxed: false`, the shape and the label alone, bold in the tone's colour at the text's own size, for a value in a table whose every cell has a state: `chip([4], "ok", boxed: false)`. `shape` takes another of the four, or none. |
 | `callout(body, tone: "note", label: none, size:, shape: auto, caps: true)` | Aside that must not be missed. Its tone's shape goes before its label, or before its body where it has none; `shape` takes another of the four, or none. |
 | `panel(body, label: none, color: slate, caps: true)` | Boxed block, no tone semantics. |
-| `code(body, breakable: false)` | Code-block treatment; the document installs it as a show rule. |
+| `code(body, breakable: false)` | Code-block treatment; the document installs it as a show rule. A line too long for its block wraps, and the audit fails on it. |
 | `link-note` | Show rule for links: coloured and underlined, address footnoted for paper. |
 | `item(n, title, body, color:, size:)` | Numbered step. |
 | `sheet(cols, head, ..rows, size:, blank: 0, across: 1, gutter: 9pt)` | A table of any number of columns: zebra rows, and a header that repeats across pages. Its cells are set at `size`, code included. `blank` adds empty rows tall enough to write in. `across: 2` sets a long, narrow sheet in two columns, `gutter` apart, read down each column and then the next, with the header atop every column; where it ends, its last rows are shared between the columns by height, so the columns end level. |
