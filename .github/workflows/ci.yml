@@ -210,6 +210,14 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/list-spacing.sh
 
+  part-align:
+    name: Inside a part, a flow is centred and a line aligned right ends at its edge
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/part-align.sh
+
   num:
     name: num() groups a number by thousands, and keeps its decimals and sign
     runs-on: ubuntu-latest
@@ -434,6 +442,14 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/list-spacing.sh
+
+  oldest-part-align:
+    name: Inside a part, a flow is centred and a line aligned right ends at its edge, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/part-align.sh
 
   oldest-num:
     name: num() groups a number by thousands, and keeps its decimals and sign, on the oldest toolchain
