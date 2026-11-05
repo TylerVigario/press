@@ -96,6 +96,14 @@
 // Without it a table crossing a page break leaves the reader with bare rows and no column
 // labels — and on paper there is no scrolling back.
 //
+// A row is kept whole where it fits on a page. One that does not fit in what is left of the page
+// starts the next, under the repeated header: split, the rest of it would open that page beside
+// empty cells and read as a row of its own, with nothing in its first column. A row taller than a
+// page splits, as it must, rather than run off the page's foot. typst knows a column's width only
+// inside its cells, so each cell measures its words there, and the sheet reads the heights back
+// on typst's next pass. `breakable: true` lets every row split, and `false` keeps every one
+// whole, so that one taller than a page runs off its foot, as the audit then says.
+//
 // `blank` adds that many empty rows after the given ones, each tall enough to write in, for a
 // log filled in by hand: `#sheet((auto, auto, 1fr), ([Date], [Size], [Notes]), blank: 6)`.
 //
@@ -106,9 +114,15 @@
 // ends press splits its last rows between the columns by their measured height, not their count,
 // and the columns end level, a row that wraps counted at its height. A sheet that fits on one page
 // is balanced the same way.
-#let sheet(cols, head, size: sz.micro, blank: 0, across: 1, gutter: 9pt, ..rows) = {
+// Each sheet's number, by which it alone reads back its cells' heights.
+#let _sheets = counter("press-sheet")
+
+#let sheet(cols, head, size: sz.micro, blank: 0, across: 1, gutter: 9pt, breakable: auto,
+  ..rows) = {
   assert(type(across) == int and across >= 1,
     message: "sheet(across:) takes a number of columns, 1 or more; got " + repr(across))
+  assert(breakable in (auto, true, false),
+    message: "sheet(breakable:) takes auto, true or false; got " + repr(breakable))
   let inset = (x: 5pt, y: 4pt)
   let n = if type(cols) == int { cols } else { cols.len() }
   // A cell's code is set at the sheet's size, as its words are.
@@ -117,7 +131,7 @@
     set par(spacing: _part-gap)
     text(size: size, ..style, c)
   }
-  let cells = (
+  let given = (
     ..rows.pos().map(c => at-size[#c]),
     ..range(blank * n).map(_ => box(height: _pen - 2 * inset.y)),
   )
@@ -132,83 +146,111 @@
     table.header(..head.map(h => at-size(weight: 700)[#h])),
     ..cells,
   )
-  if across == 1 or cells.len() == 0 { return part(cells) }
-
-  let lines = range(0, cells.len(), step: n).map(i => cells.slice(i, calc.min(i + n, cells.len())))
+  _sheets.step()
   layout(region => context {
+    let id = _sheets.get().first()
     let w = (region.width - gutter * (across - 1)) / across
     let head-h = measure(block(width: w, part(()))).height
-    let tall = lines.map(l => measure(block(width: w, part(l))).height - head-h)
-    // A column's height on a full page, and on the page the sheet starts on, what is left of it.
-    // Measured, as inside units(), the height has no end, and the sheet is one page.
-    let full = region.height
-    let first = if full.pt() == calc.inf { full } else {
-      full - (here().position().y - _text-top())
-    }
-
-    // The page each row lands on, filling as typst's columns do: a column takes rows while they
-    // fit, and the sheet moves on from a column too short for its header and first row. A row
-    // taller than a whole page's column goes where it is, as typst breaks it there.
-    let room(leaf) = (if leaf == 0 { first } else { full }) - head-h
-    let leaf = 0
-    let col = 0
-    let used = 0pt
-    let on = ()
-    for h in tall {
-      while used + h > room(leaf) and not (used == 0pt and leaf > 0) {
-        used = 0pt
-        col += 1
-        if col == across { col = 0; leaf += 1 }
+    // Each row's tallest cell, as its cells measured themselves on typst's last pass. On its first
+    // there are none, and every row is kept whole.
+    let heights = (:)
+    if breakable == auto {
+      for m in query(<press-sheet-cell>) {
+        if m.value.sheet == id {
+          let r = str(m.value.row)
+          heights.insert(r, calc.max(heights.at(r, default: 0pt), m.value.height))
+        }
       }
-      on.push(leaf)
-      used += h
     }
-
-    // The last page's rows, shared between its columns by height. `most` is the shortest the
-    // tallest column can be, found by halving between what an even share would be and all of
-    // them. Then each column takes rows until it holds its share of what is left, never past
-    // `most`, so where the rows cannot come out even, an earlier column is the longer.
-    let t = on.position(p => p == leaf)
-    let rest = tall.slice(t)
-    let total = rest.sum()
-    let slack = 0.01pt
-    let needs(most) = {
-      let count = 1
-      let held = 0pt
-      for h in rest {
-        if held > 0pt and held + h > most + slack { count += 1; held = 0pt }
-        held += h
+    // A row splits where it is taller than a page holds under the header. Measured, as inside
+    // units(), the page has no end, and every row fits. The measuring is placed, so it takes no
+    // room.
+    let cells = given.enumerate().map(((i, c)) => {
+      let r = calc.quo(i, n)
+      if breakable != auto { return table.cell(breakable: breakable, c) }
+      let over = heights.at(str(r), default: 0pt) + 2 * inset.y > region.height - head-h
+      table.cell(breakable: over, {
+        place(layout(s => [#metadata((sheet: id, row: r,
+          height: measure(block(width: s.width, c)).height))<press-sheet-cell>]))
+        c
+      })
+    })
+    if across == 1 or cells.len() == 0 { part(cells) } else {
+      let lines = range(0, cells.len(), step: n).map(i =>
+        cells.slice(i, calc.min(i + n, cells.len())))
+      let tall = lines.map(l => measure(block(width: w, part(l))).height - head-h)
+      // A column's height on a full page, and on the page the sheet starts on, what is left of it.
+      // Measured, as inside units(), the height has no end, and the sheet is one page.
+      let full = region.height
+      let first = if full.pt() == calc.inf { full } else {
+        full - (here().position().y - _text-top())
       }
-      count
-    }
-    let low = calc.max(..rest, total / across)
-    let most = total
-    for _ in range(24) {
-      let mid = (low + most) / 2
-      if needs(mid) <= across { most = mid } else { low = mid }
-    }
-    let shares = ()
-    let i = 0
-    for c in range(across) {
-      let share = rest.slice(i).sum(default: 0pt) / (across - c)
-      let held = 0pt
-      let from = i
-      while i < rest.len() and (c == across - 1
-          or (held < share - slack and held + rest.at(i) <= most + slack)) {
-        held += rest.at(i)
-        i += 1
-      }
-      shares.push(range(from, i))
-    }
-    let fits = shares.all(s => s.map(i => rest.at(i)).sum(default: 0pt) <= room(leaf) + slack)
 
-    let flowed = if t > 0 { (part(lines.slice(0, t).flatten()), colbreak()) } else { () }
-    let ending = if not fits { (part(lines.slice(t).flatten(), before: t),) } else {
-      shares.filter(s => s.len() > 0).map(s =>
-        part(s.map(i => lines.at(t + i)).flatten(), before: t + s.first())
-      ).intersperse(colbreak())
+      // The page each row lands on, filling as typst's columns do: a column takes rows while they
+      // fit, and the sheet moves on from a column too short for its header and first row. A row
+      // taller than a whole page's column goes where it is, as typst puts it there: split, or
+      // under breakable: false whole and past the column's foot.
+      let room(leaf) = (if leaf == 0 { first } else { full }) - head-h
+      let leaf = 0
+      let col = 0
+      let used = 0pt
+      let on = ()
+      for h in tall {
+        while used + h > room(leaf) and not (used == 0pt and leaf > 0) {
+          used = 0pt
+          col += 1
+          if col == across { col = 0; leaf += 1 }
+        }
+        on.push(leaf)
+        used += h
+      }
+
+      // The last page's rows, shared between its columns by height. `most` is the shortest the
+      // tallest column can be, found by halving between what an even share would be and all of
+      // them. Then each column takes rows until it holds its share of what is left, never past
+      // `most`, so where the rows cannot come out even, an earlier column is the longer.
+      let t = on.position(p => p == leaf)
+      let rest = tall.slice(t)
+      let total = rest.sum()
+      let slack = 0.01pt
+      let needs(most) = {
+        let count = 1
+        let held = 0pt
+        for h in rest {
+          if held > 0pt and held + h > most + slack { count += 1; held = 0pt }
+          held += h
+        }
+        count
+      }
+      let low = calc.max(..rest, total / across)
+      let most = total
+      for _ in range(24) {
+        let mid = (low + most) / 2
+        if needs(mid) <= across { most = mid } else { low = mid }
+      }
+      let shares = ()
+      let i = 0
+      for c in range(across) {
+        let share = rest.slice(i).sum(default: 0pt) / (across - c)
+        let held = 0pt
+        let from = i
+        while i < rest.len() and (c == across - 1
+            or (held < share - slack and held + rest.at(i) <= most + slack)) {
+          held += rest.at(i)
+          i += 1
+        }
+        shares.push(range(from, i))
+      }
+      let fits = shares.all(s => s.map(i => rest.at(i)).sum(default: 0pt) <= room(leaf) + slack)
+
+      let flowed = if t > 0 { (part(lines.slice(0, t).flatten()), colbreak()) } else { () }
+      let ending = if not fits { (part(lines.slice(t).flatten(), before: t),) } else {
+        shares.filter(s => s.len() > 0).map(s =>
+          part(s.map(i => lines.at(t + i)).flatten(), before: t + s.first())
+        ).intersperse(colbreak())
+      }
+      columns(across, gutter: gutter, (..flowed, ..ending).join())
     }
-    columns(across, gutter: gutter, (..flowed, ..ending).join())
   })
 }
 
