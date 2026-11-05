@@ -93,6 +93,9 @@ jobs:
   decide:
     name: Decide the version
     runs-on: ubuntu-latest
+    # A job takes minutes at most. A hung step should fail rather than hold a runner, and the
+    # release, for six hours.
+    timeout-minutes: 15
     outputs:
       release: ${{ steps.decide.outputs.release }}
       version: ${{ steps.decide.outputs.version }}
@@ -223,6 +226,7 @@ jobs:
     needs: [decide, gate]
     if: needs.decide.outputs.release == 'true' && !inputs.dry-run
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     # The App's secrets live here, readable only by a job running on main.
     environment: release
     permissions:

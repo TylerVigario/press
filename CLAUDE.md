@@ -88,7 +88,8 @@ locally (install, update, refusals); and runs shellcheck, over `press.just`'s re
 toolchain action's `run:` blocks too, markdownlint (lines ≤ 100), actionlint, a JSON parse, an
 invisible-character scan and CodeQL. A false finding fixed gets a `pass-*` case. A layout fix
 gets a `.github/<name>.sh` and its `.typ`, run by a job on press's typst and one on the oldest,
-each a context in `main.json`, which is applied with `gh api` once the change is merged.
+each a context in `main.json`, which is applied with `gh api` once the change is merged, and each
+with `timeout-minutes: *timeout`, which `timeouts.sh` requires of every job.
 The tools CI installs are pinned by hand, with digests; the weekly Pins workflow opens an issue
 for each release a pin is behind (`sh .github/pins.sh` shows the same comparison). typst's pin is
 the kit's own, `tools/install-typst.sh`, which the toolchain action runs and every repository's CI
