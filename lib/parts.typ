@@ -200,11 +200,24 @@
 // runs first and code then meets the same block again. It marks what it holds, and leaves a
 // block already inside a code alone: the document's choice stands, and the block is boxed once.
 #let _in-code = state("press-in-code", false)
+// A line wider than its block wraps: it copies with a break in it, and on paper it reads as two
+// lines. Each one leaves a mark, which check fails on: its page and how it starts. Placed, so the
+// measuring takes no room on the page.
+#let _wraps(body) = if body.func() == raw {
+  place(layout(size => for l in body.lines {
+    if measure(l).width > size.width {
+      let start = l.text.replace(regex("[\\s\"\\\\]+"), " ").trim()
+      let cs = start.clusters()
+      let start = if cs.len() > 40 { cs.slice(0, 40).join() + "…" } else { start }
+      [#metadata("press-code-wrap " + str(here().page()) + " " + start)]
+    }
+  }))
+}
 #let code(body, breakable: false) = context if _in-code.get() { body } else {
   block(
     width: 100%, fill: paper-tint, stroke: 0.6pt + rule-mid,
     inset: (x: 7pt, y: 6pt), radius: 1.5pt, breakable: breakable,
-    { _in-code.update(true); body; _in-code.update(false) },
+    { _in-code.update(true); _wraps(body); body; _in-code.update(false) },
   )
 }
 
