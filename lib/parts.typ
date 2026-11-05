@@ -305,6 +305,51 @@
   #text(fill: ink-soft, _body(spacing, body))
 ]
 
+// The sources a document cites by number, and the numbered list of them where they close it. A
+// source is given once, in `sources()`, by its key, its title and its address, and numbered in
+// the order given, across the document. `src()` prints the numbers of the keys it names, small
+// and faint, so a sentence reads past them. A key no `sources()` gives, or one given twice, is a
+// compile error naming it. The list prints at `size`, `across` columns `gutter` apart, a source
+// to a line: its number, its title and its address, printed without `https://` so it reads and
+// types from paper, while its link holds it whole. An address of `none` prints the title alone.
+//
+//   Most of the county's wells were tested in the spring #src("wells", "survey").
+//
+//   #sources(
+//     ("wells", [Sam Example, Well testing in the county, 2025], "https://example.org/wells/2025"),
+//     ("survey", [County Water District, Groundwater survey, 2026], none),
+//   )
+#let src(..keys) = context {
+  let keys = keys.pos()
+  assert(keys.len() > 0, message: "src() needs the key of a source")
+  let given = query(<press-source>).map(m => m.value)
+  let ns = keys.map(k => {
+    let i = given.position(g => g == k)
+    assert(i != none, message: "src(): no sources() gives the key " + repr(k))
+    i + 1
+  }).dedup().sorted()
+  text(size: sz.micro, fill: ink-faint)[[#ns.map(str).join(", ")]]
+}
+
+#let sources(..entries, size: sz.micro, across: 2, gutter: 10pt) = {
+  let entries = entries.pos()
+  for e in entries {
+    assert(type(e) == array and e.len() == 3 and type(e.at(0)) == str,
+      message: "sources() takes each source as (key, title, address); got " + repr(e))
+  }
+  let keys = entries.map(e => e.at(0))
+  for k in keys {
+    assert(keys.filter(x => x == k).len() == 1, message: "sources(): the key " + repr(k)
+      + " is given twice")
+    [#metadata(k)<press-source>]
+  }
+  set text(size: size)
+  let lines = for (i, (_, title, url)) in entries.enumerate() {
+    [#(i + 1). #title#if url != none [ · #link(url)[#url.trim("https://", at: start)]] \ ]
+  }
+  if across == 1 { lines } else { columns(across, gutter: gutter, lines) }
+}
+
 
 // A part's own words, as a document passes them in `words`: every key the part prints must be
 // there, so a misspelt or missing one is a compile error naming it, not English left behind.
