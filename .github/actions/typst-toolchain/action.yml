@@ -43,9 +43,9 @@ runs:
         tmp=$(mktemp -d)
         if [ "$OLDEST" = true ]; then
           just_version=$OLDEST_JUST_VERSION just_sha256=$OLDEST_JUST_SHA256
-          curl --fail --silent --show-error --location --retry 5 \
+          sh tools/fetch.sh \
             "https://github.com/typst/typst/releases/download/v${OLDEST_TYPST_VERSION}/typst-x86_64-unknown-linux-musl.tar.xz" \
-            --output "$tmp/typst.tar.xz"
+            "$tmp/typst.tar.xz"
           # Verified before extraction: an archive checked after unpacking has already
           # chosen its own paths.
           printf '%s  %s\n' "$OLDEST_TYPST_SHA256" "$tmp/typst.tar.xz" | sha256sum -c -
@@ -55,9 +55,9 @@ runs:
           just_version=$JUST_VERSION just_sha256=$JUST_SHA256
           sudo sh tools/install-typst.sh /usr/local/bin
         fi
-        curl --fail --silent --show-error --location --retry 5 \
+        sh tools/fetch.sh \
           "https://github.com/casey/just/releases/download/${just_version}/just-${just_version}-x86_64-unknown-linux-musl.tar.gz" \
-          --output "$tmp/just.tar.gz"
+          "$tmp/just.tar.gz"
         printf '%s  %s\n' "$just_sha256" "$tmp/just.tar.gz" | sha256sum -c -
         sudo tar -xzf "$tmp/just.tar.gz" -C /usr/local/bin just
         typst --version

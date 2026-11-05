@@ -121,6 +121,7 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 | `sh third_party/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory; then audits it, where the audit's tools are installed |
 | `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | the audit alone, which refuses to run without its tools: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text printed on text, code that wraps |
 | `sh third_party/press/tools/install-typst.sh <dir>` | installs the typst press is built and audited with into `<dir>`, pinned by version and digest, on Linux x86_64 or aarch64: for a repository's CI (see In CI below) |
+| `sh third_party/press/tools/fetch.sh <url> <file>` | downloads a file, trying again on a timeout or a 5xx, and says on stderr how each try went: the host that answered each hop, its status and the IDs it gave the request, and how long the last try took. `install-typst.sh` downloads typst with it |
 
 `<flags>` are the three above: `--root . --font-path third_party/press/fonts --ignore-system-fonts`.
 
@@ -279,7 +280,8 @@ skipping it. On GitHub Actions, for a repository that builds with npm:
 ```
 
 `install-typst.sh` runs on Linux, x86_64 or aarch64, and refuses anywhere else; a workstation
-installs typst from its own packages.
+installs typst from its own packages. Its download is said in the log, in lines that begin
+`fetch:`, so a failed one shows which hop failed and the IDs GitHub gave it.
 
 ## Writing a document
 

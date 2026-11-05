@@ -50,7 +50,8 @@ for f in lib.typ press.toml .gitignore .gitattributes calibration.typ press.just
          lib/base.typ lib/brief.typ lib/letter.typ lib/recipe.typ lib/resume.typ \
          template/main.typ template/letter.typ template/recipe.typ template/resume.typ \
          tools/new.sh tools/build.sh tools/all.sh tools/watch.sh tools/clean.sh \
-         tools/stamp.sh tools/check.sh tools/report.sh tools/install-typst.sh fonts/licenses; do
+         tools/stamp.sh tools/check.sh tools/report.sh tools/install-typst.sh tools/fetch.sh \
+         fonts/licenses; do
     grep -qx "press/$f" "$tmp/tar.list" || fail "press/$f is missing from the bundle"
 done
 
