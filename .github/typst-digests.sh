@@ -23,7 +23,7 @@ pins=$(sed -n 's/^TYPST_SHA256_\([A-Z0-9_]*\)=\([0-9a-f]*\)$/\1 \2/p' tools/inst
 printf '%s\n' "$pins" | while read -r arch sum; do
     arch=$(printf '%s' "$arch" | tr '[:upper:]' '[:lower:]')
     name=typst-$arch-unknown-linux-musl.tar.xz
-    curl --fail --silent --show-error --location \
+    curl --fail --silent --show-error --location --retry 5 \
         "https://github.com/typst/typst/releases/download/v$version/$name" --output "$tmp/$name"
     echo "$sum  $tmp/$name" | sha256sum -c - >/dev/null \
         || fail "$name of typst $version is not the digest tools/install-typst.sh pins"
