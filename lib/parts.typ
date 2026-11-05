@@ -36,8 +36,13 @@
 
 // A part's body, its paragraphs and lists spaced as the document spaces them: `spacing` is the
 // document's paragraph spacing, read before the part sets its own. The part's own gap stays around
-// the body, so a body of one paragraph sits as it did, and the part's other pieces with it.
-#let _body(spacing, body) = block(spacing: _part-gap, { set par(spacing: spacing); body })
+// the body, so a body of one paragraph sits as it did, and the part's other pieces with it. The
+// body is as wide as the part: typst aligns a thing within the block it is in, so a flow in a body
+// only as wide as its widest line would centre on that line, not on the part.
+#let _body(spacing, body) = block(width: 100%, spacing: _part-gap, {
+  set par(spacing: spacing)
+  body
+})
 
 // press's marks in a title, unsourced()'s, and the title without them. footer() prints the title
 // on every page, and a mark printed with it each time would count one item once a page.

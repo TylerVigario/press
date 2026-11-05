@@ -91,6 +91,9 @@
             "context": "Lines, list items and paragraphs are each further apart than the last"
           },
           {
+            "context": "Inside a part, a flow is centred and a line aligned right ends at its edge"
+          },
+          {
             "context": "num() groups a number by thousands, and keeps its decimals and sign"
           },
           {
@@ -161,6 +164,9 @@
           },
           {
             "context": "Lines, list items and paragraphs are each further apart than the last, on the oldest toolchain"
+          },
+          {
+            "context": "Inside a part, a flow is centred and a line aligned right ends at its edge, on the oldest toolchain"
           },
           {
             "context": "num() groups a number by thousands, and keeps its decimals and sign, on the oldest toolchain"
