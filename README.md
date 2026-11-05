@@ -488,6 +488,16 @@ build it in the document.
 - **A title given as a string keeps straight quotes.** typst curls quotes and apostrophes in
   markup only, so `title: "God's Promises"` prints a straight apostrophe wherever the title
   prints, in `header()` and in `footer()`. Give it as markup: `title: [God's Promises]`.
+- **A `#let` in markup ends at its line break.** With `#let rows = log.filter(f)` and
+  `.sorted(key: k)` on the next line, `rows` holds only the first line, unsorted, and
+  `.sorted(key: k)` prints on the page as text. In a file of helpers nothing prints, and the value
+  is simply wrong. Wrap the expression in parentheses, `#let rows = (log.filter(f) ...)`, or write
+  it in a code block, `#{ ... }`, where a chain carries on across lines.
+- **`rev()` after `sorted(key:)` also reverses entries that share a key.** typst's sort keeps
+  entries with equal keys in their order, and `rev()` turns those round with the rest, so a log
+  sorted newest first lists each day's entries in the reverse of the order they were written, and
+  `sorted(by: (a, b) => a > b)` does the same. Reverse it first, then sort, then reverse it again:
+  `log.rev().sorted(key: r => r.date).rev()`.
 - **A minus sign is not a hyphen.** typst prints U+2212, the typographic minus, for a hyphen
   typed before a digit (`ls -1`, `-12.34567`) and for a negative number it shows, in content or
   through `str()`. No keyboard has it, so a coordinate, a command or a code copied from the PDF
