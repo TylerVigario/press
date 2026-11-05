@@ -93,6 +93,13 @@
   // Code is set a step below the text around it, as sz.fine is to sz.small; typst's own rule for
   // raw sets it at 0.8em first, which this is relative to.
   show raw: set text(font: face-mono, size: sz.fine / sz.small / 0.8 * 1em)
+  // typst curls a quote typed in markup and prints one in a string as it is, so a string read
+  // from data, or a title given as one, would print straight beside curled prose. This curls a
+  // string's quotes by typst's own rules, so a page has one form whichever way its text came.
+  // Code and math keep theirs straight, and so does an address link-note prints.
+  show text: _curl
+  show raw: set smartquote(enabled: false)
+  show math.equation: set smartquote(enabled: false)
   show raw.where(block: true): code
   show link: link-note
 

@@ -298,6 +298,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/sources.sh
 
+  quotes:
+    name: A string's quotes curl as markup's, and code's and addresses' stay straight
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/quotes.sh
+
   form-fill:
     name: A form page is its blank's, and each answer lands where it is put
     runs-on: ubuntu-latest
@@ -581,6 +590,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/sources.sh
+
+  oldest-quotes:
+    name: A string's quotes curl as markup's, and code's and addresses' stay straight, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/quotes.sh
 
   oldest-form-fill:
     name: A form page is its blank's, and each answer lands where it is put, on the oldest toolchain

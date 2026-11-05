@@ -338,7 +338,9 @@ preset margins are absolute, and the audit measures them on any page size. **Lan
 `xml()` read a file, by a path from the document or from the root, into typst values, and a string
 shown as a value, `#r.note` or a cell of a `sheet`, is set as text and never read as markup. So
 nothing in the data needs escaping: `//`, a hyphen before a digit, a line that starts with `=` or
-`-`, and every character typst's markup uses print as written.
+`-`, and every character typst's markup uses print as written. Quotes and apostrophes are the one
+exception: every template curls them as markup's are, so the data and the prose beside it print
+one form of each.
 
 ```typst
 #import "/third_party/press/lib.typ": *
@@ -485,9 +487,14 @@ build it in the document.
   does; a hand-rolled `table()` does not.
 - **Markdown habits break typst:** `**bold**` warns and vanishes (use one `*`), `+ thing` at a
   line start becomes a list, `/ thing` is a compile error. Reword rather than escape.
-- **A title given as a string keeps straight quotes.** typst curls quotes and apostrophes in
-  markup only, so `title: "God's Promises"` prints a straight apostrophe wherever the title
-  prints, in `header()` and in `footer()`. Give it as markup: `title: [God's Promises]`.
+- **Only code, math and an address keep a straight quote.** typst curls a quote typed in
+  markup, and every template curls one in a string the same way, so a title given as one, data
+  and prose print one form. An escaped `\'` curls too. A quote that must print straight, in a
+  command or a value to copy, goes in raw text, `` `grep 'x'` ``, or under
+  `set smartquote(enabled: false)`.
+- **An apostrophe after a digit prints as a prime.** typst reads a quote after a digit as a foot
+  or an inch mark, so `2026's` prints 2026′s, in markup or from data, as `12"` prints 12″. Type
+  the apostrophe itself, `2026’s`, or reword.
 - **A `#let` in markup ends at its line break.** With `#let rows = log.filter(f)` and
   `.sorted(key: k)` on the next line, `rows` holds only the first line, unsorted, and
   `.sorted(key: k)` prints on the page as text. In a file of helpers nothing prints, and the value
