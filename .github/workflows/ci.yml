@@ -282,6 +282,13 @@ jobs:
       - *checkout
       - run: sh .github/typst-digests.sh
 
+  fetch:
+    name: fetch.sh tries a failed download again, and says how each try went
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - run: sh .github/fetch-tries.sh
+
   installers:
     name: Both installers install, update and refuse as they should, install.ps1 through PowerShell 7
     runs-on: ubuntu-latest
@@ -591,9 +598,9 @@ jobs:
         run: |
           set -euo pipefail
           tmp=$(mktemp -d)
-          curl --fail --silent --show-error --location --retry 5 \
+          sh tools/fetch.sh \
             "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz" \
-            --output "$tmp/actionlint.tar.gz"
+            "$tmp/actionlint.tar.gz"
           echo "${ACTIONLINT_SHA256}  $tmp/actionlint.tar.gz" | sha256sum -c -
           tar -xzf "$tmp/actionlint.tar.gz" -C "$tmp" actionlint
           sudo install -m 0755 "$tmp/actionlint" /usr/local/bin/actionlint

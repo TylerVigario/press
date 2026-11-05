@@ -38,9 +38,9 @@ url="https://github.com/cocogitto/cocogitto/releases/download/${COG_VERSION}/coc
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT INT TERM
 
-# --fail so an HTML error page is an error rather than a tarball that fails to
-# extract three lines later with a message about gzip.
-curl --fail --silent --show-error --location --retry 5 "$url" --output "$tmp/cog.tar.gz"
+# fetch.sh fails on an HTML error page rather than leaving a tarball that fails to
+# extract three lines later with a message about gzip, and says how each try went.
+sh "$(dirname "$0")/../tools/fetch.sh" "$url" "$tmp/cog.tar.gz"
 
 # Verified BEFORE extraction. A digest checked after unpacking has already let the
 # archive choose its own paths.
