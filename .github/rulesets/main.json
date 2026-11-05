@@ -115,6 +115,9 @@
             "context": "A source is numbered by the list, which prints it short, its link whole"
           },
           {
+            "context": "A string's quotes curl as markup's, and code's and addresses' stay straight"
+          },
+          {
             "context": "A form page is its blank's, and each answer lands where it is put"
           },
           {
@@ -197,6 +200,9 @@
           },
           {
             "context": "A source is numbered by the list, which prints it short, its link whole, on the oldest toolchain"
+          },
+          {
+            "context": "A string's quotes curl as markup's, and code's and addresses' stay straight, on the oldest toolchain"
           },
           {
             "context": "A form page is its blank's, and each answer lands where it is put, on the oldest toolchain"

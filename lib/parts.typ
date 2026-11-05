@@ -226,6 +226,27 @@
   )
 }
 
+// A piece of text with a straight quote in it, its quotes made smart, so typst curls each as it
+// does one typed in markup; a piece with none is shown as it is. Every template shows its text
+// with it. A quote typed in markup is a smart quote already and never reaches it, so it turns
+// only a string's quotes, and an escaped one's. It rebuilds the whole piece, never the quote
+// alone: what a show rule puts in is set apart from the text around it, and a rule on the quote
+// would lose the kerning on either side of it.
+#let _curl(it) = {
+  if not ("'" in it.text or "\"" in it.text) { return it }
+  let parts = ()
+  let run = ""
+  for c in it.text.clusters() {
+    if c in ("'", "\"") {
+      parts.push(run)
+      run = ""
+      parts.push(smartquote(double: c == "\""))
+    } else { run += c }
+  }
+  parts.push(run)
+  parts.join()
+}
+
 // Links that work on a screen and on paper, in the one PDF. Every template installs it, as it
 // installs `code`, and a document without one installs it:
 //
@@ -249,8 +270,10 @@
   }
   address = address.trim("/", at: end, repeat: false)
   let body = if it.body.has("text") { it.body.text.trim("/", at: end, repeat: false) }
-  if body in (it.dest.trim("/", at: end, repeat: false), address) { shown } else {
-    shown + footnote(address)
+  // An address keeps its quotes straight where it prints, so it works when copied.
+  let straight(address) = { set smartquote(enabled: false); address }
+  if body in (it.dest.trim("/", at: end, repeat: false), address) { straight(shown) } else {
+    shown + footnote(straight(address))
   }
 }
 
