@@ -8,6 +8,42 @@ verbatim. 0.1.0 at the bottom is hand-written and reads "Initial release." becau
 release has no changes to list — there is nothing it changed from.
 
 - - -
+## [v0.10.0](https://github.com/TylerVigario/press/compare/v0.9.1..v0.10.0) - 2026-11-05
+#### Features
+- callout and panel take caps, so a label keeps its case (#239) - ([9f55ea2](https://github.com/TylerVigario/press/commit/9f55ea22c40c964d3928b6f6aac8277e42393bd8)) - Tyler Vigario, Claude Opus 5.5
+#### Bug Fixes
+- a download GitHub times out is tried again, so one 504 no longer fails CI (#255) - ([a90cf0e](https://github.com/TylerVigario/press/commit/a90cf0e7b08c5772265b0ee28eb9dc03998d3b3d)) - Tyler Vigario, Claude Opus 5.5
+- a part's body spaces its paragraphs and lists as the document does (#238) - ([0120893](https://github.com/TylerVigario/press/commit/0120893284df90317eea8f2782404ef59b987a8f)) - Tyler Vigario, Claude Opus 5.5
+- check refuses to run without a Python, as it does without poppler (#236) - ([a68355b](https://github.com/TylerVigario/press/commit/a68355bc3bff23ac1e384796dfbc3f9fad5612fd)) - Tyler Vigario, Claude Opus 5.5
+- a letter's list items sit further apart than its lines and nearer than its paragraphs (#232) - ([baeabf1](https://github.com/TylerVigario/press/commit/baeabf1d48ee148257d0eb56cabbfcc9ec9dce3b)) - Tyler Vigario, Claude Opus 5.5
+- a title still to be named is counted once wherever it prints, and where it prints nowhere (#221) - ([39ca1ba](https://github.com/TylerVigario/press/commit/39ca1bad1a7ca4d76f25d3bb96436a96414336e5)) - Tyler Vigario, Claude Opus 5.5
+- units sit their spacing apart under every pack, and "stacks" balances by it (#220) - ([547cce8](https://github.com/TylerVigario/press/commit/547cce8a623c5a443d0f8c7e9d8d5ff28f302578)) - Tyler Vigario, Claude Opus 5.5
+- the header, a == heading, a template's head and a résumé entry keep their own gaps (#219) - ([275e39a](https://github.com/TylerVigario/press/commit/275e39a1eba9c7978756953f8b6f6d82df2268b1)) - Tyler Vigario, Claude Opus 5.5
+- a part keeps its own gap between its pieces, whatever a template sets between paragraphs (#211) - ([34624f9](https://github.com/TylerVigario/press/commit/34624f9c94c51b8eb12a7a69485b4e344289f043)) - Tyler Vigario, Claude Opus 5.5
+#### Documentation
+- the README names tones, the colour and tint of each tone (#257) - ([1fb00ac](https://github.com/TylerVigario/press/commit/1fb00ac6769da032e2225ad40953baa831ebf385)) - Tyler Vigario, Claude Opus 5.5
+- press's comments give the reason for a choice, not the story of how it was made (#256) - ([d9508ce](https://github.com/TylerVigario/press/commit/d9508ceb99de131a96a8c32456d03aedf2a58b8a)) - Tyler Vigario, Claude Opus 5.5
+- a blank issue can still be opened beside the forms (#252) - ([e6e1881](https://github.com/TylerVigario/press/commit/e6e188182c86d88324a5930c941119427fe6a1ad)) - Tyler Vigario, Claude Opus 5.5
+- issue forms and a pull request template ask for what a report needs (#251) - ([3512017](https://github.com/TylerVigario/press/commit/35120172032983465d61be2667f29d0200d8e382)) - Tyler Vigario, Claude Opus 5.5
+- a contributing guide says how to build, test and shape a change to press (#250) - ([5856711](https://github.com/TylerVigario/press/commit/585671112b8eacf2abb71723e461ddd515a8689a)) - Tyler Vigario, Claude Opus 5.5
+- a security policy points a reporter at private vulnerability reporting (#249) - ([d33b514](https://github.com/TylerVigario/press/commit/d33b514296ec8a111d7a6d789836d2aecc47b5c4)) - Tyler Vigario, Claude Opus 5.5
+- comments in lib/, calibration.typ and tools/ say how press works now (#243) - ([ee80663](https://github.com/TylerVigario/press/commit/ee806631a01d7ec44205177bc37c36d3017cee87)) - Tyler Vigario, Claude Opus 5.5
+- README, CLAUDE.md, press.toml and press.just say what is true now (#241) - ([882e6a0](https://github.com/TylerVigario/press/commit/882e6a0a3217ed54f3434704d30475258bfd8746)) - Tyler Vigario, Claude Opus 5.5
+- README's document from data totals a file with no rows, and groups its counts (#235) - ([9bb741c](https://github.com/TylerVigario/press/commit/9bb741c1d7cdd6c5ac640b4518b3a448bbab4a04)) - Tyler Vigario, Claude Opus 5.5
+#### Continuous Integration
+- press's comments give their reasons, not a rule number in a document no reader has (#253) - ([81388fe](https://github.com/TylerVigario/press/commit/81388fe5bf8b5622eee3e475920b4a5101f8b401)) - Tyler Vigario, Claude Opus 5.5
+- CI and the release carry no step or check they repeat or never use (#245) - ([6166556](https://github.com/TylerVigario/press/commit/6166556fd1e4e6a1adb45395430929d4545841f9)) - Tyler Vigario, Claude Opus 5.5
+- CI's comments and headers describe the checks as they run (#242) - ([4c05ca8](https://github.com/TylerVigario/press/commit/4c05ca84ac16f4d41cea58570cada9dca515ac55)) - Tyler Vigario, Claude Opus 5.5
+- shellcheck reads press.just's recipes and the toolchain action's run: blocks (#240) - ([4d0b4ac](https://github.com/TylerVigario/press/commit/4d0b4ac30f67a6f206def321206794a3e851b1ff)) - Tyler Vigario, Claude Opus 5.5
+- each assertion is a job of its own, and a required context by its name (#237) - ([3a7e68e](https://github.com/TylerVigario/press/commit/3a7e68eefd088dec5a5b0b4f41d451cbd0e286f2)) - Tyler Vigario, Claude Opus 5.5
+- the checks that measure a word's box read it through one helper (#234) - ([58285e7](https://github.com/TylerVigario/press/commit/58285e73a44eb365a68207553bb0dfe4eff5cb94)) - Tyler Vigario, Claude Opus 5.5
+- addendum-size fails when its body-text label is not found, and code-size checks a code block is boxed (#233) - ([14e4575](https://github.com/TylerVigario/press/commit/14e45754dd1381f861d701cf058ddadd788cbc1b)) - Tyler Vigario, Claude Opus 5.5
+#### Refactoring
+- stamp.sh says its font digest splits $dig on purpose, as its other digests do (#258) - ([0dc0149](https://github.com/TylerVigario/press/commit/0dc014973f119707d89fd7e8e9a38587ca678445)) - Tyler Vigario, Claude Opus 5.5
+- lib/ carries no import, branch or copy it does not need (#244) - ([b1b69a1](https://github.com/TylerVigario/press/commit/b1b69a1de18166a53cc1bf941d953ade6da4e259)) - Tyler Vigario, Claude Opus 5.5
+
+- - -
+
 ## [v0.9.1](https://github.com/TylerVigario/press/compare/v0.9.0..v0.9.1) - 2026-11-04
 #### Bug Fixes
 - paragraphs are further apart than a list's items, so each reads as one (#209) - ([4838a70](https://github.com/TylerVigario/press/commit/4838a701a9ef7cfc8984ecb864ee5cd6281dac44)) - Tyler Vigario, Claude Opus 5.5
