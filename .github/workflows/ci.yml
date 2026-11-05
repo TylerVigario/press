@@ -83,6 +83,9 @@ jobs:
   build:
     name: Documents build
     runs-on: ubuntu-latest
+    # A job takes minutes at most. A hung step should fail rather than hold a runner, and the
+    # pull request waiting on it, for six hours.
+    timeout-minutes: &timeout 15
     steps:
       - &checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -95,6 +98,7 @@ jobs:
   version:
     name: press.toml's version is the one the last release wrote
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - &history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -109,6 +113,7 @@ jobs:
   templates:
     name: The templates compile, in place and scaffolded
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain
@@ -117,6 +122,7 @@ jobs:
   rebuild:
     name: A rebuild leaves the document unchanged
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain
@@ -126,6 +132,7 @@ jobs:
   all:
     name: all builds the documents, not their parts or press's files
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain
@@ -134,6 +141,7 @@ jobs:
   audit:
     name: Documents pass the audit
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - &toolchain-poppler
@@ -149,6 +157,7 @@ jobs:
   audit-cases:
     name: The audit passes and refuses its known cases
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -157,6 +166,7 @@ jobs:
   reading-order:
     name: A résumé reads in the order it prints
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -165,6 +175,7 @@ jobs:
   code-break:
     name: A code block a document lets break breaks, and only that one
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -173,6 +184,7 @@ jobs:
   label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -181,6 +193,7 @@ jobs:
   caps:
     name: 'Every label press uppercases keeps its case under caps: false'
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -189,6 +202,7 @@ jobs:
   stamp-break:
     name: A stamp's hairline stays on the page with its words
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -197,6 +211,7 @@ jobs:
   code-size:
     name: Code is set in press's face, inline to the text around it, a block boxed
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -205,6 +220,7 @@ jobs:
   list-spacing:
     name: Lines, list items and paragraphs are each further apart than the last
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -213,6 +229,7 @@ jobs:
   part-align:
     name: Inside a part, a flow is centred and a line aligned right ends at its edge
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -221,6 +238,7 @@ jobs:
   num:
     name: num() groups a number by thousands, and keeps its decimals and sign
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -229,6 +247,7 @@ jobs:
   addendum-size:
     name: An addendum's label is no larger than the entry it is under
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -237,6 +256,7 @@ jobs:
   head-gaps:
     name: A header, a == heading and a résumé entry keep their own gaps
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -245,6 +265,7 @@ jobs:
   units-gap:
     name: Units sit their spacing apart under every pack, and "stacks" balances by it
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -253,6 +274,7 @@ jobs:
   sheet-across:
     name: A sheet across columns reads down each in turn, its last page balanced
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -261,6 +283,7 @@ jobs:
   sheet-row:
     name: A sheet's row that does not fit starts the next page whole
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -269,6 +292,7 @@ jobs:
   sources:
     name: A source is numbered by the list, which prints it short, its link whole
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -277,6 +301,7 @@ jobs:
   form-fill:
     name: A form page is its blank's, and each answer lands where it is put
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-poppler
@@ -285,6 +310,7 @@ jobs:
   bundle:
     name: The release bundle installs and works
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *history
       - *toolchain-poppler
@@ -294,6 +320,7 @@ jobs:
   digests:
     name: Every typst digest the kit pins is the release's
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - run: sh .github/typst-digests.sh
@@ -301,6 +328,7 @@ jobs:
   fetch:
     name: fetch.sh tries a failed download again, and says how each try went
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - run: sh .github/fetch-tries.sh
@@ -308,6 +336,7 @@ jobs:
   installers:
     name: Both installers install, update and refuse as they should, install.ps1 through PowerShell 7
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *history
       - run: sh .github/bundle.sh "$RUNNER_TEMP/bundle"
@@ -321,6 +350,7 @@ jobs:
   bundle-rebuilds:
     name: A release's commit rebuilds the bundle it published
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *history
       - run: sh .github/bundle.sh "$RUNNER_TEMP/bundle"
@@ -339,6 +369,7 @@ jobs:
   oldest-floors:
     name: The oldest toolchain is the floors press declares
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - &toolchain-oldest
@@ -364,6 +395,7 @@ jobs:
   oldest-build:
     name: Documents build on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -372,6 +404,7 @@ jobs:
   oldest:
     name: Documents pass on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -380,6 +413,7 @@ jobs:
   oldest-templates:
     name: The templates compile, in place and scaffolded, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -388,6 +422,7 @@ jobs:
   oldest-rebuild:
     name: A rebuild leaves the document unchanged, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -397,6 +432,7 @@ jobs:
   oldest-all:
     name: all builds the documents, not their parts or press's files, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -405,6 +441,7 @@ jobs:
   oldest-audit-cases:
     name: The audit passes and refuses its known cases, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -413,6 +450,7 @@ jobs:
   oldest-reading-order:
     name: A résumé reads in the order it prints, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -421,6 +459,7 @@ jobs:
   oldest-code-break:
     name: A code block a document lets break breaks, and only that one, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -429,6 +468,7 @@ jobs:
   oldest-label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -437,6 +477,7 @@ jobs:
   oldest-caps:
     name: 'Every label press uppercases keeps its case under caps: false, on the oldest toolchain'
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -445,6 +486,7 @@ jobs:
   oldest-stamp-break:
     name: A stamp's hairline stays on the page with its words, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -453,6 +495,7 @@ jobs:
   oldest-code-size:
     name: Code is set in press's face, inline to the text around it, a block boxed, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -461,6 +504,7 @@ jobs:
   oldest-list-spacing:
     name: Lines, list items and paragraphs are each further apart than the last, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -469,6 +513,7 @@ jobs:
   oldest-part-align:
     name: Inside a part, a flow is centred and a line aligned right ends at its edge, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -477,6 +522,7 @@ jobs:
   oldest-num:
     name: num() groups a number by thousands, and keeps its decimals and sign, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -485,6 +531,7 @@ jobs:
   oldest-addendum-size:
     name: An addendum's label is no larger than the entry it is under, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -493,6 +540,7 @@ jobs:
   oldest-head-gaps:
     name: A header, a == heading and a résumé entry keep their own gaps, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -501,6 +549,7 @@ jobs:
   oldest-units-gap:
     name: Units sit their spacing apart under every pack, and "stacks" balances by it, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -509,6 +558,7 @@ jobs:
   oldest-sheet-across:
     name: A sheet across columns reads down each in turn, its last page balanced, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -517,6 +567,7 @@ jobs:
   oldest-sheet-row:
     name: A sheet's row that does not fit starts the next page whole, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -525,6 +576,7 @@ jobs:
   oldest-sources:
     name: A source is numbered by the list, which prints it short, its link whole, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -533,6 +585,7 @@ jobs:
   oldest-form-fill:
     name: A form page is its blank's, and each answer lands where it is put, on the oldest toolchain
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - *toolchain-oldest
@@ -541,6 +594,7 @@ jobs:
   invisible:
     name: No invisible characters
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       # Reads the tree and nothing else: no toolchain, no fonts.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -591,6 +645,7 @@ jobs:
   shell:
     name: Shell scripts lint
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -617,6 +672,7 @@ jobs:
   workflows:
     name: Workflows lint
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     env:
       # One job uses it, so it is installed here rather than by a shared script;
       # the version and its digest sit together, and a bump changes both.
@@ -646,6 +702,7 @@ jobs:
   markdown:
     name: Markdown lint
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -661,13 +718,23 @@ jobs:
   contexts:
     name: Every CI job is a required context, by a name GitHub keeps whole
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       - *checkout
       - run: sh .github/contexts.sh
 
+  timeouts:
+    name: Every job stops at a timeout, so a hung step fails instead of holding a runner
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - run: sh .github/timeouts.sh
+
   json:
     name: JSON parses
     runs-on: ubuntu-latest
+    timeout-minutes: *timeout
     steps:
       # Reads the tree and nothing else.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

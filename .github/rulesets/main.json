@@ -217,6 +217,9 @@
             "context": "Every CI job is a required context, by a name GitHub keeps whole"
           },
           {
+            "context": "Every job stops at a timeout, so a hung step fails instead of holding a runner"
+          },
+          {
             "context": "JSON parses"
           },
           {
