@@ -410,6 +410,8 @@ split is by role, not page number.
 ### Vocabulary
 
 Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"bad"` (red).
+`tones` maps each to its colour and tint, for a part a document draws itself: `tones.at("ok")`
+is `(ok, ok-tint)`.
 
 | Call | For |
 |---|---|
