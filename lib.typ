@@ -10,10 +10,9 @@
 // files, not a Typst package: no namespace, no version in the import. Which press a repo
 // builds with is the copy it holds; its version is in press.toml beside this file.
 //
-// Its composition vocabulary — `unit`, `chip`, `decision` — had
-// been copy-pasted between documents before press held it. None of it was ever
-// document-specific, and `unit` and `chip` had already gone byte-identical across three
-// files: the drift press exists to prevent, one level down.
+// Its composition vocabulary — `unit`, `chip`, `decision` — lives here because none of it is
+// specific to one document: copied into each document instead, it drifts apart, and that drift
+// is what press exists to prevent.
 //
 
 // Composition is OFFERED, never imposed. Section order, page choice, which
