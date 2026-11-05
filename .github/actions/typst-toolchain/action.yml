@@ -43,7 +43,7 @@ runs:
         tmp=$(mktemp -d)
         if [ "$OLDEST" = true ]; then
           just_version=$OLDEST_JUST_VERSION just_sha256=$OLDEST_JUST_SHA256
-          curl --fail --silent --show-error --location \
+          curl --fail --silent --show-error --location --retry 5 \
             "https://github.com/typst/typst/releases/download/v${OLDEST_TYPST_VERSION}/typst-x86_64-unknown-linux-musl.tar.xz" \
             --output "$tmp/typst.tar.xz"
           # Verified before extraction: an archive checked after unpacking has already
@@ -55,7 +55,7 @@ runs:
           just_version=$JUST_VERSION just_sha256=$JUST_SHA256
           sudo sh tools/install-typst.sh /usr/local/bin
         fi
-        curl --fail --silent --show-error --location \
+        curl --fail --silent --show-error --location --retry 5 \
           "https://github.com/casey/just/releases/download/${just_version}/just-${just_version}-x86_64-unknown-linux-musl.tar.gz" \
           --output "$tmp/just.tar.gz"
         printf '%s  %s\n' "$just_sha256" "$tmp/just.tar.gz" | sha256sum -c -

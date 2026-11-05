@@ -40,7 +40,7 @@ trap 'rm -rf "$tmp"' EXIT INT TERM
 
 # --fail so an HTML error page is an error rather than a tarball that fails to
 # extract three lines later with a message about gzip.
-curl --fail --silent --show-error --location "$url" --output "$tmp/cog.tar.gz"
+curl --fail --silent --show-error --location --retry 5 "$url" --output "$tmp/cog.tar.gz"
 
 # Verified BEFORE extraction. A digest checked after unpacking has already let the
 # archive choose its own paths.

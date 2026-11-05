@@ -575,7 +575,7 @@ jobs:
         run: |
           set -euo pipefail
           tmp=$(mktemp -d)
-          curl --fail --silent --show-error --location \
+          curl --fail --silent --show-error --location --retry 5 \
             "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz" \
             --output "$tmp/actionlint.tar.gz"
           echo "${ACTIONLINT_SHA256}  $tmp/actionlint.tar.gz" | sha256sum -c -
