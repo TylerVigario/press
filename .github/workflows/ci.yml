@@ -258,6 +258,14 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/sheet-across.sh
 
+  sheet-row:
+    name: A sheet's row that does not fit starts the next page whole
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/sheet-row.sh
+
   form-fill:
     name: A form page is its blank's, and each answer lands where it is put
     runs-on: ubuntu-latest
@@ -497,6 +505,14 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/sheet-across.sh
+
+  oldest-sheet-row:
+    name: A sheet's row that does not fit starts the next page whole, on the oldest toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/sheet-row.sh
 
   oldest-form-fill:
     name: A form page is its blank's, and each answer lands where it is put, on the oldest toolchain

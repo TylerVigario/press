@@ -109,6 +109,9 @@
             "context": "A sheet across columns reads down each in turn, its last page balanced"
           },
           {
+            "context": "A sheet's row that does not fit starts the next page whole"
+          },
+          {
             "context": "A form page is its blank's, and each answer lands where it is put"
           },
           {
@@ -185,6 +188,9 @@
           },
           {
             "context": "A sheet across columns reads down each in turn, its last page balanced, on the oldest toolchain"
+          },
+          {
+            "context": "A sheet's row that does not fit starts the next page whole, on the oldest toolchain"
           },
           {
             "context": "A form page is its blank's, and each answer lands where it is put, on the oldest toolchain"
