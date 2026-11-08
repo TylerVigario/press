@@ -33,7 +33,7 @@
 # cached, failed), from the status each build adds to the file PRESS_TALLY names.
 #
 # --check audits every one instead, refusing without the audit's tools, and --tz names the
-# stamp's zone, as build.sh takes them.
+# stamp's zone for this run, over .press.toml's and PRESS_TZ, as build.sh takes them.
 set -eu
 
 press=$(dirname "$(dirname "$0")")

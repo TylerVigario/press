@@ -173,11 +173,19 @@ the build. The passes are `warnings`, `fonts`, `glyphs`, `ink-margin`, `text-on-
 standing, it would hide that pass's next real finding. A pass that cannot run, for a missing or
 broken tool, fails the audit whatever the document accepts.
 
-The stamp prints in **`PRESS_TZ`**, an IANA zone name set for every build
-(`PRESS_TZ=America/Los_Angeles`, or `UTC` for documents read across zones), so every machine
-prints the same time and an unchanged page stays unchanged wherever it is built. A runner that
-cannot set a variable on its command line, npm in `cmd.exe` on Windows, passes it to the tool
-instead: `build.sh --tz America/Los_Angeles`, `all.sh --tz America/Los_Angeles`.
+The stamp prints in the zone the repository names once, in **`.press.toml`** at its root, where
+the tools run:
+
+```toml
+timezone = "America/Los_Angeles"
+```
+
+An IANA zone name, or `UTC` for documents read across zones, so every machine prints the same
+time and an unchanged page stays unchanged wherever, and by whatever, it is built. With none named
+the stamp prints in UTC, never the building machine's own zone. `PRESS_TZ` names another zone for
+a build, over the file, and a tool's `--tz` for a run, over both: `build.sh --tz UTC`. The file
+takes `name = "value"` lines and `#` comments, and a build fails on a line it cannot read or a
+name it does not know, rather than printing in UTC unnoticed.
 
 ### From your runner
 
@@ -186,9 +194,9 @@ instead: `build.sh --tz America/Los_Angeles`, `all.sh --tz America/Los_Angeles`.
 
 ```json
 "scripts": {
-  "press": "sh third_party/press/tools/all.sh --tz America/Los_Angeles",
-  "press:build": "sh third_party/press/tools/build.sh --tz America/Los_Angeles",
-  "press:check": "sh third_party/press/tools/all.sh --check --tz America/Los_Angeles",
+  "press": "sh third_party/press/tools/all.sh",
+  "press:build": "sh third_party/press/tools/build.sh",
+  "press:check": "sh third_party/press/tools/all.sh --check",
   "press:watch": "sh third_party/press/tools/watch.sh"
 }
 ```
@@ -227,7 +235,7 @@ Under `mod` it is `just press build …`, and `just press` lists the recipes; un
 `new` is `new.sh` and `clean` is `clean.sh`. `all` builds documents, not their parts: a file
 named `_*.typ` is a part, and so is everything beside a `main.typ`, at any depth; press's own
 folder is skipped, so `just all .` builds the repository's documents and not press's files. It
-builds every one, then fails if any failed its audit. Export `PRESS_TZ` from the justfile.
+builds every one, then fails if any failed its audit.
 
 ### Requirements
 

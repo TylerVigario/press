@@ -61,6 +61,9 @@
             "context": "A rebuild leaves the document unchanged"
           },
           {
+            "context": "The stamp prints in the zone .press.toml names, or UTC, on any machine"
+          },
+          {
             "context": "all builds the documents, not their parts or press's files"
           },
           {
@@ -149,6 +152,9 @@
           },
           {
             "context": "A rebuild leaves the document unchanged, on the oldest toolchain"
+          },
+          {
+            "context": "The stamp prints in the zone .press.toml names, or UTC, on any machine, on the oldest toolchain"
           },
           {
             "context": "all builds the documents, not their parts or press's files, on the oldest toolchain"

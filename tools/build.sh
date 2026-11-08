@@ -19,8 +19,8 @@
 #
 #   sh third_party/press/tools/build.sh --check docs/guide.typ
 #
-# --tz names the zone the stamp prints in, as PRESS_TZ does, for a runner that cannot set an
-# environment variable on its command line: npm runs its scripts in cmd.exe on Windows.
+# The stamp prints in the zone the repository's .press.toml names, or UTC (stamp.sh). --tz names
+# another for this run, over the file and PRESS_TZ:
 #
 #   sh third_party/press/tools/build.sh --tz America/Los_Angeles docs/guide.typ
 #
