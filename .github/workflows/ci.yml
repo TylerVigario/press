@@ -129,6 +129,15 @@ jobs:
       - run: just build calibration.typ
       - run: sh .github/rebuild-unchanged.sh calibration.typ
 
+  zone:
+    name: The stamp prints in the zone .press.toml names, or UTC, on any machine
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain
+      - run: sh .github/zone.sh
+
   all:
     name: all builds the documents, not their parts or press's files
     runs-on: ubuntu-latest
@@ -437,6 +446,15 @@ jobs:
       - *toolchain-oldest
       - run: just build calibration.typ
       - run: sh .github/rebuild-unchanged.sh calibration.typ
+
+  oldest-zone:
+    name: The stamp prints in the zone .press.toml names, or UTC, on any machine, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/zone.sh
 
   oldest-all:
     name: all builds the documents, not their parts or press's files, on the oldest toolchain

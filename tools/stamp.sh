@@ -70,36 +70,75 @@ echo "$v" | awk -F. -v min="$min" '{
 now=$(date +%s)
 
 # The stamp is kept and compared in UTC -- the PDF's /CreationDate -- and printed in the
-# DOCUMENT's time zone: PRESS_TZ, an IANA name the consuming repo sets for every build —
-# exported from a justfile, set in an npm script or CI —
+# REPOSITORY's time zone, an IANA name its .press.toml gives, at the root the tools run from:
 #
-#   PRESS_TZ=America/Los_Angeles     ("UTC" for documents read across zones)
+#   timezone = "America/Los_Angeles"     ("UTC" for documents read across zones)
 #
 # so every machine prints the same text for the same moment, and an unchanged page stays
-# unchanged wherever it is built. Unset, it is the building machine's own zone, and a build
-# under another zone re-stamps a page that did not change.
+# unchanged wherever it is built, by whatever runs the build. The zone is the repository's, the
+# same for each of its documents and each build of them, so it is written once, where every
+# build reads it, as a site's is in Hugo's or Jekyll's configuration. PRESS_TZ overrides the file
+# for a build, and --tz, which build.sh and all.sh take, overrides both. With none naming a zone
+# the stamp prints in UTC, never the building machine's own zone, which would re-stamp an
+# unchanged page each time a machine in another zone built it.
 #
+# .press.toml is a small part of TOML: each line blank, a # comment, or a setting, name = "value"
+# or name = 'value', a comment after it if any. A line that is none of those, a name press does
+# not know or one given twice fails the build, rather than leaving a setting unread and the
+# page in UTC. Its own name keeps it apart from press.toml, the kit's, which marks press's
+# folder.
+settings=.press.toml
+setting() {
+    LC_ALL=C awk -v want="$1" -v sq="'" -v file="$settings" '
+        function bad(why) { printf "press: %s, line %d: %s\n       %s\n", file, NR, why, $0 > "/dev/stderr"; fail = 1 }
+        NR == 1 { sub(/^\357\273\277/, "") }
+        { sub(/\r$/, "") }
+        /^[ \t]*(#.*)?$/ { next }
+        !match($0, /^[ \t]*[A-Za-z0-9_-]+[ \t]*=[ \t]*/) { bad("not a setting, name = \"value\""); next }
+        {
+            name = substr($0, 1, RLENGTH); sub(/^[ \t]*/, "", name); sub(/[ \t]*=.*$/, "", name)
+            v = substr($0, RLENGTH + 1)
+            if (v ~ /^"[^"\\]*"[ \t]*(#.*)?$/) q = "\""
+            else if (v ~ ("^" sq "[^" sq "]*" sq "[ \t]*(#.*)?$")) q = sq
+            else { bad("its value is not one quoted string"); next }
+            v = substr(v, 2); v = substr(v, 1, index(v, q) - 1)
+            if (name != "timezone") { bad("press has no setting " name "; it has timezone"); next }
+            if (name in seen) { bad(name " is set twice"); next }
+            seen[name] = 1
+            if (name == want) found = v
+        }
+        END { if (fail) exit 1; if (found != "") print found }
+    ' "$settings"
+}
+# The file is read whenever it is there, so a fault in it fails every build, not only one
+# without PRESS_TZ.
+name=
+if [ -f "$settings" ]; then name=$(setting timezone) || exit 1; fi
+from="$settings's timezone"
+if [ -n "${PRESS_TZ:-}" ]; then name=$PRESS_TZ from="PRESS_TZ (or --tz)"; fi
 # date is handed the zone's FILE, not its name. Git for Windows' date knows no names: its
 # database is /mingw64/share/zoneinfo, where its date neither looks nor follows TZDIR, but it
 # reads a zone file given by path, as glibc, the BSDs and macOS do. A name or path date
 # cannot read is no error to date either: it prints UTC under a made-up name. So the file is
-# found first, and a name with none fails the build.
-zone=
-if [ -n "${PRESS_TZ:-}" ]; then
+# found first, and a name with none fails the build. UTC with no zone named is POSIX's UTC0,
+# which needs no file.
+zone=UTC0
+if [ -n "$name" ]; then
+    zone=
     for dir in ${TZDIR:+"$TZDIR"} /usr/share/zoneinfo /mingw64/share/zoneinfo; do
-        if [ -f "$dir/$PRESS_TZ" ]; then
-            zone=$dir/$PRESS_TZ
+        if [ -f "$dir/$name" ]; then
+            zone=:$dir/$name
             break
         fi
     done
     if [ -z "$zone" ]; then
-        echo "press: PRESS_TZ (or --tz) is not a time zone this machine knows: $PRESS_TZ" >&2
+        echo "press: $from is not a time zone this machine knows: $name" >&2
         echo "       looked in ${TZDIR:+$TZDIR, }/usr/share/zoneinfo and /mingw64/share/zoneinfo;" >&2
         echo "       set TZDIR if this machine keeps its zones elsewhere" >&2
         exit 1
     fi
 fi
-tz() { if [ -n "$zone" ]; then TZ=":$zone" "$@"; else "$@"; fi; }
+tz() { TZ=$zone "$@"; }
 
 # Readable on paper. GNU date (Linux, Git for Windows) takes -d @N; BSD and macOS take -r N.
 when() { tz date -d "@$1" '+%Y-%m-%d %H:%M %Z' 2>/dev/null || tz date -r "$1" '+%Y-%m-%d %H:%M %Z'; }
