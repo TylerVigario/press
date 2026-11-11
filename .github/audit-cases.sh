@@ -10,9 +10,10 @@
 # first does not blind it. Then the build, stamp.sh, audits as check does: it fails a fail case with
 # its PDF written, and without poppler it says the audit was skipped and succeeds. And: a pass that
 # cannot run fails the audit whatever the document accepts; open items and estimates are counted,
-# with the audit's tools or without them; a title still to be named is counted once, however many
-# pages print it, or none; with no XML parser, or no python, check refuses and a build skips the
-# passes that need one, unrecorded; and an unchanged document is not compiled again.
+# with the audit's tools or without them; a line of code that wraps fails the build without them
+# too; a title still to be named is counted once, however many pages print it, or none; with no
+# XML parser, or no python, check refuses and a build skips the passes that need one, unrecorded;
+# and an unchanged document is not compiled again.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -80,6 +81,20 @@ PRESS_PDFTOTEXT=/nonexistent/pdftotext sh tools/stamp.sh .github/audit-cases/pas
 grep -qF "has 2 open items" "$tmp/out" || { cat "$tmp/out" >&2; fail "a build without poppler did not count the open items"; }
 grep -qF "prints 1 estimate," "$tmp/out" || { cat "$tmp/out" >&2; fail "a build without poppler did not count the estimate"; }
 echo "audit-cases: a build without the audit's tools still counts the open items and estimates"
+
+# A line of code that wraps is found from press's marks, which need only typst, so a build
+# without the audit's tools still fails it, as it fails the measuring grid.
+for v in PRESS_PDFTOTEXT=/nonexistent/pdftotext PRESS_PDFFONTS=/nonexistent/pdffonts; do
+    t=${v##*/}
+    # shellcheck disable=SC2086
+    ! env "$v" sh tools/stamp.sh \
+        .github/audit-cases/fail-code-wrap.typ "$tmp/b/wrap.pdf" $flags > "$tmp/out" 2>&1 \
+        || fail "a build without $t passed a line of code that wraps"
+    grep -qF "is too long for it and wraps" "$tmp/out" \
+        || { cat "$tmp/out" >&2; fail "a build without $t failed, but not for the line that wraps"; }
+    grep -qF "is not audited: " "$tmp/out" || { cat "$tmp/out" >&2; fail "a build without $t did not say it was not audited"; }
+done
+echo "audit-cases: a build without the audit's tools still fails a line of code that wraps"
 
 # A title still to be named is one open item, though the footer prints it on every page: counted
 # once where a header prints it too, once where a head of the document's own prints it with
