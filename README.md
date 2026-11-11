@@ -243,8 +243,8 @@ builds every one, then fails if any failed its audit.
 - **`sh`** for the tools. On Windows it comes with Git for Windows.
 - **The audit** needs poppler (`pdffonts`, `pdftotext`, `pdftoppm`), a Python, and a grep
   with PCRE (GNU grep; on macOS, `brew install grep`); a build without them is not audited,
-  though it still counts the open items and estimates and fails while a form's measuring grid
-  is on, which need only typst.
+  though it still counts the open items and estimates, and fails while a form's measuring grid
+  is on or a line of a code block wraps, which need only typst.
   Where `PATH` finds the wrong one, name it: `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`,
   `PRESS_PDFTOPPM`, `PRESS_PYTHON`, `PRESS_GREP` (`ggrep` on macOS). The audit refuses a
   `pdftotext` that is not poppler's.

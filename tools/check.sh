@@ -119,8 +119,9 @@ shift 3
 # (PRESS_BUILT_DEPS, PRESS_BUILT_LOG), so nothing compiles twice. A tool the audit lacks is
 # then one line saying the audit was skipped and why, not a failure: building never depends
 # on these tools, and check itself still refuses without them. press's marks, which need only
-# typst, are read before the tools are asked for, so a build without them still counts the open
-# items and still fails while the measuring grid is on: skip ends with the status so far.
+# typst, are read and reported before the tools are asked for, so a build without them still
+# counts the open items, and still fails while the measuring grid is on or a line of code wraps:
+# skip ends with the status so far.
 optional=
 [ "${PRESS_AUDIT:-}" != optional ] || optional=1
 skip() {
@@ -203,6 +204,54 @@ tr '\000\\' '\n/' < "$tmp/deps" | awk '
 # At least $src itself; an empty list would skip the check and report the document clean.
 test -s "$tmp/sources" || { echo "press: typst listed no sources for $src" >&2; exit 1; }
 
+# ACCEPTED FINDINGS. A document may accept a finding it keeps on purpose, a sent record that
+# will not be restyled, with a line in its own source naming the pass and why:
+#
+#   // press: accept ink-margin — sent 2026-03-02, kept as sent
+#
+# That pass's findings still print, then a line saying they were accepted and why, and they do
+# not fail. A reason is required, and the pass must be one of $passes. An acceptance its pass
+# finds nothing for fails: left standing, it would hide that pass's next real finding.
+#
+# Only the document's own file accepts. An acceptance in a file it imports or includes, a
+# shared template, would speak for every document that uses the file; a finding that file
+# causes is the file's to fix, so such a line is refused.
+passes="warnings fonts glyphs ink-margin text-on-text code-wrap"
+accepted=
+hit=
+skipped=
+: > "$tmp/reasons"
+accept_re='^[[:space:]]*//[[:space:]]*press:[[:space:]]*accept([[:space:]]|$)'
+grep -E "$accept_re" "$src" > "$tmp/accepts" || true
+while IFS= read -r f; do
+    if grep -qE "$accept_re" "$f" && ! cmp -s "$f" "$src"; then
+        echo "press: $f accepts a finding, but only the document's own file may ($src):" >&2
+        echo "       a finding a shared file causes is that file's to fix" >&2
+        rc=1
+    fi
+done < "$tmp/sources"
+while IFS= read -r line; do
+    rest=$(printf '%s\n' "$line" | sed -E 's#^[[:space:]]*//[[:space:]]*press:[[:space:]]*accept[[:space:]]*##')
+    name=$(printf '%s\n' "$rest" | awk '{ print $1 }' | sed 's/:$//')
+    reason=$(printf '%s\n' "$rest" | sed -E 's/^[^[:space:]]*[[:space:]]*//; s/^(—|-|:)[[:space:]]*//')
+    case " $passes " in
+        *" $name "*) ;;
+        *) echo "press: $src accepts \"$name\", which is not a pass; the passes are: $passes" >&2
+           rc=1; continue ;;
+    esac
+    if [ -z "$reason" ]; then
+        echo "press: $src accepts $name with no reason; say why: // press: accept $name — <why>" >&2
+        rc=1; continue
+    fi
+    accepted="$accepted $name"
+    printf '%s\t%s\n' "$name" "$reason" >> "$tmp/reasons"
+done < "$tmp/accepts"
+# found <pass>: the pass found something; it fails the audit unless the document accepts it.
+found() {
+    hit="$hit $1"
+    case " $accepted " in *" $1 "*) ;; *) rc=1 ;; esac
+}
+
 # PRESS'S MARKS. Three of press's parts leave a mark for the audit: unsourced(), a value the
 # document prints without having read it from a source, marked with its kind; form(probe:), the
 # measuring grid; and code(), a line of a code block too long for it. typst lists them, and only
@@ -268,6 +317,20 @@ if [ -n "$want" ]; then
             *code*) echo "press: could not tell whether a line of code wraps in $pdf" >&2; rc=1 ;;
         esac
     fi
+fi
+
+# CODE THAT WRAPS. A line of a code block too long for it wraps without a word from typst: it
+# copies with a break in it, and on paper it reads as two lines. The PDF cannot tell a wrapped
+# line from two, so code() measures each line against its block and marks the ones that wrap,
+# with the page the block starts on and how the line starts, and this reads the marks. It needs
+# only typst, so it is reported here, before the audit's tools are asked for: a build without
+# them still fails a line that wraps, as it fails the measuring grid.
+if [ -n "$wraps" ]; then
+    printf '%s\n' "$wraps" | while IFS=' ' read -r p start; do
+        echo "press: $pdf: a line of the code block on page $p is too long for it and wraps: $start" >&2
+    done
+    echo "       it copies with a break in it; shorten it, or split it where its language allows" >&2
+    found code-wrap
 fi
 
 # The glyph check needs a grep that speaks PCRE, honours the (*UTF) verb, and knows
@@ -339,54 +402,6 @@ for spec in "PRESS_PDFTOTEXT $PDFTOTEXT" "PRESS_PDFFONTS $PDFFONTS"; do
              echo "       its own /mingw64/bin, with Xpdf's pdftotext, ahead of PATH: set $var there." >&2
              exit 1; }
 done
-
-# ACCEPTED FINDINGS. A document may accept a finding it keeps on purpose, a sent record that
-# will not be restyled, with a line in its own source naming the pass and why:
-#
-#   // press: accept ink-margin — sent 2026-03-02, kept as sent
-#
-# That pass's findings still print, then a line saying they were accepted and why, and they do
-# not fail. A reason is required, and the pass must be one of $passes. An acceptance its pass
-# finds nothing for fails: left standing, it would hide that pass's next real finding.
-#
-# Only the document's own file accepts. An acceptance in a file it imports or includes, a
-# shared template, would speak for every document that uses the file; a finding that file
-# causes is the file's to fix, so such a line is refused.
-passes="warnings fonts glyphs ink-margin text-on-text code-wrap"
-accepted=
-hit=
-skipped=
-: > "$tmp/reasons"
-accept_re='^[[:space:]]*//[[:space:]]*press:[[:space:]]*accept([[:space:]]|$)'
-grep -E "$accept_re" "$src" > "$tmp/accepts" || true
-while IFS= read -r f; do
-    if grep -qE "$accept_re" "$f" && ! cmp -s "$f" "$src"; then
-        echo "press: $f accepts a finding, but only the document's own file may ($src):" >&2
-        echo "       a finding a shared file causes is that file's to fix" >&2
-        rc=1
-    fi
-done < "$tmp/sources"
-while IFS= read -r line; do
-    rest=$(printf '%s\n' "$line" | sed -E 's#^[[:space:]]*//[[:space:]]*press:[[:space:]]*accept[[:space:]]*##')
-    name=$(printf '%s\n' "$rest" | awk '{ print $1 }' | sed 's/:$//')
-    reason=$(printf '%s\n' "$rest" | sed -E 's/^[^[:space:]]*[[:space:]]*//; s/^(—|-|:)[[:space:]]*//')
-    case " $passes " in
-        *" $name "*) ;;
-        *) echo "press: $src accepts \"$name\", which is not a pass; the passes are: $passes" >&2
-           rc=1; continue ;;
-    esac
-    if [ -z "$reason" ]; then
-        echo "press: $src accepts $name with no reason; say why: // press: accept $name — <why>" >&2
-        rc=1; continue
-    fi
-    accepted="$accepted $name"
-    printf '%s\t%s\n' "$name" "$reason" >> "$tmp/reasons"
-done < "$tmp/accepts"
-# found <pass>: the pass found something; it fails the audit unless the document accepts it.
-found() {
-    hit="$hit $1"
-    case " $accepted " in *" $1 "*) ;; *) rc=1 ;; esac
-}
 
 # SCANS (scan(), in lib/parts.typ). A document that reads an image file may have marked some of it
 # as a scan, content it did not set. The passes that read the page — fonts, ink near the edge, text
@@ -489,17 +504,6 @@ elif [ -n "$PY" ]; then
 else
     echo "press: skipping the line-overlap check (no working python found)" >&2
     skipped="$skipped text-on-text"
-fi
-# CODE THAT WRAPS. A line of a code block too long for it wraps without a word from typst: it
-# copies with a break in it, and on paper it reads as two lines. The PDF cannot tell a wrapped
-# line from two, so code() measures each line against its block and marks the ones that wrap,
-# with the page the block starts on and how the line starts, and this reads the marks.
-if [ -n "$wraps" ]; then
-    printf '%s\n' "$wraps" | while IFS=' ' read -r p start; do
-        echo "press: $pdf: a line of the code block on page $p is too long for it and wraps: $start" >&2
-    done
-    echo "       it copies with a break in it; shorten it, or split it where its language allows" >&2
-    found code-wrap
 fi
 warns=$(printf '%s\n' "$out" | grep '^warning:' || true)
 if [ -n "$warns" ] && [ -n "${PRESS_BUILT_DEPS:-}" ]; then
