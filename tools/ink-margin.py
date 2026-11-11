@@ -104,8 +104,10 @@ def clearance(path):
     minx, maxx, miny, maxy = w, -1, h, -1
     for y in range(h):
         row = px[y*w:(y+1)*w]
-        # 230 rather than 255: anti-aliased edges and the palest tints are ink.
-        xs = [x for x, v in enumerate(row) if v < 230]
+        # Ink is any pixel that is not the paper's white. press's palest tint, paper-tint, renders
+        # at 247 and its others from 235 to 240, and a band of any of them clips at the edge as a
+        # rule does; an anti-aliased edge is ink too.
+        xs = [x for x, v in enumerate(row) if v < 255]
         if xs:
             miny = min(miny, y); maxy = y
             minx = min(minx, xs[0]); maxx = max(maxx, xs[-1])
