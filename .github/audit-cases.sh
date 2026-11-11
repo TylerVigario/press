@@ -65,6 +65,25 @@ echo "audit-cases: the build audits as check does, and without poppler says it d
 ! grep -qF "accepted" "$tmp/out" || { cat "$tmp/out" >&2; fail "a pass that could not run was called accepted"; }
 echo "audit-cases: a pass that cannot run fails the audit, whatever the document accepts"
 
+# Nor is a Python that cannot parse the passes: it exits 1, as CPython does for a script whose
+# syntax is newer than itself. The stand-in answers the probe, `-c pass`, and fails any script.
+op=$tmp/old-python
+printf '#!/bin/sh
+[ "$1" = -c ] && [ "$2" = pass ] && exit 0
+echo "SyntaxError: invalid syntax" >&2; exit 1
+' \
+    > "$op"
+chmod +x "$op"
+# shellcheck disable=SC2086
+! PRESS_PYTHON=$op sh tools/check.sh .github/audit-cases/pass-finding-accepted.typ \
+    "$tmp/b/old.pdf" . $flags > "$tmp/out" 2>&1 || fail "a Python that could not parse the passes was accepted"
+! grep -qF "accepted" "$tmp/out" || { cat "$tmp/out" >&2; fail "a pass Python could not parse was called accepted"; }
+for c in "the printable-area check" "the line-overlap check"; do
+    grep -qF "press: $c could not run: $op exited 1" "$tmp/out" \
+        || { cat "$tmp/out" >&2; fail "$c did not say it could not run"; }
+done
+echo "audit-cases: a Python that cannot parse the passes fails the audit, whatever the document accepts"
+
 # Open items and estimates are counted, not failed: the pass case above audited clean, and says
 # how many of each.
 # shellcheck disable=SC2086

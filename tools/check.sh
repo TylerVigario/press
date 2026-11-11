@@ -468,16 +468,28 @@ if [ -z "$PY" ] && [ -z "$optional" ]; then
     echo "       set PRESS_PYTHON to one if it is not on PATH as python3 or python" >&2
     exit 1
 fi
+# did_not_run <check> <status>: a Python pass did not run to its end, which fails the audit
+# whatever the document accepts. die() has said why already; any other status is named.
+did_not_run() {
+    [ "$2" -eq 2 ] || echo "press: $1 could not run: $PY exited $2 before it finished" >&2
+    rc=1
+}
 if [ -n "$PY" ] && [ -n "$optional" ] && ! command -v "${PRESS_PDFTOPPM:-pdftoppm}" >/dev/null 2>&1; then
     # A build without pdftoppm skips this pass and says so; check reports it as the pass fails.
     echo "press: skipping the printable-area check (no pdftoppm, which comes with poppler)" >&2
     skipped="$skipped ink-margin"
 elif [ -n "$PY" ]; then
-    # 1 is a finding; anything else is the pass failing to run, which no acceptance covers.
+    # 3 is a finding (FINDING in the pass); anything else is the pass failing to run, which no
+    # acceptance covers. die() exits 2 and says why; any other status is Python's own, a script
+    # it could not parse or an error nothing caught, and is named here.
     s=0
     PRESS_PDFTOPPM="${PRESS_PDFTOPPM:-pdftoppm}" \
         "$PY" "$press_root/tools/ink-margin.py" "$page" 0.48 "$pdf" || s=$?
-    case $s in 0) ;; 1) found ink-margin ;; *) rc=1; skipped="$skipped ink-margin" ;; esac
+    case $s in
+        0) ;;
+        3) found ink-margin ;;
+        *) did_not_run "the printable-area check" "$s"; skipped="$skipped ink-margin" ;;
+    esac
 else
     echo "press: skipping the printable-area check (no working python found)" >&2
     skipped="$skipped ink-margin"
@@ -502,7 +514,11 @@ if [ -n "$PY" ] && [ -n "$optional" ] && ! "$PY" -c 'import xml.parsers.expat' >
 elif [ -n "$PY" ]; then
     s=0
     PRESS_PDFTOTEXT="$PDFTOTEXT" "$PY" "$press_root/tools/line-overlap.py" "$page" "$pdf" || s=$?
-    case $s in 0) ;; 1) found text-on-text ;; *) rc=1; skipped="$skipped text-on-text" ;; esac
+    case $s in
+        0) ;;
+        3) found text-on-text ;;
+        *) did_not_run "the line-overlap check" "$s"; skipped="$skipped text-on-text" ;;
+    esac
 else
     echo "press: skipping the line-overlap check (no working python found)" >&2
     skipped="$skipped text-on-text"

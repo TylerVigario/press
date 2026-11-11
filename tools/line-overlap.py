@@ -48,9 +48,15 @@ import os, re, subprocess, sys, tempfile, pathlib
 # shapes was 2.72pt. The floor sits in the middle of a gap with nothing in it.
 EPSILON_PT = 0.5
 
+# A finding exits 3, a status Python never gives of its own accord: it exits 1 for an exception
+# nothing caught and for a script it cannot parse, as a Python older than this file's syntax
+# does, and 2 when it cannot open the script. check reads only 3 as a finding, so a Python that
+# fails before a line of the pass runs is never a finding a document has accepted.
+FINDING = 3
+
 def die(msg):
-    """The pass could not run: exit 2, apart from 1 for a finding, so check never takes a
-    missing or broken tool for a finding a document has accepted."""
+    """The pass could not run: exit 2, apart from FINDING, so check never takes a missing or
+    broken tool for a finding a document has accepted."""
     print(msg, file=sys.stderr)
     sys.exit(2)
 
@@ -165,7 +171,7 @@ def main():
                       file=sys.stderr)
                 print(f"    upper: {upper[:72]}", file=sys.stderr)
                 print(f"    lower: {lower[:72]}", file=sys.stderr)
-                rc = 1
+                rc = FINDING
     return rc
 
 

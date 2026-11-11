@@ -142,8 +142,10 @@ repository has.
   in README's list, or a document can never accept it. Only the document's own file accepts.
   The measuring grid, `form(probe:)`, is not a pass: no document may accept it, so it fails
   through `rc` and never through `found`.
-  The Python passes exit 1 for a finding and 2 when they cannot run (`die()`); keep that
-  apart, or a missing tool reads as a finding a document has accepted.
+  The Python passes exit 3 for a finding (`FINDING`) and 2 when they cannot run (`die()`), and
+  check takes only 3 as a finding: Python exits 1 of its own accord, for a script it cannot
+  parse or an error nothing caught. Keep a finding's status apart from 0, 1 and 2, or a broken
+  tool reads as a finding a document has accepted.
 - **The build record is one file, `.build-record`, in press's folder**, kept out of git by the
   kit's `.gitignore`; nothing goes beside a document or its PDF.
 - **The build record keys on everything typst does not list.** `stamp.sh`'s `key()` holds the
