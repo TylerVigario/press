@@ -20,9 +20,15 @@ reason PRESS_PDFTOTEXT exists: on Windows PATH is not the contributor's to order
 """
 import os, re, subprocess, sys, tempfile, pathlib
 
+# A finding exits 3, a status Python never gives of its own accord: it exits 1 for an exception
+# nothing caught and for a script it cannot parse, as a Python older than this file's syntax
+# does, and 2 when it cannot open the script. check reads only 3 as a finding, so a Python that
+# fails before a line of the pass runs is never a finding a document has accepted.
+FINDING = 3
+
 def die(msg):
-    """The pass could not run: exit 2, apart from 1 for a finding, so check never takes a
-    missing or broken tool for a finding a document has accepted."""
+    """The pass could not run: exit 2, apart from FINDING, so check never takes a missing or
+    broken tool for a finding a document has accepted."""
     print(msg, file=sys.stderr)
     sys.exit(2)
 
@@ -122,7 +128,7 @@ def main():
                 print(f"press: {name} page {n} has ink {c:.2f}in from a paper edge "
                       f"(floor {floor:.2f}in) — it will clip when printed at actual size",
                       file=sys.stderr)
-                rc = 1
+                rc = FINDING
     return rc
 
 if __name__ == "__main__":
