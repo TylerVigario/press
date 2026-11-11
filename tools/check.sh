@@ -258,8 +258,10 @@ found() {
 # where a source of the document's own names one, as unsourced or probe:, or holds a code block,
 # so no other document is compiled again: typst eval, or typst query
 # before 0.15, which has no eval. Neither takes the --deps a build passes, so the query runs
-# without it. Any mention of unsourced asks, a shorthand's `unsourced.with(...)` among them: a
-# query too many costs a compile, and one too few would leave a document's open items uncounted.
+# without it. Any mention of unsourced asks, a shorthand's `unsourced.with(...)` among them, and
+# a fence or any mention of raw, so a block made through `raw.with(...)` or a name given to raw
+# is read as one written `raw(...)` is: a query too many costs a compile, and one too few would
+# leave a document's open items uncounted, or pass a line of code that wraps.
 #
 # Open items and estimates are counted, not failed: a draft carries them, and the count is what
 # keeps one from going out unnoticed. A missing value is not counted: nothing is left to do. The
@@ -283,7 +285,7 @@ press_marks() {
 want=$(while IFS= read -r f; do
     if grep -q 'unsourced' "$f"; then echo unsourced; fi
     if grep -q 'probe:' "$f"; then echo probe; fi
-    if grep -qE '```|raw\(' "$f"; then echo code; fi
+    if grep -qE '```|(^|[^[:alnum:]_-])raw([^[:alnum:]_-]|$)' "$f"; then echo code; fi
 done < "$tmp/sources")
 wraps=
 if [ -n "$want" ]; then
