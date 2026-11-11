@@ -1,7 +1,7 @@
 #!/bin/sh
 # check.sh — audit a built document for what typst lets through without a word: warnings that
-# exit 0, fonts that are not vendored, glyphs that vanish, ink too near the edge, text on text,
-# code that wraps.
+# exit 0, fonts that are not vendored, glyphs that vanish, ink too near the edge, text off the
+# paper, text on text, code that wraps.
 #
 # Run from the consumer root by build.sh --check, which any runner calls, and by stamp.sh after
 # every build:
@@ -216,7 +216,7 @@ test -s "$tmp/sources" || { echo "press: typst listed no sources for $src" >&2; 
 # Only the document's own file accepts. An acceptance in a file it imports or includes, a
 # shared template, would speak for every document that uses the file; a finding that file
 # causes is the file's to fix, so such a line is refused.
-passes="warnings fonts glyphs ink-margin text-on-text code-wrap"
+passes="warnings fonts glyphs ink-margin off-page text-on-text code-wrap"
 accepted=
 hit=
 skipped=
@@ -416,6 +416,45 @@ if tr '\000' '\n' < "$tmp/deps" | grep -qiE '\.(pdf|png|jpe?g|gif|svg|webp)$'; t
             "$@" --input press-scans=hidden 2>/dev/null; then
         page=$tmp/scans-hidden.pdf
     fi
+fi
+# The OFF-PAGE check: text placed past the paper's edge. place() puts content wherever it is told,
+# and content wholly off the paper prints on no page and leaves no ink near an edge for the
+# printable-area check to measure, so a fact the document gives is lost without a word. Its text
+# is still in the PDF, outside the page: pdftotext reads each page twice, once within the paper
+# and once through a crop far wider than it on every side, and a word only the wide read finds is
+# off the paper. The crop reaches past the left and top edges only from a negative origin, and
+# only in pdftotext's plain output: -bbox ignores it. Text only: a shape or an image wholly off
+# the paper is not found.
+if "$PDFTOTEXT" "$page" "$tmp/paper.txt" 2>/dev/null \
+        && "$PDFTOTEXT" -x -100000 -y -100000 -W 200000 -H 200000 "$page" "$tmp/wide.txt" 2>/dev/null; then
+    # One line for each page with text off it: the page's number, a tab, and its first words.
+    awk -v RS='\f' '
+        FILENAME == ARGV[1] {
+            n = split($0, w, /[ \t\n]+/)
+            for (i = 1; i <= n; i++) if (w[i] != "") have[FNR, w[i]]++
+            next
+        }
+        {
+            n = split($0, w, /[ \t\n]+/); c = 0; s = ""
+            for (i = 1; i <= n; i++) {
+                if (w[i] == "") continue
+                if (have[FNR, w[i]] > 0) { have[FNR, w[i]]--; continue }
+                if (++c <= 12) s = s (c > 1 ? " " : "") w[i]
+            }
+            if (c > 12) s = s " …"
+            if (c) print FNR "\t" s
+        }' "$tmp/paper.txt" "$tmp/wide.txt" > "$tmp/off"
+    if [ -s "$tmp/off" ]; then
+        while IFS='	' read -r p words; do
+            echo "press: $pdf page $p has text off the paper, which prints on no page: $words" >&2
+        done < "$tmp/off"
+        echo "       it is in the PDF but on no printed sheet; place it on the page" >&2
+        found off-page
+    fi
+else
+    echo "press: the off-page check could not run: $PDFTOTEXT could not read $pdf" >&2
+    rc=1
+    skipped="$skipped off-page"
 fi
 # The PRINTABLE-AREA check. A document can overflow the unprintable band
 # silently: typst has no concept of it, so the failure appears on paper and

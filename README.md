@@ -119,7 +119,7 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 | `sh third_party/press/tools/watch.sh docs/guide.typ` | recompiles on every save to `print/<same path>.watch.pdf`, a preview beside the stamped PDF |
 | `sh third_party/press/tools/clean.sh` | deletes `print/` |
 | `sh third_party/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory; then audits it, where the audit's tools are installed |
-| `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | the audit alone, which refuses to run without its tools: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text printed on text, code that wraps |
+| `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | the audit alone, which refuses to run without its tools: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text off the paper, text printed on text, code that wraps |
 | `sh third_party/press/tools/install-typst.sh <dir>` | installs the typst press is built and audited with into `<dir>`, pinned by version and digest, on Linux x86_64 or aarch64: for a repository's CI (see In CI below) |
 | `sh third_party/press/tools/fetch.sh <url> <file>` | downloads a file, trying again on a timeout or a 5xx, and says on stderr how each try went: the host that answered each hop, its status and the IDs it gave the request, and how long the last try took. `install-typst.sh` downloads typst with it |
 
@@ -168,10 +168,10 @@ cannot accept for it, since a finding a shared file causes is that file's to fix
 ```
 
 Its findings still print, then a line saying they are accepted and why, and they do not fail
-the build. The passes are `warnings`, `fonts`, `glyphs`, `ink-margin`, `text-on-text` and
-`code-wrap`. An acceptance with no reason fails, and so does one its pass finds nothing for: left
-standing, it would hide that pass's next real finding. A pass that cannot run, for a missing or
-broken tool, fails the audit whatever the document accepts.
+the build. The passes are `warnings`, `fonts`, `glyphs`, `ink-margin`, `off-page`,
+`text-on-text` and `code-wrap`. An acceptance with no reason fails, and so does one its pass
+finds nothing for: left standing, it would hide that pass's next real finding. A pass that
+cannot run, for a missing or broken tool, fails the audit whatever the document accepts.
 
 The stamp prints in the zone the repository names once, in **`.press.toml`** at its root, where
 the tools run:
