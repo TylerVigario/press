@@ -182,7 +182,7 @@ jobs:
       - run: sh .github/reading-order.sh
 
   code-break:
-    name: A code block a document lets break breaks, and one that fits moves whole
+    name: A code block a document lets break breaks, and only that one
     runs-on: ubuntu-latest
     timeout-minutes: *timeout
     steps:
@@ -493,7 +493,7 @@ jobs:
       - run: sh .github/reading-order.sh
 
   oldest-code-break:
-    name: A code block a document lets break breaks, and one that fits moves whole, on the oldest toolchain
+    name: A code block a document lets break breaks, and only that one, on the oldest toolchain
     runs-on: ubuntu-latest
     timeout-minutes: *timeout
     steps:

@@ -76,7 +76,7 @@
             "context": "A résumé reads in the order it prints"
           },
           {
-            "context": "A code block a document lets break breaks, and one that fits moves whole"
+            "context": "A code block a document lets break breaks, and only that one"
           },
           {
             "context": "A part taller than a page breaks, and one that fits moves whole"
@@ -169,7 +169,7 @@
             "context": "A résumé reads in the order it prints, on the oldest toolchain"
           },
           {
-            "context": "A code block a document lets break breaks, and one that fits moves whole, on the oldest toolchain"
+            "context": "A code block a document lets break breaks, and only that one, on the oldest toolchain"
           },
           {
             "context": "A part taller than a page breaks, and one that fits moves whole, on the oldest toolchain"
