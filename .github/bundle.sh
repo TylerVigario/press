@@ -26,6 +26,14 @@
 # skips that commit to reach the same time.
 set -eu
 cd "$(dirname "$0")/.."
+# The time comes from the history, so a tree without one, as `git archive` or a release's
+# source download gives it, cannot rebuild a release's bytes: it is refused, not dated now.
+# A tree inside another repository's checkout is refused too: that history is not its own.
+top=$(git rev-parse --show-toplevel 2>/dev/null || true)
+[ -n "$top" ] && [ "$(cd "$top" && pwd -P)" = "$(pwd -P)" ] \
+    || { echo "bundle: $(pwd) is not a git checkout of press; the bundle's time comes from its" >&2
+         echo "        history, so build it from a clone" >&2
+         exit 1; }
 
 out=${1:?usage: sh .github/bundle.sh <out dir>}
 version=$(sed -n 's/^version *= *"\(.*\)"$/\1/p' press.toml)
@@ -55,7 +63,7 @@ git ls-files -s -- $kit | awk '$1 == "100755" { print $4 }' | while IFS= read -r
     chmod 755 "$tmp/press/$f"
 done
 
-when=$(git log -1 --format=%ct --invert-grep --grep='^release: v' 2>/dev/null || date +%s)
+when=$(git log -1 --format=%ct --invert-grep --grep='^release: v')
 # A clone holding only a release's own commit, as `git clone --depth 1 --branch v<version>`
 # makes, has no commit to take the time from, and its bytes could not be the published ones.
 [ -n "$when" ] || { echo "bundle: HEAD is a release's own commit and the history stops there;" >&2
