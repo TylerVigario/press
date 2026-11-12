@@ -19,8 +19,30 @@ trap 'rm -rf "$tmp"' EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-# A job's name is the line indented four spaces under its id, as every job in ci.yml writes it;
-# a job written otherwise is missing below, and fails here.
+# A job's id is the line indented two spaces under `jobs:`, a comment after it or not, and its
+# name the line indented four under it, as every job in ci.yml writes them. A job with no name
+# reports under its id, and one given a matrix under its name and the matrix's values, as
+# "Tests (ubuntu-latest, 64)": no context main.json requires is either, so the first fails
+# unrequired and the second holds every pull request for a check that never arrives.
+awk '
+    function done() {
+        if (job != "" && !named) print "a job with no name, which reports under its id: " job
+        job = ""
+    }
+    /^jobs:/ { in_jobs = 1; next }
+    in_jobs && /^[^ #]/ { done(); in_jobs = 0 }
+    in_jobs && /^  [A-Za-z0-9_-]+:[ \t]*(#.*)?$/ {
+        done(); job = $1; sub(/:$/, "", job); named = 0; strategy = 0; next
+    }
+    job == "" { next }
+    /^    name: / { named = 1 }
+    /^    [^ #]/ { strategy = /^    strategy:/ }
+    strategy && /^      matrix:/ {
+        print "a job given a matrix, which reports under its name and the matrix values: " job
+    }
+    END { done() }
+' .github/workflows/ci.yml > "$tmp/odd"
+[ ! -s "$tmp/odd" ] || { sed 's/^/contexts: /' "$tmp/odd" >&2; exit 1; }
 sed -n 's/^    name: //p' .github/workflows/ci.yml | sed "s/^'\(.*\)'\$/\1/; s/''/'/g" > "$tmp/jobs"
 grep -qx '    name: Validate PR title' .github/workflows/commit-convention.yml ||
     fail "commit-convention.yml has no job named Validate PR title"
