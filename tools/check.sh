@@ -567,7 +567,14 @@ else
     echo "press: skipping the line-overlap check (no working python found)" >&2
     skipped="$skipped text-on-text"
 fi
-warns=$(printf '%s\n' "$out" | grep '^warning:' || true)
+# Each warning as typst prints it: its line, then where it is, the source line marked and any
+# hint, every line of which begins with a space or a line number, to the blank line after it.
+# Its first line alone would say what is wrong and not where, the same line twice for one
+# warning at two places.
+warns=$(printf '%s\n' "$out" | awk '
+    /^warning:/ { on = 1; print; next }
+    on && /^([ 0-9]|$)/ { print; next }
+    { on = 0 }')
 if [ -n "$warns" ] && [ -n "${PRESS_BUILT_DEPS:-}" ]; then
     # The build printed them already, just above.
     echo "press: $src compiles with the warnings above — typst exits 0 on these and there is" >&2
