@@ -67,15 +67,19 @@ on:
   push:
     branches: [main]
   # The release workflow calls this as its gate, so nothing is released that a
-  # merge would have refused. Concurrency below still keys on the caller's name and
-  # ref, and only a pull request cancels an earlier run.
+  # merge would have refused. Concurrency below keys on the caller's name.
   workflow_call:
 
 permissions:
   contents: read
 
+# A pull request's runs share a group by its ref, and a new push cancels the run before it,
+# which tested a tree that is gone. Every other run, a push to main and the release's gate, has a
+# group of its own commit: GitHub keeps one run waiting in a group and cancels it when the next
+# arrives ("Control the concurrency of workflows and jobs"), so behind a run in progress, a third
+# merge cancelled the second's run before it started, and main's commit carried no CI.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
