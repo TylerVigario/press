@@ -34,18 +34,17 @@
 
 #let sample(colour) = {
   set text(fill: colour)
-  stack(spacing: 4pt,
+  stack(spacing: 3pt,
     text(size: sz.micro)[micro 8.6 — The quick brown fox jumps over the lazy dog · 0123456789],
     text(size: sz.fine)[fine 9.4 — The quick brown fox jumps over the lazy dog · 0123456789],
     text(size: sz.small)[small 10.2 — The quick brown fox jumps over the lazy dog],
-    text(size: sz.body)[body 11 — The quick brown fox jumps over the lazy],
   )
 }
 
 #table(
   columns: (auto, 1fr),
   stroke: 0.4pt + rule-hair,
-  inset: (x: 6pt, y: 6pt),
+  inset: (x: 6pt, y: 5pt),
   align: (left + horizon, left + horizon),
   [#text(size: sz.fine, weight: 700)[ink] #linebreak()
    #text(size: sz.micro, fill: ink-soft)[17.85:1]], sample(ink),
@@ -55,12 +54,16 @@
    #text(size: sz.micro, fill: ink-soft)[6.40:1]], sample(ink-faint),
   [#text(size: sz.fine, weight: 700)[slate] #linebreak()
    #text(size: sz.micro, fill: ink-soft)[8.40:1]], sample(slate),
+  [#text(size: sz.fine, weight: 700)[warn] #linebreak()
+   #text(size: sz.micro, fill: ink-soft)[5.30:1]], sample(warn),
+  [#text(size: sz.fine, weight: 700)[ok] #linebreak()
+   #text(size: sz.micro, fill: ink-soft)[5.05:1]], sample(ok),
 )
 #v(3pt)
 #text(size: sz.micro, fill: ink-soft)[
-  `ink-faint` is the one to watch. It is the lightest ink in the set and it carries the
-  footer and the italic closing line of `stamp`, so it fails first in economy mode. If it
-  survives here, nothing else in the library is at risk.
+  `ok` is the one to watch: the lightest ink, with `warn` next, both in a unit's label and an
+  unboxed chip's; `ink-faint`, the lightest grey, sets the footer. They fail first in economy
+  mode: if `ok` survives here, nothing else in the library is at risk.
 ]
 #v(8pt)
 
