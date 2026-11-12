@@ -38,7 +38,7 @@
 // it, and the header and footer print it from here.
 #show: brief.with(
   title: unsourced[Document title],
-  author: "Your name",
+  author: unsourced[Your name],
   meta: unsourced[scope · date],
   footer: footer(status: unsourced[status]),
   legend: ([Colour is state. Each heading says what its section is for.],

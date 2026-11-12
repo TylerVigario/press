@@ -33,7 +33,7 @@
 
 #show: resume.with(
   title: unsourced[Your Name — Résumé],
-  author: "Your Name",
+  author: unsourced[Your Name],
   headline: [What you do, in a few words],
   contact: (unsourced[Town, ST], unsourced[555-0100], unsourced(link("mailto:you@example.com"))),
 )

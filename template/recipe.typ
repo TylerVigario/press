@@ -31,7 +31,7 @@
 
 #show: recipe.with(
   title: unsourced[Dish name],
-  author: "Your name",
+  author: unsourced[Your name],
   yield: unsourced[serves 4],
   method: unsourced[stovetop],
   time: unsourced[about 30 min],

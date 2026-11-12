@@ -57,6 +57,29 @@
   else if it.has("children") { it.children.map(_unmarked).join() } else { it }
 }
 
+// The words of content, as a document's metadata takes them: a name marked with unsourced()
+// gives its name, and its mark nothing.
+#let _plain(it) = {
+  if type(it) == str { it } else if type(it) != content { str(it) }
+  else if it.has("text") { it.text }
+  else if it.has("children") { it.children.map(_plain).join() }
+  else if it.has("body") { _plain(it.body) }
+  else if it.has("child") { _plain(it.child) }
+  else if it == [ ] { " " } else { "" }
+}
+
+// A template's author: a string, content such as a name marked with unsourced(), or a list of
+// either. The document's metadata takes text, so `meta` is its words; `start`, placed where the
+// template starts, records the author as given, without its marks, for the parts that print the
+// writer, and counts the marks there, once, however many places print the name.
+#let _author(author) = {
+  let names = if type(author) == array { author } else { (author,) }
+  (
+    meta: names.map(_plain),
+    start: [#metadata(names.map(_unmarked))<press-author>#names.map(_marks).flatten().join()],
+  )
+}
+
 // A title marked with unsourced() is counted once, wherever it prints, and where it prints
 // nowhere, as a letter's: typst's title() with the document's own title counts it, printing it;
 // else header(); else the footer() on the first page that has one; else the start of the
@@ -783,7 +806,14 @@
 // The writer's name, from the document's author. Called in context; `what` names the document
 // that needs it, for the message when no author is set.
 #let _writer(what: "a letter") = {
-  assert(document.author.len() > 0,
-    message: what + " takes its writer from set document(author: \"…\"); set it once at the top")
-  document.author.join(", ")
+  // A template's author, as given, a name marked with unsourced() among them, recorded without
+  // its marks: the template counted them once, where it started.
+  let given = query(<press-author>)
+  if given.len() > 0 and given.first().value.len() > 0 {
+    given.first().value.join(", ")
+  } else {
+    assert(document.author.len() > 0,
+      message: what + " takes its writer from set document(author: \"…\"); set it once at the top")
+    document.author.join(", ")
+  }
 }

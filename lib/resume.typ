@@ -48,7 +48,8 @@
   size: sz.small, accent: slate, caps: true,
   preset: (paper: "us-letter", margin: (x: 0.6in, y: 0.5in)), calibration: calibration, body,
 ) = {
-  set document(title: title, author: author)
+  let writer = _author(author)
+  set document(title: title, author: writer.meta)
   set page(.._page(preset, calibration))
   // The calibration, applied to all the template sets: its inks, its strokes and its bands.
   show: _calibrate.with(calibration)
@@ -90,6 +91,7 @@
   ))
   // The title is counted here when nothing in the document prints it.
   _title-start()
+  writer.start
   if centred { align(center, head) } else { head }
   body
 }

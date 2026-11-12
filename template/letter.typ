@@ -33,7 +33,7 @@
 
 #show: letter.with(
   title: unsourced[Letter to Recipient Name],
-  author: "Your Name",
+  author: unsourced[Your Name],
   contact: (
     unsourced[123 Street Name, Town, ST 00000],
     unsourced[(555) 555-0100],
