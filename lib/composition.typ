@@ -11,13 +11,14 @@
 // format decide what the reader is allowed to know.
 // `caps` forwards to the label's `eyebrow` — see the note on it in parts.typ. This is the
 // most-used call in the vocabulary, so it is where the uppercasing does the most
-// damage: `unit([pH], "warn")` renders "PH" with nothing to indicate it happened. A unit
-// `breakable: true` lets break keeps its label with the lead, as a callout does. Its tone's shape
+// damage: `unit([pH], "warn")` renders "PH" with nothing to indicate it happened. A unit is
+// kept whole where it fits on a page, and let break where it is taller than one; `breakable` is
+// as code()'s. One that breaks keeps its label with the lead, as a callout does. Its tone's shape
 // goes before its label, as a callout's does, and `shape` changes it.
-#let unit(label, tone, lead, body, caps: true, breakable: false, shape: auto) = {
+#let unit(label, tone, lead, body, caps: true, breakable: auto, shape: auto) = {
   let pair = tones.at(tone)
-  context block(width: 100%, breakable: breakable, stroke: (left: 2.5pt + pair.at(0)),
-        fill: paper-tint, inset: (x: 8pt, y: 6.5pt))[
+  context _fit("unit", breakable, b => block(width: 100%, breakable: b,
+        stroke: (left: 2.5pt + pair.at(0)), fill: paper-tint, inset: (x: 8pt, y: 6.5pt))[
     #let spacing = par.spacing
     #set par(spacing: _part-gap)
     #text(size: sz.fine, block(sticky: true,
@@ -25,7 +26,7 @@
     #v(2.5pt)
     #text(size: sz.fine, weight: 700)[#lead]
     #if body != none [ #v(2.5pt) #text(size: sz.fine, _body(spacing, body)) ]
-  ]
+  ])
 }
 
 // A state, shown by its tone's colour and its shape: the circle is ok, the triangle warn, the
@@ -48,10 +49,10 @@
 }
 
 // A question with its note, under its number in a filled badge — for anything the reader must
-// answer.
-#let decision(n, q, note, color: bad) = context block(
-  width: 100%, breakable: false, inset: (bottom: 5.5pt),
-)[
+// answer. Kept whole where it fits on a page, and let break where it is taller than one;
+// `breakable` is as code()'s.
+#let decision(n, q, note, color: bad, breakable: auto) = context _fit("decision", breakable,
+  b => block(width: 100%, breakable: b, inset: (bottom: 5.5pt))[
   #let spacing = par.spacing
   #set par(spacing: _part-gap)
   #grid(columns: (auto, 1fr), gutter: 6pt, align: (left + top, left + top),
@@ -62,7 +63,7 @@
       #v(1.5pt)
       #text(size: sz.fine, fill: ink-soft, _body(spacing, note))
     ])
-]
+])
 
 // Room for a pen: ruled paper spaces its lines 7 to 9 mm apart, and 8 mm takes ordinary
 // handwriting. A blank table row is otherwise only as tall as its inset, about 3 mm.

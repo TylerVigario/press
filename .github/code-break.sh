@@ -5,11 +5,12 @@
 #   sh .github/code-break.sh
 #
 # Run by CI on press's typst and on the oldest toolchain, with poppler. brief and base box
-# every code block with code(), unbreakable; a document lets one break with its own rule,
-# `it => code(it, breakable: true)`, as parts.typ shows. .github/code-break.typ has a block that
-# opts in and one that does not, each too long for the space left on its page. The first must
-# start on the page it reaches, its lines split across the turn, and the second must start on a
-# page of its own, its first line and its last on the same page.
+# every code block with code(), kept whole where it fits on a page; a document lets one break with
+# its own rule, `it => code(it, breakable: true)`, as parts.typ shows. .github/code-break.typ has a
+# block that opts in and one that does not, each too long for the space left on its page and
+# shorter than a page. The first must start on the page it reaches, its lines split across the
+# turn, and the second must start on a page of its own, its first line and its last on the same
+# page. A block taller than a page is tall-parts.sh's.
 set -eu
 cd "$(dirname "$0")/.."
 

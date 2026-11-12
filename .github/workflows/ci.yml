@@ -190,6 +190,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/code-break.sh
 
+  tall-parts:
+    name: A part taller than a page breaks, and one that fits moves whole
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/tall-parts.sh
+
   label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads
     runs-on: ubuntu-latest
@@ -491,6 +500,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/code-break.sh
+
+  oldest-tall-parts:
+    name: A part taller than a page breaks, and one that fits moves whole, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/tall-parts.sh
 
   oldest-label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain
