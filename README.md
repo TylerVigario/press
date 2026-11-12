@@ -467,7 +467,7 @@ is `(ok, ok-tint)`.
 | `form(blank, probe: none, body)` | One page of a flat PDF form, filled in: the page is the blank's own, its size and edge to edge, with none of the document's header, footer, background or foreground, and the blank a `scan()` under the answers. `#form(image("application.pdf", page: 2))[...]`; the document makes the image, so the path is its own. `probe: 18pt` draws a measuring grid over the page, a line every 18pt, every fourth one heavier, and where two heavy lines cross, that point's x and y in points, for reading where each blank is; the audit fails while it is on. |
 | `tick(x, y)` | A box marked with an X, centred on the point given. |
 | `letterhead(..contact, face: face-text)` | A letter's head: the writer (the document's author), a contact line, a rule. A link that shows its own address needs no footnote. |
-| `dateline(date)` | A letter's date, written once where it prints; `continued` reads it. |
+| `dateline(date)` | A letter's date, written once where it prints; `continued` reads it, each page taking the last one printed on it or before it, so a document of several letters dates each page by its own. |
 | `re(..refs, words: (re: [Re:]))` | A letter's subject line; each reference stays whole and copyable. |
 | `enclosures(..items, words: (singular: [Enclosure], plural: [Enclosures]))` | What goes with a letter, one item to a line. |
 | `continued(words: (page: [Page]))` | A header for page two onward of a letter: writer, date, page. `set page(header: continued())`. |
