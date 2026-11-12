@@ -64,8 +64,8 @@ A fix to how a page is laid out comes with a check that fails without the fix:
 
 ## Lints
 
-CI also runs shellcheck at `--severity=warning`, over press.just's recipes and the toolchain
-action's `run:` blocks too; markdownlint, lines at most 100; actionlint; a JSON parse; and a scan
+CI also runs shellcheck at `--severity=warning`, over press.just's recipes and every composite
+action's `run:` steps too; markdownlint, lines at most 100; actionlint; a JSON parse; and a scan
 for soft hyphens and zero-width characters in any tracked file.
 
 ## Releases

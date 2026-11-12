@@ -84,8 +84,8 @@ place and as `new.sh` scaffolds it, rebuilds to prove an unchanged page keeps it
 measures; does all of that again at the oldest typst and just press accepts; builds the release
 bundle and installs it in a scratch repository to scaffold, build and audit there with no just,
 checks every typst digest the kit pins, and runs both installers against the bundle served
-locally (install, update, refusals); and runs shellcheck, over `press.just`'s recipes and the
-toolchain action's `run:` blocks too, markdownlint (lines ≤ 100), actionlint, a JSON parse, an
+locally (install, update, refusals); and runs shellcheck, over `press.just`'s recipes and every
+composite action's `run:` steps too, markdownlint (lines ≤ 100), actionlint, a JSON parse, an
 invisible-character scan and CodeQL. A false finding fixed gets a `pass-*` case. A layout fix
 gets a `.github/<name>.sh` and its `.typ`, run by a job on press's typst and one on the oldest,
 each a context in `main.json`, which is applied with `gh api` once the change is merged, and each

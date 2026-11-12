@@ -34,8 +34,8 @@ name: CI
 #   No invisible characters  soft hyphens, zero-width characters and direction controls
 #                            in any tracked file, which reach paper unseen and survive
 #                            review: a direction control moves and reverses text.
-#   Shell scripts lint       every *.sh in the tree, press.just's recipes and the
-#                            toolchain action's run: blocks. tools/check.sh is the audit
+#   Shell scripts lint       every *.sh in the tree, press.just's recipes and every
+#                            composite action's run: steps. tools/check.sh is the audit
 #                            itself, and every defect found in it this far has been
 #                            a shell defect — a pipeline exit masked by sort, a
 #                            guard that asserted existence where ancestry was the
@@ -829,8 +829,8 @@ jobs:
           # width of whatever was added last.
           find . -path ./.git -prune -o -name '*.sh' -print0 \
             | xargs -0 --no-run-if-empty shellcheck --severity=warning
-          # And the shell outside a *.sh file: press.just's recipes, and the toolchain action's
-          # run: blocks, which actionlint does not read.
+          # And the shell outside a *.sh file: press.just's recipes, and the run: steps of every
+          # composite action under .github/actions, which actionlint does not read.
           out=$(mktemp -d)
           sh .github/embedded-shell.sh "$out"
           shellcheck --severity=warning "$out"/*.sh
