@@ -1,5 +1,5 @@
 // A character no vendored face draws, on the page: it vanishes, and the audit says so.
-// expect: is MISSING a character present in the source
+// expect: is MISSING a character no face draws: 📋
 #import "/lib.typ": *
 #set document(title: [Glyph missing], author: "press")
 #set page(..card)

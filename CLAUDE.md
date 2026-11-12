@@ -156,6 +156,11 @@ repository has.
   (`scan()`, in `lib/parts.typ`, and `--input press-scans=hidden`). `stamp.sh` compiles that
   copy at the document PDF's own stamp (`PRESS_STAMP_AS`), so it lays out exactly as the
   document does; the Python passes take the document's PDF as a name to report findings against.
+- **The glyph check reads typst's PDF/A-2b refusals by their words.** `check.sh` compiles a copy
+  as PDF/A-2b and takes each `cannot be displayed using` (0.14) or `could not be displayed with
+  font` (0.15) error for a character no face draws; any other error sends it to probing the
+  characters typed in the sources. A typst that words the refusal otherwise sends every document
+  there, and `fail-glyph-from-data` audits clean: add the new words.
 - **The audit's glyph scan leaves out exactly press's `lib.typ` and the files in its `lib/`**,
   found beside `press.toml`, and the files of any Typst package, found beside a `typst.toml`. A
   document kept in press's directory, such as the calibration sheet, is still scanned.

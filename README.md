@@ -119,7 +119,7 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 | `sh third_party/press/tools/watch.sh docs/guide.typ` | recompiles on every save to `print/<same path>.watch.pdf`, a preview beside the stamped PDF |
 | `sh third_party/press/tools/clean.sh` | deletes `print/` |
 | `sh third_party/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory; then audits it, where the audit's tools are installed |
-| `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | the audit alone, which refuses to run without its tools: typst warnings, fonts that are not vendored, glyphs that vanished, ink too near the edge, text off the paper, text printed on text, code that wraps |
+| `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | the audit alone, which refuses to run without its tools: typst warnings, fonts that are not vendored, characters no face draws, ink too near the edge, text off the paper, text printed on text, code that wraps |
 | `sh third_party/press/tools/install-typst.sh <dir>` | installs the typst press is built and audited with into `<dir>`, pinned by version and digest, on Linux x86_64 or aarch64: for a repository's CI (see In CI below) |
 | `sh third_party/press/tools/fetch.sh <url> <file>` | downloads a file, trying again on a timeout or a 5xx, and says on stderr how each try went: the host that answered each hop, its status and the IDs it gave the request, and how long the last try took. `install-typst.sh` downloads typst with it |
 
@@ -133,7 +133,11 @@ it refuses. The audit also says how many open items a document still carries for
 to supply, and how many estimates it prints, each marked with `unsourced()`, and fails for
 neither: a draft carries them. A form page with its measuring grid on, `form(probe:)`, does
 fail it: the grid is for measuring. So does a line of a code block too long for it, which wraps:
-a command copies with a break in it, and on paper reads as two.
+a command copies with a break in it, and on paper reads as two. A character no face draws fails
+it wherever it came from, typed, escaped or read from a data file: the audit compiles the
+document again as PDF/A-2b, which typst refuses for such a character. A document that places a
+PDF without `scan()` cannot be compiled that way, and only the characters typed in its own files
+are checked; the audit says so.
 
 **An unchanged document is not built again.** One file in press's folder, `.build-record`,
 records what each document's last build read — every file typst lists, the fonts, typst's
