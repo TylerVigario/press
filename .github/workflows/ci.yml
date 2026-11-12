@@ -208,6 +208,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/letter-dates.sh
 
+  header-rule:
+    name: header()'s rule clears the title's descenders
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/header-rule.sh
+
   label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads
     runs-on: ubuntu-latest
@@ -527,6 +536,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/letter-dates.sh
+
+  oldest-header-rule:
+    name: header()'s rule clears the title's descenders, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/header-rule.sh
 
   oldest-label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain

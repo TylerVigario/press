@@ -85,6 +85,9 @@
             "context": "continued() dates each page by the letter it is a page of"
           },
           {
+            "context": "header()'s rule clears the title's descenders"
+          },
+          {
             "context": "A callout's, panel's or unit's label stays on the page with what it heads"
           },
           {
@@ -179,6 +182,9 @@
           },
           {
             "context": "continued() dates each page by the letter it is a page of, on the oldest toolchain"
+          },
+          {
+            "context": "header()'s rule clears the title's descenders, on the oldest toolchain"
           },
           {
             "context": "A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain"
