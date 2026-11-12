@@ -87,7 +87,11 @@
     text(font: face, size: size, weight: 700, fill: ink, _unmarked(document.title)),
     text(size: sz.fine, fill: ink-soft, meta),
   )
-  v(-3pt)
+  // The rule clears the title's descenders: it sits as far under the face's descender line as the
+  // gap alone would put it under the baseline, and what follows moves down with it.
+  let depth = measure(text(font: face, size: size, weight: 700, top-edge: "baseline",
+    bottom-edge: "descender")[g]).height
+  v(-3pt + depth)
   line(length: 100%, stroke: 2pt + color)
 })
 
