@@ -39,8 +39,9 @@ checks you touched at both.
 - **One concern a pull request.** A fix and the check that proves it go together, and an
   unrelated tidy goes in its own.
 - **The title is a Conventional Commit**, and the pull request squash-merges with it as the
-  commit. Its type sets the next version: `feat` moves the minor version, `fix` the patch, a
-  breaking change the major, and `docs`, `ci`, `refactor` and the rest none.
+  commit. Its type sets the next version: `feat` moves the minor version, `fix` the patch, and
+  `docs`, `ci`, `refactor` and the rest none. A breaking change moves the major from 1.0.0 on;
+  below it, cocogitto moves the minor, as for a `feat`, so a 0.x release may break.
 - **The description says what changed and what was measured**, and closes the issue it
   fixes: `Closes #123`.
 - **When behaviour changes, change the README with it.** It is the only guide a repository

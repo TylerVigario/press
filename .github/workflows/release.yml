@@ -5,10 +5,10 @@ name: Release
 # recorded on main, and the GitHub release is published, which creates the tag.
 #
 # THE VERSION COMES FROM THE COMMITS. cocogitto's default bump rules decide it: a
-# breaking change bumps major, `feat` minor, `fix` patch, and every other type
-# (docs, ci, chore, refactor, release) bumps nothing. When nothing since the last tag
-# bumps, the run says so and releases nothing. Which types bump is cog.toml's to
-# change, not this file's.
+# breaking change bumps major from 1.0.0 on, and minor below it, `feat` minor, `fix`
+# patch, and every other type (docs, ci, chore, refactor, release) bumps nothing. When
+# nothing since the last tag bumps, the run says so and releases nothing. Which types
+# bump is cog.toml's to change, not this file's.
 #
 # THE RUN MAY OVERRIDE THE STEP, and only the step. `bump` is auto by default: the
 # commits decide. patch, minor or major replaces how far the version moves from the last
