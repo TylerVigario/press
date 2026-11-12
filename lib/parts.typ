@@ -359,11 +359,13 @@
 
 // The sources a document cites by number, and the numbered list of them where they close it. A
 // source is given once, in `sources()`, by its key, its title and its address, and numbered in
-// the order given, across the document. `src()` prints the numbers of the keys it names, small
-// and faint, so a sentence reads past them. A key no `sources()` gives, or one given twice, is a
-// compile error naming it. The list prints at `size`, `across` columns `gutter` apart, a source
-// to a line: its number, its title and its address, printed without `https://` so it reads and
-// types from paper, while its link holds it whole. An address of `none` prints the title alone.
+// the order given, across the document: a second list's numbers go on from the first's, so a
+// marker's number is the one its source prints with, wherever the list is. `src()` prints the
+// numbers of the keys it names, small and faint, so a sentence reads past them. A key no
+// `sources()` gives, or one given twice, in one list or in two, is a compile error naming it.
+// The list prints at `size`, `across` columns `gutter` apart, a source to a line: its number,
+// its title and its address, printed without `https://` so it reads and types from paper, while
+// its link holds it whole. An address of `none` prints the title alone.
 //
 //   Most of the county's wells were tested in the spring #src("wells", "survey").
 //
@@ -390,16 +392,23 @@
       message: "sources() takes each source as (key, title, address); got " + repr(e))
   }
   let keys = entries.map(e => e.at(0))
-  for k in keys {
-    assert(keys.filter(x => x == k).len() == 1, message: "sources(): the key " + repr(k)
-      + " is given twice")
-    [#metadata(k)<press-source>]
+  for k in keys { [#metadata(k)<press-source>] }
+  // Each key is given once in the document, so the first's place among every list's keys is
+  // how many sources come before this list's.
+  context {
+    let given = query(<press-source>).map(m => m.value)
+    for k in keys {
+      assert(given.filter(x => x == k).len() == 1, message: "sources(): the key " + repr(k)
+        + " is given twice")
+    }
+    let before = if keys.len() > 0 { given.position(g => g == keys.first()) } else { 0 }
+    set text(size: size)
+    let lines = for (i, (_, title, url)) in entries.enumerate() {
+      [#(before + i + 1). #title#if url != none [
+        · #link(url)[#url.trim("https://", at: start)]] \ ]
+    }
+    if across == 1 { lines } else { columns(across, gutter: gutter, lines) }
   }
-  set text(size: size)
-  let lines = for (i, (_, title, url)) in entries.enumerate() {
-    [#(i + 1). #title#if url != none [ · #link(url)[#url.trim("https://", at: start)]] \ ]
-  }
-  if across == 1 { lines } else { columns(across, gutter: gutter, lines) }
 }
 
 
