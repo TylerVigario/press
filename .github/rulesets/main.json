@@ -91,6 +91,9 @@
             "context": "A recipe card points into its reference by page, as a brief does"
           },
           {
+            "context": "A sheet sets a span, a line and a footer as typst's table does"
+          },
+          {
             "context": "A callout's, panel's or unit's label stays on the page with what it heads"
           },
           {
@@ -191,6 +194,9 @@
           },
           {
             "context": "A recipe card points into its reference by page, as a brief does, on the oldest toolchain"
+          },
+          {
+            "context": "A sheet sets a span, a line and a footer as typst's table does, on the oldest toolchain"
           },
           {
             "context": "A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain"

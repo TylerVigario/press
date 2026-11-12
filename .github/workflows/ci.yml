@@ -226,6 +226,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/recipe-ref.sh
 
+  sheet-spans:
+    name: A sheet sets a span, a line and a footer as typst's table does
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/sheet-spans.sh
+
   label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads
     runs-on: ubuntu-latest
@@ -563,6 +572,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/recipe-ref.sh
+
+  oldest-sheet-spans:
+    name: A sheet sets a span, a line and a footer as typst's table does, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/sheet-spans.sh
 
   oldest-label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain

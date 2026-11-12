@@ -97,6 +97,12 @@
 // Without it a table crossing a page break leaves the reader with bare rows and no column
 // labels — and on paper there is no scrolling back.
 //
+// A cell given as typst's `table.cell` keeps its span and its other fields, and a `table.hline`,
+// `table.vline` or `table.footer` is drawn as in typst's table: a totals row is a footer,
+// `table.footer(table.cell(colspan: 2)[Total], [82])`. The sheet places its cells in the order
+// given, so a cell takes no `x` or `y`; rows a span ties together are kept together, as one row is.
+// Under `across`, the footer closes the last column, and a line takes no `y`.
+//
 // A row is kept whole where it fits on a page. One that does not fit in what is left of the page
 // starts the next, under the repeated header: split, the rest of it would open that page beside
 // empty cells and read as a row of its own, with nothing in its first column. A row taller than a
@@ -132,54 +138,127 @@
     set par(spacing: _part-gap)
     text(size: size, ..style, c)
   }
-  let given = (
-    ..rows.pos().map(c => at-size[#c]),
-    ..range(blank * n).map(_ => box(height: _pen - 2 * inset.y)),
-  )
+  let is-a(c, ..kinds) = type(c) == content and kinds.pos().contains(c.func())
+  // A cell given as typst's table.cell keeps its span and its other fields, its body set at the
+  // sheet's size as every cell's is. A sheet places its cells in the order given.
+  let unpack(c, ..style) = if is-a(c, table.cell) {
+    let fields = c.fields()
+    let body = fields.remove("body")
+    assert("x" not in fields and "y" not in fields, message: "a sheet places its cells in the "
+      + "order given, so its table.cell takes no x or y; typst's table places a cell by position")
+    (body: at-size(body, ..style), fields: fields)
+  } else { (body: at-size(..style)[#c], fields: (:)) }
+  let head-cells = head.map(h => {
+    let (body, fields) = unpack(h, weight: 700)
+    assert(fields.at("rowspan", default: 1) == 1, message: "a sheet's head is one row")
+    table.cell(..fields, body)
+  })
+  // Each cell, with the place typst's table gives it: the next free one, along the rows, past
+  // any a cell above spans down into. A span past the last column or over another cell is
+  // typst's to refuse. A line or a footer of typst's table goes with the rows before it; a
+  // footer closes the sheet.
+  let entries = ()
+  let foot = none
+  let taken = (:)
+  let at = 0
+  let place-of(i) = str(calc.rem(i, n)) + "," + str(calc.quo(i, n))
+  let given = rows.pos()
+  for (i, c) in (..given, ..range(blank * n)).enumerate() {
+    if i < given.len() and is-a(c, table.hline, table.vline) { entries.push((line: c)); continue }
+    if i < given.len() and is-a(c, table.footer) {
+      let fields = c.fields()
+      let kids = fields.remove("children")
+      foot = table.footer(..fields, ..kids.map(k => if is-a(k, table.hline, table.vline) { k }
+        else { let (body, fields) = unpack(k); table.cell(..fields, body) }))
+      continue
+    }
+    let (body, fields) = if i < given.len() { unpack(c) }
+      else { (body: box(height: _pen - 2 * inset.y), fields: (:)) }
+    while place-of(at) in taken { at += 1 }
+    let (x, y) = (calc.rem(at, n), calc.quo(at, n))
+    let (w, h) = (fields.at("colspan", default: 1), fields.at("rowspan", default: 1))
+    for dx in range(w) { for dy in range(h) { taken.insert(place-of(at + dx + dy * n), true) } }
+    entries.push((body: body, fields: fields, row: y, rows: h))
+  }
+  // The rows a span ties together are kept together, as one group: a group is what a row is
+  // alone, kept whole where it fits on a page, and in `across`, moved between columns whole.
+  let groups = ((first: 0, entries: ()),)
+  let end = -1
+  for e in entries {
+    if "row" in e {
+      if end >= 0 and e.row > end { groups.push((first: e.row, entries: ())) }
+      end = calc.max(end, e.row + e.rows - 1)
+    }
+    groups.last().entries.push(e)
+  }
+  assert(across == 1 or entries.all(e => "line" not in e or e.line.func() != table.hline
+      or e.line.fields().at("y", default: auto) == auto),
+    message: "sheet(across:) draws a table.hline where it is given among the rows, so it takes "
+      + "no y")
   // The sheet, or the part of it a column holds: `before` rows come ahead of these, so the
   // stripes run on from column to column.
-  let part(cells, before: 0) = table(
+  let part(cells, before: 0, last: true) = table(
     columns: cols,
     stroke: 0.4pt + rule-hair,
     inset: inset,
     fill: (_, y) => if y == 0 { slate-tint }
       else if calc.odd(y + before) { paper-tint } else { none },
-    table.header(..head.map(h => at-size(weight: 700)[#h])),
+    table.header(..head-cells),
     ..cells,
+    ..if last and foot != none { (foot,) },
   )
   _sheets.step()
   layout(region => context {
     let id = _sheets.get().first()
     let w = (region.width - gutter * (across - 1)) / across
-    let head-h = measure(block(width: w, part(()))).height
-    // Each row's tallest cell, as its cells measured themselves on typst's last pass. On its first
-    // there are none, and every row is kept whole.
-    let heights = (:)
+    let head-h = measure(block(width: w, part((), last: false))).height
+    // A footer typst repeats takes its room on every page, as the header does.
+    let foot-h = if foot != none and foot.fields().at("repeat", default: true) {
+      measure(block(width: w, part(()))).height - head-h
+    } else { 0pt }
+    // Each row's tallest cell, and each span's height, as the cells measured themselves on
+    // typst's last pass. On its first there are none, and every group is kept whole.
+    let rows-h = (:)
+    let spans-h = (:)
     if breakable == auto {
       for m in query(<press-sheet-cell>) {
         if m.value.sheet == id {
-          let r = str(m.value.row)
-          heights.insert(r, calc.max(heights.at(r, default: 0pt), m.value.height))
+          let (into, key) = if m.value.rows == 1 { (rows-h, str(m.value.row)) }
+            else { (spans-h, str(m.value.group)) }
+          let h = calc.max(into.at(key, default: 0pt), m.value.height + 2 * inset.y * m.value.rows)
+          if m.value.rows == 1 { rows-h.insert(key, h) } else { spans-h.insert(key, h) }
         }
       }
     }
-    // A row splits where it is taller than a page holds under the header. Measured, as inside
-    // units(), the page has no end, and every row fits. The measuring is placed, so it takes no
-    // room.
-    let cells = given.enumerate().map(((i, c)) => {
-      let r = calc.quo(i, n)
-      if breakable != auto { return table.cell(breakable: breakable, c) }
-      let over = heights.at(str(r), default: 0pt) + 2 * inset.y > region.height - head-h
-      table.cell(breakable: over, {
-        place(layout(s => [#metadata((sheet: id, row: r,
-          height: measure(block(width: s.width, c)).height))<press-sheet-cell>]))
-        c
+    // A group splits where it is taller than a page holds under the header: its rows' tallest
+    // cells stacked, or a span, whichever is taller. Measured, as inside units(), the page has
+    // no end, and every group fits. The measuring is placed, so it takes no room.
+    let cells = groups.enumerate().map(((g, group)) => {
+      let placed = group.entries.filter(e => "row" in e)
+      let span = placed.fold(group.first, (a, e) => calc.max(a, e.row + e.rows)) - group.first
+      let tall = calc.max(spans-h.at(str(g), default: 0pt),
+        range(group.first, group.first + span).map(r =>
+          rows-h.at(str(r), default: 2 * inset.y)).sum(default: 0pt))
+      let over = tall > region.height - head-h - foot-h
+      group.entries.map(e => {
+        if "line" in e { return e.line }
+        let fields = e.fields
+        let own = fields.remove("breakable", default: auto)
+        let b = if own != auto { own } else if breakable != auto { breakable } else { over }
+        table.cell(..fields, breakable: b, {
+          if breakable == auto {
+            place(layout(s => [#metadata((sheet: id, group: g, row: e.row, rows: e.rows,
+              height: measure(block(width: s.width, e.body)).height))<press-sheet-cell>]))
+          }
+          e.body
+        })
       })
     })
-    if across == 1 or cells.len() == 0 { part(cells) } else {
-      let lines = range(0, cells.len(), step: n).map(i =>
-        cells.slice(i, calc.min(i + n, cells.len())))
-      let tall = lines.map(l => measure(block(width: w, part(l))).height - head-h)
+    if across == 1 or entries.len() == 0 { part(cells.flatten()) } else {
+      let lines = cells
+      let firsts = groups.map(g => g.first)
+      let tall = lines.enumerate().map(((i, l)) =>
+        measure(block(width: w, part(l, last: i == lines.len() - 1))).height - head-h)
       // A column's height on a full page, and on the page the sheet starts on, what is left of it.
       // Measured, as inside units(), the height has no end, and the sheet is one page.
       let full = region.height
@@ -244,10 +323,13 @@
       }
       let fits = shares.all(s => s.map(i => rest.at(i)).sum(default: 0pt) <= room(leaf) + slack)
 
-      let flowed = if t > 0 { (part(lines.slice(0, t).flatten()), colbreak()) } else { () }
-      let ending = if not fits { (part(lines.slice(t).flatten(), before: t),) } else {
-        shares.filter(s => s.len() > 0).map(s =>
-          part(s.map(i => lines.at(t + i)).flatten(), before: t + s.first())
+      let flowed = if t > 0 { (part(lines.slice(0, t).flatten(), last: false), colbreak()) }
+        else { () }
+      let ending = if not fits { (part(lines.slice(t).flatten(), before: firsts.at(t)),) } else {
+        let held = shares.filter(s => s.len() > 0)
+        held.enumerate().map(((k, s)) =>
+          part(s.map(i => lines.at(t + i)).flatten(), before: firsts.at(t + s.first()),
+            last: k == held.len() - 1)
         ).intersperse(colbreak())
       }
       columns(across, gutter: gutter, (..flowed, ..ending).join())
