@@ -101,7 +101,7 @@ A document imports press by its path from the project root:
 and builds with plain typst, from whatever runs your builds:
 
 ```sh
-typst compile --root . --font-path third_party/press/fonts --ignore-system-fonts docs/guide.typ print/guide.pdf
+typst compile --root . --font-path third_party/press/fonts --ignore-system-fonts docs/guide/main.typ print/docs/guide/main.pdf
 ```
 
 The same three settings can come from the environment instead — `TYPST_ROOT=.`,
@@ -114,9 +114,9 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 | tool | does |
 |---|---|
 | `sh third_party/press/tools/new.sh docs/guide` | scaffolds `docs/guide/main.typ` from the template, its import written for where press sits; add `letter`, `recipe` or `resume` for those templates |
-| `sh third_party/press/tools/build.sh docs/guide.typ` | builds and audits each document named to `print/<same path>.pdf` and says in one line what it made: new, changed, unchanged or cached, pages, words, size and the stamp; given several, ends with the count. `--check` first runs the audit alone, refusing without its tools |
+| `sh third_party/press/tools/build.sh docs/guide/main.typ` | builds and audits each document named to `print/<same path>.pdf` and says in one line what it made: new, changed, unchanged or cached, pages, words, size and the stamp; given several, ends with the count. `--check` first runs the audit alone, refusing without its tools |
 | `sh third_party/press/tools/all.sh [dir...]` | builds every document under the directories named (default `docs/`), not the files they are made of and not press's own, then the count; fails if any failed. `--check` audits them instead |
-| `sh third_party/press/tools/watch.sh docs/guide.typ` | recompiles on every save to `print/<same path>.watch.pdf`, a preview beside the stamped PDF |
+| `sh third_party/press/tools/watch.sh docs/guide/main.typ` | recompiles on every save to `print/<same path>.watch.pdf`, a preview beside the stamped PDF |
 | `sh third_party/press/tools/clean.sh` | deletes `print/` |
 | `sh third_party/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory; then audits it, where the audit's tools are installed |
 | `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | the audit alone, which refuses to run without its tools: typst warnings, fonts that are not vendored, characters no face draws, ink too near the edge, text off the paper, text printed on text, code that wraps |
@@ -211,8 +211,8 @@ to it where the stamp is later. A value that is not a whole number of seconds st
 ```
 
 `npm run press` builds every document under `docs/`, and `npm run press -- recipes` those under
-another directory; `npm run press:build -- docs/guide.typ` builds one, and
-`npm run press:watch -- docs/guide.typ` previews it.
+another directory; `npm run press:build -- docs/guide/main.typ` builds one,
+and `npm run press:watch -- docs/guide/main.typ` previews it.
 
 **make:**
 
@@ -230,9 +230,9 @@ line in its justfile: `import 'third_party/press/press.just'`, or `mod press
 already has). Then:
 
 ```sh
-just build docs/guide.typ        # -> print/docs/guide.pdf, audited, and a line saying what it made
-just watch docs/guide.typ        # a preview on every save -> print/docs/guide.watch.pdf
-just check docs/guide.typ        # the audit, refusing without its tools
+just build docs/guide/main.typ   # -> print/docs/guide/main.pdf, audited, and a line saying what it made
+just watch docs/guide/main.typ   # a preview on every save -> print/docs/guide/main.watch.pdf
+just check docs/guide/main.typ   # the audit, refusing without its tools
 just all                         # every document under docs/, or under the directories named
 just new docs/next-doc           # scaffold; just new docs/to-x letter for a letter
 just clean                       # delete print/
