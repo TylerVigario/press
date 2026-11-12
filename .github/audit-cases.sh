@@ -11,9 +11,9 @@
 # its PDF written, and without poppler it says the audit was skipped and succeeds. And: a pass that
 # cannot run fails the audit whatever the document accepts; open items and estimates are counted,
 # with the audit's tools or without them; a line of code that wraps fails the build without them
-# too; a title still to be named is counted once, however many pages print it, or none; with no
-# XML parser, or no python, check refuses and a build skips the passes that need one, unrecorded;
-# and an unchanged document is not compiled again.
+# too; a title still to be named is counted once, however many pages print it, or none, and a
+# footer's status once; with no XML parser, or no python, check refuses and a build skips the
+# passes that need one, unrecorded; and an unchanged document is not compiled again.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -129,6 +129,14 @@ for c in pass-unsourced-title pass-unsourced-title-own-head pass-unsourced-title
         || { cat "$tmp/out" >&2; fail "$c did not count its title once"; }
 done
 echo "audit-cases: a title still to be named is counted once, however many pages print it, or none"
+# A footer's status still to be settled is one open item too, though every page from the first with
+# a footer prints it.
+# shellcheck disable=SC2086
+sh tools/check.sh .github/audit-cases/pass-unsourced-status.typ "$tmp/o/status.pdf" . $flags > "$tmp/out" 2>&1 \
+    || { cat "$tmp/out" >&2; fail "pass-unsourced-status failed its audit"; }
+grep -qF "has 1 open item " "$tmp/out" \
+    || { cat "$tmp/out" >&2; fail "pass-unsourced-status did not count its status once"; }
+echo "audit-cases: a footer's status still to be settled is counted once, however many pages print it"
 
 # A python with no XML parser cannot run the text-on-text pass. A stand-in python, the real one
 # with expat taken away at startup, is named by PRESS_PYTHON: check fails, and says why, and a

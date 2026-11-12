@@ -492,7 +492,8 @@
 // or a template's title, as header() names it. `edition` is what it says of the edition: none
 // leaves it out, and updated(words: …) says it in other words. A title marked with unsourced()
 // counts once: typst's title() with the document's own title counts it, or header(), or with
-// neither, the footer on the first page that has one.
+// neither, the footer on the first page that has one. A status marked with it counts once too,
+// on the first page with a footer; the pages after print it without its marks.
 //
 //   #set page(..dense, footer: footer(status: [draft]))
 #let footer(status: none, edition: updated()) = context {
@@ -500,12 +501,12 @@
   // Tells the document's start, and the footers after this one, the title's marks are counted.
   [#metadata(none)<press-footer>]
   let footers = query(<press-footer>)
-  if (footers.len() > 0 and footers.first().location().page() == here().page()
-      and query(<press-header>).len() == 0 and not _titled()) {
+  let first = footers.len() > 0 and footers.first().location().page() == here().page()
+  if first and query(<press-header>).len() == 0 and not _titled() {
     _marks(document.title).join()
   }
   grid(columns: (1fr, auto),
-    align(left)[#_unmarked(document.title)#if status != none [ · #status]],
+    align(left)[#_unmarked(document.title)#if status != none [ · #if first { status } else { _unmarked(status) }]],
     align(right)[#if edition != none [#edition · ]#counter(page).display("1 / 1", both: true)])
 }
 
