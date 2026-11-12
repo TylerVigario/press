@@ -19,9 +19,9 @@
 # (.github/, CLAUDE.md, the changelog) stays out without anyone remembering to leave it out,
 # and a file the kit needs is added here on purpose.
 #
-# Reproducible: every file carries one commit's time, names are sorted and owners zeroed, so
-# a release's tag always yields the bytes it published, and its sums can be rebuilt and
-# compared. The time is the newest commit's that is not a release's own. The release run
+# Reproducible: every file carries one commit's time, names are sorted, owners zeroed and modes
+# set, whatever the umask, so a release's tag always yields the bytes it published, and its sums
+# can be rebuilt and compared. The time is the newest commit's that is not a release's own. The release run
 # builds the bundle before the forge records its `release:` commit, so a rebuild from the tag
 # skips that commit to reach the same time.
 set -eu
@@ -45,6 +45,15 @@ done
 # Leftovers a working tree can hold and a release must not.
 find "$tmp/press" -name __pycache__ -prune -exec rm -rf {} +
 find "$tmp/press" -name '*.pyc' -exec rm -f {} +
+# The modes the archives record, set rather than taken from the umask, which mkdir, cp and the
+# checkout before them all apply: every directory 755, every file 644, and a file git keeps
+# executable 755, as a umask of 022 gives them.
+find "$tmp/press" -type d -exec chmod 755 {} +
+find "$tmp/press" -type f -exec chmod 644 {} +
+# shellcheck disable=SC2086  # $kit is a list of paths, none with a space
+git ls-files -s -- $kit | awk '$1 == "100755" { print $4 }' | while IFS= read -r f; do
+    chmod 755 "$tmp/press/$f"
+done
 
 when=$(git log -1 --format=%ct --invert-grep --grep='^release: v' 2>/dev/null || date +%s)
 # A clone holding only a release's own commit, as `git clone --depth 1 --branch v<version>`
