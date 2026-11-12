@@ -236,12 +236,16 @@ and `npm run press:watch -- docs/guide/main.typ` previews it.
 **make:**
 
 ```make
-.PHONY: all
+.PHONY: all FORCE
 all:
 	sh third_party/press/tools/all.sh
-print/%.pdf: %.typ
+print/%.pdf: %.typ FORCE
 	sh third_party/press/tools/build.sh $<
+FORCE:
 ```
+
+A document reads more than its own file, its data and its chapters, and `build.sh` knows them
+all: `FORCE` has make ask it every time, and an unchanged document comes back `cached`.
 
 **just** — `press.just` is ready-made recipes for a repository that already uses just. One
 line in its justfile: `import 'third_party/press/press.just'`, or `mod press
