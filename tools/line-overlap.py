@@ -59,9 +59,9 @@ import math, os, re, subprocess, sys, tempfile, pathlib
 # their outlines' hulls, by how far one must move to clear the other. Not tuned
 # to taste. A glyph's hull is its outline's, with each curve read at points along
 # it, so where it falls short of the curve, by a hair, it errs toward passing.
-# Measured across 159 clean documents, no glyph of one line overlapped a glyph of
-# another at all, 0.00pt; the known collisions, upright and slanted, overlap by
-# 3.79pt and more.
+# Measured across 159 clean documents in press's Noto faces, no glyph of one line
+# overlapped a glyph of another at all, 0.00pt; the known collisions, upright and
+# slanted, overlap by 3.98pt and more.
 EPSILON_PT = 0.5
 
 # A finding exits 3, a status Python never gives of its own accord: it exits 1 for an exception
@@ -358,9 +358,11 @@ def lines(glyphs):
     keyed.sort(key=lambda k: (k[0], k[1]))
     out, last = [], None
     for a, off, g in keyed:
-        # Origins within 0.05pt of the same baseline are on it: typst sets a line's glyphs on
-        # one, and cairo writes their places to the millionth of a point.
-        if last is None or a != last[0] or off - last[1] > 0.05:
+        # Origins within the floor of one baseline are on it. typst sets a line's glyphs on one,
+        # but a face may set a mark a fraction off it, as Noto Sans Hebrew sets a dagesh 0.12pt
+        # off, and that mark is its letter's; a raised footnote marker sits points off, a line of
+        # its own. Two lines drawn within half a point of each other read as one line anyway.
+        if last is None or a != last[0] or off - last[1] > EPSILON_PT:
             out.append([])
         out[-1].append(g)
         last = (a, off)
