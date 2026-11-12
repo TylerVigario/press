@@ -94,6 +94,9 @@
             "context": "A sheet sets a span, a line and a footer as typst's table does"
           },
           {
+            "context": "header() keeps a short title or meta on one line beside a long one"
+          },
+          {
             "context": "A callout's, panel's or unit's label stays on the page with what it heads"
           },
           {
@@ -197,6 +200,9 @@
           },
           {
             "context": "A sheet sets a span, a line and a footer as typst's table does, on the oldest toolchain"
+          },
+          {
+            "context": "header() keeps a short title or meta on one line beside a long one, on the oldest toolchain"
           },
           {
             "context": "A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain"
