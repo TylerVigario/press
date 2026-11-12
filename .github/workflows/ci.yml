@@ -31,8 +31,9 @@ name: CI
 #                            toolchain", so a change that needs a newer one fails here, not on a
 #                            machine still at the floor; and one that those are the floors press
 #                            declares.
-#   No invisible characters  soft hyphens and zero-width characters in any tracked
-#                            file, which reach paper unseen and survive review.
+#   No invisible characters  soft hyphens, zero-width characters and direction controls
+#                            in any tracked file, which reach paper unseen and survive
+#                            review: a direction control moves and reverses text.
 #   Shell scripts lint       every *.sh in the tree, press.just's recipes and the
 #                            toolchain action's run: blocks. tools/check.sh is the audit
 #                            itself, and every defect found in it this far has been
@@ -768,7 +769,10 @@ jobs:
         run: |
           set -uo pipefail
           # U+00AD soft hyphen, U+200B..U+200D zero-width, U+2060 word joiner,
-          # U+FEFF BOM.
+          # U+FEFF BOM, and Unicode's direction controls, as invisible, which typst
+          # applies: the marks U+200E and U+200F, the embeddings and overrides
+          # U+202A..U+202E, and the isolates U+2066..U+2069. "Pay Sam 120 now.", with
+          # U+202E before Sam and U+202C after 120, prints "Pay 021 maS now.".
           #
           # EVERY TRACKED FILE, not a list of extensions. This globbed *.typ and
           # *.md, while the job is named for the tree — a promise an extension list
@@ -794,7 +798,7 @@ jobs:
           # runner invokes this as `bash -e`, where a bare 1 would abort before the
           # status could be read.
           rc=0
-          out=$(git grep -nIP '[\x{00AD}\x{200B}-\x{200D}\x{2060}\x{FEFF}]') || rc=$?
+          out=$(git grep -nIP '[\x{00AD}\x{200B}-\x{200F}\x{202A}-\x{202E}\x{2060}\x{2066}-\x{2069}\x{FEFF}]') || rc=$?
           case "$rc" in
             0) printf '%s\n' "$out"
                echo "::error::invisible characters found — see the lines above"
