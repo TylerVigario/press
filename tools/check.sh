@@ -31,23 +31,28 @@
 # recompiles and fails on any warning, which is the only enforcement available.
 #
 # The FONT check catches substitution by listing embedded faces that are not
-# vendored here. The GLYPH check catches disappearance by rendering each
-# non-ASCII character from the source in ISOLATION and asking whether it survived.
+# vendored here. The GLYPH check catches disappearance by compiling the document
+# again as PDF/A-2b, which typst refuses for each character no face draws, wherever
+# the character came from. Where that compile cannot finish, it renders each
+# non-ASCII character from the source in ISOLATION and asks whether it survived.
 #
-# The glyph check probes rather than reading the document's own text layer, because
-# that layer lies. In `A ⛔ B 📋 C` with neither symbol drawable, only the FIRST
-# unmapped character is dropped from the extracted text; the rest remain in it
-# and read back as present. A whole-document scan therefore reports one missing
-# glyph when there are five. Isolating one candidate per probe makes each the
-# first, and the answer truthful.
+# Neither reads the document's own text layer, because that layer lies. In
+# `A ⛔ B 📋 C` with neither symbol drawable, only the FIRST unmapped character is
+# dropped from the extracted text; the rest remain in it and read back as present.
+# A whole-document scan therefore reports one missing glyph when there are five.
+# typst's PDF/A check names each one, and isolating one candidate per probe makes
+# each the first, so both answers are truthful.
 #
 # The vendored family list is derived by subtracting `typst fonts` without a
 # --font-path (typst's own embedded faces) from the same command with one, so
 # it stays correct when typst changes what it bundles.
 #
 # LIMITS, stated because a check trusted past its reach is worse than none:
-#   · `#sym.checkmark` and friends carry no source codepoint, so the glyph check
-#     cannot see them — the font check still catches the substitution they cause.
+#   · Where the PDF/A compile cannot finish — a PDF placed without scan() stops it —
+#     the glyph check probes only the characters typed in the document's sources. A
+#     character from data or an escape is not among them, and `#sym.checkmark` and
+#     friends carry no source codepoint, so none of those is checked there; the audit
+#     says so, and the font check still catches a substitution.
 #   · A probe asks whether a character survives at all — drawn by a vendored face
 #     or by one of typst's own embedded faces — not whether THIS document's face
 #     draws it, and it never looks at the document's page. So a character in a
@@ -583,6 +588,47 @@ if [ -n "$leaks" ]; then
     echo "$leaks" | sort -u | sed 's/^/  /' >&2
     found fonts
 fi
+# The GLYPH check. A character no face draws, press's or typst's own, is lost from the page, and
+# typst says nothing. PDF/A requires every glyph a page shows to be in its font, so compiled as
+# PDF/A-2b typst refuses each such character instead, wherever the text came from: the source, an
+# escape or a data file. The audit compiles a copy that way, at the PDF's stamp with every scan
+# hidden, as for the page passes, and reports each character refused, at the line typst names.
+# typst words the refusal two ways, 0.14's "cannot be displayed using" and 0.15's "could not be
+# displayed with font"; a refusal worded otherwise reads as the compile failing for another reason.
+#
+# PDF/A has rules of its own: typst cannot embed a PDF in it, so a PDF placed without scan() stops
+# the compile. Where it fails for any other reason, the characters it refused are still reported,
+# and the characters typed in the document's own sources are probed one by one, below. A character
+# from data or an escape is then not checked, and a line says so.
+probe=
+reported=
+if ! a2b=$(PRESS_IN_CHECK=1 PRESS_STAMP_AS="$pdf" sh "$press_root/tools/stamp.sh" "$src" "$tmp/a2b.pdf" \
+        "$@" --input press-scans=hidden --pdf-standard a-2b --diagnostic-format short 2>&1); then
+    errs=$(printf '%s\n' "$a2b" | grep -E ': error: ' || true)
+    refused_re="PDF/A-2b error: the text (\`\".*\"\` could not be displayed with font |'.*' cannot be displayed using )"
+    boxes=$(printf '%s\n' "$errs" | grep -E "$refused_re" | sed \
+        -e 's/^\(.*\): error: PDF\/A-2b error: the text `"\(.*\)"` could not be displayed with font .*$/\2	\1/' \
+        -e "s/^\\(.*\\): error: PDF\\/A-2b error: the text '\\(.*\\)' cannot be displayed using .*\$/\\2	\\1/" || true)
+    other=$(printf '%s\n' "$errs" | grep -vE "$refused_re" || true)
+    [ -n "$errs" ] || other=$(printf '%s\n' "${a2b:-it failed without a word}" | head -3)
+    if [ -n "$boxes" ]; then
+        while IFS='	' read -r ch at; do
+            echo "press: $pdf is MISSING a character no face draws: $ch ($at)" >&2
+            reported="$reported<$ch>"
+        done <<EOF
+$boxes
+EOF
+        found glyphs
+    fi
+    if [ -n "$other" ]; then
+        echo "press: $pdf does not compile as PDF/A-2b, so a character from data or an escape is not" >&2
+        echo "       checked for a glyph; those typed in its sources are —" >&2
+        printf '%s\n' "$other" | sed 's/^/  /' >&2
+        probe=1
+    fi
+fi
+# The probe, where the PDF/A compile could not finish.
+#
 # (*UTF) forces PCRE to match characters rather than bytes. Without it the class
 # is byte-oriented under a non-UTF-8 locale, so every multi-byte character is split
 # into its bytes and each byte is probed as though it were a character — none of
@@ -630,7 +676,8 @@ uncommented() {
         print out
     }' "$1"
 }
-chars=$(while IFS= read -r f; do uncommented "$f"; done < "$tmp/sources" \
+chars=
+[ -z "$probe" ] || chars=$(while IFS= read -r f; do uncommented "$f"; done < "$tmp/sources" \
         | "$GREP" -oP '(*UTF)[^\x00-\x7F]' \
         | grep -vP '(*UTF)^[\p{Z}\p{Cf}]$' \
         | sort -u || true)
@@ -640,6 +687,7 @@ if [ -n "$chars" ]; then
     typst fonts --font-path "$fontdir" --ignore-system-fonts | sort > "$tmp/all"
     fams=$(comm -13 "$tmp/embedded" "$tmp/all" | sed 's/.*/"&"/' | paste -sd, -)
     for ch in $chars; do
+        case $reported in *"<$ch>"*) continue ;; esac
         printf '#set page(width: 6cm, height: 2cm)\n#set text(font: (%s))\nX%sX\n' "$fams" "$ch" > "$tmp/probe.typ"
         typst compile --root "$tmp" --font-path "$fontdir" --ignore-system-fonts "$tmp/probe.typ" "$tmp/probe.pdf" 2>/dev/null || true
         if ! "$PDFTOTEXT" "$tmp/probe.pdf" - 2>/dev/null | grep -qF "$ch"; then
