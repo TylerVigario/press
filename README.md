@@ -250,13 +250,14 @@ builds every one, then fails if any failed its audit.
 
 - **typst 0.14 or newer.** An older one is refused with a message naming both versions.
 - **`sh`** for the tools. On Windows it comes with Git for Windows.
-- **The audit** needs poppler (`pdffonts`, `pdftotext`, `pdftoppm`), a Python, and a grep
-  with PCRE (GNU grep; on macOS, `brew install grep`); a build without them is not audited,
-  though it still counts the open items and estimates, and fails while a form's measuring grid
-  is on or a line of a code block wraps, which need only typst.
+- **The audit** needs poppler (`pdffonts`, `pdftotext`, `pdftoppm`, `pdftocairo`), a Python,
+  and a grep with PCRE (GNU grep; on macOS, `brew install grep`); a build without them is not
+  audited, though it still counts the open items and estimates, and fails while a form's
+  measuring grid is on or a line of a code block wraps, which need only typst.
   Where `PATH` finds the wrong one, name it: `PRESS_PDFTOTEXT`, `PRESS_PDFFONTS`,
-  `PRESS_PDFTOPPM`, `PRESS_PYTHON`, `PRESS_GREP` (`ggrep` on macOS). The audit refuses a
-  `pdftotext` that is not poppler's.
+  `PRESS_PDFTOPPM`, `PRESS_PDFTOCAIRO`, `PRESS_PYTHON`, `PRESS_GREP` (`ggrep` on macOS). The
+  audit refuses a `pdftotext` that is not poppler's, and finds `pdftocairo` beside the one
+  `PRESS_PDFTOTEXT` names.
 - **just 1.55 or newer**, only to use `press.just`.
 
 ### On Windows
@@ -271,9 +272,9 @@ builds every one, then fails if any failed its audit.
   `PATH`, and Git bundles Xpdf's `pdftotext`. Inside `sh` that one wins, and the audit refuses
   it: builds say "not audited: pdftotext is not poppler's". No `PATH` order fixes this. Set
   `PRESS_PDFTOTEXT` in your user environment, with forward slashes, to `pdftotext.exe` in
-  poppler's `Library/bin` (under `%LOCALAPPDATA%/Microsoft/WinGet/Packages/`). Git bundles no
-  `pdffonts` or `pdftoppm`; `PRESS_PDFFONTS` and `PRESS_PDFTOPPM` pin those the same way if you
-  want all three fixed.
+  poppler's `Library/bin` (under `%LOCALAPPDATA%/Microsoft/WinGet/Packages/`). The audit finds
+  `pdftocairo` beside it. Git bundles no `pdffonts` or `pdftoppm`; `PRESS_PDFFONTS` and
+  `PRESS_PDFTOPPM` pin those the same way if you want all three fixed.
 - **Set them again after `winget upgrade` updates poppler.** The folder they name carries
   poppler's version, `poppler-25.07.0`, and winget keeps no link to poppler that survives an
   upgrade, so an upgrade leaves them naming a folder that is gone. Builds still succeed, now
