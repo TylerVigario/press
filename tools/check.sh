@@ -444,21 +444,45 @@ fi
 # off the paper. The crop reaches past the left and top edges only from a negative origin, and
 # only in pdftotext's plain output: -bbox ignores it. Text only: a shape or an image wholly off
 # the paper is not found.
+#
+# poppler cuts slanted text into pieces of words, and cuts it differently as the area it reads
+# changes: a note at 30° reads "Bi st" within the paper and "B is t" through the wide crop. The
+# same text, so the same characters: the words the paper read has and the wide one lacks are
+# pooled by character, and a word only the wide read finds is off the paper only where that pool
+# cannot spell it. Text off the paper adds characters the paper read has nowhere.
 if "$PDFTOTEXT" "$page" "$tmp/paper.txt" 2>/dev/null \
         && "$PDFTOTEXT" -x -100000 -y -100000 -W 200000 -H 200000 "$page" "$tmp/wide.txt" 2>/dev/null; then
     # One line for each page with text off it: the page's number, a tab, and its first words.
     awk -v RS='\f' '
         FILENAME == ARGV[1] {
             n = split($0, w, /[ \t\n]+/)
-            for (i = 1; i <= n; i++) if (w[i] != "") have[FNR, w[i]]++
+            for (i = 1; i <= n; i++)
+                if (w[i] != "") { have[FNR, w[i]]++; on[FNR, ++ons[FNR]] = w[i] }
             next
         }
         {
-            n = split($0, w, /[ \t\n]+/); c = 0; s = ""
+            n = split($0, w, /[ \t\n]+/); m = 0
             for (i = 1; i <= n; i++) {
                 if (w[i] == "") continue
                 if (have[FNR, w[i]] > 0) { have[FNR, w[i]]--; continue }
-                if (++c <= 12) s = s (c > 1 ? " " : "") w[i]
+                left[++m] = w[i]
+            }
+            split("", pool)
+            for (i = 1; i <= ons[FNR]; i++) {
+                x = on[FNR, i]
+                if (have[FNR, x] > 0) {
+                    have[FNR, x]--
+                    for (k = 1; k <= length(x); k++) pool[substr(x, k, 1)]++
+                }
+            }
+            c = 0; s = ""
+            for (i = 1; i <= m; i++) {
+                x = left[i]; spelt = 1
+                split("", need)
+                for (k = 1; k <= length(x); k++) need[substr(x, k, 1)]++
+                for (ch in need) if (pool[ch] < need[ch]) spelt = 0
+                if (spelt) { for (ch in need) pool[ch] -= need[ch]; continue }
+                if (++c <= 12) s = s (c > 1 ? " " : "") x
             }
             if (c > 12) s = s " …"
             if (c) print FNR "\t" s
