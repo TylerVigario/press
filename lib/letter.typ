@@ -19,6 +19,8 @@
 // letter in the face of the résumé it goes with, and align(center, letterhead(…)) centres the
 // name and contact line to match a résumé's centred header; the rule stays full width.
 #let letterhead(..contact, face: face-text) = block(width: 100%, above: 0pt, below: 22pt, context {
+  // Where a letter starts, for continued().
+  [#metadata(none)<press-letterhead>]
   set text(font: face)
   let items = contact.pos()
   stack(spacing: 7pt,
@@ -54,15 +56,20 @@
 }
 
 // A header for page two onward: the writer, the date and the page number, so a page parted
-// from the first still says whose letter it is. Page one is left to the letterhead.
+// from the first still says whose letter it is. Page one is left to the letterhead. In a
+// document of several letters, each letter's first page is the one its letterhead is on, left
+// to it, and its pages are numbered from there; with no letterhead, from the document's first.
 //
 //   #set page(..reading, header: continued())
 #let continued(words: (page: [Page])) = context {
   let w = _words("continued", words, "page")
-  let n = counter(page).get().first()
-  if n > 1 {
+  let here-page = here().page()
+  let heads = query(<press-letterhead>).map(m => m.location().page()).filter(q => q <= here-page)
+  let first = if heads.len() > 0 { heads.last() }
+  let n = if first != none { here-page - first + 1 } else { counter(page).get().first() }
+  if first != here-page and n > 1 {
     set text(size: sz.fine, fill: _cal(ink-soft))
-    let dates = query(<press-dateline>).filter(m => m.location().page() <= n)
+    let dates = query(<press-dateline>).filter(m => m.location().page() <= here-page)
     let date = if dates.len() > 0 { dates.last().value }
     grid(columns: (1fr, auto, 1fr), align: (left, center, right),
       _writer(), if date != none { date }, [#w.page #n])
