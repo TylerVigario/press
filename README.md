@@ -312,7 +312,7 @@ skipping it. On GitHub Actions, for a repository that builds with npm:
 ```yaml
 - run: sh third_party/press/tools/install-typst.sh "$RUNNER_TEMP/bin"
 - run: echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
-- run: sudo apt-get install -y poppler-utils
+- run: sudo apt-get update && sudo apt-get install -y poppler-utils
 - run: npm run press:check
 ```
 
