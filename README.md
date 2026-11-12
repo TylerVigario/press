@@ -54,13 +54,25 @@ the next release every document can use it.
 
 press is a folder of files your repository holds. From the directory it should live in —
 `third_party/` at the project root, as this guide assumes — run the installer for your
-system. It puts `press/` there, and run again it updates it:
+system. It puts `press/` there, and run again it updates it.
 
-| system | line |
-|---|---|
-| Linux, macOS | `curl -fsSL https://github.com/TylerVigario/press/releases/latest/download/install.sh \| sh` |
-| Linux without curl | `wget -qO- https://github.com/TylerVigario/press/releases/latest/download/install.sh \| sh` |
-| Windows, from PowerShell or `cmd.exe` | `powershell -NoProfile -c "irm https://github.com/TylerVigario/press/releases/latest/download/install.ps1 \| iex"` |
+**Linux, macOS:**
+
+```sh
+curl -fsSL https://github.com/TylerVigario/press/releases/latest/download/install.sh | sh
+```
+
+**Linux without curl:**
+
+```sh
+wget -qO- https://github.com/TylerVigario/press/releases/latest/download/install.sh | sh
+```
+
+**Windows, from PowerShell or `cmd.exe`:**
+
+```powershell
+powershell -NoProfile -c "irm https://github.com/TylerVigario/press/releases/latest/download/install.ps1 | iex"
+```
 
 Each release attaches its own installer, which installs that release: `latest/download` is the
 newest, and `download/v<version>` in its place fixes one. The installer downloads its
@@ -78,12 +90,19 @@ module with dependencies it does not vendor, and Composer projects keep it out o
 shows what changed.
 
 **Without the installer,** the archives unpack with the same tools. Delete `press/` first when
-updating, or files a release removed stay behind:
+updating, or files a release removed stay behind.
 
-| system | line |
-|---|---|
-| Linux, macOS | `curl -fsSL https://github.com/TylerVigario/press/releases/latest/download/press.tar.gz \| tar -xz` |
-| Windows, PowerShell 5.1 or 7 | `$ProgressPreference='SilentlyContinue'; Invoke-WebRequest https://github.com/TylerVigario/press/releases/latest/download/press.zip -OutFile press.zip; Expand-Archive press.zip -DestinationPath .; Remove-Item press.zip` |
+**Linux, macOS:**
+
+```sh
+curl -fsSL https://github.com/TylerVigario/press/releases/latest/download/press.tar.gz | tar -xz
+```
+
+**Windows, PowerShell 5.1 or 7:**
+
+```powershell
+$ProgressPreference='SilentlyContinue'; Invoke-WebRequest https://github.com/TylerVigario/press/releases/latest/download/press.zip -OutFile press.zip; Expand-Archive press.zip -DestinationPath .; Remove-Item press.zip
+```
 
 Under the Restricted execution policy, PowerShell 7 cannot load `Expand-Archive`; the
 installer does not use it. Each release's `SHA256SUMS` lists both archives and both
