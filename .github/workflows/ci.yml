@@ -244,6 +244,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/header-meta.sh
 
+  source-date:
+    name: A build takes SOURCE_DATE_EPOCH for the current time, and no stamp is later
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/source-date.sh
+
   label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads
     runs-on: ubuntu-latest
@@ -599,6 +608,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/header-meta.sh
+
+  oldest-source-date:
+    name: A build takes SOURCE_DATE_EPOCH for the current time, and no stamp is later, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/source-date.sh
 
   oldest-label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain

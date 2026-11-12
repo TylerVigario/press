@@ -191,6 +191,11 @@ a build, over the file, and a tool's `--tz` for a run, over both: `build.sh --tz
 takes `name = "value"` lines and `#` comments, and a build fails on a line it cannot read or a
 name it does not know, rather than printing in UTC unnoticed.
 
+A build with **`SOURCE_DATE_EPOCH`** set, as a reproducible build sets it, takes it for the
+current time, as [its specification](https://reproducible-builds.org/specs/source-date-epoch/)
+says: a page new or changed is stamped with it, and one unchanged keeps its stamp, or comes back
+to it where the stamp is later. A value that is not a whole number of seconds stops the build.
+
 ### From your runner
 
 **npm** — on Windows npm runs scripts with `cmd.exe`, where `mkdir -p` makes a folder named

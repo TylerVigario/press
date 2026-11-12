@@ -67,7 +67,23 @@ echo "$v" | awk -F. -v min="$min" '{
     for (i = 1; i <= 3; i++) { if ($i + 0 > m[i] + 0) exit 0; if ($i + 0 < m[i] + 0) exit 1 }
 }' || { echo "press: needs typst $min or newer; this is typst $v" >&2; exit 1; }
 
+# SOURCE_DATE_EPOCH, where it is set, is the build's time, as the specification says
+# (https://reproducible-builds.org/specs/source-date-epoch/): "Build processes MUST use this
+# variable for embedded timestamps in place of the "current" date and time", and a timestamp
+# that is not current is "no later than the value of this variable". A page changed or new is
+# stamped with it, and one kept unchanged keeps its stamp, or comes back to it where the stamp
+# is later. A value that is not a whole number of seconds stops the build; set but empty, which
+# the specification does not cover, it is as if unset.
 now=$(date +%s)
+sde=${SOURCE_DATE_EPOCH:-}
+case $sde in
+    '') ;;
+    *[!0-9]*)
+        echo "press: SOURCE_DATE_EPOCH is $sde, not a whole number of seconds since 1970," \
+            "as date +%s prints" >&2
+        exit 1 ;;
+    *) now=$sde ;;
+esac
 
 # The stamp is kept and compared in UTC -- the PDF's /CreationDate -- and printed in the
 # REPOSITORY's time zone, an IANA name its .press.toml gives, at the root the tools run from:
@@ -255,9 +271,13 @@ if [ -z "${PRESS_IN_CHECK:-}" ] && [ -z "${PRESS_STAMP_AS:-}" ]; then
         # shellcheck disable=SC2086
         { cat "$work/key"; echo "pdf $($dig "$pdf" | cut -d ' ' -f 1)"; } > "$work/now"
         sed -n 's/^input //p' "$work/entry" > "$work/inputs"
+        # SOURCE_DATE_EPOCH is not in the key: it stamps only a page that changed, which the
+        # record never holds, and a recorded stamp later than it is built again, to come back.
         # shellcheck disable=SC2086
         if head -n "$(wc -l < "$work/now")" "$work/entry" | cmp -s - "$work/now" \
-                && [ -s "$work/inputs" ] && $dig -c --status "$work/inputs" 2>/dev/null; then
+                && [ -s "$work/inputs" ] && $dig -c --status "$work/inputs" 2>/dev/null \
+                && { [ -z "$sde" ] \
+                    || [ "$(sed -n 's/^stamp //p' "$work/entry")" -le "$sde" ]; }; then
             sed -n 's/^note //p' "$work/entry" >&2
             printf 'cached %s\n' "$(when "$(sed -n 's/^stamp //p' "$work/entry")")"
             exit 0
@@ -315,6 +335,15 @@ if [ -n "${PRESS_STAMP_AS:-}" ]; then
 fi
 
 old=$( [ -f "$pdf" ] && stamp_of "$pdf" || true )
+# keep <typst flags...>: the page is unchanged, and keeps its stamp, or comes back to
+# SOURCE_DATE_EPOCH where the stamp is later.
+keep() {
+    if [ -n "$sde" ] && [ "$old" -gt "$sde" ]; then
+        out=$(at "$now" "$pdf" "$@") || { printf '%s\n' "$out" >&2; exit 1; }
+        finish unchanged "$now" "$@"
+    fi
+    finish unchanged "$old" "$@"
+}
 if [ -n "$old" ]; then
     # typst takes the format from the extension, so the trial build keeps .pdf. It sits in
     # print/, so an interrupt mid-compile removes it rather than leaving it there.
@@ -322,13 +351,13 @@ if [ -n "$old" ]; then
     if out=$(at "$old" "$trial" "$@"); then
         if cmp -s "$trial" "$pdf"; then
             rm -f "$trial"
-            finish unchanged "$old" "$@"
+            keep "$@"
         fi
         # Other bytes, the same pages: the new build is the PDF, at the old time.
         if prints_same "$trial" "$pdf"; then
             mv -f "$trial" "$pdf"
             trial=
-            finish unchanged "$old" "$@"
+            keep "$@"
         fi
     else
         rm -f "$trial"
