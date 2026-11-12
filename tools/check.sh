@@ -82,21 +82,22 @@
 #     and what would distinguish them is not in the text layer. Nothing cheap
 #     covers that case; the printable-area check does not either, because ink in
 #     the middle of a page is not its question.
-#   · Rotated text is the overlap check's soft spot. Poppler segments rotated
-#     glyphs into fragments and reports them as separate lines, which reads as a
-#     small phantom overlap — worst measured 0.13pt against a smallest genuine
-#     collision of 2.72pt. The 0.5pt floor exists for that gap and nothing else,
-#     so a document leaning heavily on rotation deserves a look by eye.
+#   · The overlap check reads each glyph's outline as drawn, from poppler's
+#     pdftocairo, so text at a slant is measured as it prints. Word boxes stand
+#     upright around a slanted word and hold far more than its glyphs: two lines
+#     of a stamp at -30° read 2.26pt of text on text through them, touching
+#     nothing.
 #   · The printable-area check additionally needs a Python and poppler's
-#     pdftoppm, and the line-overlap check a Python. check refuses without a
-#     working interpreter, as it does without poppler; a build skips both passes
-#     and says so. PRESS_PYTHON and PRESS_PDFTOPPM name either
-#     directly. The interpreter is found by EXECUTING a candidate, not by
-#     resolving a name — Windows ships a zero-byte python3 alias that answers
-#     `command -v` and then prints a Store advert, and turning that alias off
-#     leaves a working `python` and no `python3`. A name-based guard failed
-#     both ways: it ran a stub that could not work, and skipped where a working
-#     interpreter was present under the other name.
+#     pdftoppm, and the line-overlap check a Python and poppler's pdftocairo.
+#     check refuses without a working interpreter, as it does without poppler;
+#     a build skips the passes it cannot run and says so. PRESS_PYTHON,
+#     PRESS_PDFTOPPM and PRESS_PDFTOCAIRO name each directly. The interpreter
+#     is found by EXECUTING a candidate, not by resolving a name — Windows
+#     ships a zero-byte python3 alias that answers `command -v` and then prints
+#     a Store advert, and turning that alias off leaves a working `python` and
+#     no `python3`. A name-based guard failed both ways: it ran a stub that
+#     could not work, and skipped where a working interpreter was present under
+#     the other name.
 #
 # The PRINTABLE-AREA check verifies that no ink comes within 0.48in of a paper
 # edge — the 0.5in safe area the page presets are built around, less a rendering
@@ -392,6 +393,19 @@ printf '\302\240\n' | "$GREP" -qP '(*UTF)^[\p{Z}\p{Cf}]$' 2>/dev/null \
 # trusted; whatever it is aimed at still has to say poppler.
 PDFTOTEXT=${PRESS_PDFTOTEXT:-pdftotext}
 PDFFONTS=${PRESS_PDFFONTS:-pdffonts}
+# pdftocairo draws each glyph for the line-overlap check. It comes with poppler, beside its
+# pdftotext, so where PRESS_PDFTOTEXT names a path it is found there, and on Windows a pdftotext
+# named is all it takes; PRESS_PDFTOCAIRO names it directly. Git bundles none to find instead.
+if [ -n "${PRESS_PDFTOCAIRO:-}" ]; then
+    PDFTOCAIRO=$PRESS_PDFTOCAIRO
+else
+    case $PDFTOTEXT in
+        */*) base=$(basename "$PDFTOTEXT")
+             case $base in pdftotext*) suffix=${base#pdftotext} ;; *) suffix= ;; esac
+             PDFTOCAIRO="$(dirname "$PDFTOTEXT")/pdftocairo$suffix" ;;
+        *) PDFTOCAIRO=pdftocairo ;;
+    esac
+fi
 for spec in "PRESS_PDFTOTEXT $PDFTOTEXT" "PRESS_PDFFONTS $PDFFONTS"; do
     var=${spec%% *}; tool=${spec#* }
     command -v "$tool" >/dev/null 2>&1 \
@@ -555,9 +569,15 @@ if [ -n "$PY" ] && [ -n "$optional" ] && ! "$PY" -c 'import xml.parsers.expat' >
     # check runs it, and the pass reports that it could not.
     echo "press: skipping the line-overlap check ($PY has no XML parser)" >&2
     skipped="$skipped text-on-text"
+elif [ -n "$PY" ] && [ -n "$optional" ] && ! command -v "$PDFTOCAIRO" >/dev/null 2>&1; then
+    # A build without pdftocairo skips this pass and says so, as without pdftoppm; check runs
+    # it, and the pass reports that it could not.
+    echo "press: skipping the line-overlap check (no pdftocairo, which comes with poppler)" >&2
+    skipped="$skipped text-on-text"
 elif [ -n "$PY" ]; then
     s=0
-    PRESS_PDFTOTEXT="$PDFTOTEXT" "$PY" "$press_root/tools/line-overlap.py" "$page" "$pdf" || s=$?
+    PRESS_PDFTOTEXT="$PDFTOTEXT" PRESS_PDFTOCAIRO="$PDFTOCAIRO" \
+        "$PY" "$press_root/tools/line-overlap.py" "$page" "$pdf" || s=$?
     case $s in
         0) ;;
         3) found text-on-text ;;

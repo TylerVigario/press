@@ -65,6 +65,21 @@ echo "audit-cases: the build audits as check does, and without poppler says it d
 ! grep -qF "accepted" "$tmp/out" || { cat "$tmp/out" >&2; fail "a pass that could not run was called accepted"; }
 echo "audit-cases: a pass that cannot run fails the audit, whatever the document accepts"
 
+# The line-overlap check reads each glyph from pdftocairo: without it, check fails, naming the
+# variable that names it, and a build skips the pass and says so.
+slanted=.github/audit-cases/pass-slanted-lines.typ
+# shellcheck disable=SC2086
+! PRESS_PDFTOCAIRO=/nonexistent/pdftocairo sh tools/check.sh "$slanted" "$tmp/b/cairo.pdf" . \
+    $flags > "$tmp/out" 2>&1 || fail "check passed without pdftocairo"
+grep -qF "set PRESS_PDFTOCAIRO" "$tmp/out" \
+    || { cat "$tmp/out" >&2; fail "check without pdftocairo did not name PRESS_PDFTOCAIRO"; }
+# shellcheck disable=SC2086
+PRESS_PDFTOCAIRO=/nonexistent/pdftocairo sh tools/stamp.sh "$slanted" "$tmp/b/cairo.pdf" $flags \
+    > "$tmp/out" 2>&1 || { cat "$tmp/out" >&2; fail "a build without pdftocairo failed"; }
+grep -qF "skipping the line-overlap check (no pdftocairo" "$tmp/out" \
+    || { cat "$tmp/out" >&2; fail "a build without pdftocairo did not say it skipped the pass"; }
+echo "audit-cases: without pdftocairo, check fails naming it, and a build skips the pass"
+
 # Nor is a Python that cannot parse the passes: it exits 1, as CPython does for a script whose
 # syntax is newer than itself. The stand-in answers the probe, `-c pass`, and fails any script.
 op=$tmp/old-python
