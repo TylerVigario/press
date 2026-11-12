@@ -34,16 +34,25 @@ path=${2:-CHANGELOG.md}
 gen=$(mktemp)
 out=$(mktemp)
 made=
-# Undo what was made even when a step fails half-way, so the clone is left as it was found.
+tagged=
+# Undo what was made even when a step fails half-way, so the clone is left as it was found: the
+# tag only once this made it, never one the clone held already.
 cleanup() {
     rm -f "$gen" "$out"
-    if [ -n "$made" ]; then git tag -d "$tag" >/dev/null 2>&1 || true; fi
+    if [ -n "$tagged" ]; then git tag -d "$tag" >/dev/null 2>&1 || true; fi
     if [ "$made" = commit ]; then git reset -q --soft HEAD~1; fi
 }
 trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
+# The release's tag does not exist yet when this runs. One the clone holds already is a release's
+# own, and is not this script's to move or delete.
+if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+    echo "write-changelog: $tag is a tag in this clone already; this writes the changelog for a" >&2
+    echo "                 release not yet tagged" >&2
+    exit 1
+fi
 # Signing is off for both: they are never pushed, and a machine that signs by default would
 # otherwise stop here asking for a tag message.
 if [ "$(git log -1 --format=%s)" = "release: $tag" ]; then
@@ -54,6 +63,7 @@ else
     made=commit
 fi
 git -c tag.gpgSign=false tag "$tag"
+tagged=yes
 cog changelog > "$gen"
 
 awk -v gen="$gen" -v path="$path" '
