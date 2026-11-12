@@ -64,6 +64,9 @@
             "context": "The stamp prints in the zone .press.toml names, or UTC, on any machine"
           },
           {
+            "context": "A build takes SOURCE_DATE_EPOCH for the current time, and no stamp is later"
+          },
+          {
             "context": "all builds the documents, not their parts or press's files"
           },
           {
@@ -173,6 +176,9 @@
           },
           {
             "context": "The stamp prints in the zone .press.toml names, or UTC, on any machine, on the oldest toolchain"
+          },
+          {
+            "context": "A build takes SOURCE_DATE_EPOCH for the current time, and no stamp is later, on the oldest toolchain"
           },
           {
             "context": "all builds the documents, not their parts or press's files, on the oldest toolchain"
