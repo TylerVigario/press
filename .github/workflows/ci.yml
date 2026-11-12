@@ -443,8 +443,18 @@ jobs:
           # Dated an hour on, so the two times differ.
           GIT_COMMITTER_DATE="@$(( $(git log -1 --format=%ct) + 3600 ))" \
             git -c user.name=ci -c user.email=ci@invalid commit -q --allow-empty -m "release: v0.0.0"
-          sh .github/bundle.sh "$RUNNER_TEMP/rebuilt"
+          # Rebuilt as on another machine: from a checkout of its own, written at a umask of 077,
+          # which the archives' modes must not follow.
+          (umask 077 && git worktree add -q --detach "$RUNNER_TEMP/elsewhere" HEAD \
+            && sh "$RUNNER_TEMP/elsewhere/.github/bundle.sh" "$RUNNER_TEMP/rebuilt")
           diff "$RUNNER_TEMP/bundle/SHA256SUMS" "$RUNNER_TEMP/rebuilt/SHA256SUMS"
+          # What two builds on one runner share cannot differ between them, the order its
+          # filesystem lists names in among it, so the archives' own order is checked: tar's
+          # --sort=name, each directory's names in byte order, depth first, and the zip's, the
+          # sorted list it was given.
+          { tar -tzf "$RUNNER_TEMP/bundle/press.tar.gz" | tr '/' '\001' | LC_ALL=C sort -c; } 2>&1 \
+            | tr '\001' '/'
+          unzip -Z1 "$RUNNER_TEMP/bundle/press.zip" | sed 's#/$##' | LC_ALL=C sort -c
 
   # On the oldest typst and just press accepts: the same checks, so a change that needs a newer
   # one fails here, not on a machine still at the floor.
