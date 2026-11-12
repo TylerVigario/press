@@ -7,8 +7,10 @@
 # release writes press.toml's version, so it is the newest release tag's, or a release's own
 # commit recorded it and its publish has not happened yet, which the Release workflow then
 # finishes at that number. Any other version is a hand edit: the Release workflow would take it
-# for an unfinished release and publish it without the commits deriving it. Needs the history
-# and the tags (fetch-depth: 0).
+# for an unfinished release and publish it without the commits deriving it. A release's own
+# commit is titled `release: v<version>` and made by the vigario-press-release App, its bot's
+# address the author's: a pull request can carry the title, and its squash merge is authored by
+# whoever opened it. Needs the history and the tags (fetch-depth: 0).
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -25,8 +27,11 @@ if [ "$v" = "$newest" ]; then
     echo "version-check: press.toml says $v, the newest release"
     exit 0
 fi
+app='335304434+vigario-press-release[bot]@users.noreply.github.com'
 wrote=$(git log -1 --format=%s -G '^version *=' -- press.toml)
-[ "$wrote" = "release: v$v" ] \
+by=$(git log -1 --format=%ae -G '^version *=' -- press.toml)
+[ "$wrote" = "release: v$v" ] && [ "$by" = "$app" ] \
     || fail "press.toml says $v, the newest release is $newest, and the commit that wrote $v is
-       \"$wrote\", not the release's own; only the Release workflow writes the version"
+       \"$wrote\" by $by, not the release's own by the vigario-press-release App; only the
+       Release workflow writes the version"
 echo "version-check: press.toml says $v, recorded by its release's commit and not yet published"
