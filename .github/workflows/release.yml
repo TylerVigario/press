@@ -268,8 +268,25 @@ jobs:
           set -euo pipefail
           # From this tree, now carrying the new version: the files the release commit
           # records are the ones written here, so the bundle matches the commit it is
-          # attached to. CI built and installed the same bundle on every pull request.
+          # attached to.
           sh .github/bundle.sh "$RUNNER_TEMP/bundle"
+
+      # typst, just and poppler, for the checks below, as CI's bundle jobs have them.
+      - uses: ./.github/actions/typst-toolchain
+        with:
+          poppler: "true"
+
+      - name: Check the bundle that will be published
+        run: |
+          set -euo pipefail
+          # The gate's CI built and installed a bundle at the last release's version, in
+          # press.toml and both installers, and so with other sums. This one, at the new
+          # version, is what publishes, and a published release is immutable: so it installs
+          # and works, and both installers install, update and refuse, before anything is
+          # written. The runner image carries pwsh, which install-check needs for install.ps1.
+          pwsh --version
+          sh .github/bundle-check.sh "$RUNNER_TEMP/bundle"
+          sh .github/install-check.sh "$RUNNER_TEMP/bundle"
 
       - name: Mint a token for the release App
         id: app-token
