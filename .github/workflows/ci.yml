@@ -199,6 +199,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/tall-parts.sh
 
+  letter-dates:
+    name: continued() dates each page by the letter it is a page of
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/letter-dates.sh
+
   label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads
     runs-on: ubuntu-latest
@@ -509,6 +518,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/tall-parts.sh
+
+  oldest-letter-dates:
+    name: continued() dates each page by the letter it is a page of, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/letter-dates.sh
 
   oldest-label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain

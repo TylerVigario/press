@@ -12,8 +12,6 @@
 // date is never the build stamp: a letter is dated the day it goes out, and its reader is
 // outside, with no shelf copy to compare.
 
-#let _letter-date = state("press-letter-date", none)
-
 
 // The writer's name, a line of contact details, and a rule beneath. A contact item is text or
 // a link; a link that shows its own address (link("mailto:…"), or link(url)[example.com])
@@ -32,8 +30,10 @@
   )
 })
 
-// The letter's date, written once, where it prints. continued() reads it from here.
-#let dateline(date) = { _letter-date.update(date); date }
+// The letter's date, written once, where it prints. continued() reads it from here: each page
+// takes the last one printed on it or before it, so a document of several letters dates each
+// page by the letter it is a page of.
+#let dateline(date) = [#metadata(date)<press-dateline>#date]
 
 // The subject line. Each reference is kept whole, so an account number never breaks across a
 // line, and stays text a reader can copy.
@@ -62,7 +62,8 @@
   let n = counter(page).get().first()
   if n > 1 {
     set text(size: sz.fine, fill: ink-soft)
-    let date = _letter-date.final()
+    let dates = query(<press-dateline>).filter(m => m.location().page() <= n)
+    let date = if dates.len() > 0 { dates.last().value }
     grid(columns: (1fr, auto, 1fr), align: (left, center, right),
       _writer(), if date != none { date }, [#w.page #n])
   }
