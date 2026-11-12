@@ -152,6 +152,15 @@ jobs:
       - *toolchain
       - run: sh .github/all-check.sh
 
+  just-mod:
+    name: just press lists press's recipes under mod, and just --list under import
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain
+      - run: sh .github/just-mod.sh
+
   audit:
     name: Documents pass the audit
     runs-on: ubuntu-latest
@@ -560,6 +569,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/all-check.sh
+
+  oldest-just-mod:
+    name: just press lists press's recipes under mod, and just --list under import, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/just-mod.sh
 
   oldest-audit-cases:
     name: The audit passes and refuses its known cases, on the oldest toolchain

@@ -77,14 +77,16 @@ root := justfile_directory()
 # sees it, rather than failing inside it.
 
 # The recipe list, as the first recipe. Under `mod press`, `just press` runs a module's first
-# recipe, so it lists press's. Under `import` the default comes from the consumer's own
-# justfile, never an imported one, so a one-line justfile lists with `just --list`. Named
-# _list, not default: a consumer with its own `default` recipe and an import would otherwise
-# fail with "recipe `default` first defined ... is redefined". Not [default] either: that
-# would claim the consumer's default, and clash with a consumer's own [default].
+# recipe, so it lists press's: from press.just itself, since a second just started bare finds
+# the justfile of the directory it runs in, the consumer's. Under `import` the default comes
+# from the consumer's own justfile, never an imported one, so a one-line justfile lists with
+# `just --list`. Named _list, not default: a consumer with its own `default` recipe and an
+# import would otherwise fail with "recipe `default` first defined ... is redefined". Not
+# [default] either: that would claim the consumer's default, and clash with a consumer's own
+# [default].
 [private]
 _list:
-    @{{ quote(just_executable()) }} --list --unsorted
+    @{{ quote(just_executable()) }} --justfile {{ quote(source_file()) }} --list --unsorted
 
 # Compile one document and audit it → print/<same path>.pdf
 #
