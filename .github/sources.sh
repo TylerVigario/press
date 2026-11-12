@@ -9,8 +9,9 @@
 # the numbers of the list, not of the citing: [3], then [1, 3] for two named out of order, then
 # [2]. A marker is set smaller than the text it is in. Each line of the list is its number and
 # title, then the address without https://, and the source with no address prints no separator.
-# Each link holds the whole address. A key no sources() gives, and one given twice, stop the build
-# with a message naming the key.
+# Each link holds the whole address. With a second list after it, the second list's source is
+# numbered 4, going on from the first's, and so is its marker. A key no sources() gives, and one
+# given twice, in one list or in two, stop the build with a message naming the key.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -43,10 +44,20 @@ body=$(height Bodyword) mark=$(height "[3]")
 awk -v b="$body" -v m="$mark" 'BEGIN { exit !(m < b * 0.85) }' ||
     fail "a marker is ${mark}pt tall, no smaller than the text's ${body}pt"
 
-for case in "unknown:no sources() gives the key \"nosuch\"" "twice:the key \"alpha\" is given twice"; do
+build --input case=second
+text=$(pdftotext "$tmp/probe.pdf" - | tr '\n' ' ' | tr -s ' ')
+for want in "1. Alphasource title" "A second part cites [4]" "4. Deltasource title"; do
+    case $text in
+        *"$want"*) ;;
+        *) fail "with two lists, the page does not read \"$want\"; it reads: $text" ;;
+    esac
+done
+
+for case in "unknown:no sources() gives the key \"nosuch\"" \
+    "twice:the key \"alpha\" is given twice" "across:the key \"alpha\" is given twice"; do
     rc=0
     build --input "case=${case%%:*}" 2> "$tmp/said" || rc=$?
     [ "$rc" != 0 ] || fail "case ${case%%:*} built; it must stop the build"
     grep -qF "${case#*:}" "$tmp/said" || fail "case ${case%%:*} does not say \"${case#*:}\": $(cat "$tmp/said")"
 done
-echo "sources: markers number by the list, each source prints short with its link whole, and a bad key stops the build"
+echo "sources: markers number by the lists, one sequence across them, and a bad key stops the build"
