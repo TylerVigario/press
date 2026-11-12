@@ -390,8 +390,9 @@ composes its own page uses the same parts: `letterhead`, `dateline` and `continu
 says what the cook is in for, `serves 8 · stovetop · about 40 min`, with a line under it saying
 what the dish is. Page one is the whole cook: the ingredients in a `sheet`, the method in
 numbered `item`s, a costly step in `color: warn`. Whatever the card labels `<depth>` starts the
-reference on a page of its own, under a line saying page one is the whole job, and `writein()`
-leaves lines for what the cook changed.
+reference on a page of its own, under a line saying page one is the whole job, and a step points
+there with typst's page reference, as in a brief. `writein()` leaves lines for what the cook
+changed.
 
 **A résumé** applies `resume`: `new.sh docs/resume resume` starts one.
 `#show: resume.with(title:, author:, headline:, contact:)` sets one column on a full sheet, with
