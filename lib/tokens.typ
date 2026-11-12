@@ -53,19 +53,24 @@
 //
 // Each is a STACK: the head is the intended face, the tail is a vendored
 // fallback for glyphs the head does not carry. The tail is not cosmetic. Typst
-// falls back PER GLYPH to its own bundled LibertinusSerif when the requested
-// family lacks a codepoint — silently, no warning, exit 0 — so a sans document
-// ships stray serif glyphs and nothing says so. Verified: U+2192 (→) is absent
-// from Open Sans, and `→` in body text embedded LibertinusSerif-Regular, plus
-// LibertinusSerif-Italic wherever the surrounding text was italic.
+// falls back PER GLYPH to its own bundled fonts when the requested family lacks a
+// codepoint — silently, no warning, exit 0 — so a sans document ships stray serif
+// glyphs, or none, and nothing says so. Verified: U+2192 (→) is absent from Noto
+// Sans, and set in it alone, typst draws it from its own LibertinusSerif.
 //
-// Liberation Sans is the tail because it is already vendored and its coverage
-// is broad. Mono falls back to Liberation Mono's own sans sibling rather than
-// to a serif: the wrong width beats the wrong species.
-#let face-sans = ("Liberation Sans",)
-#let face-text = ("Open Sans", "Liberation Sans")
-#let face-display = ("Montserrat", "Liberation Sans")
-#let face-mono = ("Liberation Mono", "Liberation Sans")
+// Every face is Noto, one family made to sit together. The tail is the Noto faces
+// that carry what Noto Sans does not: Noto Sans Math the arrows and operators,
+// Noto Sans Symbols 2 the ticks, crosses, boxes and warning signs, and Noto Sans
+// Hebrew the Hebrew. Mono falls back to Noto Sans rather than to a serif: the
+// wrong width beats the wrong species. face-sans is face-text, kept so a document
+// that names it builds; face-math sets equations, which typst would otherwise set
+// in its own serif math face.
+#let _tail = ("Noto Sans Math", "Noto Sans Symbols 2", "Noto Sans Hebrew")
+#let face-text = ("Noto Sans", .._tail)
+#let face-sans = face-text
+#let face-display = ("Noto Sans", .._tail)
+#let face-mono = ("Noto Sans Mono", "Noto Sans", .._tail)
+#let face-math = ("Noto Sans Math",)
 
 // Type scale — pick a step rather than inventing a size inline.
 //

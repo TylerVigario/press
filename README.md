@@ -341,8 +341,8 @@ so a page parted from the rest still says what it is and which edition.
 Without `base`, a document sets these itself: its body font, `#set text(font: face-text, ...)`
 (without it the body renders in typst's own Libertinus Serif, without a word); its name, with
 `#set document(title: [...], author: "...")`, which a PDF viewer shows and a page prints from
-`document.title`; and the show rules it needs, `raw` and `code` for commands and `link-note`
-for links.
+`document.title`; and the show rules it needs, `raw` and `code` for commands, `link-note` for
+links, and `#show math.equation: set text(font: face-math)` for equations.
 
 **A longer document** is a directory: `new.sh` makes `docs/handbook/main.typ`, and chapters go
 beside it, `#include`d from it. Give it the reading page, `brief.with(preset: reading)`, use
@@ -481,22 +481,24 @@ is `(ok, ok-tint)`.
 | `entry(role, org, dates, stacked: false)` | A résumé's role: role, organisation and dates in one paragraph, the dates at the right; `stacked` puts the organisation on its own line. It stays with what follows, so no page ends on a role. |
 
 **Tokens.** Colours `ink`, `ink-soft`, `ink-faint`, `rule-hair`, `rule-mid`, `paper-tint`,
-`slate`, `slate-tint`, `steel`, and `ok`/`warn`/`bad` each with a `-tint`. Faces `face-text`
-(Open Sans), `face-display` (Montserrat), `face-sans` (Liberation Sans), `face-mono`
-(Liberation Mono) — use these, never font names as strings. Sizes `sz.micro` 8.6 · `fine` 9.4
+`slate`, `slate-tint`, `steel`, and `ok`/`warn`/`bad` each with a `-tint`. Faces `face-text`,
+`face-display` and `face-sans` (Noto Sans), `face-mono` (Noto Sans Mono) and `face-math` (Noto
+Sans Math) — use these, never font names as strings. Sizes `sz.micro` 8.6 · `fine` 9.4
 · `small` 10.2 · `body` 11 · `lead` 12.5 · `head` 14.5 · `title` 21 · `hero` 28. Page presets
 `dense`, `reading`, `card`, spread with `#set page(..card)`. When the vocabulary does not fit,
 build it in the document.
 
 ### Traps
 
-- **Fonts fail in three ways, and only one warns.** A missing *family* warns and still ships;
-  a missing *weight or style* substitutes the nearest face silently; a missing *glyph* is drawn
-  from typst's own fonts silently (`✓` is in none of press's faces, and comes from typst's
-  NewCMMath). Only the audit catches them.
-  **Read [`FONTS.md`](FONTS.md) before using any symbol.**
-- **Some symbols are in no vendored face.** `✓ ✗ ▸` render from typst's NewCMMath, `⚠ ⚡ ☐`
-  from DejaVuSansMono, and **`⛔` and `📋` vanish** from the page. Build a probe and audit it.
+- **Fonts fail in three ways, and only one warns.** A missing *family* warns and still ships,
+  and the audit fails it; a missing *glyph* is drawn from typst's own fonts silently, or printed
+  as an empty box, and only the audit catches it; a missing *weight or style* substitutes the
+  nearest face press has silently, and nothing catches it: italic code prints upright, since
+  Noto Sans Mono has no italic.
+  **Read [`FONTS.md`](FONTS.md) before using any symbol, weight or style.**
+- **Some symbols are in no vendored face.** Noto's faces draw `✓ ✗ ▸ ⚠ ☐ ⛔ 📋` and many more,
+  but `⚓ ♻ ⚙` render from typst's DejaVuSansMono and `⎋` from its NewCMMath, and **a character
+  no face draws, such as `🔧` or `漢`, prints as an empty box**. Build a probe and audit it.
 - **`unit`, `callout`, `panel`, `addendum`, `eyebrow`, and brief's, recipe's and résumé's
   headings uppercase their labels.** "pH" becomes "PH", "µS" becomes "ΜS" (a capital Mu). Pass
   `caps: false` to the part, or to the template for its headings, whenever case means something.
@@ -557,6 +559,5 @@ justfile's `import`, all in one commit.
 Copyright © 2026 Tyler Vigario. **AGPL-3.0-or-later** — see [`LICENSE`](LICENSE). What you
 typeset with it is yours: a compiled PDF carries no licence from the kit.
 
-The faces under `fonts/` keep their own terms — Open Sans (Apache-2.0), Liberation
-(OFL-1.1-RFN), Montserrat (OFL-1.1) — with each licence's text in `fonts/licenses/`. See
-[`FONTS.md`](FONTS.md).
+The faces under `fonts/` are Noto, under the SIL Open Font License 1.1 (OFL-1.1), with each
+project's licence text in `fonts/licenses/`. See [`FONTS.md`](FONTS.md).

@@ -128,8 +128,11 @@ echo "form-fill: the filled form audits clean, its blank left out"
 
 . .github/word-box.sh
 pdftotext -bbox "$tmp/probe.pdf" "$tmp/boxes.html"
+# Beside it: the label's box starts within 4pt to the right of the crossing, and its middle
+# within 8pt below it. Its middle, not its top, which sits where the face's ascent puts it.
 word_boxes "$tmp/boxes.html" "216," \
-    | awk '$1 >= 216 && $1 <= 220 && $2 >= 216 && $2 <= 220 { hit = 1 } END { exit !hit }' \
+    | awk '$1 >= 216 && $1 <= 220 && ($2 + $4) / 2 >= 216 && ($2 + $4) / 2 <= 224 { hit = 1 }
+        END { exit !hit }' \
     || fail "the grid's label for 216, 216 is not beside its crossing"
 echo "form-fill: the measuring grid runs from the page's corner, every step, its crossings labelled"
 

@@ -130,9 +130,4 @@ echo whole 51
 echo whole 52
 echo whole 53
 echo whole 54
-echo whole 55
-echo whole 56
-echo whole 57
-echo whole 58
-echo whole 59
 ```

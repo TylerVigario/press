@@ -16,14 +16,14 @@
 # neither warns.
 #
 #   SUBSTITUTED — the codepoint is missing from every vendored face, so typst
-#   draws it from one of its OWN embedded fonts. Measured on press:
-#   ✓ ✗ ▸ come from NewCMMath, ⚠ ⚡ ☐ from DejaVuSansMono, ℹ from
-#   LibertinusSerif. The page looks almost right and the species is wrong.
+#   draws it from one of its OWN embedded fonts. Measured on press: ⚓ ♻ ⚙ come
+#   from DejaVuSansMono, ⎋ from NewCMMath. The page looks almost right and the
+#   species is wrong.
 #
-#   VANISHED — no font anywhere has it, so it is dropped from the page AND from
-#   the extracted text. Measured: ⛔ and 📋 disappear outright. This is the worse
-#   half: a substitution ships the wrong glyph, a disappearance ships missing
-#   content, and a printed sheet cannot be diffed against anything.
+#   MISSING — no font anywhere has it, so the page prints the head face's mark for
+#   a glyph it lacks, an empty box, in its place. Measured: 🔧 🚗 漢. This is the
+#   worse half: a substitution ships the wrong glyph, a box ships missing content,
+#   and a printed sheet cannot be diffed against anything.
 #
 # The WARNINGS check reads typst's own output. typst exits 0 on warnings and has no
 # deny-warnings flag, so a warning ships unless something reads it — markdown
@@ -37,7 +37,7 @@
 # non-ASCII character from the source in ISOLATION and asks whether it survived.
 #
 # Neither reads the document's own text layer, because that layer lies. In
-# `A ⛔ B 📋 C` with neither symbol drawable, only the FIRST unmapped character is
+# `A 🔧 B 🚗 C` with neither symbol drawable, only the FIRST unmapped character is
 # dropped from the extracted text; the rest remain in it and read back as present.
 # A whole-document scan therefore reports one missing glyph when there are five.
 # typst's PDF/A check names each one, and isolating one candidate per probe makes
@@ -631,8 +631,8 @@ elif [ -n "$warns" ]; then
     found warnings
 fi
 # A face is vendored when its name, past the subset prefix, is a vendored family alone or
-# followed by -: OpenSans, OpenSans-Bold, Montserrat-Bold-Identity-H. Without the - a family
-# that only begins with a vendored one, like LiberationSansNarrow, would pass as it.
+# followed by -: NotoSans-Regular, NotoSansMath-Regular-Identity-H. Without the - a family that
+# only begins with a vendored one, like NotoSansDisplay, would pass as NotoSans.
 leaks=$("$PDFFONTS" "$page" | tail -n +3 | awk '{print $1}' | sed 's/^[A-Z]*+//' | grep -vE "^($allow)(-|\$)" || true)
 if [ -n "$leaks" ]; then
     echo "press: $pdf draws from fonts that are NOT vendored here —" >&2

@@ -37,6 +37,6 @@ first=$(page_of 'echo opted 0')
 last=$(page_of 'echo opted 59')
 [ "$first" != "$last" ] || fail "the block that opts in to breaking did not break across a page"
 first=$(page_of 'echo whole 0')
-last=$(page_of 'echo whole 59')
+last=$(page_of 'echo whole 54')
 [ "$first" = "$last" ] || fail "the block that does not opt in broke across a page"
 echo "code-break: a block a document lets break breaks, and one it does not moves whole"

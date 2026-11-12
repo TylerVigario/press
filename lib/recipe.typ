@@ -36,6 +36,8 @@
   // Code is set a step below the text around it, as sz.fine is to sz.small; typst's own rule for
   // raw sets it at 0.8em first, which this is relative to.
   show raw: set text(font: face-mono, size: sz.fine / sz.small / 0.8 * 1em)
+  // Equations in the math face that sits with the text, not typst's own serif one.
+  show math.equation: set text(font: face-math)
   // typst curls a quote typed in markup and prints one in a string as it is, so a string read
   // from data, or a title given as one, would print straight beside curled prose. This curls a
   // string's quotes by typst's own rules, so a page has one form whichever way its text came.

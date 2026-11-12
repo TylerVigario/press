@@ -3,5 +3,5 @@
 #set document(title: [Glyph never placed], author: "press")
 #set page(..card)
 #set text(font: face-text, size: sz.body)
-#let spare = "📋"
+#let spare = "🔧"
 Plain text.

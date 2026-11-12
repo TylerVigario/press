@@ -7,7 +7,7 @@
 #   sh .github/code-size.sh
 #
 # Run by CI on press's typst and on the oldest toolchain, with poppler. Every glyph of
-# Liberation Mono is 0.6em wide, so a word of code's width in pdftotext's boxes gives its size.
+# Noto Sans Mono is 0.6em wide, so a word of code's width in pdftotext's boxes gives its size.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -35,7 +35,7 @@ for case in "codebody:9.40:in body text" "codesheet:8.60:in a sheet's cell" \
 done
 # left_of <word>: the left edge of its box, in points from the page's.
 left_of() { word_box "$tmp/boxes.html" "$1" | awk '{ print $1 }'; }
-# Under each template: the PDF embeds Liberation Mono and not typst's DejaVu Sans Mono, which
+# Under each template: the PDF embeds Noto Sans Mono and not typst's DejaVu Sans Mono, which
 # the audit refuses, body code is a step below the template's body size, 10.2pt in all but
 # letter, whose body is 11pt, and a code block is boxed by code(), its words 7pt in from the
 # text's edge by its inset.
@@ -44,7 +44,7 @@ for case in brief:9.40 base:9.40 recipe:9.40 letter:10.14 resume:9.40; do
     typst compile --root . --font-path fonts --ignore-system-fonts --input "template=$template" \
         .github/code-face.typ "$tmp/face.pdf"
     fonts=$(pdffonts "$tmp/face.pdf")
-    printf '%s\n' "$fonts" | grep -q 'LiberationMono' || fail "$template sets code in no Liberation Mono"
+    printf '%s\n' "$fonts" | grep -q 'NotoSansMono' || fail "$template sets code in no Noto Sans Mono"
     ! printf '%s\n' "$fonts" | grep -q 'DejaVu' || fail "$template sets code in typst's DejaVu Sans Mono"
     pdftotext -bbox "$tmp/face.pdf" "$tmp/boxes.html"
     got=$(size_of codeface)
