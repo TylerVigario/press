@@ -10,9 +10,11 @@
 // and the method first, then the reference, and writein() for what the cook changed. A card
 // marks where its reference starts with typst's own label, <depth>, on the heading that opens
 // it, and recipe starts it on a page of its own under `depth`, a line saying page one is the
-// whole cook; none prints no line. A section is a heading, `= Method`, drawn as a band, and `==`
-// is a labelled hairline under it; `caps: false` keeps the headings' case, which upper() would
-// change. `footer` is the footer: none leaves it out.
+// whole cook; none prints no line. A pointer into the reference is typst's own page reference,
+// #ref(<label>, form: "page"), as in a brief: recipe numbers its pages so that typst can. A
+// section is a heading, `= Method`, drawn as a band, and `==` is a labelled hairline under it;
+// `caps: false` keeps the headings' case, which upper() would change. `footer` is the footer:
+// none leaves it out.
 //
 //   #show: recipe.with(title: [Black beans], yield: [serves 8], method: [stovetop],
 //     time: [about 40 min], intro: [A pot of beans for the week.])
@@ -23,7 +25,7 @@
   body,
 ) = {
   set document(title: title, author: author)
-  set page(..preset, footer: footer)
+  set page(..preset, numbering: "1", footer: footer)
   set text(font: face-text, size: sz.small, fill: ink, lang: "en")
   // Paragraphs further apart than a list's items, and items than lines, so each reads as one:
   // a paragraph ends where its gap shows, and the one after a list is not its last item's.

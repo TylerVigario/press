@@ -217,6 +217,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/header-rule.sh
 
+  recipe-ref:
+    name: A recipe card points into its reference by page, as a brief does
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/recipe-ref.sh
+
   label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads
     runs-on: ubuntu-latest
@@ -545,6 +554,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/header-rule.sh
+
+  oldest-recipe-ref:
+    name: A recipe card points into its reference by page, as a brief does, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/recipe-ref.sh
 
   oldest-label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain
