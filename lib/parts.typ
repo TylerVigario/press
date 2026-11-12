@@ -71,7 +71,9 @@
 
 // A document's header: its title on the left, `meta` on the right, and a rule beneath. The title
 // is the one the document names itself with, set document(title:) or a template's title, so it
-// is named once, as footer() names it.
+// is named once, as footer() names it. A title that fits on one line keeps it, and `meta` wraps
+// beside it. Beside a title too long for one line, `meta` keeps its one line where it fits in
+// half the line, and else the two share the line in halves.
 //
 //   #header(meta: [Site A · October 2026])
 #let header(meta: none, color: slate, face: face-display, size: sz.title) = context block(width: 100%, {
@@ -81,12 +83,19 @@
   // Tells footer() and the document's start the title's marks are counted here.
   [#metadata(none)<press-header>]
   if not _titled() { _marks(document.title).join() }
-  grid(
-    columns: (auto, 1fr),
-    align: (left + bottom, right + bottom),
-    text(font: face, size: size, weight: 700, fill: ink, _unmarked(document.title)),
-    text(size: sz.fine, fill: ink-soft, meta),
-  )
+  layout(region => {
+    let title = text(font: face, size: size, weight: 700, fill: ink, _unmarked(document.title))
+    let note = text(size: sz.fine, fill: ink-soft, meta)
+    let gap = 9pt
+    let half = (region.width - gap) / 2
+    grid(
+      columns: if measure(title).width + gap < region.width { (auto, 1fr) }
+        else if measure(note).width <= half { (1fr, auto) } else { (1fr, 1fr) },
+      column-gutter: gap,
+      align: (left + bottom, right + bottom),
+      title, note,
+    )
+  })
   // The rule clears the title's descenders: it sits as far under the face's descender line as the
   // gap alone would put it under the baseline, and what follows moves down with it.
   let depth = measure(text(font: face, size: size, weight: 700, top-edge: "baseline",
