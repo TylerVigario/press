@@ -195,12 +195,28 @@
 // has to be edited out after a paste. MDN's guidance is the same. Where a
 // document genuinely mixes shells, say so in the prose around the block.
 //
-// breakable is opt-in. A command split across a page turn is a command with no
-// second half, so the default refuses to break; a long listing that legitimately
-// spans pages passes `breakable: true` through a closure:
+// A block is kept whole wherever it fits on a page. A command split across a page
+// turn is a command with no second half, so by default a block that falls across one
+// starts the next page whole; only a block taller than a page breaks, since kept whole
+// it would run off the page's foot and its end print on no page. A long listing that
+// should break at any turn passes `breakable: true` through a closure:
 //
 //   #show raw.where(block: true): it => code(it, breakable: true)
 //
+// and `breakable: false` keeps every block whole, one taller than a page too.
+//
+// _fit(part, breakable, made): the block `made(breakable)` gives, where breakable is auto
+// kept whole where it fits on a page and let break where it is taller than one, as a sheet's
+// row is. A page's height is the height of the region it is laid out in; measured, as inside
+// units(), the page has no end, and the block is kept whole. true and false are passed as they
+// are.
+#let _fit(part, breakable, made) = {
+  assert(breakable in (auto, true, false),
+    message: part + "(breakable:) takes auto, true or false; got " + repr(breakable))
+  if breakable != auto { made(breakable) } else {
+    layout(region => made(measure(block(width: region.width, made(false))).height > region.height))
+  }
+}
 // A template installs code for every block, so a document's own rule for one block, above,
 // runs first and code then meets the same block again. It marks what it holds, and leaves a
 // block already inside a code alone: the document's choice stands, and the block is boxed once.
@@ -218,12 +234,12 @@
     }
   }))
 }
-#let code(body, breakable: false) = context if _in-code.get() { body } else {
-  block(
+#let code(body, breakable: auto) = context if _in-code.get() { body } else {
+  _fit("code", breakable, b => block(
     width: 100%, fill: paper-tint, stroke: 0.6pt + rule-mid,
-    inset: (x: 7pt, y: 6pt), radius: 1.5pt, breakable: breakable,
+    inset: (x: 7pt, y: 6pt), radius: 1.5pt, breakable: b,
     { _in-code.update(true); _wraps(body); body; _in-code.update(false) },
-  )
+  ))
 }
 
 // A piece of text with a straight quote in it, its quotes made smart, so typst curls each as it
@@ -277,10 +293,10 @@
   }
 }
 
-// Numbered entry: marker, title, explanation.
-#let item(n, title, body, color: slate, size: sz.small) = context block(
-  width: 100%, breakable: false, inset: (bottom: 6pt),
-)[
+// Numbered entry: marker, title, explanation. Kept whole where it fits on a page, and let break
+// where it is taller than one; `breakable` is as code()'s.
+#let item(n, title, body, color: slate, size: sz.small, breakable: auto) = context _fit("item",
+  breakable, b => block(width: 100%, breakable: b, inset: (bottom: 6pt))[
   #let spacing = par.spacing
   #set par(spacing: _part-gap)
   #text(size: size, weight: 700, fill: color)[#n]
@@ -288,7 +304,7 @@
   #text(size: size, weight: 700)[#title]
   #v(2pt)
   #text(size: size, _body(spacing, body))
-]
+])
 
 // a → b → c, for pipelines.
 #let flow(..steps) = align(center)[
