@@ -11,7 +11,8 @@
 # that set the quote apart from its neighbours would lose the kerning beside it and move the words
 # after it. The cases are prose, a tracked label, strings inside markup, a foot and an inch after a
 # digit, and German. The title, given as a string, prints curled, and a quote in code, in math and
-# in an address link-note prints, bare or in its footnote, stays straight.
+# in an address link-note prints, bare or in its footnote, stays straight. .github/quotes-each.typ
+# gives a string under each template in turn, which must print its quote curled under all five.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -53,4 +54,14 @@ for want in "The Tenant’s Notes" "echo 'it's' \"x\"" "grep 'it'\\''s' \"a file
     case $text in *"$want"*) ;; *) fail "the page does not read \"$want\"; it reads: $text" ;; esac
 done
 case $text in *"Tenant's"*) fail "the title prints a straight apostrophe: $text" ;; esac
-echo "quotes: a string's quotes print as markup's, kerned alike, and code, math and an address keep theirs straight"
+for t in base brief letter recipe resume; do
+    typst compile --root . --font-path fonts --ignore-system-fonts --input "template=$t" \
+        .github/quotes-each.typ "$tmp/$t.pdf"
+    each=$(pdftotext "$tmp/$t.pdf" - | tr '\n' ' ' | tr -s ' ')
+    case $each in
+        *"The tenant’s notes"*) ;;
+        *) fail "under $t, a string's quote does not print curled; the page reads: $each" ;;
+    esac
+done
+echo "quotes: a string's quotes print as markup's under every template, kerned alike, and code," \
+    "math and an address keep theirs straight"
