@@ -9,12 +9,14 @@
 // type and the rules for code and links, and the document's title and author, with nothing
 // drawn. Like every template it keeps its own lines, so it can be read, or copied, on its own.
 // A set rule written after it changes any of these for the document it is in:
-// `#set par(leading: 0.58em)` after the show rule wins over base's own.
+// `#set par(leading: 0.58em)` after the show rule wins over base's own. `preset` is the page, and
+// `calibration` is the printer's, its band at each edge, which widens the margins where it
+// must: tokens.typ's `calibration` says how.
 //
 //   #show: base.with(title: [Rack power], author: "Your name", preset: dense)
-#let base(title: none, author: (), preset: card, body) = {
+#let base(title: none, author: (), preset: card, calibration: calibration, body) = {
   set document(title: title, author: author)
-  set page(..preset)
+  set page(.._calibrated(preset, calibration))
   set text(font: face-text, size: sz.small, fill: ink, lang: "en")
   // Paragraphs further apart than a list's items, and items than lines, so each reads as one:
   // a paragraph ends where its gap shows, and the one after a list is not its last item's.
@@ -38,5 +40,7 @@
   show link: link-note
   // The title is counted here when nothing in the document prints it.
   _title-start()
+  // The calibration's bands, for the audit.
+  _edges-mark(calibration)
   body
 }

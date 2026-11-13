@@ -94,10 +94,11 @@
   each scale with it, so a ruler that does not measure what it says means printing the sheet
   again at Actual size.
 
-  *2 and 3, the bands.* No ink prints nearer an edge than its band. press's page presets are
-  built to keep ink 0.5 in, #mm(0.5in), from every edge, and the audit fails ink nearer than
-  0.48 in, #mm(0.48in): a band wider than either, at any edge or on either side, is the number
-  to recalibrate them by.
+  *2 and 3, the bands.* No ink prints nearer an edge than its band. press's page presets keep
+  ink clear of a band of #fixed(calibration.edges.top / 1in, 2) in, #mm(calibration.edges.top),
+  at every edge, press's own calibration. Given to a template as its calibration, the larger of
+  front and back at each edge, `calibration: (edges: (top: …, bottom: …, left: …, right: …))`,
+  the bands widen the page's margins where they must, and the audit fails ink inside them.
 
   *4, ink.* Text in an ink lighter than this fades on this printer, at the smallest size press
   sets. Page #on(<reading-ink>) places press's own text inks on the same scale.

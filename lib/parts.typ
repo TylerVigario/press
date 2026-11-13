@@ -69,6 +69,73 @@
   _marks(document.title).join()
 }
 
+// A calibration as a template takes it, checked, each edge it leaves out taken from press's own,
+// `calibration` in tokens.typ. An edge's band is an absolute length.
+#let _calibration(given) = {
+  assert(type(given) == dictionary, message: "calibration takes a dictionary, (edges: (top: …, "
+    + "bottom: …, left: …, right: …)); got " + repr(given))
+  for key in given.keys() {
+    assert(key in calibration, message: "calibration takes " + calibration.keys().join(", ")
+      + "; got " + key)
+  }
+  let edges = given.at("edges", default: (:))
+  assert(type(edges) == dictionary, message: "calibration's edges takes a dictionary, (top: …, "
+    + "bottom: …, left: …, right: …); got " + repr(edges))
+  for (edge, band) in edges {
+    assert(edge in calibration.edges,
+      message: "calibration's edges are top, bottom, left and right; got " + edge)
+    assert(type(band) == length and band.em == 0 and band >= 0pt, message: "calibration's " + edge
+      + " edge takes an absolute length, the band the printer cannot print; got " + repr(band))
+  }
+  (edges: calibration.edges + edges)
+}
+
+// A preset set for a calibration: each margin widened by as much as the calibration's band at
+// that edge exceeds press's own, which every preset's ink, its header and footer included,
+// already clears. A header and a footer keep their distance from the body, so each moves with
+// its margin and clears the band too. A band no wider than press's changes nothing.
+#let _calibrated(preset, given) = {
+  let edges = _calibration(given).edges
+  let more = (:)
+  for (edge, band) in edges { more.insert(edge, calc.max(0pt, band - calibration.edges.at(edge))) }
+  if more.values().all(m => m == 0pt) { return preset }
+  let m = preset.at("margin", default: auto)
+  let given-as(edge, ..others) = {
+    let v = if type(m) == dictionary {
+      let found = (edge, ..others.pos(), "rest").filter(k => k in m)
+      if found.len() > 0 { m.at(found.first()) } else { auto }
+    } else { m }
+    assert(type(v) == length, message: "calibration widens a page's margins, so its " + edge
+      + " margin must be a length; got " + repr(v))
+    v
+  }
+  // A header's ascent and a footer's descent, typst's 30% of their margin unless given, are
+  // fixed at what they were, so a wider margin does not move them further into it.
+  let fixed(v, margin) = if type(v) == ratio { v * margin }
+    else if type(v) == relative { v.ratio * margin + v.length } else { v }
+  let (top, bottom) = (given-as("top", "y"), given-as("bottom", "y"))
+  let sides = if type(m) == dictionary and ("inside" in m or "outside" in m) {
+    let wider = calc.max(more.left, more.right)
+    (inside: given-as("inside", "x") + wider, outside: given-as("outside", "x") + wider)
+  } else {
+    (left: given-as("left", "x") + more.left, right: given-as("right", "x") + more.right)
+  }
+  (
+    ..preset,
+    margin: (top: top + more.top, bottom: bottom + more.bottom, ..sides),
+    header-ascent: fixed(preset.at("header-ascent", default: 30%), top),
+    footer-descent: fixed(preset.at("footer-descent", default: 30%), bottom),
+  )
+}
+
+// The calibration's bands, for the audit, in inches, top, bottom, left and right: it fails ink
+// nearer an edge than that edge's band. A template places it where it starts.
+#let _edges-mark(given) = {
+  let edges = _calibration(given).edges
+  metadata("press-edges " + ("top", "bottom", "left", "right")
+    .map(edge => str(calc.round(edges.at(edge) / 1in, digits: 4))).join(" "))
+}
+
 // A document's header: its title on the left, `meta` on the right, and a rule beneath. The title
 // is the one the document names itself with, set document(title:) or a template's title, so it
 // is named once, as footer() names it. A title that fits on one line keeps it, and `meta` wraps

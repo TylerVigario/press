@@ -99,9 +99,10 @@
 #     could not work, and skipped where a working interpreter was present under
 #     the other name.
 #
-# The PRINTABLE-AREA check verifies that no ink comes within 0.48in of a paper
-# edge — the 0.5in safe area the page presets are built around, less a rendering
-# tolerance.
+# The PRINTABLE-AREA check verifies that no ink comes nearer a paper edge than
+# the printer's band there: 0.48in at every edge, press's own calibration and the
+# 0.5in safe area the page presets are built around less a rendering tolerance, or
+# the bands a document's calibration declares, edge by edge (lib/tokens.typ).
 #
 # The OVERLAP check reports any line of text printed on top of another. It and
 # the printable-area check catch LAYOUT faults rather than font ones, and they
@@ -258,11 +259,12 @@ found() {
     case " $accepted " in *" $1 "*) ;; *) rc=1 ;; esac
 }
 
-# PRESS'S MARKS. Three of press's parts leave a mark for the audit: unsourced(), a value the
-# document prints without having read it from a source, marked with its kind; form(probe:), the
-# measuring grid; and code(), a line of a code block too long for it. typst lists them, and only
-# where a source of the document's own names one, as unsourced or probe:, or holds a code block,
-# so no other document is compiled again: typst eval, or typst query
+# PRESS'S MARKS. press leaves marks for the audit: unsourced(), a value the document prints
+# without having read it from a source, marked with its kind; form(probe:), the measuring grid;
+# code(), a line of a code block too long for it; and a template, the calibration it was given,
+# the printer's band at each edge. typst lists them, and only where a source of the document's
+# own names one, as unsourced, probe: or calibration, or holds a code block, so no other document
+# is compiled again: typst eval, or typst query
 # before 0.15, which has no eval. Neither takes the --deps a build passes, so the query runs
 # without it. Any mention of unsourced asks, a shorthand's `unsourced.with(...)` among them, and
 # a fence or any mention of raw, so a block made through `raw.with(...)` or a name given to raw
@@ -291,13 +293,24 @@ press_marks() {
 want=$(while IFS= read -r f; do
     if grep -q 'unsourced' "$f"; then echo unsourced; fi
     if grep -q 'probe:' "$f"; then echo probe; fi
+    if grep -q 'calibration' "$f"; then echo calibration; fi
     if grep -qE '```|(^|[^[:alnum:]_-])raw([^[:alnum:]_-]|$)' "$f"; then echo code; fi
 done < "$tmp/sources")
 wraps=
+# The floor at each edge, top, bottom, left and right: press's own calibration, or the widest band
+# at each edge among those a document's templates were given.
+floor=0.48
 if [ -n "$want" ]; then
     if marks=$(press_marks "$@"); then
         wraps=$(printf '%s\n' "$marks" | grep -o '"press-code-wrap [^"]*"' \
             | sed 's/^"press-code-wrap //; s/"$//' || true)
+        declared=$(printf '%s\n' "$marks" | grep -o '"press-edges [^"]*"' \
+            | sed 's/^"press-edges //; s/"$//' || true)
+        if [ -n "$declared" ]; then
+            floor=$(printf '%s\n' "$declared" | awk '
+                { for (i = 1; i <= 4; i++) if (NR == 1 || $i > m[i]) m[i] = $i }
+                END { printf "%s,%s,%s,%s", m[1], m[2], m[3], m[4] }')
+        fi
         n=$(printf '%s\n' "$marks" | grep -o '"press-open"' | wc -l | tr -d ' ')
         case $n in
             0) ;;
@@ -323,6 +336,9 @@ if [ -n "$want" ]; then
         esac
         case $want in
             *code*) echo "press: could not tell whether a line of code wraps in $pdf" >&2; rc=1 ;;
+        esac
+        case $want in
+            *calibration*) echo "press: could not read the calibration of $pdf" >&2; rc=1 ;;
         esac
     fi
 fi
@@ -566,7 +582,7 @@ elif [ -n "$PY" ]; then
     # it could not parse or an error nothing caught, and is named here.
     s=0
     PRESS_PDFTOPPM="${PRESS_PDFTOPPM:-pdftoppm}" \
-        "$PY" "$press_root/tools/ink-margin.py" "$page" 0.48 "$pdf" || s=$?
+        "$PY" "$press_root/tools/ink-margin.py" "$page" "$floor" "$pdf" || s=$?
     case $s in
         0) ;;
         3) found ink-margin ;;

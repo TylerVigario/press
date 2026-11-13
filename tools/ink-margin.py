@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Report the smallest distance from any ink to any paper edge, per page.
+"""Report ink nearer a paper edge than that edge's floor, per page and edge.
 
 Exists because a document can overflow the printable area silently: typst has
 no concept of a printer's unprintable band, so the failure only appears on
-paper, after the sheet is in your hand.
+paper, after the sheet is in your hand. The floor is the band: one for every
+edge, or one each for the top, bottom, left and right, as a document's
+calibration declares them (tokens.typ's `calibration`).
 
 Reads PGM pages by rendering via pdftoppm, so it needs poppler — the same
 dependency `check` already has — plus a Python to run this file.
@@ -113,12 +115,26 @@ def clearance(path):
             minx = min(minx, xs[0]); maxx = max(maxx, xs[-1])
     if maxx < 0:
         return None                      # blank page, nothing to clip
-    return min(minx, w-1-maxx, miny, h-1-maxy) / DPI
+    return {"top": miny / DPI, "bottom": (h-1-maxy) / DPI,
+            "left": minx / DPI, "right": (w-1-maxx) / DPI}
+
+EDGES = ("top", "bottom", "left", "right")
+
+def floors(arg):
+    """The floor at each edge, in inches: one number for all four, or four, comma-separated, for
+    the top, bottom, left and right."""
+    values = [float(v) for v in arg.split(",")]
+    if len(values) == 1:
+        values *= 4
+    if len(values) != 4:
+        die(f"press: {pathlib.Path(sys.argv[0]).name} takes one floor or four, top, bottom, left "
+            f"and right; got {arg}")
+    return dict(zip(EDGES, values))
 
 def main():
     # A third argument names the PDF in findings, when the one read is a copy of it: check reads
     # a copy with its scans hidden (lib/parts.typ's scan()), and reports against the document's PDF.
-    pdf, floor = sys.argv[1], float(sys.argv[2])
+    pdf, floor = sys.argv[1], floors(sys.argv[2])
     name = sys.argv[3] if len(sys.argv) > 3 else pdf
     rc = 0
     with tempfile.TemporaryDirectory() as tmp:
@@ -126,11 +142,12 @@ def main():
             c = clearance(page)
             if c is None:
                 continue
-            if c < floor:
-                print(f"press: {name} page {n} has ink {c:.2f}in from a paper edge "
-                      f"(floor {floor:.2f}in) — it will clip when printed at actual size",
-                      file=sys.stderr)
-                rc = FINDING
+            for edge in EDGES:
+                if c[edge] < floor[edge]:
+                    print(f"press: {name} page {n} has ink {c[edge]:.2f}in from its {edge} edge, "
+                          f"inside the {floor[edge]:.2f}in band it is set for: a printer with that "
+                          f"band clips it at actual size", file=sys.stderr)
+                    rc = FINDING
     return rc
 
 if __name__ == "__main__":

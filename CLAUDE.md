@@ -39,7 +39,7 @@ needs it, built for both media, and offered to every document from the next rele
 | | what |
 |---|---|
 | `lib.typ` | the one file a document imports, which imports every file in `lib/` |
-| `lib/` | `tokens.typ` (colours, faces, sizes, presets, the version), `parts.typ`, `composition.typ`, and a file for each template, with the parts only it uses: `letter.typ` holds the letter's, `resume.typ` the résumé's `entry` |
+| `lib/` | `tokens.typ` (colours, faces, sizes, presets, the calibration, the version), `parts.typ`, `composition.typ`, and a file for each template, with the parts only it uses: `letter.typ` holds the letter's, `resume.typ` the résumé's `entry` |
 | `press.toml` | `version`, the version last released, and `typst`, the oldest typst press works with |
 | `template/` | the starters `tools/new.sh` copies, `main.typ` (applying `brief`), `letter.typ` (applying `letter`), `recipe.typ` (applying `recipe`) and `resume.typ` (applying `resume`); each imports `../lib.typ` so it compiles in place |
 | `calibration.typ` | the print calibration sheet; imports `lib.typ` |
@@ -148,6 +148,11 @@ repository has.
   tool reads as a finding a document has accepted.
 - **The build record is one file, `.build-record`, in press's folder**, kept out of git by the
   kit's `.gitignore`; nothing goes beside a document or its PDF.
+- **press's own calibration is written twice:** `calibration` in `lib/tokens.typ`, which every
+  template takes by default, and `floor=` in `tools/check.sh`, the audit's floor at every edge
+  for a document that declares none. A template records the bands it was given as a
+  `press-edges` mark, which check reads only where the document's own sources mention
+  `calibration`; `edges.sh` fails when the two disagree. Change both together.
 - **The build record keys on everything typst does not list.** `stamp.sh`'s `key()` holds the
   fonts in each font path, typst's version, press's tools, the flags, the zone and typst's
   environment; typst's `--deps` lists the rest. A new thing a build depends on goes into

@@ -14,18 +14,19 @@
 // #ref(<label>, form: "page"), as in a brief: recipe numbers its pages so that typst can. A
 // section is a heading, `= Method`, drawn as a band, and `==` is a labelled hairline under it;
 // `caps: false` keeps the headings' case, which upper() would change. `footer` is the footer:
-// none leaves it out.
+// none leaves it out. `preset` is the page, and `calibration` is the printer's, its band at each
+// edge, which widens the margins where it must: tokens.typ's `calibration` says how.
 //
 //   #show: recipe.with(title: [Black beans], yield: [serves 8], method: [stovetop],
 //     time: [about 40 min], intro: [A pot of beans for the week.])
 #let recipe(
   title: none, author: (), yield: none, method: none, time: none, intro: none, preset: card,
-  footer: footer(), caps: true,
+  footer: footer(), calibration: calibration, caps: true,
   depth: [Nothing past this point is needed to cook. Page 1 is the whole job.],
   body,
 ) = {
   set document(title: title, author: author)
-  set page(..preset, numbering: "1", footer: footer)
+  set page(.._calibrated(preset, calibration), numbering: "1", footer: footer)
   set text(font: face-text, size: sz.small, fill: ink, lang: "en")
   // Paragraphs further apart than a list's items, and items than lines, so each reads as one:
   // a paragraph ends where its gap shows, and the one after a list is not its last item's.
@@ -86,6 +87,8 @@
 
   // The title is counted here when nothing in the document prints it.
   _title-start()
+  // The calibration's bands, for the audit.
+  _edges-mark(calibration)
   // The head, its header and intro, is one part, with the part's own gaps inside.
   block(width: 100%, {
     set par(spacing: _part-gap)

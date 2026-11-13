@@ -95,8 +95,9 @@
 // "actual size" needs no scaling — but consumer printers cannot print to the
 // paper edge, and that unprintable band is set in hardware with no dialog
 // option on most of them. Everything here therefore keeps ink at least 0.5in
-// from every edge, which clears the dead band on ordinary lasers and inkjets
-// alike. "Fit to page" is then never necessary, and should never be used: it
+// from every edge, clear of press's own calibration below; a printer whose band
+// is wider at an edge is set by its own, which widens these margins to clear
+// it. "Fit to page" is then never necessary, and should never be used: it
 // scales the sheet down and undoes the type sizes above.
 //
 // The bottom margin is deliberately larger than the top. The footer sits INSIDE
@@ -117,3 +118,14 @@
   paper: "us-letter", margin: (x: 0.55in, top: 0.55in, bottom: 0.75in),
   footer-descent: 0.12in,
 )
+
+// The calibration the presets are set for. `edges` is how near each edge of the paper a printer
+// starts to print, its band, as the calibration sheet's readings 2 and 3 measure it: every
+// preset keeps its ink, a header or footer included, at least that far from each edge, and the
+// audit fails ink nearer. A template's `calibration` sets a printer's own, edge by edge, an edge
+// left out taking this one's: `brief.with(calibration: (edges: (bottom: 17mm)))` widens the
+// bottom margin by as much as 17 mm exceeds the bottom here, and the audit fails ink within
+// 17 mm of the bottom edge. A band narrower than this one leaves the margins as they are and
+// lets the audit pass ink nearer that edge. A repository whose documents print on one printer
+// writes its numbers once, in a file its documents or its shared template import.
+#let calibration = (edges: (top: 0.48in, bottom: 0.48in, left: 0.48in, right: 0.48in))
