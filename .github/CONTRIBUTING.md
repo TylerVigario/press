@@ -23,16 +23,20 @@ Every build is audited where the tools are installed, and says in one line what 
 
 ## Test a change
 
-Each check CI runs is a script you can run: `sh .github/<name>.sh`. Those that touch what you
-changed are the ones to run first:
+Most checks CI runs are a script you can run, `sh .github/<name>.sh`. The documents' build and
+audit are `just build calibration.typ` and `just check calibration.typ`, as above, and the lints
+below run their own tools. Those that touch what you changed are the ones to run first:
 
 - `audit-cases.sh`: the audit's known cases, `.github/audit-cases/`
 - `templates.sh`: each starter compiles in place and as `new.sh` scaffolds it
 - a layout check, such as `list-spacing.sh`, each with the `.typ` it measures
 
-CI runs every check at the typst `tools/install-typst.sh` pins and again at the oldest press
-accepts, `press.toml`'s `typst`, so a change that needs a newer typst fails there. Run the
-checks you touched at both.
+CI runs each check that compiles with typst at the typst `tools/install-typst.sh` pins and again
+at the oldest press accepts, `press.toml`'s `typst`, so a change that needs a newer typst fails
+there; the release bundle's check alone runs at press's typst only. `tools/install-typst.sh`
+installs the newer. The oldest is typst's own release of that version, whose address and digest
+the toolchain action's `OLDEST_` pins give, in `.github/actions/typst-toolchain/action.yml`.
+Run the checks you touched at both.
 
 ## Shape a pull request
 
@@ -67,7 +71,7 @@ A fix to how a page is laid out comes with a check that fails without the fix:
 
 CI also runs shellcheck at `--severity=warning`, over press.just's recipes and every composite
 action's `run:` steps too; markdownlint, lines at most 100; actionlint; a JSON parse; and a scan
-for soft hyphens and zero-width characters in any tracked file.
+for soft hyphens, zero-width characters and direction controls in any tracked file.
 
 ## Releases
 
