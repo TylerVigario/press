@@ -60,6 +60,6 @@ needs them, each with the reference that lets them check it.
 
 The last paragraph says what happens next, and how to reach you.
 
-#signature(closing: [Sincerely,])
+#signature(closing: [Sincerely,], dated: false)
 
 #enclosures([First enclosure], [Second enclosure])
