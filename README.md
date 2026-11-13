@@ -558,11 +558,13 @@ Print at **100% — "Actual size"**, never "Fit to page". The presets are exactl
 keep all ink at least 0.5in from every edge; a document that overrides the margin or places
 content absolutely can break that, and the audit measures it.
 
-`calibration.typ` prints the text inks at the four smallest sizes, the pale tints, the rule
-weights and a heading's solid band, where a printer gives out first. Build it like any document
-(`third_party/press/calibration.typ`), and print it on the paper and printer you actually use —
-once at normal quality and once in economy mode, duplexed on the long edge — to find where your
-hardware gives out before a real document does.
+`calibration.typ` measures a printer by numbers, each of its scales numbered by its value: the
+band it cannot print at each edge of each side of a sheet, whether it prints at actual size, and
+the lightest ink, the palest fill, the thinnest rule and the darkest solid it holds. Build it like
+any document (`third_party/press/calibration.typ`), print it on the paper and printer you actually
+use — at Actual size, duplexed on the long edge, once at normal quality and once in economy mode —
+and write the numbers on its first page, which says what each one sets. Its edge gauges print
+into the edges on purpose, so it accepts the audit's ink-margin finding.
 
 ## Versioning
 
