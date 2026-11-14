@@ -18,7 +18,8 @@
 #let unit(label, tone, lead, body, caps: true, breakable: auto, shape: auto) = {
   let pair = tones.at(tone)
   context _fit("unit", breakable, b => block(width: 100%, breakable: b,
-        stroke: (left: 2.5pt + pair.at(0)), fill: paper-tint, inset: (x: 8pt, y: 6.5pt))[
+        stroke: (left: _stroke(2.5pt, pair.at(0))), fill: _cal(paper-tint),
+        inset: (x: 8pt, y: 6.5pt))[
     #let spacing = par.spacing
     #set par(spacing: _part-gap)
     #text(size: sz.fine, block(sticky: true,
@@ -41,7 +42,8 @@
   let pair = tones.at(tone)
   let shown = [#_shaped("chip", tone, shape, gap: 0.3em)#label]
   if boxed {
-    box(fill: pair.at(1), stroke: 0.5pt + pair.at(0), inset: (x: 4pt, y: 2pt), radius: 1pt,
+    context box(fill: _cal(pair.at(1)), stroke: _stroke(0.5pt, pair.at(0)),
+        inset: (x: 4pt, y: 2pt), radius: 1pt,
         text(size: sz.micro, weight: 700, fill: pair.at(0), shown))
   } else {
     text(weight: 700, fill: pair.at(0), shown)
@@ -56,7 +58,7 @@
   #let spacing = par.spacing
   #set par(spacing: _part-gap)
   #grid(columns: (auto, 1fr), gutter: 6pt, align: (left + top, left + top),
-    box(fill: color, radius: 50%, inset: (x: 4.5pt, y: 3pt),
+    box(fill: _cal(color), radius: 50%, inset: (x: 4.5pt, y: 3pt),
       text(size: sz.fine, weight: 700, fill: white)[#n]),
     [
       #text(size: sz.fine, weight: 700)[#q]
@@ -82,7 +84,7 @@
 }
 
 // The line a pen writes on, under a signature, a date or a note.
-#let _hand-line = line(length: 100%, stroke: 0.5pt + ink)
+#let _hand-line = context line(length: 100%, stroke: _stroke(0.5pt, ink))
 
 // A table of any number of columns, two or twenty: `#sheet((auto, 1fr), ([Item], [Amount]), ..)`.
 //
@@ -196,17 +198,19 @@
     message: "sheet(across:) draws a table.hline where it is given among the rows, so it takes "
       + "no y")
   // The sheet, or the part of it a column holds: `before` rows come ahead of these, so the
-  // stripes run on from column to column.
-  let part(cells, before: 0, last: true) = table(
-    columns: cols,
-    stroke: 0.4pt + rule-hair,
-    inset: inset,
-    fill: (_, y) => if y == 0 { slate-tint }
-      else if calc.odd(y + before) { paper-tint } else { none },
-    table.header(..head-cells),
-    ..cells,
-    ..if last and foot != none { (foot,) },
-  )
+  // stripes run on from column to column. Called in context, for its colours.
+  let part(cells, before: 0, last: true) = {
+    let (head, stripe) = (_cal(slate-tint), _cal(paper-tint))
+    table(
+      columns: cols,
+      stroke: _stroke(0.4pt, rule-hair),
+      inset: inset,
+      fill: (_, y) => if y == 0 { head } else if calc.odd(y + before) { stripe } else { none },
+      table.header(..head-cells),
+      ..cells,
+      ..if last and foot != none { (foot,) },
+    )
+  }
   _sheets.step()
   layout(region => context {
     let id = _sheets.get().first()
@@ -362,7 +366,11 @@
 //   - Shut the water off at the street.
 #let checkbox(checked: false, size: 0.7em, stroke: 0.6pt + ink, radius: 1pt) = context {
   let x = measure(text(top-edge: "x-height", bottom-edge: "baseline")[x]).height
-  box(width: size, height: size, baseline: size / 2 - x / 2, stroke: stroke, radius: radius,
+  // A stroke given as a width and one colour is drawn as press draws its own.
+  let plain = (type(stroke) == std.stroke and type(stroke.thickness) == length
+    and type(stroke.paint) == color)
+  let drawn = if plain { _stroke(stroke.thickness, stroke.paint) } else { stroke }
+  box(width: size, height: size, baseline: size / 2 - x / 2, stroke: drawn, radius: radius,
     if checked { place(center + horizon,
       text(size: size, weight: 700, top-edge: "cap-height", bottom-edge: "baseline")[X]) })
 }

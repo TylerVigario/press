@@ -222,6 +222,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/edges.sh
 
+  calibration-floors:
+    name: A calibration's floors darken press's inks and tints, and widen its rules
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/floors.sh
+
   header-rule:
     name: header()'s rule clears the title's descenders
     runs-on: ubuntu-latest
@@ -605,6 +614,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/edges.sh
+
+  oldest-calibration-floors:
+    name: A calibration's floors darken press's inks and tints, and widen its rules, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/floors.sh
 
   oldest-header-rule:
     name: header()'s rule clears the title's descenders, on the oldest toolchain

@@ -26,7 +26,7 @@
     ..if items.len() > 0 {
       (text(size: sz.small, fill: ink-soft, items.join(text(fill: ink-faint)[ #sym.dot.c ])),)
     },
-    line(length: 100%, stroke: 0.75pt + rule-mid),
+    line(length: 100%, stroke: _stroke(0.75pt, rule-mid)),
   )
 })
 
@@ -61,7 +61,7 @@
   let w = _words("continued", words, "page")
   let n = counter(page).get().first()
   if n > 1 {
-    set text(size: sz.fine, fill: ink-soft)
+    set text(size: sz.fine, fill: _cal(ink-soft))
     let dates = query(<press-dateline>).filter(m => m.location().page() <= n)
     let date = if dates.len() > 0 { dates.last().value }
     grid(columns: (1fr, auto, 1fr), align: (left, center, right),
@@ -86,7 +86,9 @@
   header: continued(), calibration: calibration, body,
 ) = {
   set document(title: title, author: author)
-  set page(.._calibrated(reading, calibration), header: header)
+  set page(.._page(reading, calibration), header: header)
+  // The calibration, applied to all the template sets: its inks, its strokes and its bands.
+  show: _calibrate.with(calibration)
   set text(font: face, size: sz.body, fill: ink, lang: "en")
   set par(leading: 0.6em, spacing: 1.05em)
   // A list's items are further apart than the lines within one, so a wrapped item reads as one,
@@ -110,8 +112,6 @@
 
   // The title is counted here when nothing in the document prints it.
   _title-start()
-  // The calibration's bands, for the audit.
-  _edges-mark(calibration)
   let head = letterhead(..if type(contact) == array { contact } else { (contact,) }, face: face)
   if centred { align(center, head) } else { head }
   if date != none { dateline(date); parbreak() }

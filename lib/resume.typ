@@ -49,7 +49,9 @@
   preset: (paper: "us-letter", margin: (x: 0.6in, y: 0.5in)), calibration: calibration, body,
 ) = {
   set document(title: title, author: author)
-  set page(.._calibrated(preset, calibration))
+  set page(.._page(preset, calibration))
+  // The calibration, applied to all the template sets: its inks, its strokes and its bands.
+  show: _calibrate.with(calibration)
   set text(font: face, size: size, fill: ink, lang: "en")
   // Paragraphs further apart than a list's items, and items than lines, so each reads as one:
   // a paragraph ends where its gap shows, and the one after a list is not its last item's.
@@ -73,7 +75,7 @@
   show link: link-note
   let contact = if type(contact) == array { contact } else { (contact,) }
   show heading: set block(above: 1.1em, below: 0.6em, inset: (bottom: 0.3em),
-    stroke: (bottom: 0.5pt + rule-mid), sticky: true)
+    stroke: (bottom: _stroke-in(calibrated(calibration), 0.5pt, rule-mid)), sticky: true)
   show heading: it => block(width: 100%, text(size: 1.1 * size, weight: 700, fill: accent,
     tracking: 0.5pt, if caps { upper(it.body) } else { it.body }))
 
@@ -88,8 +90,6 @@
   ))
   // The title is counted here when nothing in the document prints it.
   _title-start()
-  // The calibration's bands, for the audit.
-  _edges-mark(calibration)
   if centred { align(center, head) } else { head }
   body
 }

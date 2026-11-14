@@ -69,14 +69,31 @@
   _marks(document.title).join()
 }
 
-// A calibration as a template takes it, checked, each edge it leaves out taken from press's own,
-// `calibration` in tokens.typ. An edge's band is an absolute length.
+// A calibration as a template takes it, checked, each number it leaves out taken from press's
+// own, `calibration` in tokens.typ. An edge's band and a rule's width are absolute lengths; ink
+// and fill are contrasts on white, from 1 to 21, 6 for 6:1.
 #let _calibration(given) = {
-  assert(type(given) == dictionary, message: "calibration takes a dictionary, (edges: (top: …, "
-    + "bottom: …, left: …, right: …)); got " + repr(given))
+  assert(type(given) == dictionary, message: "calibration takes a dictionary, (edges: (…), "
+    + "ink: …, fill: …, rule: (…)); got " + repr(given))
   for key in given.keys() {
     assert(key in calibration, message: "calibration takes " + calibration.keys().join(", ")
       + "; got " + key)
+  }
+  let readings = (ink: "the lightest text ink that reads", fill: "the palest fill that prints even")
+  for (key, what) in readings {
+    let v = given.at(key, default: calibration.at(key))
+    assert(type(v) in (int, float) and v >= 1 and v <= 21, message: "calibration's " + key
+      + " takes " + what + ", as its contrast on white, from 1 to 21, 6 for 6:1; got " + repr(v))
+  }
+  let rule = given.at("rule", default: (:))
+  assert(type(rule) == dictionary, message: "calibration's rule takes a dictionary, (rule-hair: …, "
+    + "rule-mid: …, slate: …, ink: …); got " + repr(rule))
+  for (name, width) in rule {
+    assert(name in calibration.rule,
+      message: "calibration's rule takes rule-hair, rule-mid, slate and ink; got " + name)
+    assert(type(width) == length and width.em == 0 and width >= 0pt, message: "calibration's rule "
+      + "takes for " + name + " an absolute length, the thinnest rule that prints unbroken; got "
+      + repr(width))
   }
   let edges = given.at("edges", default: (:))
   assert(type(edges) == dictionary, message: "calibration's edges takes a dictionary, (top: …, "
@@ -87,14 +104,19 @@
     assert(type(band) == length and band.em == 0 and band >= 0pt, message: "calibration's " + edge
       + " edge takes an absolute length, the band the printer cannot print; got " + repr(band))
   }
-  (edges: calibration.edges + edges)
+  (
+    edges: calibration.edges + edges,
+    ink: float(given.at("ink", default: calibration.ink)),
+    fill: float(given.at("fill", default: calibration.fill)),
+    rule: calibration.rule + rule,
+  )
 }
 
 // A preset set for a calibration: each margin widened by as much as the calibration's band at
 // that edge exceeds press's own, which every preset's ink, its header and footer included,
 // already clears. A header and a footer keep their distance from the body, so each moves with
 // its margin and clears the band too. A band no wider than press's changes nothing.
-#let _calibrated(preset, given) = {
+#let _page(preset, given) = {
   let edges = _calibration(given).edges
   let more = (:)
   for (edge, band) in edges { more.insert(edge, calc.max(0pt, band - calibration.edges.at(edge))) }
@@ -136,6 +158,94 @@
     .map(edge => str(calc.round(edges.at(edge) / 1in, digits: 4))).join(" "))
 }
 
+// A colour darkened to the lightest shade whose contrast on white reaches `ratio`, by scaling its
+// light, each of its channels in linear light by one factor: the same colour in less light, its
+// hue kept, and never outside what a printer's sRGB holds. A colour that reaches `ratio` already
+// is returned as it is.
+#let _darken-to(colour, ratio) = {
+  if _contrast(colour) >= ratio { return colour }
+  let light = rgb(colour).components(alpha: false).map(c => _linear(c / 100%))
+  let y = 0.2126 * light.at(0) + 0.7152 * light.at(1) + 0.0722 * light.at(2)
+  // A hair under the factor that meets `ratio` exactly, so rounding never leaves it short.
+  let k = 0.9999 * (1.05 / ratio - 0.05) / y
+  let encode(v) = if v <= 0.0031308 { 12.92 * v } else { 1.055 * calc.pow(v, 1 / 2.4) - 0.055 }
+  rgb(..light.map(v => encode(k * v) * 100%))
+}
+
+// press's presets, set for a calibration, by name: each of press's inks darkened to the
+// calibration's `ink`, each tint to its `fill`, `rule` the thinnest rule in each rule colour, and
+// the page presets, `dense`, `reading` and `card`, their margins widened for its `edges`. press's
+// functions take them from the calibration their template was given; a document takes them here
+// for what it draws itself:
+//
+//   #let c = calibrated(calibration)
+//   #text(fill: c.ink-faint)[…]  #line(stroke: c.rule.rule-hair + rule-hair)  #set page(..c.card)
+#let calibrated(given) = {
+  let set-for = _calibration(given)
+  let presets = (:)
+  for (name, colour) in _inks { presets.insert(name, _darken-to(colour, set-for.ink)) }
+  for (name, colour) in _tints { presets.insert(name, _darken-to(colour, set-for.fill)) }
+  presets.insert("rule", set-for.rule)
+  for (name, preset) in (dense: dense, reading: reading, card: card) {
+    presets.insert(name, _page(preset, given))
+  }
+  presets
+}
+
+// The calibration a document's template was given, which press's functions read in context: a
+// document has one, so each reads the last.
+#let _calibration-state = state("press-calibration", (:))
+#let _presets() = calibrated(_calibration-state.final())
+
+// A colour as press's functions draw it: one of press's inks or tints, set for the document's
+// calibration, and any other as it is. _cal is called in context; _cal-in takes the presets, as a
+// template that holds its calibration does.
+#let _cal-in(presets, colour) = {
+  for (name, own) in _inks + _tints { if colour == own { return presets.at(name) } }
+  colour
+}
+#let _cal(colour) = _cal-in(_presets(), colour)
+
+// A stroke of `width` in `colour`, as press's functions draw it: the colour set as _cal sets it,
+// at least as wide as the calibration's thinnest rule in the darkest of press's rule colours no
+// darker than it, or in rule-hair where it is paler than all of them. _stroke is called in
+// context, and _stroke-in takes the presets, as _cal-in does.
+#let _stroke-in(presets, width, colour) = {
+  let colour = _cal-in(presets, colour)
+  let under = _rules.pairs().filter(((_, c)) => _contrast(c) <= _contrast(colour))
+    .sorted(key: ((_, c)) => _contrast(c))
+  let floor = presets.rule.at(if under.len() > 0 { under.last().at(0) } else { "rule-hair" })
+  calc.max(width, floor) + colour
+}
+#let _stroke(width, colour) = _stroke-in(_presets(), width, colour)
+
+// A template's calibration, applied to all it sets: its bands recorded for the audit, the
+// calibration for press's functions, and each of press's inks it darkens set in that ink as the
+// calibration darkens it. An ink is set where its text is, so a document's own text in one of
+// press's inks, `text(fill: ink-faint)`, is darkened with press's; so is what stands in such text
+// without being a text of its own, a curled quote or an equation.
+#let _calibrate(given, body) = {
+  let presets = calibrated(given)
+  let changed = _inks.pairs().filter(((name, own)) => presets.at(name) != own)
+  let shade(fill) = {
+    let found = changed.find(((_, own)) => fill == own)
+    if found == none { fill } else { presets.at(found.at(0)) }
+  }
+  let in-shade(it) = context {
+    let fill = shade(text.fill)
+    if fill == text.fill { it } else { text(fill: fill, it) }
+  }
+  [#_edges-mark(given)#_calibration-state.update(_calibration(given))]
+  // typst's own footnote rule, black and 0.5pt, drawn as press draws a rule in that colour.
+  set footnote.entry(separator: line(length: 30% + 0pt, stroke: _stroke-in(presets, 0.5pt, black)))
+  if changed.len() == 0 { body } else {
+    show smartquote: in-shade
+    show math.equation: in-shade
+    changed.fold(body,
+      (it, (name, own)) => { show text.where(fill: own): set text(fill: presets.at(name)); it })
+  }
+}
+
 // A document's header: its title on the left, `meta` on the right, and a rule beneath. The title
 // is the one the document names itself with, set document(title:) or a template's title, so it
 // is named once, as footer() names it. A title that fits on one line keeps it, and `meta` wraps
@@ -168,7 +278,7 @@
   let depth = measure(text(font: face, size: size, weight: 700, top-edge: "baseline",
     bottom-edge: "descender")[g]).height
   v(-3pt + depth)
-  line(length: 100%, stroke: 2pt + color)
+  line(length: 100%, stroke: _stroke(2pt, color))
 })
 
 #let tones = (
@@ -193,6 +303,7 @@
 // sits in, as checkbox() centres on the lowercase. Each is drawn to look the same size as the
 // others, so a square is a little smaller than a circle and a triangle a little wider.
 #let _shape(name, color) = context {
+  let color = _cal(color)
   let cap = measure(text(top-edge: "cap-height", bottom-edge: "baseline")[X]).height
   let s = 0.85 * cap
   let drawn = if name == "circle" { circle(radius: s / 2, fill: color) }
@@ -223,7 +334,7 @@
   let pair = tones.at(tone)
   let mark = _shaped("callout", tone, shape)
   context block(
-    width: 100%, fill: pair.at(1), stroke: (left: 3pt + pair.at(0)),
+    width: 100%, fill: _cal(pair.at(1)), stroke: (left: _stroke(3pt, pair.at(0))),
     inset: (x: 10pt, y: 8pt),
   )[
     #let spacing = par.spacing
@@ -237,7 +348,7 @@
 // Bordered panel — for grids where a tint would shout. Its label is kept with the body, as a
 // callout's is, and `caps: false` keeps its case.
 #let panel(body, label: none, color: slate, caps: true) = context block(
-  width: 100%, stroke: 0.6pt + rule-mid, inset: 10pt, radius: 1pt,
+  width: 100%, stroke: _stroke(0.6pt, rule-mid), inset: 10pt, radius: 1pt,
 )[
   #let spacing = par.spacing
   #set par(spacing: _part-gap)
@@ -316,7 +427,7 @@
 }
 #let code(body, breakable: auto) = context if _in-code.get() { body } else {
   _fit("code", breakable, b => block(
-    width: 100%, fill: paper-tint, stroke: 0.6pt + rule-mid,
+    width: 100%, fill: _cal(paper-tint), stroke: _stroke(0.6pt, rule-mid),
     inset: (x: 7pt, y: 6pt), radius: 1.5pt, breakable: b,
     { _in-code.update(true); _wraps(body); body; _in-code.update(false) },
   ))
@@ -358,7 +469,7 @@
 // Keep links out of headings once a document has an outline: the contents repeat the
 // heading, and its footnote with it, so the address is noted twice.
 #let link-note(it) = {
-  let shown = underline(stroke: 0.5pt + slate, offset: 1.6pt, text(fill: slate, it))
+  let shown = context underline(stroke: _stroke(0.5pt, slate), offset: 1.6pt, text(fill: slate, it))
   if type(it.dest) != str { return shown }
   let address = it.dest
   for prefix in ("mailto:", "https://", "http://") {
@@ -388,7 +499,7 @@
 
 // a → b → c, for pipelines.
 #let flow(..steps) = align(center)[
-  #box(inset: (x: 9pt, y: 6pt), stroke: 0.6pt + rule-mid, radius: 1pt)[
+  #context box(inset: (x: 9pt, y: 6pt), stroke: _stroke(0.6pt, rule-mid), radius: 1pt)[
     #text(size: sz.small)[
       #steps.pos().join([ #text(fill: ink-faint)[#sym.arrow.r] ])
     ]
@@ -400,7 +511,7 @@
   // ends on the rule alone. The gap under it is the part's own, as inside every other part.
   block(sticky: true, below: _part-gap, {
     v(4pt)
-    line(length: 100%, stroke: 0.5pt + rule-hair)
+    context line(length: 100%, stroke: _stroke(0.5pt, rule-hair))
     v(2pt)
   })
   text(size: sz.micro, fill: ink-faint, style: "italic")[#body]
@@ -415,7 +526,7 @@
 //
 //   #addendum([2026-10-15 21:11], label: [Retold])[What was told the second time.]
 #let addendum(date, body, label: [Later], color: ink-faint, caps: true) = context block(
-  width: 100%, above: 0.9em, inset: (left: 0.8em), stroke: (left: 0.6pt + color),
+  width: 100%, above: 0.9em, inset: (left: 0.8em), stroke: (left: _stroke(0.6pt, color)),
 )[
   #let spacing = par.spacing
   #set par(spacing: _part-gap)
@@ -587,7 +698,7 @@
 //
 //   #set page(..dense, footer: footer(status: [draft]))
 #let footer(status: none, edition: updated()) = context {
-  set text(size: sz.micro, fill: ink-faint)
+  set text(size: sz.micro, fill: _cal(ink-faint))
   // Tells the document's start, and the footers after this one, the title's marks are counted.
   [#metadata(none)<press-footer>]
   let footers = query(<press-footer>)
