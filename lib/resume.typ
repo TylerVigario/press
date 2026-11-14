@@ -38,8 +38,8 @@
 // A set rule after the show rule changes a heading's gaps: `#show heading: set block(above: 8pt)`
 // for the space above, `below:` for the space under the rule, and `inset: (bottom: 2pt)` for the
 // space between the title and its rule. `contact` is a list of items, or one item alone.
-// `preset` is the page, and `calibration` is the printer's, its band at each edge, which widens
-// the margins where it must: tokens.typ's `calibration` says how.
+// `preset` is the page, and `calibration` is the printer's numbers, which set its margins, inks,
+// tints and rules: tokens.typ's `calibration` says how.
 //
 //   #show: resume.with(title: [Your Name — Résumé], author: "Your Name",
 //     headline: [Network and systems], contact: ([Town, ST], link("mailto:you@example.com")))

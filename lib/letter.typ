@@ -76,8 +76,8 @@
 // face of a résumé it goes with, and `centred` centres the letterhead to match a centred head.
 // `header` is the header for page two onward: none leaves it out, and continued(words: …)
 // gives it other words. `contact` is a list of items, or one item alone. `calibration` is the
-// printer's, its band at each edge, which widens the margins where it must: tokens.typ's
-// `calibration` says how.
+// printer's numbers, which set its margins, inks, tints and rules: tokens.typ's `calibration`
+// says how.
 //
 //   #show: letter.with(title: [Letter to the county], author: "Your Name",
 //     contact: ([Town, ST], link("mailto:you@example.com")), date: [15 October 2026])

@@ -10,8 +10,8 @@
 // drawn. Like every template it keeps its own lines, so it can be read, or copied, on its own.
 // A set rule written after it changes any of these for the document it is in:
 // `#set par(leading: 0.58em)` after the show rule wins over base's own. `preset` is the page, and
-// `calibration` is the printer's, its band at each edge, which widens the margins where it
-// must: tokens.typ's `calibration` says how.
+// `calibration` is the printer's numbers, which set its margins, inks, tints and rules:
+// tokens.typ's `calibration` says how.
 //
 //   #show: base.with(title: [Rack power], author: "Your name", preset: dense)
 #let base(title: none, author: (), preset: card, calibration: calibration, body) = {
