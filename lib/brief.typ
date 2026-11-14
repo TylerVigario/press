@@ -13,8 +13,10 @@
 // `footer` is the footer: none leaves it out, footer(status: [draft]) gives it a status, and
 // footer(edition: …) other words. It is passed here because a set page rule after the header
 // would start a new page.
-// `preset` is the page. A section is a heading, `= How it works`, drawn as a band, and `==` is a
-// labelled hairline under it; `caps: false` keeps the headings' case, which upper() would change.
+// `preset` is the page, and `calibration` is the printer's, its band at each edge, which widens
+// the margins where it must: tokens.typ's `calibration` says how. A section is a heading,
+// `= How it works`, drawn as a band, and `==` is a labelled hairline under it; `caps: false`
+// keeps the headings' case, which upper() would change.
 //
 //   #show: brief.with(title: [Rack power], author: "Your name", meta: [Site A · October 2026])
 //
@@ -27,12 +29,13 @@
 //
 //   = Reference — skip unless you need it <depth>
 #let brief(
-  title: none, author: (), meta: none, legend: none, footer: footer(), preset: card, caps: true,
+  title: none, author: (), meta: none, legend: none, footer: footer(), preset: card,
+  calibration: calibration, caps: true,
   depth: [Nothing past this point is needed: what comes before it is the whole job.],
   body,
 ) = {
   set document(title: title, author: author)
-  set page(..preset, numbering: "1", footer: footer)
+  set page(.._calibrated(preset, calibration), numbering: "1", footer: footer)
   set text(font: face-text, size: sz.small, fill: ink, lang: "en")
   // Paragraphs further apart than a list's items, and items than lines, so each reads as one:
   // a paragraph ends where its gap shows, and the one after a list is not its last item's.
@@ -96,6 +99,8 @@
       + "legend: ([Colour is state.], chip([DONE], \"ok\"))")
   // The title is counted here when nothing in the document prints it.
   _title-start()
+  // The calibration's bands, for the audit.
+  _edges-mark(calibration)
   // The head, its header and legend, is one part, with the part's own gaps inside.
   block(width: 100%, {
     set par(spacing: _part-gap)

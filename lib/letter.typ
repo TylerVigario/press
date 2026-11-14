@@ -75,16 +75,18 @@
 // and, where it has them, enclosures(). `face` sets the letter, letterhead included, in the
 // face of a résumé it goes with, and `centred` centres the letterhead to match a centred head.
 // `header` is the header for page two onward: none leaves it out, and continued(words: …)
-// gives it other words. `contact` is a list of items, or one item alone.
+// gives it other words. `contact` is a list of items, or one item alone. `calibration` is the
+// printer's, its band at each edge, which widens the margins where it must: tokens.typ's
+// `calibration` says how.
 //
 //   #show: letter.with(title: [Letter to the county], author: "Your Name",
 //     contact: ([Town, ST], link("mailto:you@example.com")), date: [15 October 2026])
 #let letter(
   title: none, author: (), contact: (), date: none, face: face-text, centred: false,
-  header: continued(), body,
+  header: continued(), calibration: calibration, body,
 ) = {
   set document(title: title, author: author)
-  set page(..reading, header: header)
+  set page(.._calibrated(reading, calibration), header: header)
   set text(font: face, size: sz.body, fill: ink, lang: "en")
   set par(leading: 0.6em, spacing: 1.05em)
   // A list's items are further apart than the lines within one, so a wrapped item reads as one,
@@ -108,6 +110,8 @@
 
   // The title is counted here when nothing in the document prints it.
   _title-start()
+  // The calibration's bands, for the audit.
+  _edges-mark(calibration)
   let head = letterhead(..if type(contact) == array { contact } else { (contact,) }, face: face)
   if centred { align(center, head) } else { head }
   if date != none { dateline(date); parbreak() }

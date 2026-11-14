@@ -88,6 +88,9 @@
             "context": "continued() dates each page by the letter it is a page of"
           },
           {
+            "context": "A template set for a calibration keeps its ink clear of the printer's bands"
+          },
+          {
             "context": "header()'s rule clears the title's descenders"
           },
           {
@@ -197,6 +200,9 @@
           },
           {
             "context": "continued() dates each page by the letter it is a page of, on the oldest toolchain"
+          },
+          {
+            "context": "A template set for a calibration keeps its ink clear of the printer's bands, on the oldest toolchain"
           },
           {
             "context": "header()'s rule clears the title's descenders, on the oldest toolchain"

@@ -40,8 +40,8 @@ prints true, so every part is made for both:
   reader loses nothing.
 - **Commands are short and unwrapped,** so they copy cleanly from the screen and can be typed
   from paper.
-- **Pages keep all ink 0.5in from the edge,** so printing at actual size never clips; on
-  screen it is simply margin.
+- **Pages keep all ink clear of the printer's band at every edge,** 0.5in unless a calibration
+  says otherwise, so printing at actual size never clips; on screen it is simply margin.
 - **Self-contained.** If a fact is needed to act, it is in the document. A runbook kept beside
   the machine it describes is read exactly when that machine is down.
 
@@ -458,11 +458,11 @@ is `(ok, ok-tint)`.
 
 | Call | For |
 |---|---|
-| `base(title:, author:, preset: card)` | Template: the page, the document's name, the type and the show rules, with nothing drawn, for a document that lays out its own page. `#show: base.with(...)`. |
-| `brief(title:, author:, meta:, legend: none, footer: footer(), preset: card, caps: true, depth: [...])` | Template: the general-purpose document's page, type, show rules, header and footer. A section is a heading: `=` draws a band, `==` a labelled hairline, slate unless `section(color:)` says otherwise. Whatever the document labels `<depth>` starts its depth layer on a page of its own under `depth`, a line saying nothing past it is needed; none prints no line. `legend`, the note and then the chips for the states its pages carry, prints under the header and says what its colours mean: `legend: ([Colour is state.], chip([DONE], "ok"))`. `#show: brief.with(...)`. |
-| `letter(title:, author:, contact:, date:, face: face-text, centred: false, header: continued())` | Template: a letter's page, letterhead and date, and the page-two header. Code is set as brief sets it, in press's mono face. `#show: letter.with(...)`. |
-| `resume(title:, author:, headline:, contact:, face: face-text, centred: false, size: sz.small, accent: slate, caps: true, preset: (paper: "us-letter", margin: (x: 0.6in, y: 0.5in)))` | Template: a résumé's page, type and head, and its headings as ruled sections. Code is set as brief sets it, in press's mono face. `#show: resume.with(...)`. |
-| `recipe(title:, author:, yield:, method:, time:, intro:, preset: card, footer: footer(), caps: true, depth: [...])` | Template: a recipe card's page and header, its yield, method and time beside the dish, and its headings as brief draws them. Whatever the card labels `<depth>` starts its reference on a page of its own under `depth`. Code is set as brief sets it, in press's mono face. `#show: recipe.with(...)`. |
+| `base(title:, author:, preset: card, calibration: calibration)` | Template: the page, the document's name, the type and the show rules, with nothing drawn, for a document that lays out its own page. `#show: base.with(...)`. Every template takes `calibration`, the printer's band at each edge, which widens its margins where they must: *Printing* says how. |
+| `brief(title:, author:, meta:, legend: none, footer: footer(), preset: card, calibration: calibration, caps: true, depth: [...])` | Template: the general-purpose document's page, type, show rules, header and footer. A section is a heading: `=` draws a band, `==` a labelled hairline, slate unless `section(color:)` says otherwise. Whatever the document labels `<depth>` starts its depth layer on a page of its own under `depth`, a line saying nothing past it is needed; none prints no line. `legend`, the note and then the chips for the states its pages carry, prints under the header and says what its colours mean: `legend: ([Colour is state.], chip([DONE], "ok"))`. `#show: brief.with(...)`. |
+| `letter(title:, author:, contact:, date:, face: face-text, centred: false, header: continued(), calibration: calibration)` | Template: a letter's page, letterhead and date, and the page-two header. Code is set as brief sets it, in press's mono face. `#show: letter.with(...)`. |
+| `resume(title:, author:, headline:, contact:, face: face-text, centred: false, size: sz.small, accent: slate, caps: true, preset: (paper: "us-letter", margin: (x: 0.6in, y: 0.5in)), calibration: calibration)` | Template: a résumé's page, type and head, and its headings as ruled sections. Code is set as brief sets it, in press's mono face. `#show: resume.with(...)`. |
+| `recipe(title:, author:, yield:, method:, time:, intro:, preset: card, footer: footer(), calibration: calibration, caps: true, depth: [...])` | Template: a recipe card's page and header, its yield, method and time beside the dish, and its headings as brief draws them. Whatever the card labels `<depth>` starts its reference on a page of its own under `depth`. Code is set as brief sets it, in press's mono face. `#show: recipe.with(...)`. |
 | `unit(label, tone, lead, body, caps:, breakable: auto, shape: auto)` | The workhorse. One idea: label, bold lead, body. Its tone's shape goes before its label, as a chip's does, so its state reads on a grey printout; `shape` takes another of the four, or none. Kept whole or broken as `code`'s block is. |
 | `units(..items, pack: "stacks", gutter:, spacing:)` | A group of units. `"stacks"`: two columns balanced by measured height. `"grid"`: rows aligned, when the pairing means something. `"single"`: one column. |
 | `header(meta: none, color:, face:, size:)` | A document's header: its title, the one the document names itself with, on the left, `meta` on the right, and a rule beneath, clear of the title's descenders. A title that fits on one line keeps it, and `meta` wraps beside it. Beside a title too long for one line, `meta` keeps its one line where it fits in half the line, and else the two share the line in halves. |
@@ -504,8 +504,9 @@ is `(ok, ok-tint)`.
 `face-display` and `face-sans` (Noto Sans), `face-mono` (Noto Sans Mono) and `face-math` (Noto
 Sans Math) — use these, never font names as strings. Sizes `sz.micro` 8.6 · `fine` 9.4
 · `small` 10.2 · `body` 11 · `lead` 12.5 · `head` 14.5 · `title` 21 · `hero` 28. Page presets
-`dense`, `reading`, `card`, spread with `#set page(..card)`. When the vocabulary does not fit,
-build it in the document.
+`dense`, `reading`, `card`, spread with `#set page(..card)`, and `calibration`, the printer's band
+at each edge they are set for, 0.48in, which every template takes by default. When the vocabulary
+does not fit, build it in the document.
 
 ### Traps
 
@@ -555,8 +556,34 @@ build it in the document.
 ## Printing
 
 Print at **100% — "Actual size"**, never "Fit to page". The presets are exactly US Letter and
-keep all ink at least 0.5in from every edge; a document that overrides the margin or places
-content absolutely can break that, and the audit measures it.
+keep all ink at least 0.5in from every edge, clear of press's own calibration, a band of 0.48in
+at each edge that a printer cannot print; a document that overrides the margin or places content
+absolutely can break that, and the audit measures it.
+
+**A printer's own bands.** A printer whose band at an edge is wider than press's, or narrower, is
+set by its numbers: the calibration sheet's readings 2 and 3, the larger of front and back at
+each edge, given to a template as its `calibration`. An edge left out takes press's band:
+
+```typ
+#show: brief.with(title: [Rack power], author: "Your name",
+  calibration: (edges: (top: 4mm, bottom: 17mm, left: 6.5mm, right: 6.5mm)))
+```
+
+The template widens each margin by as much as the band at that edge exceeds press's, so the
+page's ink, its header and footer included, clears it, and the audit fails ink inside each band,
+edge by edge, where it fails ink within 0.48in of any edge for a document that declares none. A
+band narrower than press's leaves the margins as they are and lets the audit pass ink nearer that
+edge. A repository whose documents print on one printer writes its numbers once, in a file of its
+own that its documents, or its shared template, import after press:
+
+```typ
+#import "/docs/printer.typ": calibration   // which holds: #let calibration = (edges: (bottom: 17mm))
+#show: brief.with(title: [Rack power], author: "Your name", calibration: calibration)
+```
+
+Every template takes a calibration, `base` among them, the template for a document that lays out
+its own page. A page rule that spreads a preset itself, `#set page(..dense)`, is set for press's
+own bands; a document that lays out its own page for a printer of its own takes `base`.
 
 `calibration.typ` measures a printer by numbers, each of its scales numbered by its value: the
 band it cannot print at each edge of each side of a sheet, whether it prints at actual size, and
