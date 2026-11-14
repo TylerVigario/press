@@ -82,18 +82,19 @@
 // and, where it has them, enclosures(). `face` sets the letter, letterhead included, in the
 // face of a résumé it goes with, and `centred` centres the letterhead to match a centred head.
 // `header` is the header for page two onward: none leaves it out, and continued(words: …)
-// gives it other words. `contact` is a list of items, or one item alone. `calibration` is the
-// printer's numbers, which set its margins, inks, tints and rules: tokens.typ's `calibration`
-// says how.
+// gives it other words. `contact` is a list of items, or one item alone. `preset` is the page,
+// reading by default: `preset: (..reading, paper: "a4")` sets the letter on A4. `calibration` is
+// the printer's numbers, which set its margins, inks, tints and rules: tokens.typ's
+// `calibration` says how.
 //
 //   #show: letter.with(title: [Letter to the county], author: "Your Name",
 //     contact: ([Town, ST], link("mailto:you@example.com")), date: [15 October 2026])
 #let letter(
   title: none, author: (), contact: (), date: none, face: face-text, centred: false,
-  header: continued(), calibration: calibration, body,
+  header: continued(), preset: reading, calibration: calibration, body,
 ) = {
   set document(title: title, author: author)
-  set page(.._page(reading, calibration), header: header)
+  set page(.._page(preset, calibration), header: header)
   // The calibration, applied to all the template sets: its inks, its strokes and its bands.
   show: _calibrate.with(calibration)
   set text(font: face, size: sz.body, fill: ink, lang: "en")
