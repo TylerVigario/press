@@ -148,6 +148,13 @@ repository has.
   tool reads as a finding a document has accepted.
 - **The build record is one file, `.build-record`, in press's folder**, kept out of git by the
   kit's `.gitignore`; nothing goes beside a document or its PDF.
+- **A part draws a fill or a stroke in press's colours through `_cal` or `_stroke`,** in
+  context, or a calibration never reaches it: `_cal` gives one of press's inks or tints as the
+  document's calibration sets it, and `_stroke` a line at least as wide as its floor. Text needs
+  neither: a template's `_calibrate` sets each of press's inks the calibration darkens, wherever
+  the text is, and a smart quote and an equation with it. `floors.sh` sets every part in every
+  template and fails on a colour or a line the floors should have changed; a new part goes into
+  `floors.typ`.
 - **press's own calibration is written twice:** `calibration` in `lib/tokens.typ`, which every
   template takes by default, and `floor=` in `tools/check.sh`, the audit's floor at every edge
   for a document that declares none. A template records the bands it was given as a

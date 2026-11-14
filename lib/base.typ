@@ -16,7 +16,9 @@
 //   #show: base.with(title: [Rack power], author: "Your name", preset: dense)
 #let base(title: none, author: (), preset: card, calibration: calibration, body) = {
   set document(title: title, author: author)
-  set page(.._calibrated(preset, calibration))
+  set page(.._page(preset, calibration))
+  // The calibration, applied to all the template sets: its inks, its strokes and its bands.
+  show: _calibrate.with(calibration)
   set text(font: face-text, size: sz.small, fill: ink, lang: "en")
   // Paragraphs further apart than a list's items, and items than lines, so each reads as one:
   // a paragraph ends where its gap shows, and the one after a list is not its last item's.
@@ -40,7 +42,5 @@
   show link: link-note
   // The title is counted here when nothing in the document prints it.
   _title-start()
-  // The calibration's bands, for the audit.
-  _edges-mark(calibration)
   body
 }

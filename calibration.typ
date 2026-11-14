@@ -101,11 +101,16 @@
   the bands widen the page's margins where they must, and the audit fails ink inside them.
 
   *4, ink.* Text in an ink lighter than this fades on this printer, at the smallest size press
-  sets. Page #on(<reading-ink>) places press's own text inks on the same scale.
+  sets. Given as the calibration's `ink`, `ink: 6` for 6:1, it darkens each of press's inks that
+  is lighter, its hue kept. Page #on(<reading-ink>) places press's own on the same scale.
 
-  *5 to 7, fills, rules and solids.* A tint paler than 5 vanishes into the paper, a rule thinner
-  than 6 breaks up, and a solid darker than 7 shows through the sheet: a heavier paper is the
-  fix for that, not a lighter design, because a heading's band is what makes a section
+  *5 and 6, fills and rules.* A tint paler than 5 vanishes into the paper, and a rule thinner than
+  6 breaks up. Given as the calibration's `fill` and its `rule` for each rule colour,
+  `rule: (rule-hair: …, rule-mid: …, slate: …, ink: …)`, they darken each tint paler than 5,
+  and widen each line thinner than 6 in its colour.
+
+  *7, solids.* A solid darker than 7 shows through the sheet. It sets nothing in press: a heavier
+  paper is the fix, not a lighter design, because a heading's band is what makes a section
   skippable at a glance.
 ]
 

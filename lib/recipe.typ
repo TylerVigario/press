@@ -26,7 +26,9 @@
   body,
 ) = {
   set document(title: title, author: author)
-  set page(.._calibrated(preset, calibration), numbering: "1", footer: footer)
+  set page(.._page(preset, calibration), numbering: "1", footer: footer)
+  // The calibration, applied to all the template sets: its inks, its strokes and its bands.
+  show: _calibrate.with(calibration)
   set text(font: face-text, size: sz.small, fill: ink, lang: "en")
   // Paragraphs further apart than a list's items, and items than lines, so each reads as one:
   // a paragraph ends where its gap shows, and the one after a list is not its last item's.
@@ -54,7 +56,7 @@
   show heading: set block(above: 0.8 * sz.small, below: 0.8 * sz.small)
   show heading.where(level: 1): it => context {
     v(2pt)
-    block(width: 100%, fill: _section-color(), inset: (x: 8pt, y: 4.5pt), radius: 1pt,
+    block(width: 100%, fill: _cal(_section-color()), inset: (x: 8pt, y: 4.5pt), radius: 1pt,
       text(size: sz.fine, weight: 700, tracking: 1.2pt, fill: white, {
         let shape = _section-shape()
         if shape != none [#_shape(shape, white)#h(0.4em)]
@@ -73,7 +75,7 @@
     if shape != none [#_shape(shape, _section-color())#h(0.35em)]
     eyebrow(it.body, color: _section-color(), caps: caps)
     v(-2pt)
-    line(length: 100%, stroke: 0.7pt + rule-hair)
+    line(length: 100%, stroke: _stroke(0.7pt, rule-hair))
     v(3pt)
   })
   show <depth>: it => {
@@ -87,8 +89,6 @@
 
   // The title is counted here when nothing in the document prints it.
   _title-start()
-  // The calibration's bands, for the audit.
-  _edges-mark(calibration)
   // The head, its header and intro, is one part, with the part's own gaps inside.
   block(width: 100%, {
     set par(spacing: _part-gap)

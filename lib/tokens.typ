@@ -119,13 +119,45 @@
   footer-descent: 0.12in,
 )
 
-// The calibration the presets are set for. `edges` is how near each edge of the paper a printer
-// starts to print, its band, as the calibration sheet's readings 2 and 3 measure it: every
-// preset keeps its ink, a header or footer included, at least that far from each edge, and the
-// audit fails ink nearer. A template's `calibration` sets a printer's own, edge by edge, an edge
-// left out taking this one's: `brief.with(calibration: (edges: (bottom: 17mm)))` widens the
-// bottom margin by as much as 17 mm exceeds the bottom here, and the audit fails ink within
-// 17 mm of the bottom edge. A band narrower than this one leaves the margins as they are and
-// lets the audit pass ink nearer that edge. A repository whose documents print on one printer
-// writes its numbers once, in a file its documents or its shared template import.
-#let calibration = (edges: (top: 0.48in, bottom: 0.48in, left: 0.48in, right: 0.48in))
+// A colour's contrast on white, WCAG's, from its sRGB components: 21 for black, 1 for white.
+#let _linear(c) = if c <= 0.04045 { c / 12.92 } else { calc.pow((c + 0.055) / 1.055, 2.4) }
+#let _contrast(colour) = {
+  let (r, g, b) = rgb(colour).components(alpha: false).map(c => _linear(c / 100%))
+  1.05 / (0.2126 * r + 0.7152 * g + 0.0722 * b + 0.05)
+}
+
+// press's inks, its tints and its rule colours, by name: the presets a calibration reaches.
+#let _inks = (ink: ink, ink-soft: ink-soft, ink-faint: ink-faint, slate: slate, steel: steel,
+  ok: ok, warn: warn, bad: bad)
+#let _tints = (paper-tint: paper-tint, slate-tint: slate-tint, ok-tint: ok-tint,
+  warn-tint: warn-tint, bad-tint: bad-tint)
+#let _rules = (rule-hair: rule-hair, rule-mid: rule-mid, slate: slate, ink: ink)
+
+// The calibration the presets are set for, a printer's numbers as the calibration sheet reads
+// them, which every template takes by default. A template's `calibration` sets a printer's own,
+// each number it leaves out taking this one's, and press's functions take every preset from it.
+//
+// `edges` is how near each edge of the paper the printer starts to print, its band, readings 2
+// and 3: every preset keeps its ink, a header or footer included, at least that far from each
+// edge, and the audit fails ink nearer. `brief.with(calibration: (edges: (bottom: 17mm)))`
+// widens the bottom margin by as much as 17 mm exceeds the bottom here, and the audit fails ink
+// within 17 mm of the bottom edge. A band narrower than this one leaves the margins as they are
+// and lets the audit pass ink nearer that edge.
+//
+// `ink` is the lightest text ink that reads, reading 4, as its contrast on white: every ink of
+// press's lighter than it is darkened, its hue kept, until it reaches it. `fill` is the palest
+// fill that prints even, reading 5: every tint paler than it is darkened to it. `rule` is the
+// thinnest rule that prints unbroken in each of press's rule colours, reading 6: every stroke a
+// part draws is at least the width of the darkest of those colours no darker than its own.
+// Here, each is what press uses now, so nothing changes until a printer's own are given: its
+// lightest ink, ok's, its palest tint, paper-tint's, and the thinnest rule it draws in each.
+//
+// A repository whose documents print on one printer writes its numbers once, in a file its
+// documents or its shared template import, and calibrated() hands back the presets set for them,
+// for what a document draws itself.
+#let calibration = (
+  edges: (top: 0.48in, bottom: 0.48in, left: 0.48in, right: 0.48in),
+  ink: calc.min(.._inks.values().map(_contrast)),
+  fill: calc.min(.._tints.values().map(_contrast)),
+  rule: (rule-hair: 0.4pt, rule-mid: 0.5pt, slate: 0.5pt, ink: 0.5pt),
+)

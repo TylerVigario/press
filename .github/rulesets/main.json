@@ -91,6 +91,9 @@
             "context": "A template set for a calibration keeps its ink clear of the printer's bands"
           },
           {
+            "context": "A calibration's floors darken press's inks and tints, and widen its rules"
+          },
+          {
             "context": "header()'s rule clears the title's descenders"
           },
           {
@@ -203,6 +206,9 @@
           },
           {
             "context": "A template set for a calibration keeps its ink clear of the printer's bands, on the oldest toolchain"
+          },
+          {
+            "context": "A calibration's floors darken press's inks and tints, and widen its rules, on the oldest toolchain"
           },
           {
             "context": "header()'s rule clears the title's descenders, on the oldest toolchain"

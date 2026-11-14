@@ -458,7 +458,7 @@ is `(ok, ok-tint)`.
 
 | Call | For |
 |---|---|
-| `base(title:, author:, preset: card, calibration: calibration)` | Template: the page, the document's name, the type and the show rules, with nothing drawn, for a document that lays out its own page. `#show: base.with(...)`. Every template takes `calibration`, the printer's band at each edge, which widens its margins where they must: *Printing* says how. |
+| `base(title:, author:, preset: card, calibration: calibration)` | Template: the page, the document's name, the type and the show rules, with nothing drawn, for a document that lays out its own page. `#show: base.with(...)`. Every template takes `calibration`, a printer's numbers, which set its margins, inks, tints and rules: *Printing* says how. |
 | `brief(title:, author:, meta:, legend: none, footer: footer(), preset: card, calibration: calibration, caps: true, depth: [...])` | Template: the general-purpose document's page, type, show rules, header and footer. A section is a heading: `=` draws a band, `==` a labelled hairline, slate unless `section(color:)` says otherwise. Whatever the document labels `<depth>` starts its depth layer on a page of its own under `depth`, a line saying nothing past it is needed; none prints no line. `legend`, the note and then the chips for the states its pages carry, prints under the header and says what its colours mean: `legend: ([Colour is state.], chip([DONE], "ok"))`. `#show: brief.with(...)`. |
 | `letter(title:, author:, contact:, date:, face: face-text, centred: false, header: continued(), calibration: calibration)` | Template: a letter's page, letterhead and date, and the page-two header. Code is set as brief sets it, in press's mono face. `#show: letter.with(...)`. |
 | `resume(title:, author:, headline:, contact:, face: face-text, centred: false, size: sz.small, accent: slate, caps: true, preset: (paper: "us-letter", margin: (x: 0.6in, y: 0.5in)), calibration: calibration)` | Template: a résumé's page, type and head, and its headings as ruled sections. Code is set as brief sets it, in press's mono face. `#show: resume.with(...)`. |
@@ -504,9 +504,10 @@ is `(ok, ok-tint)`.
 `face-display` and `face-sans` (Noto Sans), `face-mono` (Noto Sans Mono) and `face-math` (Noto
 Sans Math) — use these, never font names as strings. Sizes `sz.micro` 8.6 · `fine` 9.4
 · `small` 10.2 · `body` 11 · `lead` 12.5 · `head` 14.5 · `title` 21 · `hero` 28. Page presets
-`dense`, `reading`, `card`, spread with `#set page(..card)`, and `calibration`, the printer's band
-at each edge they are set for, 0.48in, which every template takes by default. When the vocabulary
-does not fit, build it in the document.
+`dense`, `reading`, `card`, spread with `#set page(..card)`, and `calibration`, the printer's
+numbers they are set for, which every template takes by default; `calibrated(calibration)` hands
+back every preset set for a printer's own. When the vocabulary does not fit, build it in the
+document.
 
 ### Traps
 
@@ -560,30 +561,43 @@ keep all ink at least 0.5in from every edge, clear of press's own calibration, a
 at each edge that a printer cannot print; a document that overrides the margin or places content
 absolutely can break that, and the audit measures it.
 
-**A printer's own bands.** A printer whose band at an edge is wider than press's, or narrower, is
-set by its numbers: the calibration sheet's readings 2 and 3, the larger of front and back at
-each edge, given to a template as its `calibration`. An edge left out takes press's band:
+**A printer's own calibration.** The presets are set for press's own calibration, `calibration`
+in `tokens.typ`, which is what press uses now, so a page prints as it always has. A printer is set
+by its own numbers, the calibration sheet's readings, given to a template as its `calibration`;
+a number left out takes press's:
+
+| key | the reading | what it sets |
+|---|---|---|
+| `edges: (top:, bottom:, left:, right:)` | 2 and 3: the band it cannot print at each edge, the larger of front and back | each margin, widened by as much as the band exceeds press's 0.48in, so the page's ink, its header and footer included, clears it; and the audit's floor at that edge |
+| `ink:` | 4: the lightest grey that reads, as its contrast, `6` for 6:1 | each of press's inks lighter than it, darkened to it, its hue kept; press's own is ok's, 5.05:1 |
+| `fill:` | 5: the palest grey that prints an even fill | each of press's tints paler than it, darkened to it; press's own is paper-tint's, 1.07:1 |
+| `rule: (rule-hair:, rule-mid:, slate:, ink:)` | 6: the thinnest rule that prints unbroken in each colour | each line a part draws, at least as wide as the floor of the darkest of those colours no darker than its own; press's own are the thinnest it draws, 0.4pt in rule-hair and 0.5pt in the others |
 
 ```typ
 #show: brief.with(title: [Rack power], author: "Your name",
-  calibration: (edges: (top: 4mm, bottom: 17mm, left: 6.5mm, right: 6.5mm)))
+  calibration: (edges: (top: 4mm, bottom: 17mm, left: 6.5mm, right: 6.5mm), ink: 6))
 ```
 
-The template widens each margin by as much as the band at that edge exceeds press's, so the
-page's ink, its header and footer included, clears it, and the audit fails ink inside each band,
-edge by edge, where it fails ink within 0.48in of any edge for a document that declares none. A
-band narrower than press's leaves the margins as they are and lets the audit pass ink nearer that
-edge. A repository whose documents print on one printer writes its numbers once, in a file of its
-own that its documents, or its shared template, import after press:
+A band narrower than press's leaves the margins as they are and lets the audit pass ink nearer
+that edge, and a floor below press's changes nothing. press's functions take every preset from the
+calibration their template was given, and text the template sets in one of press's inks takes the
+darkened ink, a document's own `text(fill: ink-faint)` among it. For what a document draws
+itself, `calibrated(calibration)` hands back the presets set for a calibration, by name:
+`#let c = calibrated(calibration)`, then `rect(fill: c.paper-tint)`,
+`line(stroke: c.rule.rule-hair + rule-hair)` or `#set page(..c.card)`.
+
+A repository whose documents print on one printer writes its numbers once, in a file of its own
+that its documents, or its shared template, import after press:
 
 ```typ
-#import "/docs/printer.typ": calibration   // which holds: #let calibration = (edges: (bottom: 17mm))
+#import "/docs/printer.typ": calibration   // which holds: #let calibration = (ink: 6)
 #show: brief.with(title: [Rack power], author: "Your name", calibration: calibration)
 ```
 
 Every template takes a calibration, `base` among them, the template for a document that lays out
-its own page. A page rule that spreads a preset itself, `#set page(..dense)`, is set for press's
-own bands; a document that lays out its own page for a printer of its own takes `base`.
+its own page. A page rule that spreads a preset itself, `#set page(..calibrated(calibration).card)`,
+is widened for the bands, but the audit holds it to press's own; a document that lays out its own
+page for a printer of its own takes `base`, which records them.
 
 `calibration.typ` measures a printer by numbers, each of its scales numbered by its value: the
 band it cannot print at each edge of each side of a sheet, whether it prints at actual size, and
