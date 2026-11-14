@@ -70,6 +70,9 @@
             "context": "all builds the documents, not their parts or press's files"
           },
           {
+            "context": "just press lists press's recipes under mod, and just --list under import"
+          },
+          {
             "context": "Documents pass the audit"
           },
           {
@@ -188,6 +191,9 @@
           },
           {
             "context": "all builds the documents, not their parts or press's files, on the oldest toolchain"
+          },
+          {
+            "context": "just press lists press's recipes under mod, and just --list under import, on the oldest toolchain"
           },
           {
             "context": "The audit passes and refuses its known cases, on the oldest toolchain"
