@@ -14,8 +14,8 @@
 // #ref(<label>, form: "page"), as in a brief: recipe numbers its pages so that typst can. A
 // section is a heading, `= Method`, drawn as a band, and `==` is a labelled hairline under it;
 // `caps: false` keeps the headings' case, which upper() would change. `footer` is the footer:
-// none leaves it out. `preset` is the page, and `calibration` is the printer's, its band at each
-// edge, which widens the margins where it must: tokens.typ's `calibration` says how.
+// none leaves it out. `preset` is the page, and `calibration` is the printer's numbers, which set
+// its margins, inks, tints and rules: tokens.typ's `calibration` says how.
 //
 //   #show: recipe.with(title: [Black beans], yield: [serves 8], method: [stovetop],
 //     time: [about 40 min], intro: [A pot of beans for the week.])

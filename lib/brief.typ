@@ -13,8 +13,8 @@
 // `footer` is the footer: none leaves it out, footer(status: [draft]) gives it a status, and
 // footer(edition: …) other words. It is passed here because a set page rule after the header
 // would start a new page.
-// `preset` is the page, and `calibration` is the printer's, its band at each edge, which widens
-// the margins where it must: tokens.typ's `calibration` says how. A section is a heading,
+// `preset` is the page, and `calibration` is the printer's numbers, which set its margins, inks,
+// tints and rules: tokens.typ's `calibration` says how. A section is a heading,
 // `= How it works`, drawn as a band, and `==` is a labelled hairline under it; `caps: false`
 // keeps the headings' case, which upper() would change.
 //
