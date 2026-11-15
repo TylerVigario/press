@@ -159,6 +159,18 @@ sh tools/check.sh .github/audit-cases/pass-unsourced-date-letter.typ "$tmp/o/dat
 grep -qF "has 1 open item " "$tmp/out" \
     || { cat "$tmp/out" >&2; fail "pass-unsourced-date-letter did not count its date once"; }
 echo "audit-cases: a letter's date still to be settled is counted once, however many pages print it"
+# A writer still to be named is one open item, though a letter's letterhead, page-two header and
+# signature, or a résumé's head, print the name, and the PDF's author is the name's words.
+for c in pass-unsourced-author-letter pass-unsourced-author-resume; do
+    # shellcheck disable=SC2086
+    sh tools/check.sh ".github/audit-cases/$c.typ" "$tmp/o/$c.pdf" . $flags > "$tmp/out" 2>&1 \
+        || { cat "$tmp/out" >&2; fail "$c failed its audit"; }
+    grep -qF "has 1 open item " "$tmp/out" \
+        || { cat "$tmp/out" >&2; fail "$c did not count its author once"; }
+    pdfinfo "$tmp/o/$c.pdf" | grep -qx 'Author: *Sam Example' \
+        || fail "$c's PDF does not name its author Sam Example: $(pdfinfo "$tmp/o/$c.pdf" | grep Author)"
+done
+echo "audit-cases: a writer still to be named is counted once, however many places print the name"
 
 # A python with no XML parser cannot run the text-on-text pass. A stand-in python, the real one
 # with expat taken away at startup, is named by PRESS_PYTHON: check fails, and says why, and a

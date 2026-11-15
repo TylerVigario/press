@@ -34,7 +34,8 @@
   depth: [Nothing past this point is needed: what comes before it is the whole job.],
   body,
 ) = {
-  set document(title: title, author: author)
+  let writer = _author(author)
+  set document(title: title, author: writer.meta)
   set page(.._page(preset, calibration), numbering: "1", footer: footer)
   // The calibration, applied to all the template sets: its inks, its strokes and its bands.
   show: _calibrate.with(calibration)
@@ -101,6 +102,7 @@
       + "legend: ([Colour is state.], chip([DONE], \"ok\"))")
   // The title is counted here when nothing in the document prints it.
   _title-start()
+  writer.start
   // The head, its header and legend, is one part, with the part's own gaps inside.
   block(width: 100%, {
     set par(spacing: _part-gap)

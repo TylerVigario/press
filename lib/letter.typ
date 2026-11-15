@@ -7,8 +7,9 @@
 
 // A letter's own parts: letter() sets the letterhead, the date and continued(), and a letter takes
 // the rest as it needs.
-// The writer is the document's author, set once with `set document(author: "…")`, and the date
-// is written once, with dateline(), where the letter prints it; no part takes either again. The
+// The writer is the document's author, set once with `set document(author: "…")` or a
+// template's `author`, which takes a name marked with unsourced(), and the date is written once,
+// with dateline(), where the letter prints it; no part takes either again. The
 // date is never the build stamp: a letter is dated the day it goes out, and its reader is
 // outside, with no shelf copy to compare.
 
@@ -95,7 +96,8 @@
   title: none, author: (), contact: (), date: none, face: face-text, centred: false,
   header: continued(), preset: reading, calibration: calibration, body,
 ) = {
-  set document(title: title, author: author)
+  let writer = _author(author)
+  set document(title: title, author: writer.meta)
   set page(.._page(preset, calibration), header: header)
   // The calibration, applied to all the template sets: its inks, its strokes and its bands.
   show: _calibrate.with(calibration)
@@ -122,6 +124,7 @@
 
   // The title is counted here when nothing in the document prints it.
   _title-start()
+  writer.start
   let head = letterhead(..if type(contact) == array { contact } else { (contact,) }, face: face)
   if centred { align(center, head) } else { head }
   if date != none { dateline(date); parbreak() }
