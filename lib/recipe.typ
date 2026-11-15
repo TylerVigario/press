@@ -15,13 +15,15 @@
 // section is a heading, `= Method`, drawn as a band, and `==` is a labelled hairline under it;
 // `caps: false` keeps the headings' case, which upper() would change. `footer` is the footer:
 // none leaves it out. `preset` is the page, and `calibration` is the printer's numbers, which set
-// its margins, inks, tints and rules: tokens.typ's `calibration` says how.
+// its margins, inks, tints and rules: tokens.typ's `calibration` says how. `lang` is the card's
+// language, `"es"` for Spanish: left out, it is the document's own, typst's English unless it
+// sets another.
 //
 //   #show: recipe.with(title: [Black beans], yield: [serves 8], method: [stovetop],
 //     time: [about 40 min], intro: [A pot of beans for the week.])
 #let recipe(
   title: none, author: (), yield: none, method: none, time: none, intro: none, preset: card,
-  footer: footer(), calibration: calibration, caps: true,
+  footer: footer(), calibration: calibration, lang: auto, caps: true,
   depth: [Nothing past this point is needed to cook. Page 1 is the whole job.],
   body,
 ) = {
@@ -30,7 +32,7 @@
   set page(.._page(preset, calibration), numbering: "1", footer: footer)
   // The calibration, applied to all the template sets: its inks, its strokes and its bands.
   show: _calibrate.with(calibration)
-  set text(font: face-text, size: sz.small, fill: ink, lang: "en")
+  set text(font: face-text, size: sz.small, fill: ink, ..if lang != auto { (lang: lang) })
   // Paragraphs further apart than a list's items, and items than lines, so each reads as one:
   // a paragraph ends where its gap shows, and the one after a list is not its last item's.
   set par(leading: 0.52em, spacing: 0.8em)

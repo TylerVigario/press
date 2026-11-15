@@ -45,21 +45,23 @@
 // for the space above, `below:` for the space under the rule, and `inset: (bottom: 2pt)` for the
 // space between the title and its rule. `contact` is a list of items, or one item alone.
 // `preset` is the page, and `calibration` is the printer's numbers, which set its margins, inks,
-// tints and rules: tokens.typ's `calibration` says how.
+// tints and rules: tokens.typ's `calibration` says how. `lang` is the résumé's language, `"es"`
+// for Spanish: left out, it is the document's own, typst's English unless it sets another.
 //
 //   #show: resume.with(title: [Your Name — Résumé], author: "Your Name",
 //     headline: [Network and systems], contact: ([Town, ST], link("mailto:you@example.com")))
 #let resume(
   title: none, author: (), headline: none, contact: (), face: face-text, centred: false,
   size: sz.small, accent: slate, caps: true,
-  preset: (paper: "us-letter", margin: (x: 0.6in, y: 0.5in)), calibration: calibration, body,
+  preset: (paper: "us-letter", margin: (x: 0.6in, y: 0.5in)), calibration: calibration,
+  lang: auto, body,
 ) = {
   let writer = _author(author)
   set document(title: title, author: writer.meta)
   set page(.._page(preset, calibration))
   // The calibration, applied to all the template sets: its inks, its strokes and its bands.
   show: _calibrate.with(calibration)
-  set text(font: face, size: size, fill: ink, lang: "en")
+  set text(font: face, size: size, fill: ink, ..if lang != auto { (lang: lang) })
   // Paragraphs further apart than a list's items, and items than lines, so each reads as one:
   // a paragraph ends where its gap shows, and the one after a list is not its last item's.
   set par(leading: 0.52em, spacing: 0.8em)

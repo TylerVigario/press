@@ -11,16 +11,18 @@
 // A set rule written after it changes any of these for the document it is in:
 // `#set par(leading: 0.58em)` after the show rule wins over base's own. `preset` is the page, and
 // `calibration` is the printer's numbers, which set its margins, inks, tints and rules:
-// tokens.typ's `calibration` says how.
+// tokens.typ's `calibration` says how. `lang` is the document's language, `"es"` for Spanish,
+// set where the template sets its type: left out, the language is the document's own, typst's
+// English unless it sets another.
 //
 //   #show: base.with(title: [Rack power], author: "Your name", preset: dense)
-#let base(title: none, author: (), preset: card, calibration: calibration, body) = {
+#let base(title: none, author: (), preset: card, calibration: calibration, lang: auto, body) = {
   let writer = _author(author)
   set document(title: title, author: writer.meta)
   set page(.._page(preset, calibration))
   // The calibration, applied to all the template sets: its inks, its strokes and its bands.
   show: _calibrate.with(calibration)
-  set text(font: face-text, size: sz.small, fill: ink, lang: "en")
+  set text(font: face-text, size: sz.small, fill: ink, ..if lang != auto { (lang: lang) })
   // Paragraphs further apart than a list's items, and items than lines, so each reads as one:
   // a paragraph ends where its gap shows, and the one after a list is not its last item's.
   set par(leading: 0.52em, spacing: 0.8em)
