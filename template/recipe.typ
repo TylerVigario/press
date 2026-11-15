@@ -49,9 +49,11 @@
 
 = Method — in order
 
-#item(1, [First step])[What to do, and how you know it is done.]
-#item(2, [The step a mistake ruins], color: warn)[What goes wrong, and how to keep it from going wrong.]
-#item(3, [Last step])[How to serve it, or keep it.]
+#steps(
+  ([First step], [What to do, and how you know it is done.]),
+  ([The step a mistake ruins], [What goes wrong, and how to keep it from going wrong.], warn),
+  ([Last step], [How to serve it, or keep it.]),
+)
 
 #callout(tone: "warn", label: [The move that matters])[The one thing the dish turns on.]
 

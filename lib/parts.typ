@@ -520,6 +520,32 @@
   #text(size: size, _body(spacing, body))
 ])
 
+// Numbered steps, as one list: each step's number, its title beside it, and its body under the
+// title, numbered from `start`. Each step is (title, body), or (title, body, color) for one in a
+// colour of its own, warn for the step a mistake ruins; `color` is every other step's. They are
+// typst's own numbered list, so a tagged PDF marks them as one, and a screen reader finds the
+// list and moves from step to step; item() is one numbered entry on its own. Each step is kept
+// whole where it fits on a page, and let break where it is taller than one; `breakable` is as
+// code()'s.
+//
+//   #steps(([Shut the water off], [Turn the valve at the street a quarter turn.]),
+//     ([Open the box], [Lift the lid with the hook end of the key.], warn))
+#let steps(..given, color: slate, size: sz.small, start: 1, breakable: auto) = {
+  let given = given.pos()
+  assert(given.len() > 0 and given.all(s => type(s) == array and s.len() in (2, 3)),
+    message: "steps() takes its steps as (title, body), or (title, body, color), one or more")
+  let colors = given.map(s => s.at(2, default: color))
+  enum(start: start, indent: 0pt, body-indent: 5pt + 0.25em, spacing: 0.8em + 6pt, tight: false,
+    numbering: n => text(size: size, weight: 700, fill: colors.at(n - start))[#n],
+    ..given.map(s => context _fit("steps", breakable, b => block(width: 100%, breakable: b)[
+      #let spacing = par.spacing
+      #set par(spacing: _part-gap)
+      #text(size: size, weight: 700, s.at(0))
+      #v(2pt)
+      #text(size: size, _body(spacing, s.at(1)))
+    ])))
+}
+
 // a → b → c, for pipelines.
 #let flow(..steps) = align(center)[
   #context box(inset: (x: 9pt, y: 6pt), stroke: _stroke(0.6pt, rule-mid), radius: 1pt)[

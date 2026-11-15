@@ -85,6 +85,9 @@
             "context": "A template keeps the document's language, given at its start or as its lang"
           },
           {
+            "context": "steps() is one tagged list, an item for each step, its number by its title"
+          },
+          {
             "context": "A code block a document lets break breaks, and only that one"
           },
           {
@@ -206,6 +209,9 @@
           },
           {
             "context": "A template keeps the document's language, given at its start or as its lang, on the oldest toolchain"
+          },
+          {
+            "context": "steps() is one tagged list, an item for each step, its number by its title, on the oldest toolchain"
           },
           {
             "context": "A code block a document lets break breaks, and only that one, on the oldest toolchain"
