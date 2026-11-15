@@ -60,6 +60,7 @@
 #chip([BOXED], "ok") #chip([UNBOXED], "bad", boxed: false)
 #decision(1, [A question?], [Its note.])
 #item(1, [An item], [Its body.])
+#steps(([A step], [Its body.]), ([A step in warn], [Its body.], warn))
 #panel(label: [A panel])[Its body.]
 #flow([a], [b], [c])
 #addendum([2026-01-01], [A later note.])
