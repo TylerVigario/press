@@ -88,20 +88,21 @@
 // gives it other words. `contact` is a list of items, or one item alone. `preset` is the page,
 // reading by default: `preset: (..reading, paper: "a4")` sets the letter on A4. `calibration` is
 // the printer's numbers, which set its margins, inks, tints and rules: tokens.typ's
-// `calibration` says how.
+// `calibration` says how. `lang` is the letter's language, `"es"` for Spanish: left out, it is
+// the document's own, typst's English unless it sets another.
 //
 //   #show: letter.with(title: [Letter to the county], author: "Your Name",
 //     contact: ([Town, ST], link("mailto:you@example.com")), date: [15 October 2026])
 #let letter(
   title: none, author: (), contact: (), date: none, face: face-text, centred: false,
-  header: continued(), preset: reading, calibration: calibration, body,
+  header: continued(), preset: reading, calibration: calibration, lang: auto, body,
 ) = {
   let writer = _author(author)
   set document(title: title, author: writer.meta)
   set page(.._page(preset, calibration), header: header)
   // The calibration, applied to all the template sets: its inks, its strokes and its bands.
   show: _calibrate.with(calibration)
-  set text(font: face, size: sz.body, fill: ink, lang: "en")
+  set text(font: face, size: sz.body, fill: ink, ..if lang != auto { (lang: lang) })
   set par(leading: 0.6em, spacing: 1.05em)
   // A list's items are further apart than the lines within one, so a wrapped item reads as one,
   // and nearer than paragraphs, so the paragraph after a list is not its last item.

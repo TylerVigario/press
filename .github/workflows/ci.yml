@@ -195,6 +195,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/reading-order.sh
 
+  lang:
+    name: A template keeps the document's language, given at its start or as its lang
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/lang.sh
+
   code-break:
     name: A code block a document lets break breaks, and only that one
     runs-on: ubuntu-latest
@@ -596,6 +605,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/reading-order.sh
+
+  oldest-lang:
+    name: A template keeps the document's language, given at its start or as its lang, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/lang.sh
 
   oldest-code-break:
     name: A code block a document lets break breaks, and only that one, on the oldest toolchain

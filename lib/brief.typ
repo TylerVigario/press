@@ -14,9 +14,10 @@
 // footer(edition: …) other words. It is passed here because a set page rule after the header
 // would start a new page.
 // `preset` is the page, and `calibration` is the printer's numbers, which set its margins, inks,
-// tints and rules: tokens.typ's `calibration` says how. A section is a heading,
-// `= How it works`, drawn as a band, and `==` is a labelled hairline under it; `caps: false`
-// keeps the headings' case, which upper() would change.
+// tints and rules: tokens.typ's `calibration` says how. `lang` is the document's language, `"es"`
+// for Spanish: left out, it is the document's own, typst's English unless it sets another. A
+// section is a heading, `= How it works`, drawn as a band, and `==` is a labelled hairline under
+// it; `caps: false` keeps the headings' case, which upper() would change.
 //
 //   #show: brief.with(title: [Rack power], author: "Your name", meta: [Site A · October 2026])
 //
@@ -30,7 +31,7 @@
 //   = Reference — skip unless you need it <depth>
 #let brief(
   title: none, author: (), meta: none, legend: none, footer: footer(), preset: card,
-  calibration: calibration, caps: true,
+  calibration: calibration, lang: auto, caps: true,
   depth: [Nothing past this point is needed: what comes before it is the whole job.],
   body,
 ) = {
@@ -39,7 +40,7 @@
   set page(.._page(preset, calibration), numbering: "1", footer: footer)
   // The calibration, applied to all the template sets: its inks, its strokes and its bands.
   show: _calibrate.with(calibration)
-  set text(font: face-text, size: sz.small, fill: ink, lang: "en")
+  set text(font: face-text, size: sz.small, fill: ink, ..if lang != auto { (lang: lang) })
   // Paragraphs further apart than a list's items, and items than lines, so each reads as one:
   // a paragraph ends where its gap shows, and the one after a list is not its last item's.
   set par(leading: 0.52em, spacing: 0.8em)
