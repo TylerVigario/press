@@ -152,6 +152,13 @@ sh tools/check.sh .github/audit-cases/pass-unsourced-status.typ "$tmp/o/status.p
 grep -qF "has 1 open item " "$tmp/out" \
     || { cat "$tmp/out" >&2; fail "pass-unsourced-status did not count its status once"; }
 echo "audit-cases: a footer's status still to be settled is counted once, however many pages print it"
+# A letter's date still to be settled is one open item too, though the page-two header prints it.
+# shellcheck disable=SC2086
+sh tools/check.sh .github/audit-cases/pass-unsourced-date-letter.typ "$tmp/o/date.pdf" . $flags \
+    > "$tmp/out" 2>&1 || { cat "$tmp/out" >&2; fail "pass-unsourced-date-letter failed its audit"; }
+grep -qF "has 1 open item " "$tmp/out" \
+    || { cat "$tmp/out" >&2; fail "pass-unsourced-date-letter did not count its date once"; }
+echo "audit-cases: a letter's date still to be settled is counted once, however many pages print it"
 
 # A python with no XML parser cannot run the text-on-text pass. A stand-in python, the real one
 # with expat taken away at startup, is named by PRESS_PYTHON: check fails, and says why, and a

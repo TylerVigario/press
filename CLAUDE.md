@@ -146,6 +146,12 @@ repository has.
   check takes only 3 as a finding: Python exits 1 of its own accord, for a script it cannot
   parse or an error nothing caught. Keep a finding's status apart from 0, 1 and 2, or a broken
   tool reads as a finding a document has accepted.
+- **A record never holds a mark.** A mark counts each time it prints, so a part that prints a
+  record's value counts any mark in it again; and under typst 0.14, which has no `typst eval`,
+  the build counts open items and estimates by reading every metadata value whole (`typst query
+  … --field value`), so a mark in a record counts again even where nothing prints it. A part that
+  records content a document gave it, as `dateline()` does for `continued()`, records it through
+  `_unmarked`.
 - **The build record is one file, `.build-record`, in press's folder**, kept out of git by the
   kit's `.gitignore`; nothing goes beside a document or its PDF.
 - **A part draws a fill or a stroke in press's colours through `_cal` or `_stroke`,** in

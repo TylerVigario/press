@@ -34,8 +34,10 @@
 
 // The letter's date, written once, where it prints. continued() reads it from here: each page
 // takes the last one printed on it or before it, so a document of several letters dates each
-// page by the letter it is a page of.
-#let dateline(date) = [#metadata(date)<press-dateline>#date]
+// page by the letter it is a page of. The record keeps the date without its marks, which count
+// where the date prints: held in the record, a mark would count again on each page continued()
+// dates, and once more under typst 0.14, where the build reads every record's value whole.
+#let dateline(date) = [#metadata(_unmarked(date))<press-dateline>#date]
 
 // The subject line. Each reference is kept whole, so an account number never breaks across a
 // line, and stays text a reader can copy.
