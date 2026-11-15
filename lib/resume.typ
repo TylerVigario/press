@@ -9,22 +9,28 @@
 // page gives it, and then by a person. So it keeps to one column: a section is a heading, and a
 // role is one paragraph, read in the order it is printed.
 
-// One role: the role in bold, the organisation after it, and the dates at the right of the line,
-// in one paragraph, so a parser reads the three in that order and a role too long for one line
-// carries its dates on its last. `stacked` puts the organisation on a line of its own, under the
-// role and its dates, for organisations that carry a place. A page never ends on a role: the
-// entry stays with what follows it.
+// One role: the role in bold, the organisation after it and then its dates, in one paragraph and
+// in that order on the line, so a parser reads the three in order however it reads a page. A
+// parser that groups a page's text by where it stands reads dates set apart at the right of the
+// line after every role, and a role read beside another role's dates is a wrong work history.
+// The dates are kept whole with the dot before them, so a line that cannot hold them carries
+// them onto the next. `stacked` puts the organisation and its dates on a line of their own,
+// under the role, for organisations that carry a place. `flush: true` sets the dates at the
+// right of the line instead, on a role's last line, where a parser that reads a page's text in
+// the order it is written still reads them in order. A page never ends on a role: the entry
+// stays with what follows it.
 //
 //   #entry([Network technician], [Valley Broadband], [2021 – present])
-#let entry(role, org, dates, stacked: false) = block(width: 100%, above: 1em, below: _part-gap,
-  sticky: true, {
-  // The dates, pushed right. Joined to an empty box, so dates that do not fit on the line go to
-  // the next one whole and still at the right: a line drops space that starts it, not a box.
-  let when = [#box(width: 0pt)#sym.wj#h(1fr)#sym.wj#box(text(fill: ink-soft, dates))]
-  if stacked {
-    [#strong(role) #when \ #org]
+#let entry(role, org, dates, stacked: false, flush: false) = block(width: 100%, above: 1em,
+  below: _part-gap, sticky: true, {
+  if flush {
+    // The dates, pushed right. Joined to an empty box, so dates that do not fit on the line go to
+    // the next one whole and still at the right: a line drops space that starts it, not a box.
+    let when = [#box(width: 0pt)#sym.wj#h(1fr)#sym.wj#box(text(fill: ink-soft, dates))]
+    if stacked { [#strong(role) #when \ #org] } else { [#strong(role) — #org #when] }
   } else {
-    [#strong(role) — #org #when]
+    let when = box(text(fill: ink-soft)[#sym.dot.c #dates])
+    if stacked { [#strong(role) \ #org #when] } else { [#strong(role) — #org #when] }
   }
 })
 

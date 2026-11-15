@@ -426,11 +426,12 @@ changed.
 **A résumé** applies `resume`: `new.sh docs/resume resume` starts one.
 `#show: resume.with(title:, author:, headline:, contact:)` sets one column on a full sheet, with
 no footer, under a head of the writer's name, the headline and the contact line. A section is a
-heading, `= Experience`, and a role is `entry(role, org, dates)`: one paragraph, so a parser reads
-the role, the organisation and the dates in that order, and a role that wraps carries its dates
-on its last line. `size:` sets the body, `sz.small` by default, and the headline, the contact line
-and the headings follow it, while the name stays at `sz.title`;
-`face:` and `centred:` match a letter's. A heading's gaps are set rules after the show rule:
+heading, `= Experience`, and a role is `entry(role, org, dates)`: one paragraph, the dates after
+the organisation, so a parser reads the role, the organisation and the dates in that order however
+it reads the page, and dates that do not fit on the line go whole to the next; `flush: true` sets
+them at the right instead. `size:` sets the body, `sz.small` by default, and the headline, the
+contact line and the headings follow it, while the name stays at `sz.title`; `face:` and
+`centred:` match a letter's. A heading's gaps are set rules after the show rule:
 `#show heading: set block(above: 8pt)`.
 
 ### brief's conventions
@@ -501,7 +502,7 @@ is `(ok, ok-tint)`.
 | `re(..refs, words: (re: [Re:]))` | A letter's subject line; each reference stays whole and copyable. |
 | `enclosures(..items, words: (singular: [Enclosure], plural: [Enclosures]))` | What goes with a letter, one item to a line. |
 | `continued(words: (page: [Page]))` | A header for page two onward of a letter: writer, date, page. `set page(header: continued())`. In a document of several letters, each letter's first page, the one its `letterhead` is on, is left to it, and its pages are numbered from there. |
-| `entry(role, org, dates, stacked: false)` | A résumé's role: role, organisation and dates in one paragraph, the dates at the right; `stacked` puts the organisation on its own line. It stays with what follows, so no page ends on a role. |
+| `entry(role, org, dates, stacked: false, flush: false)` | A résumé's role: role, organisation and dates in one paragraph and in that order on the line, the dates after the organisation and kept whole, so a parser reads them in order however it reads a page; `stacked` puts the organisation and its dates on a line of their own. `flush: true` sets the dates at the right of the line instead, which a parser that groups a page's text by where it stands reads after every role. It stays with what follows, so no page ends on a role. |
 
 **Tokens.** Colours `ink`, `ink-soft`, `ink-faint`, `rule-hair`, `rule-mid`, `paper-tint`,
 `slate`, `slate-tint`, `steel`, and `ok`/`warn`/`bad` each with a `-tint`. Faces `face-text`,
