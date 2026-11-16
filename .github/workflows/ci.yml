@@ -240,6 +240,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/letter-dates.sh
 
+  furniture-link:
+    name: A link in a header or footer prints its address after it
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/furniture-link.sh
+
   edges:
     name: A template set for a calibration keeps its ink clear of the printer's bands
     runs-on: ubuntu-latest
@@ -668,6 +677,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/letter-dates.sh
+
+  oldest-furniture-link:
+    name: A link in a header or footer prints its address after it, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/furniture-link.sh
 
   oldest-edges:
     name: A template set for a calibration keeps its ink clear of the printer's bands, on the oldest toolchain

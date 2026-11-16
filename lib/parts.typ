@@ -487,10 +487,32 @@
 // print it: unobtrusive on a screen, and on paper the reader can still type it. The scheme
 // (https://, http://, mailto:) and a trailing slash are left off, since a browser supplies
 // them. No footnote when the text already is the address, or when the link goes to a place
-// in the same document.
+// in the same document. In a page's header or footer, where typst sets no footnote and prints
+// only its number, the address follows the text in parentheses, so it prints on every page the
+// furniture does.
 //
 // Keep links out of headings once a document has an outline: the contents repeat the
 // heading, and its footnote with it, so the address is noted twice.
+// Whether what is in context sits in its page's header or footer: above the top margin, or
+// below the bottom one. A margin typst sets itself is 2.5/21 of the page's smaller side, as
+// typst's own; a page whose height follows its content has no bottom to measure from, and is
+// taken to have none.
+#let _in-furniture() = {
+  let (width, height) = if page.flipped { (page.height, page.width) } else { (page.width, page.height) }
+  if height == auto { return false }
+  let side(key) = {
+    let given = if type(page.margin) == dictionary { page.margin.at(key, default: auto) } else { page.margin }
+    if given == auto {
+      2.5 / 21 * if width == auto { height } else { calc.min(width, height) }
+    } else {
+      let given = 0% + given
+      given.ratio * height + given.length.to-absolute()
+    }
+  }
+  let y = here().position().y
+  y < side("top") or y > height - side("bottom")
+}
+
 #let link-note(it) = {
   let shown = context underline(stroke: _stroke(0.5pt, slate), offset: 1.6pt, text(fill: slate, it))
   if type(it.dest) != str { return shown }
@@ -503,7 +525,7 @@
   // An address keeps its quotes straight where it prints, so it works when copied.
   let straight(address) = { set smartquote(enabled: false); address }
   if body in (it.dest.trim("/", at: end, repeat: false), address) { straight(shown) } else {
-    shown + footnote(straight(address))
+    context if _in-furniture() [#shown (#straight(address))] else { shown + footnote(straight(address)) }
   }
 }
 
