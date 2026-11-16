@@ -33,7 +33,7 @@ prints true, so every part is made for both:
 - **Text is real text:** searchable, copyable, and set in vendored fonts, so it renders the
   same on every machine.
 - **Links work on both:** they click on screen, and `link-note` footnotes their address for
-  paper.
+  paper, or prints it in parentheses after them in a page's header or footer.
 - **A document names itself once:** its title is the PDF's metadata, so a viewer shows it,
   and the template prints it in the header and footer from there.
 - **Colour is never the only carrier of meaning,** so a greyscale printer or a colour-blind
@@ -477,7 +477,7 @@ is `(ok, ok-tint)`.
 | `callout(body, tone: "note", label: none, size:, shape: auto, caps: true)` | Aside that must not be missed. Its tone's shape goes before its label, or before its body where it has none; `shape` takes another of the four, or none. |
 | `panel(body, label: none, color: slate, caps: true)` | Boxed block, no tone semantics. |
 | `code(body, breakable: auto)` | Code-block treatment; the document installs it as a show rule. A line too long for its block wraps, and the audit fails on it. A block is kept whole where it fits on a page, and one that does not fit starts the next; a block taller than a page breaks across pages. `breakable: true` lets it break at any page turn, and `false` keeps it whole, so that one taller than a page runs off its foot. |
-| `link-note` | Show rule for links: coloured and underlined, address footnoted for paper. |
+| `link-note` | Show rule for links: coloured and underlined, address footnoted for paper; in a page's header or footer, which typst sets no footnote from, the address in parentheses after the text. |
 | `item(n, title, body, color:, size:, breakable: auto)` | One numbered entry: its number, its title and its body. Kept whole or broken as `code`'s block is. For a run of steps, `steps`. |
 | `steps(..steps, color: slate, size: sz.small, start: 1, breakable: auto)` | Numbered steps, as one list: each `(title, body)`, or `(title, body, color)` for a step in a colour of its own, `warn` for the step a mistake ruins. Each step's number is beside its title and its body under the title. They are typst's numbered list, so a tagged PDF marks them as one and a screen reader moves from step to step. Each is kept whole or broken as `code`'s block is. |
 | `sheet(cols, head, ..rows, size:, blank: 0, across: 1, gutter: 9pt, breakable: auto)` | A table of any number of columns: zebra rows, and a header that repeats across pages. Its cells are set at `size`, code included. A row is kept whole where it fits on a page, and one that does not fit starts the next; a row taller than a page splits. `breakable: true` lets every row split, and `false` keeps every one whole. `blank` adds empty rows tall enough to write in. `across: 2` sets a long, narrow sheet in two columns, `gutter` apart, read down each column and then the next, with the header atop every column; where it ends, its last rows are shared between the columns by height, so the columns end level. A cell given as typst's `table.cell` keeps its span and its other fields, and a `table.hline`, `table.vline` or `table.footer` is drawn as in typst's `table`: a totals row is a footer. The sheet places its cells in the order given, so a cell takes no `x` or `y`, and rows a span ties together are kept together, as one row is. Under `across`, the footer closes the last column, and a line takes no `y`. |

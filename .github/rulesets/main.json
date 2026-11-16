@@ -97,6 +97,9 @@
             "context": "continued() dates each page by the letter it is a page of"
           },
           {
+            "context": "A link in a header or footer prints its address after it"
+          },
+          {
             "context": "A template set for a calibration keeps its ink clear of the printer's bands"
           },
           {
@@ -224,6 +227,9 @@
           },
           {
             "context": "continued() dates each page by the letter it is a page of, on the oldest toolchain"
+          },
+          {
+            "context": "A link in a header or footer prints its address after it, on the oldest toolchain"
           },
           {
             "context": "A template set for a calibration keeps its ink clear of the printer's bands, on the oldest toolchain"
