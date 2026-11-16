@@ -84,8 +84,9 @@ place and as `new.sh` scaffolds it, rebuilds to prove an unchanged page keeps it
 measures; does all of that again at the oldest typst and just press accepts; builds the release
 bundle and installs it in a scratch repository to scaffold, build and audit there with no just,
 checks every typst digest the kit pins, and runs both installers against the bundle served
-locally (install, update, refusals); and runs shellcheck, over `press.just`'s recipes and every
-composite action's `run:` steps too, markdownlint (lines ≤ 100), actionlint, a JSON parse, an
+locally (install, update, refusals, and install.ps1's TLS setting); and runs shellcheck,
+over `press.just`'s recipes and every composite action's `run:` steps too, markdownlint
+(lines ≤ 100), actionlint, a JSON parse, an
 invisible-character scan and CodeQL. A false finding fixed gets a `pass-*` case. A layout fix
 gets a `.github/<name>.sh` and its `.typ`, run by a job on press's typst and one on the oldest,
 each a context in `main.json`, which is applied with `gh api` once the change is merged, and each
@@ -197,7 +198,9 @@ repository has.
   `install.sh`, `$sum = '…'` in `install.ps1`). Change all three together.
 - **`install.ps1` is ASCII only.** Windows PowerShell reads a script with no byte order mark in
   the system's code page. It throws instead of exiting: run through `irm | iex` in someone's
-  session, `exit` would close it.
+  session, `exit` would close it. That session keeps whatever the installer sets in its process,
+  too: a process setting it changes, as it adds TLS 1.2 to one that lacks it, it puts back in a
+  `finally` and says so, and `install-tls.sh` fails on one left changed.
 - **The tools run in Git's `sh` on Windows**, from `cmd.exe`, PowerShell and npm alike. Keep
   them POSIX `sh`, and run them on Windows before claiming they work there.
 

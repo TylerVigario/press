@@ -478,6 +478,15 @@ jobs:
           pwsh --version
           sh .github/install-check.sh "$RUNNER_TEMP/bundle"
 
+  installer-tls:
+    name: install.ps1 leaves the TLS setting of the PowerShell that ran it as it was, through PowerShell 7
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *history
+      - run: sh .github/bundle.sh "$RUNNER_TEMP/bundle"
+      - run: sh .github/install-tls.sh "$RUNNER_TEMP/bundle"
+
   bundle-rebuilds:
     name: A release's commit rebuilds the bundle it published
     runs-on: ubuntu-latest
