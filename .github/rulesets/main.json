@@ -172,6 +172,9 @@
             "context": "Both installers install, update and refuse as they should, install.ps1 through PowerShell 7"
           },
           {
+            "context": "install.ps1 leaves the TLS setting of the PowerShell that ran it as it was, through PowerShell 7"
+          },
+          {
             "context": "A release's commit rebuilds the bundle it published"
           },
           {

@@ -46,19 +46,33 @@
         throw 'press: .\press is not a press kit; move it aside and run this again'
     }
 
-    # Windows PowerShell 5.1 on an older .NET offers no TLS 1.2 by default, and GitHub needs it.
-    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
-
     # Beside press\, so both moves below are renames on one volume.
     $tmp = Join-Path $here ('.press-install.' + [IO.Path]::GetRandomFileName())
     $old = Join-Path $tmp 'old'
     New-Item -ItemType Directory -Path $tmp | Out-Null
     try {
         $zip = Join-Path $tmp 'press.zip'
+        # GitHub needs TLS 1.2, which Windows PowerShell 5.1 on an older .NET does not offer by
+        # default. The setting is the whole process's, so it is changed only where it must be:
+        # SystemDefault, 0, leaves the choice to Windows, and a setting with TLS 1.2 or a later
+        # protocol in it reaches GitHub as it is. A setting whose every protocol is older than
+        # TLS 1.2, each protocol's flag being above every older one's, has TLS 1.2 added for the
+        # download alone, says so, and is put back however the download ends, Ctrl+C included.
+        $tls = [Net.ServicePointManager]::SecurityProtocol
+        $add = ([int]$tls -gt 0) -and ([int]$tls -lt [int][Net.SecurityProtocolType]::Tls12)
         try {
+            if ($add) {
+                Write-Host "press: this PowerShell's TLS setting, $tls, offers no TLS 1.2, which GitHub needs; adding it for the download"
+                [Net.ServicePointManager]::SecurityProtocol = $tls -bor [Net.SecurityProtocolType]::Tls12
+            }
             Invoke-WebRequest -UseBasicParsing -Uri "$base/press.zip" -OutFile $zip
         } catch {
             throw "press: could not download $base/press.zip: $($_.Exception.Message)"
+        } finally {
+            if ($add) {
+                [Net.ServicePointManager]::SecurityProtocol = $tls
+                Write-Host "press: this PowerShell's TLS setting is $tls again"
+            }
         }
         # .NET's SHA-256 rather than Get-FileHash: Windows PowerShell keeps that in a script
         # module, which a PowerShell 7 PSModulePath, inherited through cmd.exe as an npm script
