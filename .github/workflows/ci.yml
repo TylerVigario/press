@@ -1046,7 +1046,7 @@ jobs:
         # node on the hosted runner is enough. Rules and ignores are
         # .markdownlint-cli2.jsonc. Dependabot does not see this pin; a bump is a
         # deliberate edit.
-        run: npx --yes markdownlint-cli2@0.24.0
+        run: npx --yes markdownlint-cli2@0.24.1
 
   contexts:
     name: Every CI job is a required context, by a name GitHub keeps whole
