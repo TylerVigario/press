@@ -6,8 +6,7 @@
 #
 # Run by CI on press's typst and on the oldest toolchain. .github/units-gap.typ measures the gap
 # under "single", "stacks" and "grid" under a tight spacing and a loose one, and sets four units
-# under "stacks" whose last goes in the left column only if the gap between the two on the right
-# counts.
+# under "stacks" whose second goes in the left column only if the gaps between units count.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -24,6 +23,7 @@ for spacing in 0.55em 2em; do
     [ "$gaps" = "{single:6pt,stacks:6pt,grid:6pt}" ] ||
         fail "units sit $gaps apart under $spacing paragraph spacing, not 6pt under each pack"
     [ "$(value "$spacing" balance)" = "true" ] ||
-        fail "\"stacks\" put a unit in the taller column under $spacing paragraph spacing"
+        fail "\"stacks\" split its units where its columns are not most level," \
+            "under $spacing paragraph spacing"
 done
 echo "units-gap: units sit their spacing apart under every pack, and \"stacks\" counts it"

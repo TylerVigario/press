@@ -148,6 +148,9 @@
             "context": "Units sit their spacing apart under every pack, and \"stacks\" balances by it"
           },
           {
+            "context": "Units under \"stacks\" read in order, down the left column and then the right"
+          },
+          {
             "context": "A sheet across columns reads down each in turn, its last page balanced"
           },
           {
@@ -278,6 +281,9 @@
           },
           {
             "context": "Units sit their spacing apart under every pack, and \"stacks\" balances by it, on the oldest toolchain"
+          },
+          {
+            "context": "Units under \"stacks\" read in order, down the left column and then the right, on the oldest toolchain"
           },
           {
             "context": "A sheet across columns reads down each in turn, its last page balanced, on the oldest toolchain"

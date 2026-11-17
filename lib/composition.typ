@@ -435,10 +435,13 @@
 // Lay out a set of units. This sets no page; it owns only how a GROUP packs,
 // which is the one thing every document was re-deriving by hand.
 //
-//   "stacks"  two columns filled independently and balanced by MEASURED height.
-//             Nothing is padded to match a neighbour, which is the failure of a
-//             row grid: a row is as tall as its tallest cell, so a short unit
-//             beside a long one leaves the gap under it.
+//   "stacks"  two columns, the units in the order given: the first down the left
+//             column and the rest down the right, split between two units where
+//             the columns' MEASURED heights come out most nearly level, and where
+//             two splits are as level, the left column the longer. Nothing is
+//             padded to match a neighbour, which is the failure of a row grid: a
+//             row is as tall as its tallest cell, so a short unit beside a long
+//             one leaves the gap under it.
 //   "grid"    row-major cells. Keeps units aligned across a row — correct when
 //             the pairing means something, and the source of that gap when it
 //             does not.
@@ -467,22 +470,23 @@
   // pack == "stacks", guaranteed by the assert above.
   layout(size => {
     let w = (size.width - gutter) / 2
-    let left = ()
-    let right = ()
-    let hl = 0pt
-    let hr = 0pt
+    let hs = us.map(u => measure(box(width: w, u)).height)
+    // The gap between two units, as the grid below sets it: an em is of the text's size, and a
+    // percentage of the height the group is set in, where that has an end.
+    let given = 0pt + 0% + spacing
+    let room = if size.height.pt() == calc.inf { 0pt } else { size.height }
+    let gap-h = given.ratio * room + given.length.to-absolute()
     // A column is as tall as its units and the gaps between them.
-    for u in us {
-      let h = measure(box(width: w, u)).height
-      if hl <= hr {
-        hl += h + if left.len() > 0 { spacing } else { 0pt }
-        left.push(u)
-      } else {
-        hr += h + if right.len() > 0 { spacing } else { 0pt }
-        right.push(u)
-      }
+    let tall(col) = col.sum(default: 0pt) + gap-h * calc.max(col.len() - 1, 0)
+    let gap(k) = calc.abs(tall(hs.slice(0, k)) - tall(hs.slice(k)))
+    // The first `k` units go left and the rest right. Each split from one unit on the left to all
+    // but one is tried, and a later split as level as an earlier one, within what rounding
+    // leaves, is taken, so the left column is the longer.
+    let k = 1
+    for j in range(2, us.len()) {
+      if gap(j) <= gap(k) + 0.01pt { k = j }
     }
     grid(columns: (1fr, 1fr), gutter: gutter, align: top,
-         stack(left), stack(right))
+         stack(us.slice(0, k)), stack(us.slice(k)))
   })
 }
