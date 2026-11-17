@@ -240,6 +240,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/letter-dates.sh
 
+  signature-page:
+    name: A signature keeps the paragraph before it on its page
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/signature-page.sh
+
   furniture-link:
     name: A link in a header or footer prints its address after it
     runs-on: ubuntu-latest
@@ -686,6 +695,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/letter-dates.sh
+
+  oldest-signature-page:
+    name: A signature keeps the paragraph before it on its page, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/signature-page.sh
 
   oldest-furniture-link:
     name: A link in a header or footer prints its address after it, on the oldest toolchain

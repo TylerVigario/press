@@ -269,6 +269,14 @@
   }
 }
 
+// A template's rule for each paragraph: the one signature() keeps on its page is set in a block
+// that sticks to the signature, so no page break comes between them. typst sticks a block only to
+// the one after it (typst/typst#5259), so the paragraph is kept whole.
+#let _signed(it) = context {
+  if query(<press-signature>).any(m => m.value == it.location()) { block(sticky: true, it) }
+  else { it }
+}
+
 // A document's header: its title on the left, `meta` on the right, and a rule beneath. The title
 // is the one the document names itself with, set document(title:) or a template's title, so it
 // is named once, as footer() names it. A title that fits on one line keeps it, and `meta` wraps
