@@ -376,8 +376,11 @@
 }
 
 // Where a document is signed, with its closing (`closing: [Sincerely,]`) kept on the same page, so
-// a page break never strands it. By default, space for an ink signature over a line with the
-// signer's name beneath, and beside it a line to date by hand (`dated: false` leaves that out).
+// a page break never strands it. Under each of press's templates the paragraph before it is kept
+// there too, whole, so the page signed on carries the document's text: the template's _signed
+// sets it in a block that sticks to the signature. By default, space for an ink signature over a
+// line with the signer's name beneath, and beside it a line to date by hand (`dated: false`
+// leaves that out).
 // For a document sent as a file, `signed: false` is a typed sign-off: the name alone.
 //
 // `name` is who signs, the document's author unless it is given. A document several people sign
@@ -407,6 +410,17 @@
   assert(type(width) in (length, ratio, relative),
     message: "signature(width:) takes a length or a relative width: width: 2.9in, width: 100%")
   let name = if name == auto { _writer(what: "signature(), given no name,") } else { name }
+  // The paragraph kept on this page, for the template's _signed: the last before the signature,
+  // where no list, table, figure, heading, block of code or equation, or other signature lies
+  // between them.
+  let before = query(selector(par).before(here()))
+  let kept = if before.len() > 0 {
+    let last = before.last().location()
+    let between = selector.or(list, enum, terms, table, figure, heading, raw.where(block: true),
+      math.equation.where(block: true), <press-signature-end>)
+    if query(between.after(last).before(here())).len() == 0 { last }
+  }
+  [#metadata(kept)<press-signature>]
   set par(spacing: _part-gap)
   if closing != none { closing }
   if not signed {
@@ -430,6 +444,7 @@
       }
     })
   }
+  [#metadata(none)<press-signature-end>]
 })
 
 // Lay out a set of units. This sets no page; it owns only how a GROUP packs,

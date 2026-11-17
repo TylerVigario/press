@@ -408,11 +408,12 @@ script to run first, and an unchanged one leaves it cached.
 `#show: letter.with(title:, author:, contact:, date:)` **names the writer and the date once**,
 sets the reading page and the letterhead, and heads page two onward with the writer, the date
 and the page; the letter carries no build stamp, since its reader is outside. The body is the
-letter from the recipient on, ending with `signature`, which keeps the closing on the same page
-as lines for an ink signature and a date, or a typed sign-off with `signed: false`. `re` keeps
-reference numbers together and `enclosures` lists what goes with the letter. To match a résumé,
-pass its face (`face: face-sans`) and centre the letterhead (`centred: true`). A letter that
-composes its own page uses the same parts: `letterhead`, `dateline` and `continued()`.
+letter from the recipient on, ending with `signature`, which keeps the closing, and the
+paragraph before it, on the same page as lines for an ink signature and a date, or a typed
+sign-off with `signed: false`. `re` keeps reference numbers together and `enclosures` lists
+what goes with the letter. To match a résumé, pass its face (`face: face-sans`) and centre the
+letterhead (`centred: true`). A letter that composes its own page uses the same parts:
+`letterhead`, `dateline` and `continued()`.
 
 **A recipe** applies `recipe`: `new.sh recipes/black-beans recipe` starts a card.
 `#show: recipe.with(title:, yield:, method:, time:, intro:)` sets the card page and a header that
@@ -483,7 +484,7 @@ is `(ok, ok-tint)`.
 | `sheet(cols, head, ..rows, size:, blank: 0, across: 1, gutter: 9pt, breakable: auto)` | A table of any number of columns: zebra rows, and a header that repeats across pages. Its cells are set at `size`, code included. A row is kept whole where it fits on a page, and one that does not fit starts the next; a row taller than a page splits. `breakable: true` lets every row split, and `false` keeps every one whole. `blank` adds empty rows tall enough to write in. `across: 2` sets a long, narrow sheet in two columns, `gutter` apart, read down each column and then the next, with the header atop every column; where it ends, its last rows are shared between the columns by height, so the columns end level. A cell given as typst's `table.cell` keeps its span and its other fields, and a `table.hline`, `table.vline` or `table.footer` is drawn as in typst's `table`: a totals row is a footer. The sheet places its cells in the order given, so a cell takes no `x` or `y`, and rows a span ties together are kept together, as one row is. Under `across`, the footer closes the last column, and a line takes no `y`. |
 | `writein(n, label: none, pitch: 8mm)` | Lines to write on by hand, each after its label: `writein(3, label: [date])`. Print only; typst writes no PDF form fields. |
 | `checkbox(checked: false, size: 0.7em, stroke: 0.6pt + ink, radius: 1pt)` | A box to tick by hand, sized to the text it sits in: inline, in a `sheet()` cell, or as a list's marker, `#set list(marker: checkbox(), body-indent: 0.6em)`, for a checklist. `checked: true` marks it with an X. The audit does not count an empty box. |
-| `signature(name: auto, closing: none, signed: true, dated: true, width: 2.6in, words: (date: [Date]))` | Where a document is signed: the closing, kept on its page, then lines for an ink signature over the signer's name and a hand-written date, or with `signed: false` a typed sign-off. `name` is the document's author unless given; a document several people sign calls it once for each. `width` is the ink line, and a relative width is of the room it has: `width: 100%` fills a grid's cell. `dated: "below"` puts the date line under the name instead of beside it, so two signers fit side by side: a two-column grid of `signature(width: 100%, dated: "below")`. |
+| `signature(name: auto, closing: none, signed: true, dated: true, width: 2.6in, words: (date: [Date]))` | Where a document is signed: the closing, kept on its page with the paragraph before it, whole, under each of press's templates, then lines for an ink signature over the signer's name and a hand-written date, or with `signed: false` a typed sign-off. `name` is the document's author unless given; a document several people sign calls it once for each. `width` is the ink line, and a relative width is of the room it has: `width: 100%` fills a grid's cell. `dated: "below"` puts the date line under the name instead of beside it, so two signers fit side by side: a two-column grid of `signature(width: 100%, dated: "below")`. |
 | `flow(..steps)` | Left-to-right stage sequence. |
 | `decision(n, q, note, color: bad, breakable: auto)` | Open question needing an answer, under its number in a filled badge. Kept whole or broken as `code`'s block is. |
 | `stamp(body)` | Closing line — provenance, or a last caution. Its hairline stays with its words across a page break. |

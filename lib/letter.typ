@@ -102,6 +102,8 @@
   set page(.._page(preset, calibration), header: header)
   // The calibration, applied to all the template sets: its inks, its strokes and its bands.
   show: _calibrate.with(calibration)
+  // The paragraph before a signature, kept on its page.
+  show par: _signed
   set text(font: face, size: sz.body, fill: ink, ..if lang != auto { (lang: lang) })
   set par(leading: 0.6em, spacing: 1.05em)
   // A list's items are further apart than the lines within one, so a wrapped item reads as one,

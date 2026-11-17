@@ -97,6 +97,9 @@
             "context": "continued() dates each page by the letter it is a page of"
           },
           {
+            "context": "A signature keeps the paragraph before it on its page"
+          },
+          {
             "context": "A link in a header or footer prints its address after it"
           },
           {
@@ -230,6 +233,9 @@
           },
           {
             "context": "continued() dates each page by the letter it is a page of, on the oldest toolchain"
+          },
+          {
+            "context": "A signature keeps the paragraph before it on its page, on the oldest toolchain"
           },
           {
             "context": "A link in a header or footer prints its address after it, on the oldest toolchain"
