@@ -1,7 +1,8 @@
 // Units under each pack, for units-gap.sh, with the paragraph spacing `--input spacing=` sets.
 // Each `<mark>` sits at the same place in its unit, so two marks one above the other are a unit's
 // height and the gap apart. `<gaps>` holds the gap under each pack, and `<balance>` whether
-// "stacks" put the last of four units in the shorter column, counting the gaps in its height.
+// "stacks" split four units where its columns come out most level, counting the gaps in their
+// heights.
 #import "/lib.typ": *
 
 #let spacing = eval(sys.inputs.at("spacing", default: "0.8em"))
@@ -16,9 +17,10 @@
 #units(pack: "stacks", u("stacks-1"), u("stacks-2"), u("stacks-3"))
 #units(pack: "grid", u("grid-1"), u("grid-2"), u("grid-3"))
 
-// Four units for "stacks": A, then B and C under it on the right, leave the right column
-// `units(spacing:)` taller than the left with the gap between B and C counted and half of it
-// shorter without, so D goes left only when the gap is counted.
+// Four units for "stacks": A, taller than B, C and D by a unit's height and 3pt. Counting the
+// gaps between units, B, C and D on the right are a unit and 9pt taller than A alone, and A and B
+// a unit and 3pt taller than C and D, so B goes left with A; not counting them, B, C and D are a
+// unit less 3pt taller than A, and B goes right.
 #context units(pack: "stacks", u("A", extra: height() + 3pt), u("B"), u("C"), u("D"))
 
 #context {
@@ -26,8 +28,8 @@
   let gap(a, b) = at(b).y - at(a).y - height()
   [#metadata((
     single: gap("single-1", "single-2"),
-    stacks: gap("stacks-1", "stacks-3"),
+    stacks: gap("stacks-1", "stacks-2"),
     grid: gap("grid-1", "grid-3"),
   ))<gaps>]
-  [#metadata(at("D").x == at("A").x)<balance>]
+  [#metadata(at("B").x == at("A").x)<balance>]
 }
