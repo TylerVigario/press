@@ -1,7 +1,7 @@
 #!/bin/sh
 # check.sh — audit a built document for what typst lets through without a word: warnings that
 # exit 0, fonts that are not vendored, glyphs that vanish, ink too near the edge, text off the
-# paper, text on text, code that wraps.
+# paper, text on text, code that wraps, a PDF with no title.
 #
 # Run from the consumer root by build.sh --check, which any runner calls, and by stamp.sh after
 # every build:
@@ -223,7 +223,7 @@ test -s "$tmp/sources" || { echo "press: typst listed no sources for $src" >&2; 
 # Only the document's own file accepts. An acceptance in a file it imports or includes, a
 # shared template, would speak for every document that uses the file; a finding that file
 # causes is the file's to fix, so such a line is refused.
-passes="warnings fonts glyphs ink-margin off-page text-on-text code-wrap"
+passes="warnings fonts glyphs ink-margin off-page text-on-text code-wrap untitled"
 accepted=
 hit=
 skipped=
@@ -440,6 +440,23 @@ for spec in "PRESS_PDFTOTEXT $PDFTOTEXT" "PRESS_PDFFONTS $PDFFONTS"; do
              exit 1; }
 done
 
+# The UNTITLED check: a PDF that names itself nowhere. typst writes the document's title, set
+# document(title:) or a template's `title`, into the PDF's metadata, and a document given none
+# builds without a word, though WCAG and PDF/UA each require a title a machine can read: it is
+# what a screen reader names the document by. pdftotext reads it as the title of the HTML page
+# it writes. A title of nothing but spaces is none.
+if "$PDFTOTEXT" -htmlmeta -l 1 "$pdf" "$tmp/meta.html" 2>/dev/null; then
+    named=$(tr '\n' ' ' < "$tmp/meta.html" | sed -n 's#.*<title>\(.*\)</title>.*#\1#p' | tr -d ' \t')
+    if [ -z "$named" ]; then
+        echo "press: $pdf has no title, for a screen reader or a search to name it by" >&2
+        echo "       name it once: the template's title: [...], or set document(title: [...])" >&2
+        found untitled
+    fi
+else
+    echo "press: the untitled check could not run: $PDFTOTEXT could not read $pdf" >&2
+    rc=1
+    skipped="$skipped untitled"
+fi
 # SCANS (scan(), in lib/parts.typ). A document that reads an image file may have marked some of it
 # as a scan, content it did not set. The passes that read the page — fonts, ink near the edge, text
 # on text — then read a copy compiled with every scan hidden, its space kept and its stamp the
