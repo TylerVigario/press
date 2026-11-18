@@ -136,7 +136,7 @@ press's tools are plain `sh` scripts, called the same way from any runner:
 | `sh third_party/press/tools/build.sh docs/guide/main.typ` | builds and audits each document named to `print/<same path>.pdf` and says in one line what it made: new, changed, unchanged or cached, pages, words, size and the stamp; given several, ends with the count. `--check` first runs the audit alone, refusing without its tools |
 | `sh third_party/press/tools/all.sh [dir...]` | builds every document under the directories named (default `docs/`), not the files they are made of and not press's own, then the count; fails if any failed. `--check` audits them instead |
 | `sh third_party/press/tools/watch.sh docs/guide/main.typ` | recompiles on every save to `print/<same path>.watch.pdf`, a preview beside the stamped PDF |
-| `sh third_party/press/tools/clean.sh` | deletes `print/` |
+| `sh third_party/press/tools/clean.sh` | deletes `print/`; `.press-stamps` stays, so an unchanged page keeps its stamp |
 | `sh third_party/press/tools/stamp.sh <doc> <pdf> <flags>` | builds, stamping the PDF with when its content last changed and keeping the old time when nothing on the page changed; makes the output directory; then audits it, where the audit's tools are installed |
 | `sh third_party/press/tools/check.sh <doc> <pdf> third_party/press <flags>` | the audit alone, which refuses to run without its tools: typst warnings, fonts that are not vendored, characters no face draws, ink too near the edge, text off the paper, text printed on text, code that wraps, a PDF with no title |
 | `sh third_party/press/tools/install-typst.sh <dir>` | installs the typst press is built and audited with into `<dir>`, pinned by version and digest, on Linux x86_64 or aarch64: for a repository's CI (see In CI below) |
@@ -197,6 +197,19 @@ the build. The passes are `warnings`, `fonts`, `glyphs`, `ink-margin`, `off-page
 `text-on-text`, `code-wrap` and `untitled`. An acceptance with no reason fails, and so does one
 its pass finds nothing for: left standing, it would hide that pass's next real finding. A pass that
 cannot run, for a missing or broken tool, fails the audit whatever the document accepts.
+
+**A document's stamp is kept in `.press-stamps`**, at the repository's root beside `.press.toml`,
+which the repository commits with its documents. Each build writes its document's line, the
+document, its PDF, the stamp and the PDF's checksum, and drops the line of a document no longer
+there. A build compiles the document at its line's stamp and keeps the stamp where the PDF has
+that checksum, as typst makes the same bytes from the same inputs on any machine, so an unchanged
+page keeps its time after `clean.sh`, in a fresh clone and on another machine, with no PDF there
+to compare with. Where the bytes differ and the PDF is there, its pages decide, as above; where it
+is gone, the page is stamped anew. A document that sets its own date, `set document(date:)`,
+keeps press's stamp too once it has a line; the build that first writes one, finding the
+document's date in the PDF, stamps the page anew. A line the build cannot read, as a merge can
+leave, or a PDF listed twice, stops the build: keep one line for each PDF, or delete a line, and
+its next build writes it again.
 
 The stamp prints in the zone the repository names once, in **`.press.toml`** at its root, where
 the tools run:

@@ -154,7 +154,10 @@ repository has.
   records content a document gave it, as `dateline()` does for `continued()`, records it through
   `_unmarked`.
 - **The build record is one file, `.build-record`, in press's folder**, kept out of git by the
-  kit's `.gitignore`; nothing goes beside a document or its PDF.
+  kit's `.gitignore`; nothing goes beside a document or its PDF. It is a cache, which an update
+  replaces with the folder. A document's stamp is a record, not a cache: it is kept in
+  `.press-stamps` at the repository's root, which the repository commits, and never in press's
+  folder, or an update would stamp every page anew.
 - **A part draws a fill or a stroke in press's colours through `_cal` or `_stroke`,** in
   context, or a calibration never reaches it: `_cal` gives one of press's inks or tints as the
   document's calibration sets it, and `_stroke` a line at least as wide as its floor. Text needs

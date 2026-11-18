@@ -321,6 +321,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/source-date.sh
 
+  stamps:
+    name: An unchanged page keeps its stamp from .press-stamps, where its PDF is gone
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/stamps.sh
+
   label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads
     runs-on: ubuntu-latest
@@ -776,6 +785,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/source-date.sh
+
+  oldest-stamps:
+    name: An unchanged page keeps its stamp from .press-stamps, where its PDF is gone, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/stamps.sh
 
   oldest-label-break:
     name: A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain

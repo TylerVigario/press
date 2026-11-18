@@ -67,6 +67,9 @@
             "context": "A build takes SOURCE_DATE_EPOCH for the current time, and no stamp is later"
           },
           {
+            "context": "An unchanged page keeps its stamp from .press-stamps, where its PDF is gone"
+          },
+          {
             "context": "all builds the documents, not their parts or press's files"
           },
           {
@@ -206,6 +209,9 @@
           },
           {
             "context": "A build takes SOURCE_DATE_EPOCH for the current time, and no stamp is later, on the oldest toolchain"
+          },
+          {
+            "context": "An unchanged page keeps its stamp from .press-stamps, where its PDF is gone, on the oldest toolchain"
           },
           {
             "context": "all builds the documents, not their parts or press's files, on the oldest toolchain"
