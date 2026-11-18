@@ -388,22 +388,25 @@ printf '\302\240\n' | "$GREP" -qP '(*UTF)^[\p{Z}\p{Cf}]$' 2>/dev/null \
 # on identical input.
 #
 # This matters most where it is least visible: Git for Windows bundles Xpdf's
-# pdftotext in mingw64/bin and Git Bash puts that ahead of a system poppler, so a
-# Windows contributor and CI silently run different checks on the same commit.
+# pdftotext in ucrt64/bin, and mingw64/bin before Git 2.56, and Git Bash puts that
+# ahead of a system poppler, so a Windows contributor and CI silently run different
+# checks on the same commit.
 #
 # -v is the discriminator. Poppler prints "The Poppler Developers"; Xpdf prints
 # "[www.xpdfreader.com]". Both are checked because a PATH can resolve them to
 # different projects.
 #
 # PRESS_PDFTOTEXT and PRESS_PDFFONTS exist because on Windows PATH is not the
-# user's to order. Git for Windows' sh prepends its own /mingw64/bin and /usr/bin at
-# startup, so the Xpdf pdftotext it bundles wins inside every tool, no matter what
-# PowerShell or a .bashrc resolves: winget puts poppler's Library/bin on the user PATH,
-# and outside sh, where mingw64/bin is not on PATH at all, poppler's is the one found. A
+# user's to order. Git for Windows' sh prepends its own /ucrt64/bin, /mingw64/bin before
+# Git 2.56, and /usr/bin at startup, so the Xpdf pdftotext it bundles wins inside every
+# tool, no matter what PowerShell or a .bashrc resolves: winget puts poppler's Library/bin
+# on the user PATH, and outside sh, where Git's bin directories are not on PATH at all,
+# poppler's is the one found. A
 # Windows contributor has no reachable lever. Naming the executable directly is that
 # lever, and it is press-scoped: nothing else on the machine reads these names, so unlike
 # renaming the bundled binary it shifts no other tool's dependency. (Measured on Git
-# 2.55, which bundles no pdffonts or pdftoppm.)
+# 2.55, which bundles no pdffonts or pdftoppm, and on 2.56, whose one pdf tool is Xpdf's
+# pdftotext 4.06.)
 #
 # The assertion is unchanged either way. Being pointable does not mean being
 # trusted; whatever it is aimed at still has to say poppler.
@@ -436,7 +439,8 @@ for spec in "PRESS_PDFTOTEXT $PDFTOTEXT" "PRESS_PDFFONTS $PDFFONTS"; do
              echo "       extractors disagree about which glyphs a PDF contains, so the" >&2
              echo "       glyph check is only meaningful against poppler." >&2
              echo "       Put it first on PATH, or set $var to it directly. On Windows, Git's sh puts" >&2
-             echo "       its own /mingw64/bin, with Xpdf's pdftotext, ahead of PATH: set $var there." >&2
+             echo "       its own /ucrt64/bin, or /mingw64/bin before Git 2.56, with Xpdf's pdftotext," >&2
+             echo "       ahead of PATH: set $var there." >&2
              exit 1; }
 done
 

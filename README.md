@@ -306,13 +306,14 @@ builds every one, then fails if any failed its audit.
   only `Git\cmd`, which has no `sh`: add the `bin` directory to your user `PATH`.
 - **Set `PRESS_PDFTOTEXT`, even though PowerShell finds poppler.** winget puts poppler's
   `Library/bin` on your user `PATH`, and `where pdftotext` in PowerShell finds poppler's. The
-  tools run in Git's `sh`, though, which puts Git's own `/mingw64/bin` ahead of everything on
-  `PATH`, and Git bundles Xpdf's `pdftotext`. Inside `sh` that one wins, and the audit refuses
-  it: builds say "not audited: pdftotext is not poppler's". No `PATH` order fixes this. Set
-  `PRESS_PDFTOTEXT` in your user environment, with forward slashes, to `pdftotext.exe` in
-  poppler's `Library/bin` (under `%LOCALAPPDATA%/Microsoft/WinGet/Packages/`). The audit finds
-  `pdftocairo` beside it. Git bundles no `pdffonts` or `pdftoppm`; `PRESS_PDFFONTS` and
-  `PRESS_PDFTOPPM` pin those the same way if you want all three fixed.
+  tools run in Git's `sh`, though, which puts Git's own `/ucrt64/bin`, or `/mingw64/bin` before
+  Git 2.56, ahead of everything on `PATH`, and Git bundles Xpdf's `pdftotext`. Inside `sh` that
+  one wins, and the audit refuses it: builds say "not audited: pdftotext is not poppler's". No
+  `PATH` order fixes this. Set `PRESS_PDFTOTEXT` in your user environment, with forward slashes,
+  to `pdftotext.exe` in poppler's `Library/bin` (under
+  `%LOCALAPPDATA%/Microsoft/WinGet/Packages/`). The audit finds `pdftocairo` beside it. Git
+  bundles no `pdffonts` or `pdftoppm`; `PRESS_PDFFONTS` and `PRESS_PDFTOPPM` pin those the same
+  way if you want all three fixed.
 - **Set them again after `winget upgrade` updates poppler.** The folder they name carries
   poppler's version, `poppler-25.07.0`, and winget keeps no link to poppler that survives an
   upgrade, so an upgrade leaves them naming a folder that is gone. Builds still succeed, now

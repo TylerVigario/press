@@ -141,15 +141,16 @@ if [ -f "$settings" ]; then name=$(setting timezone) || exit 1; fi
 from="$settings's timezone"
 if [ -n "${PRESS_TZ:-}" ]; then name=$PRESS_TZ from="PRESS_TZ (or --tz)"; fi
 # date is handed the zone's FILE, not its name. Git for Windows' date knows no names: its
-# database is /mingw64/share/zoneinfo, where its date neither looks nor follows TZDIR, but it
-# reads a zone file given by path, as glibc, the BSDs and macOS do. A name or path date
-# cannot read is no error to date either: it prints UTC under a made-up name. So the file is
-# found first, and a name with none fails the build. UTC with no zone named is POSIX's UTC0,
-# which needs no file.
+# database is /ucrt64/share/zoneinfo, and /mingw64/share/zoneinfo before Git 2.56, where its
+# date neither looks nor follows TZDIR, but it reads a zone file given by path, as glibc, the
+# BSDs and macOS do. A name or path date cannot read is no error to date either: it prints UTC
+# under a made-up name. So the file is found first, and a name with none fails the build. UTC
+# with no zone named is POSIX's UTC0, which needs no file.
 zone=UTC0
 if [ -n "$name" ]; then
     zone=
-    for dir in ${TZDIR:+"$TZDIR"} /usr/share/zoneinfo /mingw64/share/zoneinfo; do
+    for dir in ${TZDIR:+"$TZDIR"} /usr/share/zoneinfo \
+            /ucrt64/share/zoneinfo /mingw64/share/zoneinfo; do
         if [ -f "$dir/$name" ]; then
             zone=:$dir/$name
             break
@@ -157,7 +158,8 @@ if [ -n "$name" ]; then
     done
     if [ -z "$zone" ]; then
         echo "press: $from is not a time zone this machine knows: $name" >&2
-        echo "       looked in ${TZDIR:+$TZDIR, }/usr/share/zoneinfo and /mingw64/share/zoneinfo;" >&2
+        echo "       looked in ${TZDIR:+$TZDIR, }/usr/share/zoneinfo, /ucrt64/share/zoneinfo and" \
+            "/mingw64/share/zoneinfo;" >&2
         echo "       set TZDIR if this machine keeps its zones elsewhere" >&2
         exit 1
     fi
