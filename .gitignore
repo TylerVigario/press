@@ -16,3 +16,8 @@ __pycache__/
 # that commits press's folder ignores the record there without a line of its own.
 .build-record
 .build-record.*
+
+# The stamps a build keeps at the root it runs from. A repository commits its own, at its root,
+# which this file does not reach; press's are its own builds', its calibration sheet's and its CI's.
+/.press-stamps
+/.press-stamps.*

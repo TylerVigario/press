@@ -43,9 +43,17 @@
 # poppler's pdftoppm; without it, different bytes re-stamp the page as before, erring toward
 # reprinting, and building still never depends on the audit's tools.
 #
-# The previous stamp is read from the PDF itself: --creation-timestamp puts it in the Info
-# dictionary as plain text, /CreationDate(D:YYYYMMDDHHMMSSZ), in UTC. No side file to lose
-# or leave behind. A PDF without one -- or built before this -- simply gets a new stamp.
+# WHERE THE STAMP IS KEPT. In .press-stamps, at the root the tools run from, which the
+# repository commits, and in the PDF. The PDF alone would lose it: print/ is not committed, so
+# clean.sh, a fresh clone or another machine leaves no PDF, and the page would be stamped anew
+# though nothing on it changed. The file has a line for each document's PDF: the document, the
+# PDF, the stamp in UTC, and the SHA-256 of the PDF built at that stamp. The build compiles the
+# document at that stamp, and keeps it where the bytes have that checksum, as typst makes the same
+# bytes from the same inputs on any machine. Where they differ and the PDF is there, its words
+# and pixels decide, as above; where it is gone, the page is stamped anew. The PDF's own stamp,
+# --creation-timestamp's /CreationDate(D:YYYYMMDDHHMMSSZ) in its Info dictionary, is tried next,
+# for a page built before the file kept it or whose line another build overwrote. It is the
+# document's own date where it sets one, and its line keeps that from being taken for the stamp.
 #
 # typst 0.14 writes a space before the date's parenthesis, and stamp_of reads either.
 set -eu
@@ -164,20 +172,112 @@ when() { tz date -d "@$1" '+%Y-%m-%d %H:%M %Z' 2>/dev/null || tz date -r "$1" '+
 # awk does the calendar arithmetic (days from civil, Hinnant) because GNU and BSD date
 # disagree on how to parse a date, and this must run on both.
 stamp_of() {
-    grep -a -o '/CreationDate *(D:[0-9]\{14\}Z)' "$1" 2>/dev/null | head -n 1 | awk '{
-        s = substr($0, index($0, "D:") + 2, 14)
+    grep -a -o '/CreationDate *(D:[0-9]\{14\}Z)' "$1" 2>/dev/null | head -n 1 | seconds
+}
+# civil(t): awk's, a YYYYMMDDHHMMSS in UTC as Unix seconds. Characters that are not digits are
+# dropped, so .press-stamps' 2026-11-17T14:03:22Z reads too.
+civil='function civil(t,    s, y, m, d, era, yoe, doe) {
+        s = t; gsub(/[^0-9]/, "", s)
         y = substr(s, 1, 4) + 0; m = substr(s, 5, 2) + 0; d = substr(s, 7, 2) + 0
         if (m <= 2) { y -= 1; m += 12 }
         era = int(y / 400); yoe = y - era * 400
         doe = yoe * 365 + int(yoe / 4) - int(yoe / 100) + int((153 * (m - 3) + 2) / 5) + d - 1
-        printf "%d\n", (era * 146097 + doe - 719468) * 86400 + substr(s, 9, 2) * 3600 + substr(s, 11, 2) * 60 + substr(s, 13, 2)
+        return (era * 146097 + doe - 719468) * 86400 + substr(s, 9, 2) * 3600 + substr(s, 11, 2) * 60 + substr(s, 13, 2)
     }'
+# seconds: each line read, through civil.
+seconds() { awk "$civil"' { printf "%d\n", civil($0) }'; }
+
+# THE STAMPS FILE, .press-stamps. A line for each PDF built under the root, tab-separated, in
+# order of the document's path, under a line saying what the file is:
+#
+#   docs/memo.typ	print/docs/memo.pdf	2026-11-17T14:03:22Z	<the PDF's SHA-256>
+#
+# A PDF outside the root, as check's copies are, has no line: its path is another machine's.
+# Each build writes its own line, and drops the line of a document no longer there, writing the
+# whole file anew and moving it into place where that changes it; a cached build, whose line is
+# already the record's, writes only to drop one. Two builds at once each write a whole file and
+# the later one stands; the PDF's own stamp then keeps the other page's time at its next build,
+# which writes its line again. A line the build cannot read, as a merge's <<<<<<< is, or a PDF
+# listed twice, stops the build, rather than a page losing its stamp unseen.
+stamps=.press-stamps
+stamps_head="# press's stamps: when each document's page last changed, kept by its build. Commit this file."
+tab=$(printf '\t')
+# pathkey <path>: sets k to the path as the file lists it, / between names and no leading ./,
+# or to nothing for a path outside the root.
+pathkey() {
+    k=$1
+    case $k in *\\*) k=$(printf '%s' "$k" | tr '\\' '/') ;; esac
+    k=${k#./}
+    case $k in /* | ../* | */../* | ?:*) k= ;; esac
+}
+pathkey "$src"; skey=$k
+pathkey "$pdf"; pkey=$k
+# The file is read once: each line checked, this PDF's found, and whether any document listed is
+# gone. lstamp and lsum are this PDF's stamp, in Unix seconds, and checksum, and gone is 1 where
+# a line is to drop.
+lstamp='' lsum='' gone=0
+if [ -f "$stamps" ]; then
+    read_stamps=$(LC_ALL=C awk -F '\t' -v file="$stamps" -v s="$skey" -v p="$pkey" "$civil"'
+        function bad(why) { printf "press: %s, line %d: %s\n       %s\n", file, NR, why, $0 > "/dev/stderr"; fail = 1 }
+        { sub(/\r$/, "") }
+        /^(#.*)?$/ { next }
+        NF != 4 || $3 !~ /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]Z$/ \
+                || $4 !~ /^[0-9a-f]+$/ || length($4) != 64 {
+            bad("not a document, its PDF, a stamp and a checksum, between tabs"); next }
+        ($1 SUBSEP $2) in seen { bad("lists " $2 " twice"); next }
+        { seen[$1, $2] = 1 }
+        s != "" && p != "" && $1 == s && $2 == p { at = sprintf("%d", civil($3)); sum = $4 }
+        { if ((getline line < $1) < 0) gone = 1; else close($1) }
+        END { if (fail) exit 1; printf "%d\t%s\t%s\n", gone, sum, at }
+    ' "$stamps") || {
+        echo "       keep one line for each PDF, or delete a line, and its next build writes it again" >&2
+        exit 1
+    }
+    gone=${read_stamps%%"$tab"*}
+    read_stamps=${read_stamps#*"$tab"}
+    lsum=${read_stamps%%"$tab"*}
+    read_stamps=${read_stamps#*"$tab"}
+    lstamp=$read_stamps
+fi
+# listed <pdf key>: the stamp, in Unix seconds, and the checksum that $stamps lists for this
+# document and that PDF; nothing where it lists none.
+listed() {
+    [ -n "$skey" ] && [ -n "$1" ] && [ -f "$stamps" ] || return 0
+    l=$(awk -F '\t' -v s="$skey" -v p="$1" '{ sub(/\r$/, "") } $1 == s && $2 == p { print $3 "\t" $4; exit }' "$stamps")
+    [ -n "$l" ] || return 0
+    printf '%s %s\n' "$(printf '%s\n' "${l%%"$tab"*}" | seconds)" "${l#*"$tab"}"
+}
+# utc <seconds>: the stamp as the file writes it. GNU date takes -d @N; BSD and macOS take -r N.
+utc() { date -u -d "@$1" '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || date -u -r "$1" '+%Y-%m-%dT%H:%M:%SZ'; }
+# restamp <seconds>: list this PDF at that stamp and with the checksum it has now, and the other
+# PDFs whose documents are still there; the file is written only where that changes it.
+restamp() {
+    [ -n "$skey" ] && [ -n "$pkey" ] || return 0
+    # shellcheck disable=SC2086  # $dig is a command and its arguments
+    sum=$($dig "$pdf" | cut -d ' ' -f 1)
+    {
+        printf '%s\n' "$stamps_head"
+        {
+            [ ! -f "$stamps" ] || awk -F '\t' -v s="$skey" -v p="$pkey" '
+                { sub(/\r$/, "") }
+                /^(#.*)?$/ || ($1 == s && $2 == p) { next }
+                (getline line < $1) >= 0 { close($1); print }
+            ' "$stamps"
+            printf '%s\t%s\t%s\t%s\n' "$skey" "$pkey" "$(utc "$1")" "$sum"
+        } | LC_ALL=C sort
+    } > "$work/stamps"
+    [ -f "$stamps" ] && tr -d '\r' < "$stamps" | cmp -s - "$work/stamps" && return 0
+    cp "$work/stamps" "$stamps.$$" 2>/dev/null && mv -f "$stamps.$$" "$stamps" 2>/dev/null || {
+        rm -f "$stamps.$$"
+        echo "press: could not write $stamps, which keeps $pdf's stamp for every other checkout" >&2
+        exit 1
+    }
 }
 
 # The audit's working files: the files the compile read, and what typst printed.
 work=$(mktemp -d "${TMPDIR:-/tmp}/press-build.XXXXXX")
 trial=
-trap 'rm -rf "$work"; if [ -n "$trial" ]; then rm -f "$trial"; fi' EXIT
+trap 'rm -rf "$work"; rm -f "$stamps.$$"; if [ -n "$trial" ]; then rm -f "$trial"; fi' EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
@@ -269,17 +369,22 @@ if [ -z "${PRESS_IN_CHECK:-}" ] && [ -z "${PRESS_STAMP_AS:-}" ]; then
     entry > "$work/entry" || true
     if [ -s "$work/entry" ] && [ -f "$pdf" ]; then
         # shellcheck disable=SC2086
-        { cat "$work/key"; echo "pdf $($dig "$pdf" | cut -d ' ' -f 1)"; } > "$work/now"
+        psum=$($dig "$pdf" | cut -d ' ' -f 1)
+        { cat "$work/key"; echo "pdf $psum"; } > "$work/now"
         sed -n 's/^input //p' "$work/entry" > "$work/inputs"
+        rstamp=$(sed -n 's/^stamp //p' "$work/entry")
         # SOURCE_DATE_EPOCH is not in the key: it stamps only a page that changed, which the
         # record never holds, and a recorded stamp later than it is built again, to come back.
+        # A PDF under the root is cached only where $stamps lists it at the record's stamp and
+        # checksum, so a page whose line was lost, or another branch's, is built and listed again.
         # shellcheck disable=SC2086
         if head -n "$(wc -l < "$work/now")" "$work/entry" | cmp -s - "$work/now" \
                 && [ -s "$work/inputs" ] && $dig -c --status "$work/inputs" 2>/dev/null \
-                && { [ -z "$sde" ] \
-                    || [ "$(sed -n 's/^stamp //p' "$work/entry")" -le "$sde" ]; }; then
+                && { [ -z "$sde" ] || [ "$rstamp" -le "$sde" ]; } \
+                && { [ -z "$skey" ] || [ -z "$pkey" ] || [ "$lstamp $lsum" = "$rstamp $psum" ]; }; then
+            [ "$gone" -eq 0 ] || restamp "$rstamp"
             sed -n 's/^note //p' "$work/entry" >&2
-            printf 'cached %s\n' "$(when "$(sed -n 's/^stamp //p' "$work/entry")")"
+            printf 'cached %s\n' "$(when "$rstamp")"
             exit 0
         fi
     fi
@@ -287,11 +392,13 @@ if [ -z "${PRESS_IN_CHECK:-}" ] && [ -z "${PRESS_STAMP_AS:-}" ]; then
 fi
 [ -n "${PRESS_IN_CHECK:-}" ] || set -- "$@" --deps "$work/deps" --deps-format zero
 
-# finish <status> <stamp> <typst flags...>: say what typst printed and what the build made,
-# then audit it; record the build if the audit passed, and exit with the audit's answer.
+# finish <status> <stamp> <typst flags...>: list the PDF's stamp, say what typst printed and
+# what the build made, then audit it; record the build if the audit passed, and exit with the
+# audit's answer. The stamp is listed whatever the audit says, as the PDF stays written.
 finish() {
     st=$1 stamp=$2
     shift 2
+    restamp "$stamp"
     [ -n "$out" ] && printf '%s\n' "$out" >&2
     printf '%s %s\n' "$st" "$(when "$stamp")"
     [ -z "${PRESS_IN_CHECK:-}" ] || exit 0
@@ -326,15 +433,27 @@ at() {
 mkdir -p "$(dirname "$pdf")"
 
 # A copy at another PDF's stamp (PRESS_STAMP_AS): check's copy with every scan hidden, which
-# must lay out exactly as the document's PDF does, stamp and all. No comparison, no audit.
+# must lay out exactly as the document's PDF does, stamp and all. No comparison, no audit. The
+# PDF's stamp is the one $stamps lists for it, where that line's checksum is the PDF's own, and
+# otherwise its /CreationDate.
 if [ -n "${PRESS_STAMP_AS:-}" ]; then
-    e=$(stamp_of "$PRESS_STAMP_AS")
+    pathkey "$PRESS_STAMP_AS"
+    e=$(listed "$k")
+    # shellcheck disable=SC2086
+    if [ -z "$e" ] || [ "${e#* }" != "$($dig "$PRESS_STAMP_AS" | cut -d ' ' -f 1)" ]; then
+        e=$(stamp_of "$PRESS_STAMP_AS")
+    fi
+    e=${e%% *}
     [ -n "$e" ] || e=$now
     out=$(at "$e" "$pdf" "$@") || { printf '%s\n' "$out" >&2; exit 1; }
     exit 0
 fi
 
-old=$( [ -f "$pdf" ] && stamp_of "$pdf" || true )
+# The stamps the page may still carry: the one $stamps lists, which is kept where the document
+# built at it has the checksum listed beside it; then the PDF's own, where the PDF is there and
+# its stamp is another, which is kept where the document built at it makes the same bytes or
+# the same pages.
+pstamp=$( [ -f "$pdf" ] && stamp_of "$pdf" || true )
 # keep <typst flags...>: the page is unchanged, and keeps its stamp, or comes back to
 # SOURCE_DATE_EPOCH where the stamp is later.
 keep() {
@@ -344,13 +463,24 @@ keep() {
     fi
     finish unchanged "$old" "$@"
 }
-if [ -n "$old" ]; then
+tried=
+for old in $lstamp $pstamp; do
+    case " $tried " in *" $old "*) continue ;; esac
+    tried="$tried $old"
     # typst takes the format from the extension, so the trial build keeps .pdf. It sits in
     # print/, so an interrupt mid-compile removes it rather than leaving it there.
     trial="${pdf%.pdf}.press-trial.$$.pdf"
-    if out=$(at "$old" "$trial" "$@"); then
+    out=$(at "$old" "$trial" "$@") || { rm -f "$trial"; printf '%s\n' "$out" >&2; exit 1; }
+    # shellcheck disable=SC2086
+    if [ "$old" = "$lstamp" ] && [ "$($dig "$trial" | cut -d ' ' -f 1)" = "$lsum" ]; then
+        mv -f "$trial" "$pdf"
+        trial=
+        keep "$@"
+    fi
+    if [ "$old" = "$pstamp" ]; then
         if cmp -s "$trial" "$pdf"; then
             rm -f "$trial"
+            trial=
             keep "$@"
         fi
         # Other bytes, the same pages: the new build is the PDF, at the old time.
@@ -359,16 +489,13 @@ if [ -n "$old" ]; then
             trial=
             keep "$@"
         fi
-    else
-        rm -f "$trial"
-        printf '%s\n' "$out" >&2
-        exit 1
     fi
     rm -f "$trial"
-fi
+    trial=
+done
 
 if out=$(at "$now" "$pdf" "$@"); then
-    finish "$( [ -n "$old" ] && echo changed || echo new )" "$now" "$@"
+    finish "$( [ -n "$tried" ] && echo changed || echo new )" "$now" "$@"
 fi
 printf '%s\n' "$out" >&2
 exit 1
