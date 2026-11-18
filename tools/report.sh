@@ -5,7 +5,7 @@
 #
 #   sh <press_root>/tools/report.sh <pdf> <new|changed|unchanged|cached> <updated...>
 #
-#   print/docs/services.pdf: changed, 8 pages, 2721 words, 171 KiB, updated 2026-10-13 10:12 PDT
+#   print/docs/services.pdf: changed, 8 pages, 2721 words, 171 KiB, updated 2026-10-13 10:12:07 PDT
 #
 # The stamp is shown whether or not the document prints it with updated(): a sheet that
 # carries no stamp still has one in its PDF, and the build is where it can be seen.

@@ -8,13 +8,13 @@
 # holds a copy of the kit under third_party/press and two briefs, one of them setting its own
 # date, built with build.sh in UTC at SOURCE_DATE_EPOCH's times:
 #
-#   · new at 1700000000, 22:13, each with a line in .press-stamps under its heading line;
+#   · new at 1700000000, 22:13:20, each with a line in .press-stamps under its heading line;
 #   · in a copy with its PDF and no .press-stamps, as a press before it left it, unchanged at
-#     22:13, and listed;
-#   · after clean.sh, with no build record, unchanged at 22:13 though built at 23:13;
-#   · in a copy of the repository's committed files, at another path, unchanged at 22:13;
+#     22:13:20, and listed;
+#   · after clean.sh, with no build record, unchanged at 22:13:20 though built at 23:13:20;
+#   · in a copy of the repository's committed files, at another path, unchanged at 22:13:20;
 #   · in that copy, edited and not built, changed at 23:13: the checksum tells the edit;
-#   · the dated one, with its PDF there and no build record, unchanged at 22:13, though its
+#   · the dated one, with its PDF there and no build record, unchanged at 22:13:20, though its
 #     PDF's own date is the document's;
 #   · with an older .press-stamps put back over a page edited since, unchanged at that page's
 #     own stamp, and its line written again, and never cached while its line is not the record's;
@@ -63,8 +63,8 @@ tab=$(printf '\t')
 
 out=$(build "$repo" 1700000000 docs/note.typ docs/dated.typ) \
     || { printf '%s\n' "$out" >&2; fail "the first build failed"; }
-expect "a new page" note new "2023-11-14 22:13" "$out"
-expect "a new page that sets its own date" dated new "2023-11-14 22:13" "$out"
+expect "a new page" note new "2023-11-14 22:13:20" "$out"
+expect "a new page that sets its own date" dated new "2023-11-14 22:13:20" "$out"
 [ "$(head -n 1 "$repo/.press-stamps")" = \
     "# press's stamps: when each document's page last changed, kept by its build. Commit this file." ] \
     || fail ".press-stamps does not begin with the line saying what it is"
@@ -81,7 +81,7 @@ cp -R "$repo" "$before"
 rm -f "$before/.press-stamps" "$before/third_party/press/.build-record"
 out=$(build "$before" 1700003600 docs/note.typ) \
     || { printf '%s\n' "$out" >&2; fail "the build with no .press-stamps failed"; }
-expect "built before .press-stamps" note unchanged "2023-11-14 22:13" "$out"
+expect "built before .press-stamps" note unchanged "2023-11-14 22:13:20" "$out"
 [ "$(line "$before" note)" = \
     "docs/note.typ${tab}print/docs/note.pdf${tab}2023-11-14T22:13:20Z${tab}$sum" ] \
     || { cat "$before/.press-stamps" >&2; fail "the page built before .press-stamps was not listed"; }
@@ -91,8 +91,8 @@ echo "stamps: and is listed at its stamp"
 rm -f "$repo/third_party/press/.build-record"
 out=$(build "$repo" 1700003600 docs/note.typ docs/dated.typ) \
     || { printf '%s\n' "$out" >&2; fail "the build after clean.sh failed"; }
-expect "after clean.sh" note unchanged "2023-11-14 22:13" "$out"
-expect "after clean.sh, the page that sets its own date" dated unchanged "2023-11-14 22:13" "$out"
+expect "after clean.sh" note unchanged "2023-11-14 22:13:20" "$out"
+expect "after clean.sh, the page that sets its own date" dated unchanged "2023-11-14 22:13:20" "$out"
 
 # The repository's committed files, at another path: no print/, and the kit's .gitignore keeps
 # the build record out.
@@ -102,41 +102,41 @@ cp -R "$repo/docs" "$repo/.press-stamps" "$copy/"
 cp -R lib.typ lib press.toml template calibration.typ fonts tools "$copy/third_party/press/"
 out=$(build "$copy" 1700003600 docs/note.typ docs/dated.typ) \
     || { printf '%s\n' "$out" >&2; fail "the build of the copy failed"; }
-expect "in a copy" note unchanged "2023-11-14 22:13" "$out"
-expect "in a copy, the page that sets its own date" dated unchanged "2023-11-14 22:13" "$out"
+expect "in a copy" note unchanged "2023-11-14 22:13:20" "$out"
+expect "in a copy, the page that sets its own date" dated unchanged "2023-11-14 22:13:20" "$out"
 
 rm -rf "$copy/print" "$copy/third_party/press/.build-record"
 note "$copy" "Two lines."
 out=$(build "$copy" 1700003600 docs/note.typ) \
     || { printf '%s\n' "$out" >&2; fail "the build of the edited copy failed"; }
-expect "in a copy, edited and not built" note changed "2023-11-14 23:13" "$out"
+expect "in a copy, edited and not built" note changed "2023-11-14 23:13:20" "$out"
 
 rm -f "$repo/third_party/press/.build-record"
 out=$(build "$repo" 1700003600 docs/dated.typ) \
     || { printf '%s\n' "$out" >&2; fail "the build of the dated page with no record failed"; }
 expect "with its PDF and no build record, the page that sets its own date" dated unchanged \
-    "2023-11-14 22:13" "$out"
+    "2023-11-14 22:13:20" "$out"
 
 # A line another build overwrote, or a branch's older file: the PDF's own stamp keeps the page's.
 cp "$repo/.press-stamps" "$tmp/older"
 note "$repo" "Two lines."
 out=$(build "$repo" 1700003600 docs/note.typ) \
     || { printf '%s\n' "$out" >&2; fail "the edited build failed"; }
-expect "edited" note changed "2023-11-14 23:13" "$out"
+expect "edited" note changed "2023-11-14 23:13:20" "$out"
 cp "$tmp/older" "$repo/.press-stamps"
 out=$(build "$repo" 1700007200 docs/note.typ) \
     || { printf '%s\n' "$out" >&2; fail "the build under the older .press-stamps failed"; }
-expect "under an older .press-stamps" note unchanged "2023-11-14 23:13" "$out"
+expect "under an older .press-stamps" note unchanged "2023-11-14 23:13:20" "$out"
 case $(line "$repo" note) in
     *"${tab}2023-11-14T23:13:20Z${tab}"*) echo "stamps: its line is written again" ;;
-    *) cat "$repo/.press-stamps" >&2; fail "the page's line was not written again at 23:13" ;;
+    *) cat "$repo/.press-stamps" >&2; fail "the page's line was not written again at 23:13:20" ;;
 esac
 out=$(build "$repo" 1700007200 docs/note.typ) || { printf '%s\n' "$out" >&2; fail "the rebuild failed"; }
-expect "built again" note cached "2023-11-14 23:13" "$out"
+expect "built again" note cached "2023-11-14 23:13:20" "$out"
 cp "$tmp/older" "$repo/.press-stamps"
 out=$(build "$repo" 1700007200 docs/note.typ) \
     || { printf '%s\n' "$out" >&2; fail "the build under the older .press-stamps, with a record, failed"; }
-expect "with a build record, under an older .press-stamps" note unchanged "2023-11-14 23:13" "$out"
+expect "with a build record, under an older .press-stamps" note unchanged "2023-11-14 23:13:20" "$out"
 
 rm "$repo/docs/dated.typ"
 out=$(build "$repo" 1700007200 docs/note.typ) || { printf '%s\n' "$out" >&2; fail "the build failed"; }

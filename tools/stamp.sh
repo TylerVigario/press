@@ -166,8 +166,11 @@ if [ -n "$name" ]; then
 fi
 tz() { TZ=$zone "$@"; }
 
-# Readable on paper. GNU date (Linux, Git for Windows) takes -d @N; BSD and macOS take -r N.
-when() { tz date -d "@$1" '+%Y-%m-%d %H:%M %Z' 2>/dev/null || tz date -r "$1" '+%Y-%m-%d %H:%M %Z'; }
+# Readable on paper, and to the second, so two editions built in the same minute print different
+# times. GNU date (Linux, Git for Windows) takes -d @N; BSD and macOS take -r N.
+when() {
+    tz date -d "@$1" '+%Y-%m-%d %H:%M:%S %Z' 2>/dev/null || tz date -r "$1" '+%Y-%m-%d %H:%M:%S %Z'
+}
 
 # The previous stamp, in Unix seconds, from the PDF's own /CreationDate; empty if none.
 # typst 0.14 writes a space before the date's parenthesis and 0.15 none, so either is read.

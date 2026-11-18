@@ -211,8 +211,9 @@ document's date in the PDF, stamps the page anew. A line the build cannot read, 
 leave, or a PDF listed twice, stops the build: keep one line for each PDF, or delete a line, and
 its next build writes it again.
 
-The stamp prints in the zone the repository names once, in **`.press.toml`** at its root, where
-the tools run:
+The stamp prints to the second, `updated 2026-11-08 01:50:23 UTC`, so two editions built in the
+same minute print different times. It prints in the zone the repository names once, in
+**`.press.toml`** at its root, where the tools run:
 
 ```toml
 timezone = "America/Los_Angeles"
