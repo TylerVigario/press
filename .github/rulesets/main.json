@@ -124,6 +124,9 @@
             "context": "header() keeps a short title or meta on one line beside a long one"
           },
           {
+            "context": "footer() keeps its title apart from its stamp, however long the title"
+          },
+          {
             "context": "A callout's, panel's or unit's label stays on the page with what it heads"
           },
           {
@@ -263,6 +266,9 @@
           },
           {
             "context": "header() keeps a short title or meta on one line beside a long one, on the oldest toolchain"
+          },
+          {
+            "context": "footer() keeps its title apart from its stamp, however long the title, on the oldest toolchain"
           },
           {
             "context": "A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain"

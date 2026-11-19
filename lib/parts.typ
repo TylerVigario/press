@@ -277,6 +277,9 @@
   else { it }
 }
 
+// The space between the two sides of a header or a footer, so neither runs into the other.
+#let _sides-gap = 9pt
+
 // A document's header: its title on the left, `meta` on the right, and a rule beneath. The title
 // is the one the document names itself with, set document(title:) or a template's title, so it
 // is named once, as footer() names it. A title that fits on one line keeps it, and `meta` wraps
@@ -294,7 +297,7 @@
   layout(region => {
     let title = text(font: face, size: size, weight: 700, fill: ink, _unmarked(document.title))
     let note = text(size: sz.fine, fill: ink-soft, meta)
-    let gap = 9pt
+    let gap = _sides-gap
     let half = (region.width - gap) / 2
     grid(
       columns: if measure(title).width + gap < region.width { (auto, 1fr) }
@@ -768,7 +771,8 @@
 
 // A page's footer, so a page parted from the rest still says what it is and which edition: the
 // document's title, and its status where it has one, on the left; updated() and the page of the
-// total on the right. The title is the one the document names itself with, set document(title:)
+// total on the right, as far from them as header() keeps its meta from its title, however long
+// the title. The title is the one the document names itself with, set document(title:)
 // or a template's title, as header() names it. `edition` is what it says of the edition: none
 // leaves it out, and updated(words: …) says it in other words. A title marked with unsourced()
 // counts once: typst's title() with the document's own title counts it, or header(), or with
@@ -785,7 +789,7 @@
   if first and query(<press-header>).len() == 0 and not _titled() {
     _marks(document.title).join()
   }
-  grid(columns: (1fr, auto),
+  grid(columns: (1fr, auto), column-gutter: _sides-gap,
     align(left)[#_unmarked(document.title)#if status != none [ · #if first { status } else { _unmarked(status) }]],
     align(right)[#if edition != none [#edition · ]#counter(page).display("1 / 1", both: true)])
 }

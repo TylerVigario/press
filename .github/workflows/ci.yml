@@ -312,6 +312,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/header-meta.sh
 
+  footer-gap:
+    name: footer() keeps its title apart from its stamp, however long the title
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/footer-gap.sh
+
   source-date:
     name: A build takes SOURCE_DATE_EPOCH for the current time, and no stamp is later
     runs-on: ubuntu-latest
@@ -776,6 +785,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/header-meta.sh
+
+  oldest-footer-gap:
+    name: footer() keeps its title apart from its stamp, however long the title, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/footer-gap.sh
 
   oldest-source-date:
     name: A build takes SOURCE_DATE_EPOCH for the current time, and no stamp is later, on the oldest toolchain
