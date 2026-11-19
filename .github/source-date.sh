@@ -1,8 +1,8 @@
 #!/bin/sh
 # source-date.sh — a build with SOURCE_DATE_EPOCH set takes it for the current time, as the
 # specification says (https://reproducible-builds.org/specs/source-date-epoch/): a new or changed
-# page is stamped with it, an unchanged page keeps its stamp, or comes back to it where the stamp
-# is later, and a value that is not a whole number of seconds stops the build.
+# page is stamped with it, to the second, an unchanged page keeps its stamp, or comes back to it
+# where the stamp is later, and a value that is not a whole number of seconds stops the build.
 #
 #   sh .github/source-date.sh
 #
@@ -10,12 +10,13 @@
 # holds a copy of the kit under third_party/press and one brief, whose footer prints the stamp,
 # built with build.sh in UTC:
 #
-#   · new at 1700000000, 2023-11-14 22:13 UTC, its footer and its PDF's own date that time;
-#   · edited, at 1700003600, 23:13;
-#   · unchanged with no SOURCE_DATE_EPOCH, keeping 23:13, from the build record or not;
-#   · unchanged at 1700000000, earlier than its stamp, coming back to 22:13, though the build
-#     record holds 23:13;
-#   · set but empty, as if unset, keeping 22:13;
+#   · new at 1700000000, 2023-11-14 22:13:20 UTC, its footer and its PDF's own date that time;
+#   · edited, at 1700003600, 23:13:20;
+#   · edited again 30 seconds later, in the same minute, 23:13:50, its footer that time;
+#   · unchanged with no SOURCE_DATE_EPOCH, keeping 23:13:50, from the build record or not;
+#   · unchanged at 1700000000, earlier than its stamp, coming back to 22:13:20, though the build
+#     record holds 23:13:50;
+#   · set but empty, as if unset, keeping 22:13:20;
 #   · at 1700000000.5, and at "soon", stopping with a line naming the variable.
 set -eu
 cd "$(dirname "$0")/.."
@@ -52,27 +53,34 @@ expect() {
 
 out=$(build SOURCE_DATE_EPOCH=1700000000) \
     || { printf '%s\n' "$out" >&2; fail "the first build failed"; }
-expect "a new page at 1700000000" new 22:13 "$out"
-pdftotext print/docs/note.pdf - | grep -q '2023-11-14 22:13 UTC' \
-    || fail "the footer does not print 2023-11-14 22:13 UTC"
+expect "a new page at 1700000000" new 22:13:20 "$out"
+pdftotext print/docs/note.pdf - | grep -q '2023-11-14 22:13:20 UTC' \
+    || fail "the footer does not print 2023-11-14 22:13:20 UTC"
 date=$(pdfinfo -isodates print/docs/note.pdf | sed -n 's/^CreationDate: *//p')
 case $date in 2023-11-14T22:13:20*) ;; *) fail "the PDF's own date is $date, not 1700000000" ;; esac
 
 note "Two lines."
 out=$(build SOURCE_DATE_EPOCH=1700003600) \
     || { printf '%s\n' "$out" >&2; fail "the edited build failed"; }
-expect "an edited page at 1700003600" changed 23:13 "$out"
+expect "an edited page at 1700003600" changed 23:13:20 "$out"
+
+note "Three lines."
+out=$(build SOURCE_DATE_EPOCH=1700003630) \
+    || { printf '%s\n' "$out" >&2; fail "the build edited again failed"; }
+expect "a page edited again in the same minute, at 1700003630" changed 23:13:50 "$out"
+pdftotext print/docs/note.pdf - | grep -q '2023-11-14 23:13:50 UTC' \
+    || fail "the footer does not print 2023-11-14 23:13:50 UTC"
 
 out=$(build) || { printf '%s\n' "$out" >&2; fail "the build with no SOURCE_DATE_EPOCH failed"; }
-expect "an unchanged page with no SOURCE_DATE_EPOCH" unchanged 23:13 "$out"
+expect "an unchanged page with no SOURCE_DATE_EPOCH" unchanged 23:13:50 "$out"
 
 out=$(build SOURCE_DATE_EPOCH=1700000000) \
     || { printf '%s\n' "$out" >&2; fail "the clamped build failed"; }
-expect "an unchanged page stamped later than SOURCE_DATE_EPOCH" unchanged 22:13 "$out"
+expect "an unchanged page stamped later than SOURCE_DATE_EPOCH" unchanged 22:13:20 "$out"
 
 out=$(build SOURCE_DATE_EPOCH=) \
     || { printf '%s\n' "$out" >&2; fail "the build with it empty failed"; }
-expect "an unchanged page with SOURCE_DATE_EPOCH empty" unchanged 22:13 "$out"
+expect "an unchanged page with SOURCE_DATE_EPOCH empty" unchanged 22:13:20 "$out"
 
 for bad in 1700000000.5 soon; do
     if out=$(build SOURCE_DATE_EPOCH=$bad); then
