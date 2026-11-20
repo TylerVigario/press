@@ -9,7 +9,8 @@
 // in the PDF's metadata and in header(), and footer() prints it beside the status, the stamp
 // and the page. `meta` sits at the right of the header; `legend` is the line under it that
 // says what its colours mean: none, or the note and then the chips for the states its pages
-// carry, legend: ([Colour is state.], chip([SETTLED], "ok"), chip([DECIDE], "bad")).
+// carry, legend: ([Colour is state.], chip([SETTLED], "ok"), chip([DECIDE], "bad")), the note
+// kept apart from the chips however long it is.
 // `footer` is the footer: none leaves it out, footer(status: [draft]) gives it a status, and
 // footer(edition: …) other words. It is passed here because a set page rule after the header
 // would start a new page.
@@ -113,7 +114,8 @@
     v(4pt)
     if legend != none {
       let (note, ..chips) = legend
-      grid(columns: (1fr, auto), align: (left + horizon, right + horizon),
+      grid(columns: (1fr, auto), column-gutter: _sides-gap,
+        align: (left + horizon, right + horizon),
         text(size: sz.micro, fill: ink-faint, note),
         chips.join([ #h(3pt) ]))
       v(7pt)

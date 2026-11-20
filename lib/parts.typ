@@ -277,7 +277,8 @@
   else { it }
 }
 
-// The space between the two sides of a header or a footer, so neither runs into the other.
+// The space between the two sides of a header, a footer or a legend, so neither runs into the
+// other.
 #let _sides-gap = 9pt
 
 // A document's header: its title on the left, `meta` on the right, and a rule beneath. The title
