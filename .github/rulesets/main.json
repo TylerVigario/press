@@ -169,6 +169,9 @@
             "context": "Units under \"stacks\" read in order, down the left column and then the right"
           },
           {
+            "context": "Units under \"stacks\" past their page read in order, from page to page"
+          },
+          {
             "context": "A sheet across columns reads down each in turn, its last page balanced"
           },
           {
@@ -320,6 +323,9 @@
           },
           {
             "context": "Units under \"stacks\" read in order, down the left column and then the right, on the oldest toolchain"
+          },
+          {
+            "context": "Units under \"stacks\" past their page read in order, from page to page, on the oldest toolchain"
           },
           {
             "context": "A sheet across columns reads down each in turn, its last page balanced, on the oldest toolchain"

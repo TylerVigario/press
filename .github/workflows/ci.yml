@@ -465,6 +465,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/units-order.sh
 
+  units-pages:
+    name: Units under "stacks" past their page read in order, from page to page
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/units-pages.sh
+
   sheet-across:
     name: A sheet across columns reads down each in turn, its last page balanced
     runs-on: ubuntu-latest
@@ -965,6 +974,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/units-order.sh
+
+  oldest-units-pages:
+    name: Units under "stacks" past their page read in order, from page to page, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/units-pages.sh
 
   oldest-sheet-across:
     name: A sheet across columns reads down each in turn, its last page balanced, on the oldest toolchain

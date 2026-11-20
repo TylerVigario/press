@@ -456,7 +456,11 @@
 //             two splits are as level, the left column the longer. Nothing is
 //             padded to match a neighbour, which is the failure of a row grid: a
 //             row is as tall as its tallest cell, so a short unit beside a long
-//             one leaves the gap under it.
+//             one leaves the gap under it. A group that runs past its page fills
+//             each page's left column and then its right, as sheet(across: 2)
+//             does, and its last page is split as a group that fits is. There a
+//             unit is kept whole where it fits in a column, and let break where it
+//             is taller than one.
 //   "grid"    row-major cells. Keeps units aligned across a row — correct when
 //             the pairing means something, and the source of that gap when it
 //             does not.
@@ -486,22 +490,80 @@
   layout(size => {
     let w = (size.width - gutter) / 2
     let hs = us.map(u => measure(box(width: w, u)).height)
+    // A column's height on a full page, and on the page the group starts on, what is left of it.
+    // Measured, as inside another group, the height has no end, and the group is one page.
+    let full = size.height
+    let endless = full.pt() == calc.inf
+    let first = if endless { full } else { full - (here().position().y - _text-top()) }
     // The gap between two units, as the grid below sets it: an em is of the text's size, and a
     // percentage of the height the group is set in, where that has an end.
     let given = 0pt + 0% + spacing
-    let room = if size.height.pt() == calc.inf { 0pt } else { size.height }
-    let gap-h = given.ratio * room + given.length.to-absolute()
+    let gap-h = given.ratio * (if endless { 0pt } else { full }) + given.length.to-absolute()
     // A column is as tall as its units and the gaps between them.
     let tall(col) = col.sum(default: 0pt) + gap-h * calc.max(col.len() - 1, 0)
-    let gap(k) = calc.abs(tall(hs.slice(0, k)) - tall(hs.slice(k)))
-    // The first `k` units go left and the rest right. Each split from one unit on the left to all
-    // but one is tried, and a later split as level as an earlier one, within what rounding
-    // leaves, is taken, so the left column is the longer.
-    let k = 1
-    for j in range(2, us.len()) {
-      if gap(j) <= gap(k) + 0.01pt { k = j }
+    let slack = 0.01pt
+    // The split of `hs` that puts its first `k` units left and the rest right. Each split from one
+    // unit on the left to all but one is tried, and a later split as level as an earlier one,
+    // within what rounding leaves, is taken, so the left column is the longer. The two columns
+    // hold the same units and gaps however they are split, so the most level split is also the
+    // one whose taller column is the shortest: where no other split fits a page, it does not.
+    let level(hs) = {
+      let gap(k) = calc.abs(tall(hs.slice(0, k)) - tall(hs.slice(k)))
+      let k = 1
+      for j in range(2, hs.len()) {
+        if gap(j) <= gap(k) + slack { k = j }
+      }
+      k
     }
-    grid(columns: (1fr, 1fr), gutter: gutter, align: top,
-         stack(us.slice(0, k)), stack(us.slice(k)))
+    let fits(hs, k, room) = calc.max(tall(hs.slice(0, k)), tall(hs.slice(k))) <= room + slack
+    let k = level(hs)
+    if endless or fits(hs, k, first) {
+      return grid(columns: (1fr, 1fr), gutter: gutter, align: top,
+        stack(us.slice(0, k)), stack(us.slice(k)))
+    }
+
+    // A group that runs past what is left of its page fills each page's left column and then its
+    // right, as sheet(across: 2) does, so it reads in the order given from page to page. A unit
+    // is kept whole where it fits in a column, and let break where it is taller than one, as it
+    // is on a page. The group says which, by its own measure of a page: a row of typst's grid
+    // breaks wherever its column ends, and in the first page's right column typst's columns tell
+    // a part that what is left of the page is all of it, so a unit that fits would split there.
+    let cells = us.zip(hs).map(((u, h)) => grid.cell(breakable: h > full + slack, u))
+    // The page and the column each unit starts in, at how far down it, filling as typst's columns
+    // do: a column takes units while they fit, and a unit that does not fit starts the next one,
+    // unless it is taller than a whole column: that starts where it is and runs on.
+    let room(leaf) = if leaf == 0 { first } else { full }
+    let next(leaf, col) = if col == 0 { (leaf, 1) } else { (leaf + 1, 0) }
+    let (leaf, col, used) = (0, 0, 0pt)
+    let at = ()
+    for h in hs {
+      let start = if used > 0pt { used + gap-h } else { 0pt }
+      if h <= full + slack {
+        while start + h > room(leaf) + slack and not (start == 0pt and leaf > 0) {
+          (leaf, col) = next(leaf, col)
+          start = 0pt
+        }
+        at.push((leaf, col, start))
+        used = start + h
+      } else {
+        at.push((leaf, col, start))
+        let rest = h
+        while start + rest > room(leaf) + slack {
+          rest -= calc.max(room(leaf) - start, 0pt)
+          (leaf, col) = next(leaf, col)
+          start = 0pt
+        }
+        used = start + rest
+      }
+    }
+    // The last page's units are split between its columns as a group that fits is, where the
+    // first of them starts that page.
+    let t = at.position(((l, c, s)) => l == leaf)
+    let k = if t != none and at.at(t).slice(1) == (0, 0pt) { level(hs.slice(t)) }
+    columns(2, gutter: gutter, if k == none or not fits(hs.slice(t), k, room(leaf)) {
+      stack(cells)
+    } else {
+      stack(cells.slice(0, t + k)); colbreak(); stack(cells.slice(t + k))
+    })
   })
 }
