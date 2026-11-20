@@ -34,6 +34,17 @@
 // document's paragraphs; the body's own paragraphs and lists keep the document's, as _body sets.
 #let _part-gap = 0.55em
 
+// What a part that takes any number of arguments, `..`, was given by position: its content. An
+// argument given by name that the part does not take stops the build, naming it, where `..` would
+// take it and the part print nothing of it: letterhead(contact: …) leaving out the contact line,
+// or one of the part's own arguments misspelled changing nothing.
+#let _positional(part, args) = {
+  let named = args.named().keys()
+  assert(named.len() == 0, message: part + "() takes no argument named "
+    + named.map(repr).join(", ", last: " or "))
+  args.pos()
+}
+
 // A part's body, its paragraphs and lists spaced as the document spaces them: `spacing` is the
 // document's paragraph spacing, read before the part sets its own. The part's own gap stays around
 // the body, so a body of one paragraph sits as it did, and the part's other pieces with it. The
@@ -565,7 +576,7 @@
 //   #steps(([Shut the water off], [Turn the valve at the street a quarter turn.]),
 //     ([Open the box], [Lift the lid with the hook end of the key.], warn))
 #let steps(..given, color: slate, size: sz.small, start: 1, breakable: auto) = {
-  let given = given.pos()
+  let given = _positional("steps", given)
   assert(given.len() > 0 and given.all(s => type(s) == array and s.len() in (2, 3)),
     message: "steps() takes its steps as (title, body), or (title, body, color), one or more")
   let colors = given.map(s => s.at(2, default: color))
@@ -584,7 +595,7 @@
 #let flow(..steps) = align(center)[
   #context box(inset: (x: 9pt, y: 6pt), stroke: _stroke(0.6pt, rule-mid), radius: 1pt)[
     #text(size: sz.small)[
-      #steps.pos().join([ #text(fill: ink-faint)[#sym.arrow.r] ])
+      #_positional("flow", steps).join([ #text(fill: ink-faint)[#sym.arrow.r] ])
     ]
   ]
 ]
@@ -635,7 +646,7 @@
 //     ("survey", [County Water District, Groundwater survey, 2026], none),
 //   )
 #let src(..keys) = context {
-  let keys = keys.pos()
+  let keys = _positional("src", keys)
   assert(keys.len() > 0, message: "src() needs the key of a source")
   let given = query(<press-source>).map(m => m.value)
   let ns = keys.map(k => {
@@ -647,7 +658,7 @@
 }
 
 #let sources(..entries, size: sz.micro, across: 2, gutter: 10pt) = {
-  let entries = entries.pos()
+  let entries = _positional("sources", entries)
   for e in entries {
     assert(type(e) == array and e.len() == 3 and type(e.at(0)) == str,
       message: "sources() takes each source as (key, title, address); got " + repr(e))

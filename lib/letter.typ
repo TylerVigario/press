@@ -23,7 +23,7 @@
   // Where a letter starts, for continued().
   [#metadata(none)<press-letterhead>]
   set text(font: face)
-  let items = contact.pos()
+  let items = _positional("letterhead", contact)
   stack(spacing: 7pt,
     text(size: sz.head, weight: 700, fill: ink, _writer()),
     ..if items.len() > 0 {
@@ -42,13 +42,16 @@
 
 // The subject line. Each reference is kept whole, so an account number never breaks across a
 // line, and stays text a reader can copy.
-#let re(..refs, words: (re: [Re:])) = block(above: 1.2em, below: 1.2em,
-  [#text(weight: 700, _words("re", words, "re").re) #refs.pos().map(r => box(r)).join([; ])])
+#let re(..refs, words: (re: [Re:])) = {
+  let refs = _positional("re", refs)
+  block(above: 1.2em, below: 1.2em,
+    [#text(weight: 700, _words("re", words, "re").re) #refs.map(r => box(r)).join([; ])])
+}
 
 // What goes with the letter, one item to a line, under the singular word for one item and the
 // plural for more.
 #let enclosures(..items, words: (singular: [Enclosure], plural: [Enclosures])) = {
-  let items = items.pos()
+  let items = _positional("enclosures", items)
   assert(items.len() > 0, message: "enclosures() needs at least one item")
   let w = _words("enclosures", words, "singular", "plural")
   let label = if items.len() == 1 { w.singular } else { w.plural }

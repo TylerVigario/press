@@ -164,7 +164,7 @@
   let taken = (:)
   let at = 0
   let place-of(i) = str(calc.rem(i, n)) + "," + str(calc.quo(i, n))
-  let given = rows.pos()
+  let given = _positional("sheet", rows)
   for (i, c) in (..given, ..range(blank * n)).enumerate() {
     if i < given.len() and is-a(c, table.hline, table.vline) { entries.push((line: c)); continue }
     if i < given.len() and is-a(c, table.footer) {
@@ -471,7 +471,7 @@
   // press is meant to make loud.
   assert(pack in ("stacks", "grid", "single"),
          message: "units(pack:) expects \"stacks\", \"grid\" or \"single\"; got \"" + pack + "\"")
-  let us = items.pos()
+  let us = _positional("units", items)
   // One column of units, `spacing` apart. Its gutter is the gap, as it is under "grid": units set
   // one after another as blocks would take the paragraph gap around each as well.
   let stack(col) = grid(columns: (1fr,), row-gutter: spacing, ..col)

@@ -339,6 +339,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/continued-gap.sh
 
+  named-args:
+    name: A part refuses an argument given by name that it does not take
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain
+      - run: sh .github/named-args.sh
+
   source-date:
     name: A build takes SOURCE_DATE_EPOCH for the current time, and no stamp is later
     runs-on: ubuntu-latest
@@ -830,6 +839,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/continued-gap.sh
+
+  oldest-named-args:
+    name: A part refuses an argument given by name that it does not take, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/named-args.sh
 
   oldest-source-date:
     name: A build takes SOURCE_DATE_EPOCH for the current time, and no stamp is later, on the oldest toolchain

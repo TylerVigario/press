@@ -133,6 +133,9 @@
             "context": "A letter's page-two header keeps its writer, date and page apart"
           },
           {
+            "context": "A part refuses an argument given by name that it does not take"
+          },
+          {
             "context": "A callout's, panel's or unit's label stays on the page with what it heads"
           },
           {
@@ -281,6 +284,9 @@
           },
           {
             "context": "A letter's page-two header keeps its writer, date and page apart, on the oldest toolchain"
+          },
+          {
+            "context": "A part refuses an argument given by name that it does not take, on the oldest toolchain"
           },
           {
             "context": "A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain"
