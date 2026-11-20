@@ -46,7 +46,8 @@ needs it, built for both media, and offered to every document from the next rele
 | `fonts/` | the vendored faces, and `fonts/licenses/` with each one's licence text |
 | `tools/` | what every runner calls, just among them: `new.sh`, `build.sh`, `all.sh`, `watch.sh`, `clean.sh`; beneath them `stamp.sh`, `check.sh`, `report.sh`, and the audit's two Python passes; and `install-typst.sh`, which a repository's CI installs typst with, downloading through `fetch.sh`, which press's CI downloads its tools with too |
 | `press.just` | recipes for repositories that use just |
-| `README.md`, `FONTS.md`, `LICENSE` | the consumer guide, the font account, the AGPL |
+| `README.md`, `FONTS.md`, `PRINTERS.md`, `LICENSE` | the consumer guide, the font account, how a printer is recorded for press, the AGPL |
+| `printers.csv` | the printers press's calibration is measured on, a row for each printing of the calibration sheet |
 | `.gitignore` | ships in the kit, so a repository that commits press's folder ignores the build record in it |
 | `.gitattributes` | ships in the kit, so a repository that commits press's folder checks it out with LF, which `sh` needs, and its fonts as binary |
 | `install.sh`, `install.ps1` | the installers each release attaches beside the kit, not inside it |
