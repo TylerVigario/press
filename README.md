@@ -520,7 +520,7 @@ is `(ok, ok-tint)`.
 | `dateline(date)` | A letter's date, written once where it prints; `continued` reads it, each page taking the last one printed on it or before it, so a document of several letters dates each page by its own. |
 | `re(..refs, words: (re: [Re:]))` | A letter's subject line; each reference stays whole and copyable. |
 | `enclosures(..items, words: (singular: [Enclosure], plural: [Enclosures]))` | What goes with a letter, one item to a line. |
-| `continued(words: (page: [Page]))` | A header for page two onward of a letter: writer, date, page. `set page(header: continued())`. In a document of several letters, each letter's first page, the one its `letterhead` is on, is left to it, and its pages are numbered from there. |
+| `continued(words: (page: [Page]))` | A header for page two onward of a letter: writer, date, page, each kept apart from the next however long the writer's name. `set page(header: continued())`. In a document of several letters, each letter's first page, the one its `letterhead` is on, is left to it, and its pages are numbered from there. |
 | `entry(role, org, dates, stacked: false, flush: false)` | A résumé's role: role, organisation and dates in one paragraph and in that order on the line, the dates after the organisation and kept whole, so a parser reads them in order however it reads a page; `stacked` puts the organisation and its dates on a line of their own. `flush: true` sets the dates at the right of the line instead, which a parser that groups a page's text by where it stands reads after every role. It stays with what follows, so no page ends on a role. |
 
 **Tokens.** Colours `ink`, `ink-soft`, `ink-faint`, `rule-hair`, `rule-mid`, `paper-tint`,

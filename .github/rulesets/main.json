@@ -130,6 +130,9 @@
             "context": "A brief's legend keeps its note apart from its chips, however long the note"
           },
           {
+            "context": "A letter's page-two header keeps its writer, date and page apart"
+          },
+          {
             "context": "A callout's, panel's or unit's label stays on the page with what it heads"
           },
           {
@@ -275,6 +278,9 @@
           },
           {
             "context": "A brief's legend keeps its note apart from its chips, however long the note, on the oldest toolchain"
+          },
+          {
+            "context": "A letter's page-two header keeps its writer, date and page apart, on the oldest toolchain"
           },
           {
             "context": "A callout's, panel's or unit's label stays on the page with what it heads, on the oldest toolchain"

@@ -59,7 +59,8 @@
 }
 
 // A header for page two onward: the writer, the date and the page number, so a page parted
-// from the first still says whose letter it is. Page one is left to the letterhead. In a
+// from the first still says whose letter it is, each kept apart from the next however long the
+// writer's name. Page one is left to the letterhead. In a
 // document of several letters, each letter's first page is the one its letterhead is on, left
 // to it, and its pages are numbered from there; with no letterhead, from the document's first.
 //
@@ -74,7 +75,7 @@
     set text(size: sz.fine, fill: _cal(ink-soft))
     let dates = query(<press-dateline>).filter(m => m.location().page() <= here-page)
     let date = if dates.len() > 0 { dates.last().value }
-    grid(columns: (1fr, auto, 1fr), align: (left, center, right),
+    grid(columns: (1fr, auto, 1fr), column-gutter: _sides-gap, align: (left, center, right),
       _writer(), if date != none { date }, [#w.page #n])
   }
 }
