@@ -479,6 +479,11 @@ Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"ba
 `tones` maps each to its colour and tint, for a part a document draws itself: `tones.at("ok")`
 is `(ok, ok-tint)`.
 
+The parts that take any number of items, `letterhead`, `re`, `enclosures`, `units`, `sheet`,
+`steps`, `flow`, `src` and `sources`, take them by position. An argument given by name that a part
+does not take stops the build, naming it, as typst stops for any function: `letterhead(contact:
+[…])` is refused, where `letterhead([…])` prints the contact line.
+
 | Call | For |
 |---|---|
 | `base(title:, author:, preset: card, calibration: calibration, lang: auto)` | Template: the page, the document's name, the type and the show rules, with nothing drawn, for a document that lays out its own page. `#show: base.with(...)`. Every template takes `calibration`, a printer's numbers, which set its margins, inks, tints and rules: *Printing* says how. Every template takes `lang` too, the document's language, `lang: "es"` for Spanish, which sets its words and its PDF's language alike, the language screen readers and translation software go by. Left out, the language is the document's own, English unless it sets another at its start, `#set text(lang: …)` before the show rule, as typst's accessibility guide gives it; set under the show rule, it reaches the words but not always the PDF's language, which typst takes from the first content it meets. |
