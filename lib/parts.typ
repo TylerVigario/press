@@ -147,13 +147,13 @@
 }
 
 // A preset set for a calibration: each margin widened by as much as the calibration's band at
-// that edge exceeds press's own, which every preset's ink, its header and footer included,
+// that edge exceeds 0.48in, _band, which every preset's ink, its header and footer included,
 // already clears. A header and a footer keep their distance from the body, so each moves with
-// its margin and clears the band too. A band no wider than press's changes nothing.
+// its margin and clears the band too. A band no wider than 0.48in changes nothing.
 #let _page(preset, given) = {
   let edges = _calibration(given).edges
   let more = (:)
-  for (edge, band) in edges { more.insert(edge, calc.max(0pt, band - calibration.edges.at(edge))) }
+  for (edge, band) in edges { more.insert(edge, calc.max(0pt, band - _band)) }
   if more.values().all(m => m == 0pt) { return preset }
   let m = preset.at("margin", default: auto)
   let given-as(edge, ..others) = {

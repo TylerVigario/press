@@ -534,9 +534,9 @@ does not take stops the build, naming it, as typst stops for any function: `lett
 Sans Math) — use these, never font names as strings. Sizes `sz.micro` 8.6 · `fine` 9.4
 · `small` 10.2 · `body` 11 · `lead` 12.5 · `head` 14.5 · `title` 21 · `hero` 28. Page presets
 `dense`, `reading`, `card`, spread with `#set page(..card)`, and `calibration`, the printer's
-numbers they are set for, which every template takes by default; `calibrated(calibration)` hands
-back every preset set for a printer's own. When the vocabulary does not fit, build it in the
-document.
+numbers they are set for, which every template takes by default; `printer()` gives each printer
+press records, and `calibrated(calibration)` hands back every preset set for a printer's own.
+When the vocabulary does not fit, build it in the document.
 
 ### Traps
 
@@ -586,34 +586,54 @@ document.
 ## Printing
 
 Print at **100% — "Actual size"**, never "Fit to page". The presets are exactly US Letter and
-keep all ink at least 0.5in from every edge, clear of press's own calibration, a band of 0.48in
-at each edge that a printer cannot print; a document that overrides the margin or places content
-absolutely can break that, and the audit measures it.
+keep all ink at least 0.5in from every edge, clear of a band of 0.48in at each edge that a
+printer cannot print, and further where a calibration's band is wider; a document that overrides
+the margin or places content absolutely can break that, and the audit measures it.
 
 **A printer's own calibration.** The presets are set for press's own calibration, `calibration`
-in `tokens.typ`, which is what press uses now, so a page prints as it always has. A printer is set
-by its own numbers, the calibration sheet's readings, given to a template as its `calibration`;
-a number left out takes press's:
+in `tokens.typ`: the median, number by number, of the printers press records in
+[`printers.csv`](printers.csv) at normal quality, each by its latest printing. While it records
+none, it is what press used before it had a sheet, so a page prints as it always has. A printer is
+set by its own numbers, the calibration sheet's readings, given to a template as its
+`calibration`; a number left out takes press's:
 
 | key | the reading | what it sets |
 |---|---|---|
-| `edges: (top:, bottom:, left:, right:)` | 2 and 3: the band it cannot print at each edge, the larger of front and back | each margin, widened by as much as the band exceeds press's 0.48in, so the page's ink, its header and footer included, clears it; and the audit's floor at that edge |
-| `ink:` | 4: the lightest grey that reads, as its contrast, `6` for 6:1 | each of press's inks lighter than it, darkened to it, its hue kept; press's own is ok's, 5.05:1 |
-| `fill:` | 5: the palest grey that prints an even fill | each of press's tints paler than it, darkened to it; press's own is paper-tint's, 1.07:1 |
-| `rule: (rule-hair:, rule-mid:, slate:, ink:)` | 6: the thinnest rule that prints unbroken in each colour | each line a part draws, at least as wide as the floor of the darkest of those colours no darker than its own; press's own are the thinnest it draws, 0.4pt in rule-hair and 0.5pt in the others |
+| `edges: (top:, bottom:, left:, right:)` | 2 and 3: the band it cannot print at each edge, the larger of front and back | each margin, widened by as much as the band exceeds 0.48in, so the page's ink, its header and footer included, clears it; and the audit's floor at that edge |
+| `ink:` | 4: the lightest grey that reads, as its contrast, `6` for 6:1 | each of press's inks lighter than it, darkened to it, its hue kept; with no printer recorded, press's is ok's, 5.05:1 |
+| `fill:` | 5: the palest grey that prints an even fill | each of press's tints paler than it, darkened to it; with no printer recorded, press's is paper-tint's, 1.07:1 |
+| `rule: (rule-hair:, rule-mid:, slate:, ink:)` | 6: the thinnest rule that prints unbroken in each colour | each line a part draws, at least as wide as the floor of the darkest of those colours no darker than its own; with no printer recorded, press's are the thinnest it draws, 0.4pt in rule-hair and 0.5pt in the others |
 
 ```typ
 #show: brief.with(title: [Rack power], author: "Your name",
   calibration: (edges: (top: 4mm, bottom: 17mm, left: 6.5mm, right: 6.5mm), ink: 6))
 ```
 
-A band narrower than press's leaves the margins as they are and lets the audit pass ink nearer
-that edge, and a floor below press's changes nothing. press's functions take every preset from the
-calibration their template was given, and text the template sets in one of press's inks takes the
-darkened ink, a document's own `text(fill: ink-faint)` among it. For what a document draws
-itself, `calibrated(calibration)` hands back the presets set for a calibration, by name:
-`#let c = calibrated(calibration)`, then `rect(fill: c.paper-tint)`,
+A band no wider than 0.48in leaves the margins as they are, one narrower than press's lets the
+audit pass ink nearer that edge, and an ink or a fill below press's lightest, or a rule thinner
+than its thinnest, leaves press's colours and lines as it draws them. press's functions take
+every preset from the calibration their template was given, and text the template sets in one of
+press's inks takes the darkened ink, a document's own `text(fill: ink-faint)` among it. For what
+a document draws itself, `calibrated(calibration)` hands back the presets set for a calibration,
+by name: `#let c = calibrated(calibration)`, then `rect(fill: c.paper-tint)`,
 `line(stroke: c.rule.rule-hair + rule-hair)` or `#set page(..c.card)`.
+
+**A printer press records.** Each printer in `printers.csv` is a calibration by its make and
+model, so a repository that prints on one needs no sheet of its own. `printer("Make Model")` is
+its latest printing at normal quality, and `printer("Make Model", mode: "economy")` its latest in
+economy mode; `printer()` is press's own calibration, and `printer(mode: "economy")` the median
+of the printers press records in economy mode. A printer or a mode it does not record stops the
+build, saying what it records.
+
+```typ
+#show: brief.with(title: [Rack power], author: "Your name",
+  calibration: printer("Make Model", mode: "economy"))
+```
+
+A number changes over a printer's as over any calibration, `(..printer("Make Model"), ink: 6)`;
+a band or a rule given in a dictionary of its own takes press's for the others, so one that keeps
+the printer's is written into its: `let p = printer("Make Model")`, then
+`(..p, edges: p.edges + (bottom: 17mm))`.
 
 A repository whose documents print on one printer writes its numbers once, in a file of its own
 that its documents, or its shared template, import after press:

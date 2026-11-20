@@ -298,8 +298,36 @@ want=$(while IFS= read -r f; do
 done < "$tmp/sources")
 wraps=
 # The floor at each edge, top, bottom, left and right: press's own calibration, or the widest band
-# at each edge among those a document's templates were given.
-floor=0.48
+# at each edge among those a document's templates were given. press's own is lib/tokens.typ's: at
+# each edge, the median band of the latest normal printing of each printer printers.csv records,
+# the middle two's mean where there is no one middle, or 0.48in where it records none. A printer
+# is every field before a row's last thirteen, its quotes left out, so a make and model quoted
+# with a comma in it is one; tokens.typ refuses a row that is not as PRINTERS.md says.
+floor=$(awk -F, '
+    NR == 1 { next }
+    {
+        n = NF - 13
+        p = $1
+        for (i = 2; i <= n; i++) p = p "," $i
+        gsub(/"/, "", p)
+        for (i = n + 1; i <= NF; i++) gsub(/"/, "", $i)
+        if ($(n + 1) != "normal") next
+        if (!(p in when)) printers[++count] = p
+        else if ($(n + 2) < when[p]) next
+        when[p] = $(n + 2)
+        for (e = 1; e <= 4; e++) band[p, e] = $(n + 3 + e)
+    }
+    END {
+        if (count == 0) { print 0.48; exit }
+        for (e = 1; e <= 4; e++) {
+            for (i = 1; i <= count; i++) v[i] = band[printers[i], e] + 0
+            for (i = 2; i <= count; i++)
+                for (j = i; j > 1 && v[j - 1] > v[j]; j--) { t = v[j]; v[j] = v[j - 1]; v[j - 1] = t }
+            m = count % 2 ? v[(count + 1) / 2] : (v[count / 2] + v[count / 2 + 1]) / 2
+            printf "%s%.4f", (e > 1 ? "," : ""), m / 25.4
+        }
+        print ""
+    }' "$press_root/printers.csv")
 if [ -n "$want" ]; then
     if marks=$(press_marks "$@"); then
         wraps=$(printf '%s\n' "$marks" | grep -o '"press-code-wrap [^"]*"' \

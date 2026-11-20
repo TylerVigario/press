@@ -22,7 +22,7 @@ trap 'exit 143' TERM
 
 # The same probe against a copy of lib whose blocks are none of them sticky.
 mkdir -p "$tmp/unstuck/.github"
-cp -R lib lib.typ press.toml "$tmp/unstuck/"
+cp -R lib lib.typ press.toml printers.csv "$tmp/unstuck/"
 cp .github/stamp-break.typ "$tmp/unstuck/.github/"
 grep -q 'sticky: true' "$tmp"/unstuck/lib/*.typ || fail "lib has no sticky: true to take out"
 for f in "$tmp"/unstuck/lib/*.typ; do

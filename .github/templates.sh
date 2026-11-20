@@ -47,7 +47,7 @@ echo "every template in lib/ is built from tokens, parts and composition alone"
 repo="$tmp/repo"
 kit="assets/typst kit/press"
 mkdir -p "$repo/$kit"
-cp -R lib.typ lib press.toml template fonts tools "$repo/$kit/"
+cp -R lib.typ lib press.toml printers.csv template fonts tools "$repo/$kit/"
 for f in template/*.typ; do
     t=$(basename "$f" .typ)
     compile . fonts "$f" "template/$t.typ, in place,"

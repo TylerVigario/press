@@ -39,7 +39,7 @@ needs it, built for both media, and offered to every document from the next rele
 | | what |
 |---|---|
 | `lib.typ` | the one file a document imports, which imports every file in `lib/` |
-| `lib/` | `tokens.typ` (colours, faces, sizes, presets, the calibration, the version), `parts.typ`, `composition.typ`, and a file for each template, with the parts only it uses: `letter.typ` holds the letter's, `resume.typ` the résumé's `entry` |
+| `lib/` | `tokens.typ` (colours, faces, sizes, presets, the calibration and `printer()`, the version), `parts.typ`, `composition.typ`, and a file for each template, with the parts only it uses: `letter.typ` holds the letter's, `resume.typ` the résumé's `entry` |
 | `press.toml` | `version`, the version last released, and `typst`, the oldest typst press works with |
 | `template/` | the starters `tools/new.sh` copies, `main.typ` (applying `brief`), `letter.typ` (applying `letter`), `recipe.typ` (applying `recipe`) and `resume.typ` (applying `resume`); each imports `../lib.typ` so it compiles in place |
 | `calibration.typ` | the print calibration sheet; imports `lib.typ` |
@@ -47,7 +47,7 @@ needs it, built for both media, and offered to every document from the next rele
 | `tools/` | what every runner calls, just among them: `new.sh`, `build.sh`, `all.sh`, `watch.sh`, `clean.sh`; beneath them `stamp.sh`, `check.sh`, `report.sh`, and the audit's two Python passes; and `install-typst.sh`, which a repository's CI installs typst with, downloading through `fetch.sh`, which press's CI downloads its tools with too |
 | `press.just` | recipes for repositories that use just |
 | `README.md`, `FONTS.md`, `PRINTERS.md`, `LICENSE` | the consumer guide, the font account, how a printer is recorded for press, the AGPL |
-| `printers.csv` | the printers press's calibration is measured on, a row for each printing of the calibration sheet |
+| `printers.csv` | the printers press's calibration is measured on, a row for each printing of the calibration sheet, which `lib/tokens.typ` reads |
 | `.gitignore` | ships in the kit, so a repository that commits press's folder ignores the build record in it |
 | `.gitattributes` | ships in the kit, so a repository that commits press's folder checks it out with LF, which `sh` needs, and its fonts as binary |
 | `install.sh`, `install.ps1` | the installers each release attaches beside the kit, not inside it |
@@ -166,11 +166,14 @@ repository has.
   the text is, and a smart quote and an equation with it. `floors.sh` sets every part in every
   template and fails on a colour or a line the floors should have changed; a new part goes into
   `floors.typ`.
-- **press's own calibration is written twice:** `calibration` in `lib/tokens.typ`, which every
-  template takes by default, and `floor=` in `tools/check.sh`, the audit's floor at every edge
-  for a document that declares none. A template records the bands it was given as a
-  `press-edges` mark, which check reads only where the document's own sources mention
-  `calibration`; `edges.sh` fails when the two disagree. Change both together.
+- **press's own calibration is computed twice,** each from `printers.csv`, the median of each
+  printer's latest printing at normal quality, or press's numbers before it had a sheet where it
+  records none: `calibration` in `lib/tokens.typ`, which every template takes by default, and
+  `floor=` in `tools/check.sh`, the audit's floor at each edge for a document that declares none.
+  A template records the bands it was given as a `press-edges` mark, which check reads only where
+  the document's own sources mention `calibration`; `printers.sh` fails when the two disagree.
+  Change both together. The band every preset clears is `_band`, 0.48in, and not press's own: a
+  template widens a margin by as much as its calibration's band exceeds it, press's own among them.
 - **The build record keys on everything typst does not list.** `stamp.sh`'s `key()` holds the
   fonts in each font path, typst's version, press's tools, the flags, the zone and typst's
   environment; typst's `--deps` lists the rest. A new thing a build depends on goes into
