@@ -321,6 +321,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/footer-gap.sh
 
+  legend-gap:
+    name: A brief's legend keeps its note apart from its chips, however long the note
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/legend-gap.sh
+
   source-date:
     name: A build takes SOURCE_DATE_EPOCH for the current time, and no stamp is later
     runs-on: ubuntu-latest
@@ -794,6 +803,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/footer-gap.sh
+
+  oldest-legend-gap:
+    name: A brief's legend keeps its note apart from its chips, however long the note, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/legend-gap.sh
 
   oldest-source-date:
     name: A build takes SOURCE_DATE_EPOCH for the current time, and no stamp is later, on the oldest toolchain
