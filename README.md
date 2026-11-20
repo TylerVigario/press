@@ -636,8 +636,8 @@ use — at Actual size, duplexed on the long edge, once at normal quality and on
 and write the numbers on its first page, which says what each one sets. Its edge gauges print
 into the edges on purpose, so it accepts the audit's ink-margin finding.
 
-[`PRINTERS.md`](PRINTERS.md) is where each printer the sheet is printed on for press is recorded,
-by make and model, with what it read.
+Each printer the sheet is printed on for press is recorded in [`printers.csv`](printers.csv), by
+make and model, with what it read, and [`PRINTERS.md`](PRINTERS.md) says how one is recorded.
 
 ## Versioning
 
