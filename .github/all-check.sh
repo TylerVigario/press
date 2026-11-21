@@ -21,7 +21,7 @@ trap 'exit 143' TERM
 
 repo=$tmp/repo
 mkdir -p "$repo/third_party/press" "$repo/docs/book"
-cp -R lib.typ lib press.toml template calibration.typ fonts tools press.just "$repo/third_party/press/"
+cp -R lib.typ lib press.toml printers.csv template calibration.typ fonts tools press.just "$repo/third_party/press/"
 printf 'import "third_party/press/press.just"\n' > "$repo/justfile"
 printf '#import "/third_party/press/lib.typ": *\n#set document(title: [Note])\n#set text(font: face-text)\nOne line.\n' > "$repo/docs/note.typ"
 cp "$repo/docs/note.typ" "$repo/docs/book/main.typ"

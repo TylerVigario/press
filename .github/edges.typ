@@ -1,7 +1,7 @@
 // Two pages or more in one of press's templates, set for a calibration, as .github/edges.sh
 // measures them. --input template= names the template, and --input calibration= what it is
 // given: none, press's own calibration given by name (own), or bands of 1in at every edge
-// (wide), where press's own are 0.48in.
+// (wide), where press's presets clear 0.48in.
 #import "/lib.typ": *
 
 #let given = (

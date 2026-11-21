@@ -32,7 +32,7 @@ trap 'exit 143' TERM
 
 repo=$tmp/repo
 mkdir -p "$repo/third_party/press" "$repo/docs"
-cp -R lib.typ lib press.toml template calibration.typ fonts tools "$repo/third_party/press/"
+cp -R lib.typ lib press.toml printers.csv template calibration.typ fonts tools "$repo/third_party/press/"
 # note <repo> <text>: the brief whose words change.
 note() {
     printf '#import "/third_party/press/lib.typ": *\n%s\n\n%s\n' \
@@ -99,7 +99,7 @@ expect "after clean.sh, the page that sets its own date" dated unchanged "2023-1
 copy=$tmp/copy
 mkdir -p "$copy/third_party/press"
 cp -R "$repo/docs" "$repo/.press-stamps" "$copy/"
-cp -R lib.typ lib press.toml template calibration.typ fonts tools "$copy/third_party/press/"
+cp -R lib.typ lib press.toml printers.csv template calibration.typ fonts tools "$copy/third_party/press/"
 out=$(build "$copy" 1700003600 docs/note.typ docs/dated.typ) \
     || { printf '%s\n' "$out" >&2; fail "the build of the copy failed"; }
 expect "in a copy" note unchanged "2023-11-14 22:13:20" "$out"

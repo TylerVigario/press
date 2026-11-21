@@ -95,9 +95,9 @@
 // "actual size" needs no scaling — but consumer printers cannot print to the
 // paper edge, and that unprintable band is set in hardware with no dialog
 // option on most of them. Everything here therefore keeps ink at least 0.5in
-// from every edge, clear of press's own calibration below; a printer whose band
-// is wider at an edge is set by its own, which widens these margins to clear
-// it. "Fit to page" is then never necessary, and should never be used: it
+// from every edge, clear of a band of 0.48in, _band below; a calibration whose
+// band is wider at an edge, press's own or a printer's, widens these margins to
+// clear it. "Fit to page" is then never necessary, and should never be used: it
 // scales the sheet down and undoes the type sizes above.
 //
 // The bottom margin is deliberately larger than the top. The footer sits INSIDE
@@ -119,6 +119,10 @@
   footer-descent: 0.12in,
 )
 
+// The band at each edge every preset keeps its ink clear of: what press used before a printer was
+// measured. A calibration's band wider than it at an edge widens the margin there by as much.
+#let _band = 0.48in
+
 // A colour's contrast on white, WCAG's, from its sRGB components: 21 for black, 1 for white.
 #let _linear(c) = if c <= 0.04045 { c / 12.92 } else { calc.pow((c + 0.055) / 1.055, 2.4) }
 #let _contrast(colour) = {
@@ -133,6 +137,79 @@
   warn-tint: warn-tint, bad-tint: bad-tint)
 #let _rules = (rule-hair: rule-hair, rule-mid: rule-mid, slate: slate, ink: ink)
 
+// printers.csv, the printers press's calibration is measured on, a row for each printing of the
+// calibration sheet, as PRINTERS.md says: each printer's latest printing in each mode, by its make
+// and model and then its mode, as a calibration, a later row taking a date it shares. A row that is
+// not as PRINTERS.md says stops the build, naming it, so no number is misread.
+#let _modes = ("normal", "economy")
+#let _columns = ("printer", "mode", "printed", "press", "edge-top-mm", "edge-bottom-mm",
+  "edge-left-mm", "edge-right-mm", "ink", "fill", "rule-hair-pt", "rule-mid-pt", "rule-slate-pt",
+  "rule-ink-pt")
+#let _printers = {
+  let rows = csv("../printers.csv")
+  assert(rows.at(0, default: ()) == _columns, message: "printers.csv's columns are "
+    + _columns.join(",") + ", in that order; its first row is "
+    + rows.at(0, default: ()).join(","))
+  let printers = (:)
+  for (i, row) in rows.slice(1).enumerate() {
+    let r = _columns.zip(row).to-dict()
+    let at = "printers.csv's row " + str(i + 2) + ", " + repr(r.printer)
+    assert(r.printer != "" and r.printer == r.printer.trim()
+      and r.printer.match(regex("[\r\n]")) == none, message: at + ": printer takes the printer's "
+      + "make and model, on one line, with no space before or after it")
+    assert(r.mode in _modes, message: at + ": mode is normal or economy; got " + repr(r.mode))
+    assert(r.printed.match(regex("^[0-9]{4}-[0-9]{2}-[0-9]{2}$")) != none,
+      message: at + ": printed takes the date, as 2026-11-20; got " + repr(r.printed))
+    assert(r.press.match(regex("^[0-9]+[.][0-9]+[.][0-9]+$")) != none,
+      message: at + ": press takes the version in the sheet's header; got " + repr(r.press))
+    let number(key) = {
+      let v = r.at(key)
+      assert(v.match(regex("^[0-9]+([.][0-9]+)?$")) != none,
+        message: at + ": " + key + " takes a number, written bare; got " + repr(v))
+      float(v)
+    }
+    for key in ("ink", "fill") {
+      assert(number(key) >= 1 and number(key) <= 21, message: at + ": " + key
+        + " takes a contrast on white, from 1 to 21; got " + r.at(key))
+    }
+    let reading = (
+      edges: (top: number("edge-top-mm") * 1mm, bottom: number("edge-bottom-mm") * 1mm,
+        left: number("edge-left-mm") * 1mm, right: number("edge-right-mm") * 1mm),
+      ink: number("ink"),
+      fill: number("fill"),
+      rule: (rule-hair: number("rule-hair-pt") * 1pt, rule-mid: number("rule-mid-pt") * 1pt,
+        slate: number("rule-slate-pt") * 1pt, ink: number("rule-ink-pt") * 1pt),
+    )
+    let modes = printers.at(r.printer, default: (:))
+    if modes.at(r.mode, default: (printed: "")).printed <= r.printed {
+      modes.insert(r.mode, (printed: r.printed, calibration: reading))
+    }
+    printers.insert(r.printer, modes)
+  }
+  printers.pairs().map(((p, modes)) => (p, modes.pairs().map(((m, it)) => (m, it.calibration))
+    .to-dict())).to-dict()
+}
+
+// The median of numbers or lengths, the middle two's mean where there is no one middle.
+#let _median(values) = {
+  let v = values.sorted()
+  let mid = calc.quo(v.len(), 2)
+  if calc.odd(v.len()) { v.at(mid) } else { (v.at(mid - 1) + v.at(mid)) / 2 }
+}
+
+// The median, number by number, of the latest printing in each mode of every printer printers.csv
+// records in it, or none for a mode it records none in.
+#let _medians = _modes.map(mode => {
+  let readings = _printers.values().filter(modes => mode in modes).map(modes => modes.at(mode))
+  let of(..path) = _median(readings.map(r => path.pos().fold(r, (v, k) => v.at(k))))
+  (mode, if readings.len() > 0 { (
+    edges: ("top", "bottom", "left", "right").map(e => (e, of("edges", e))).to-dict(),
+    ink: of("ink"),
+    fill: of("fill"),
+    rule: ("rule-hair", "rule-mid", "slate", "ink").map(c => (c, of("rule", c))).to-dict(),
+  ) })
+}).to-dict()
+
 // The calibration the presets are set for, a printer's numbers as the calibration sheet reads
 // them, which every template takes by default. A template's `calibration` sets a printer's own,
 // each number it leaves out taking this one's, and press's functions take every preset from it.
@@ -140,24 +217,65 @@
 // `edges` is how near each edge of the paper the printer starts to print, its band, readings 2
 // and 3: every preset keeps its ink, a header or footer included, at least that far from each
 // edge, and the audit fails ink nearer. `brief.with(calibration: (edges: (bottom: 17mm)))`
-// widens the bottom margin by as much as 17 mm exceeds the bottom here, and the audit fails ink
-// within 17 mm of the bottom edge. A band narrower than this one leaves the margins as they are
-// and lets the audit pass ink nearer that edge.
+// widens the bottom margin by as much as 17 mm exceeds 0.48in, the band every preset clears, and
+// the audit fails ink within 17 mm of the bottom edge. A band no wider than 0.48in leaves the
+// margins as they are, and one narrower than this one's lets the audit pass ink nearer that edge.
 //
 // `ink` is the lightest text ink that reads, reading 4, as its contrast on white: every ink of
 // press's lighter than it is darkened, its hue kept, until it reaches it. `fill` is the palest
 // fill that prints even, reading 5: every tint paler than it is darkened to it. `rule` is the
 // thinnest rule that prints unbroken in each of press's rule colours, reading 6: every stroke a
 // part draws is at least the width of the darkest of those colours no darker than its own.
-// Here, each is what press uses now, so nothing changes until a printer's own are given: its
+//
+// press's own is the median, number by number, of the printers printers.csv records at normal
+// quality, each by its latest printing. While it records none, each is what press used before it
+// had a sheet, so nothing changes until a printer is recorded: a band of 0.48in at every edge, its
 // lightest ink, ok's, its palest tint, paper-tint's, and the thinnest rule it draws in each.
 //
 // A repository whose documents print on one printer writes its numbers once, in a file its
-// documents or its shared template import, and calibrated() hands back the presets set for them,
-// for what a document draws itself.
-#let calibration = (
-  edges: (top: 0.48in, bottom: 0.48in, left: 0.48in, right: 0.48in),
+// documents or its shared template import, or takes a printer printers.csv records, printer()'s,
+// and calibrated() hands back the presets set for them, for what a document draws itself.
+#let calibration = if _medians.normal != none { _medians.normal } else { (
+  edges: (top: _band, bottom: _band, left: _band, right: _band),
   ink: calc.min(.._inks.values().map(_contrast)),
   fill: calc.min(.._tints.values().map(_contrast)),
   rule: (rule-hair: 0.4pt, rule-mid: 0.5pt, slate: 0.5pt, ink: 0.5pt),
-)
+) }
+
+// A printer printers.csv records, as a calibration, by the make and model it is recorded under,
+// in the mode it was printed in, normal or economy: that printer's latest printing in that mode.
+// Given no printer, the median, number by number, of every printer printers.csv records in that
+// mode, so printer() is press's own calibration, `calibration`. A printer or a mode printers.csv
+// does not record stops the build, saying what it records, so one printer's numbers never stand
+// in for another's, nor normal's for economy's.
+#let printer(..name, mode: "normal") = {
+  let named = name.named().keys()
+  assert(named.len() == 0, message: "printer() takes no argument named "
+    + named.map(repr).join(", ", last: " or "))
+  let name = name.pos()
+  assert(name.len() <= 1, message: "printer() takes one printer, by its make and model; got "
+    + name.map(repr).join(", "))
+  assert(mode in _modes,
+    message: "printer()'s mode is \"normal\" or \"economy\"; got " + repr(mode))
+  let records(mode) = _printers.keys().filter(p => mode in _printers.at(p))
+  let listed(printers) = printers.map(repr).join(", ", last: " and ")
+  if name.len() == 0 {
+    if mode == "normal" { return calibration }
+    assert(_medians.at(mode) != none, message: "printers.csv records no printer in " + mode
+      + " mode" + if records("normal").len() > 0 {
+        "; in normal mode it records " + listed(records("normal"))
+      } else { "" })
+    return _medians.at(mode)
+  }
+  let name = name.first()
+  assert(type(name) == str,
+    message: "printer() takes a printer by its make and model, a string; got " + repr(name))
+  assert(name in _printers, message: "printers.csv records no printer " + repr(name) + "; "
+    + if _printers.len() == 0 { "it records none yet" } else {
+      "it records " + listed(_printers.keys())
+    })
+  let modes = _printers.at(name)
+  assert(mode in modes, message: "printers.csv records " + repr(name) + " in "
+    + modes.keys().join(" and ") + " mode, not " + mode)
+  modes.at(mode)
+}

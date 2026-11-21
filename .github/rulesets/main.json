@@ -109,6 +109,9 @@
             "context": "A template set for a calibration keeps its ink clear of the printer's bands"
           },
           {
+            "context": "press's calibration is the median of its printers, and printer() gives each"
+          },
+          {
             "context": "A calibration's floors darken press's inks and tints, and widen its rules"
           },
           {
@@ -263,6 +266,9 @@
           },
           {
             "context": "A template set for a calibration keeps its ink clear of the printer's bands, on the oldest toolchain"
+          },
+          {
+            "context": "press's calibration is the median of its printers, and printer() gives each, on the oldest toolchain"
           },
           {
             "context": "A calibration's floors darken press's inks and tints, and widen its rules, on the oldest toolchain"

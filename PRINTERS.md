@@ -7,9 +7,11 @@ calibration sheet, `calibration.typ`, has been printed on for press is recorded 
 [`printers.csv`](printers.csv), with what the sheet read, so press's numbers can be traced to the
 paper they came from, and a repository calibrating its own printer has others to compare with.
 
-No printer is recorded yet. press's calibration is still what press used before it had a sheet:
-a band of 0.48in at every edge, its own lightest ink and palest tint, and the thinnest rules it
-draws.
+press's own calibration is the median, number by number, of the printers recorded here at normal
+quality, each by its latest printing, and a document takes any one of them, or the median of
+those printed in economy mode, through `printer()`, as README's *Printing* says. No printer is
+recorded yet, so press's calibration is still what press used before it had a sheet: a band of
+0.48in at every edge, its own lightest ink and palest tint, and the thinnest rules it draws.
 
 ## Recording a printer
 
@@ -29,5 +31,8 @@ is a row of `printers.csv`, its columns in this order:
 - `rule-hair-pt`, `rule-mid-pt`, `rule-slate-pt`, `rule-ink-pt`: reading 6, the thinnest rule
   that prints unbroken in each of `rule-hair`, `rule-mid`, `slate` and `ink`, in pt.
 
-Each number is written bare, without its unit: `4.5`, not `4.5mm`. README's *Printing* says what
-each number sets.
+Each number is written bare, without its unit: `4.5`, not `4.5mm`, and a make and model with a
+comma in it is quoted, `"Make, Model"`. A printer printed again is a row more: its latest printing
+in each mode is the one press takes, a later row taking a date it shares, and the rows before it
+stay as its history. A row that is not as this says stops every build that imports press,
+naming the row. README's *Printing* says what each number sets.

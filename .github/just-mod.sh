@@ -19,7 +19,7 @@ trap 'exit 143' TERM
 
 repo=$tmp/repo
 mkdir -p "$repo/third_party/press"
-cp -R lib.typ lib press.toml template calibration.typ fonts tools press.just "$repo/third_party/press/"
+cp -R lib.typ lib press.toml printers.csv template calibration.typ fonts tools press.just "$repo/third_party/press/"
 cd "$repo"
 
 printf 'mod press "third_party/press/press.just"\nmine:\n    echo mine\n' > justfile

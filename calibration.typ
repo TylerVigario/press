@@ -95,10 +95,10 @@
   again at Actual size.
 
   *2 and 3, the bands.* No ink prints nearer an edge than its band. press's page presets keep
-  ink clear of a band of #fixed(calibration.edges.top / 1in, 2) in, #mm(calibration.edges.top),
-  at every edge, press's own calibration. Given to a template as its calibration, the larger of
-  front and back at each edge, `calibration: (edges: (top: …, bottom: …, left: …, right: …))`,
-  the bands widen the page's margins where they must, and the audit fails ink inside them.
+  ink clear of a band of #fixed(_band / 1in, 2) in, #mm(_band), at every edge. Given to a
+  template as its calibration, the larger of front and back at each edge,
+  `calibration: (edges: (top: …, bottom: …, left: …, right: …))`, the bands widen the page's
+  margins where they must, and the audit fails ink inside them.
 
   *4, ink.* Text in an ink lighter than this fades on this printer, at the smallest size press
   sets. Given as the calibration's `ink`, `ink: 6` for 6:1, it darkens each of press's inks that

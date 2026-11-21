@@ -29,7 +29,7 @@ trap 'exit 143' TERM
 
 repo=$tmp/repo
 mkdir -p "$repo/third_party/press" "$repo/docs"
-cp -R lib.typ lib press.toml template calibration.typ fonts tools "$repo/third_party/press/"
+cp -R lib.typ lib press.toml printers.csv template calibration.typ fonts tools "$repo/third_party/press/"
 note() {
     printf '#import "/third_party/press/lib.typ": *\n%s\n\n%s\n' \
         '#show: brief.with(title: [Note], author: "Sam Example")' "$1" > "$repo/docs/note.typ"
