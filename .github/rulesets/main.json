@@ -115,6 +115,9 @@
             "context": "A calibration's floors darken press's inks and tints, and widen its rules"
           },
           {
+            "context": "Under press's own calibration, each tone's label clears 4.5:1 on its tint"
+          },
+          {
             "context": "header()'s rule clears the title's descenders"
           },
           {
@@ -272,6 +275,9 @@
           },
           {
             "context": "A calibration's floors darken press's inks and tints, and widen its rules, on the oldest toolchain"
+          },
+          {
+            "context": "Under press's own calibration, each tone's label clears 4.5:1 on its tint, on the oldest toolchain"
           },
           {
             "context": "header()'s rule clears the title's descenders, on the oldest toolchain"

@@ -285,6 +285,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/floors.sh
 
+  tones:
+    name: Under press's own calibration, each tone's label clears 4.5:1 on its tint
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/tones.sh
+
   header-rule:
     name: header()'s rule clears the title's descenders
     runs-on: ubuntu-latest
@@ -803,6 +812,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/floors.sh
+
+  oldest-tones:
+    name: Under press's own calibration, each tone's label clears 4.5:1 on its tint, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/tones.sh
 
   oldest-header-rule:
     name: header()'s rule clears the title's descenders, on the oldest toolchain

@@ -42,7 +42,11 @@
 #let steel = rgb("#41566b")
 
 // Semantic
-#let ok = rgb("#2e7d4f")
+//
+// A chip and a callout set each tone's label on its tint, so each tone is at least 4.5:1 on its
+// tint, the body floor: ok 4.71:1, warn 4.65:1 and bad 6.07:1, and note's slate 7.18:1 on
+// slate-tint. .github/tones.sh measures each as a chip and a callout print it.
+#let ok = rgb("#28784b")
 #let ok-tint = rgb("#e6f2ea")
 #let warn = rgb("#a05a0e")
 #let warn-tint = rgb("#f9efdf")
@@ -230,7 +234,7 @@
 // press's own is the median, number by number, of the printers printers.csv records at normal
 // quality, each by its latest printing. While it records none, each is what press used before it
 // had a sheet, so nothing changes until a printer is recorded: a band of 0.48in at every edge, its
-// lightest ink, ok's, its palest tint, paper-tint's, and the thinnest rule it draws in each.
+// lightest ink, warn's, its palest tint, paper-tint's, and the thinnest rule it draws in each.
 //
 // A repository whose documents print on one printer writes its numbers once, in a file its
 // documents or its shared template import, or takes a printer printers.csv records, printer()'s,
