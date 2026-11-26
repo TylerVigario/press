@@ -477,7 +477,8 @@ split is by role, not page number.
 
 Tone is a string: `"note"` (slate) · `"ok"` (green) · `"warn"` (amber) · `"bad"` (red).
 `tones` maps each to its colour and tint, for a part a document draws itself: `tones.at("ok")`
-is `(ok, ok-tint)`.
+is `(ok, ok-tint)`. With press's own calibration each colour is at least 4.5:1 on its tint, so a
+label set in it on the tint reads, as a chip's and a callout's do.
 
 The parts that take any number of items, `letterhead`, `re`, `enclosures`, `units`, `sheet`,
 `steps`, `flow`, `src` and `sources`, take them by position. An argument given by name that a part
@@ -600,7 +601,7 @@ set by its own numbers, the calibration sheet's readings, given to a template as
 | key | the reading | what it sets |
 |---|---|---|
 | `edges: (top:, bottom:, left:, right:)` | 2 and 3: the band it cannot print at each edge, the larger of front and back | each margin, widened by as much as the band exceeds 0.48in, so the page's ink, its header and footer included, clears it; and the audit's floor at that edge |
-| `ink:` | 4: the lightest grey that reads, as its contrast, `6` for 6:1 | each of press's inks lighter than it, darkened to it, its hue kept; with no printer recorded, press's is ok's, 5.05:1 |
+| `ink:` | 4: the lightest grey that reads, as its contrast, `6` for 6:1 | each of press's inks lighter than it, darkened to it, its hue kept; with no printer recorded, press's is warn's, 5.30:1 |
 | `fill:` | 5: the palest grey that prints an even fill | each of press's tints paler than it, darkened to it; with no printer recorded, press's is paper-tint's, 1.07:1 |
 | `rule: (rule-hair:, rule-mid:, slate:, ink:)` | 6: the thinnest rule that prints unbroken in each colour | each line a part draws, at least as wide as the floor of the darkest of those colours no darker than its own; with no printer recorded, press's are the thinnest it draws, 0.4pt in rule-hair and 0.5pt in the others |
 

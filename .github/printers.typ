@@ -24,9 +24,9 @@
   // press's numbers before it had a sheet, printer()'s with them, and no margin widened.
   same(calibration, (edges: (top: 0.48in, bottom: 0.48in, left: 0.48in, right: 0.48in),
     rule: (rule-hair: 0.4pt, rule-mid: 0.5pt, slate: 0.5pt, ink: 0.5pt)), "calibration")
-  assert(calc.abs(calibration.ink - 5.05) < 0.005 and calc.abs(calibration.fill - 1.07) < 0.005,
+  assert(calc.abs(calibration.ink - 5.30) < 0.005 and calc.abs(calibration.fill - 1.07) < 0.005,
     message: "calibration's ink and fill are " + repr((calibration.ink, calibration.fill))
-      + ", where they should be ok's 5.05 and paper-tint's 1.07")
+      + ", where they should be warn's 5.30 and paper-tint's 1.07")
   assert.eq(printer(), calibration)
   assert.eq(calibrated(calibration).dense, dense)
 } else if case == "recorded" {
