@@ -17,17 +17,21 @@
 // goes before its label, as a callout's does, and `shape` changes it.
 #let unit(label, tone, lead, body, caps: true, breakable: auto, shape: auto) = {
   let pair = tones.at(tone)
-  context _fit("unit", breakable, b => block(width: 100%, breakable: b,
-        stroke: (left: _stroke(2.5pt, pair.at(0))), fill: _cal(paper-tint),
-        inset: (x: 8pt, y: 6.5pt))[
-    #let spacing = par.spacing
-    #set par(spacing: _part-gap)
-    #text(size: sz.fine, block(sticky: true,
-      [#_shaped("unit", tone, shape)#eyebrow(label, color: pair.at(0), caps: caps)]))
-    #v(2.5pt)
-    #text(size: sz.fine, weight: 700)[#lead]
-    #if body != none [ #v(2.5pt) #text(size: sz.fine, _body(spacing, body)) ]
-  ])
+  context {
+    let pairs = _on-tint-in(_presets(), paper-tint)
+    _fit("unit", breakable, b => block(width: 100%, breakable: b,
+          stroke: (left: _stroke(2.5pt, pair.at(0))), fill: _cal(paper-tint),
+          inset: (x: 8pt, y: 6.5pt), _set-inks(pairs)[
+      #let spacing = par.spacing
+      #set par(spacing: _part-gap)
+      #text(size: sz.fine, block(sticky: true,
+        [#_shaped("unit", tone, shape, pairs: pairs)#eyebrow(label, color: pair.at(0),
+          caps: caps)]))
+      #v(2.5pt)
+      #text(size: sz.fine, weight: 700)[#lead]
+      #if body != none [ #v(2.5pt) #text(size: sz.fine, _body(spacing, body)) ]
+    ]))
+  }
 }
 
 // A state, shown by its tone's colour and its shape: the circle is ok, the triangle warn, the
@@ -40,13 +44,16 @@
 // it out.
 #let chip(label, tone, boxed: true, shape: auto) = {
   let pair = tones.at(tone)
-  let shown = [#_shaped("chip", tone, shape, gap: 0.3em)#label]
   if boxed {
-    context box(fill: _cal(pair.at(1)), stroke: _stroke(0.5pt, pair.at(0)),
+    context {
+      let pairs = _on-tint-in(_presets(), pair.at(1))
+      box(fill: _cal(pair.at(1)), stroke: _stroke(0.5pt, pair.at(0)),
         inset: (x: 4pt, y: 2pt), radius: 1pt,
-        text(size: sz.micro, weight: 700, fill: pair.at(0), shown))
+        text(size: sz.micro, weight: 700, fill: pair.at(0), _set-inks(pairs,
+          [#_shaped("chip", tone, shape, gap: 0.3em, pairs: pairs)#label])))
+    }
   } else {
-    text(weight: 700, fill: pair.at(0), shown)
+    text(weight: 700, fill: pair.at(0), [#_shaped("chip", tone, shape, gap: 0.3em)#label])
   }
 }
 
@@ -201,6 +208,10 @@
   // stripes run on from column to column. Called in context, for its colours.
   let part(cells, before: 0, last: true) = {
     let (head, stripe) = (_cal(slate-tint), _cal(paper-tint))
+    let presets = _presets()
+    let (on-head, on-stripe) = (_on-tint-in(presets, slate-tint), _on-tint-in(presets, paper-tint))
+    show table.cell: it => if it.y == 0 { _set-inks(on-head, it) }
+      else if calc.odd(it.y + before) { _set-inks(on-stripe, it) } else { it }
     table(
       columns: cols,
       stroke: _stroke(0.4pt, rule-hair),
