@@ -303,6 +303,15 @@ jobs:
       - *toolchain-poppler
       - run: sh .github/tint-text.sh
 
+  highlight:
+    name: Highlighted code clears press's floors, under any calibration
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-poppler
+      - run: sh .github/highlight.sh
+
   header-rule:
     name: header()'s rule clears the title's descenders
     runs-on: ubuntu-latest
@@ -839,6 +848,15 @@ jobs:
       - *checkout
       - *toolchain-oldest
       - run: sh .github/tint-text.sh
+
+  oldest-highlight:
+    name: Highlighted code clears press's floors, under any calibration, on the oldest toolchain
+    runs-on: ubuntu-latest
+    timeout-minutes: *timeout
+    steps:
+      - *checkout
+      - *toolchain-oldest
+      - run: sh .github/highlight.sh
 
   oldest-header-rule:
     name: header()'s rule clears the title's descenders, on the oldest toolchain

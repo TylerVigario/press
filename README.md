@@ -601,7 +601,7 @@ set by its own numbers, the calibration sheet's readings, given to a template as
 | key | the reading | what it sets |
 |---|---|---|
 | `edges: (top:, bottom:, left:, right:)` | 2 and 3: the band it cannot print at each edge, the larger of front and back | each margin, widened by as much as the band exceeds 0.48in, so the page's ink, its header and footer included, clears it; and the audit's floor at that edge |
-| `ink:` | 4: the lightest grey that reads, as its contrast, `6` for 6:1 | each of press's inks lighter than it, darkened to it, its hue kept; with no printer recorded, press's is warn's, 5.30:1 |
+| `ink:` | 4: the lightest grey that reads, as its contrast, `6` for 6:1 | each of press's inks lighter than it, and each colour typst highlights code in, darkened to it, its hue kept; with no printer recorded, press's is warn's, 5.30:1 |
 | `fill:` | 5: the palest grey that prints an even fill | each of press's tints paler than it, darkened to it; with no printer recorded, press's is paper-tint's, 1.07:1 |
 | `rule: (rule-hair:, rule-mid:, slate:, ink:)` | 6: the thinnest rule that prints unbroken in each colour | each line a part draws, at least as wide as the floor of the darkest of those colours no darker than its own; with no printer recorded, press's are the thinnest it draws, 0.4pt in rule-hair and 0.5pt in the others |
 
@@ -618,7 +618,10 @@ press's inks takes the darkened ink, a document's own `text(fill: ink-faint)` am
 part sets on one of press's tints, in a chip, a callout, a unit, a code block or a sheet's head
 and stripes, a document's own in it included, is darkened further where it would read under
 4.5:1 on the tint as the calibration sets it, its hue kept, so a fill that darkens the tint keeps
-it readable there; the same ink on white keeps the calibration's. For what
+it readable there; the same ink on white keeps the calibration's. Code typst highlights is held
+to the same floors, though its colours are typst's and not press's: each is darkened from
+typst's, its hue kept, to the calibration's ink, and on a tint to 4.5:1 on it, where it would
+read lighter. Code given a theme of the document's own, `raw(theme:)`, keeps its colours. For what
 a document draws itself, `calibrated(calibration)` hands back the presets set for a calibration,
 by name: `#let c = calibrated(calibration)`, then `rect(fill: c.paper-tint)`,
 `line(stroke: c.rule.rule-hair + rule-hair)` or `#set page(..c.card)`.

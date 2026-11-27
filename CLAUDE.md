@@ -163,12 +163,14 @@ repository has.
   context, or a calibration never reaches it: `_cal` gives one of press's inks or tints as the
   document's calibration sets it, and `_stroke` a line at least as wide as its floor. Text needs
   neither: a template's `_calibrate` sets each of press's inks the calibration darkens, wherever
-  the text is, and a smart quote and an equation with it. `floors.sh` sets every part in every
-  template and fails on a colour or a line the floors should have changed; a new part goes into
-  `floors.typ`. A part that fills with one of press's tints sets what it holds through
-  `_set-inks(_on-tint-in(…, tint), …)`, and a shape on it through `_shaped(pairs:)`, or a
-  calibration whose fill darkens the tint leaves its text under 4.5:1 there: `tint-text.sh`
-  fails on that, and a new such part goes into `tint-text.typ`.
+  the text is, and a smart quote and an equation with it; it holds code typst highlights, in
+  typst's colours and not press's, to the calibration's ink through `_floored`. `floors.sh` sets
+  every part in every template and fails on a colour or a line the floors should have changed; a
+  new part goes into `floors.typ`. A part that fills with one of press's tints sets what it holds
+  through `_on-tint(…, tint, …)`, its inks and its highlighted code alike, and a shape on it
+  through `_shaped(pairs:)`, or a calibration whose fill darkens the tint leaves its text under
+  4.5:1 there: `tint-text.sh` and `highlight.sh` fail on that, and a new such part goes into
+  `tint-text.typ` and `highlight.typ`.
 - **press's own calibration is computed twice,** each from `printers.csv`, the median of each
   printer's latest printing at normal quality, or press's numbers before it had a sheet where it
   records none: `calibration` in `lib/tokens.typ`, which every template takes by default, and
@@ -190,6 +192,11 @@ repository has.
   font` (0.15) error for a character no face draws; any other error sends it to probing the
   characters typed in the sources. A typst that words the refusal otherwise sends every document
   there, and `fail-glyph-from-data` audits clean: add the new words.
+- **press knows typst's highlighting by its colours.** `_floored` darkens code typst highlights
+  in its own theme by matching each colour that theme sets text in, as typst 0.14 and 0.15 give
+  them, `_theirs` in `lib/parts.typ`: no rule can read a token's colour but one in context, which
+  makes a long listing three times as slow. A typst whose theme sets another colour prints it as
+  typst gives it, under press's floors; `highlight.sh` fails on that, naming it: add it.
 - **The audit's glyph scan leaves out exactly press's `lib.typ` and the files in its `lib/`**,
   found beside `press.toml`, and the files of any Typst package, found beside a `typst.toml`. A
   document kept in press's directory, such as the calibration sheet, is still scanned.

@@ -121,6 +121,9 @@
             "context": "Text a part sets on a tint clears 4.5:1 on it, under any calibration"
           },
           {
+            "context": "Highlighted code clears press's floors, under any calibration"
+          },
+          {
             "context": "header()'s rule clears the title's descenders"
           },
           {
@@ -284,6 +287,9 @@
           },
           {
             "context": "Text a part sets on a tint clears 4.5:1 on it, under any calibration, on the oldest toolchain"
+          },
+          {
+            "context": "Highlighted code clears press's floors, under any calibration, on the oldest toolchain"
           },
           {
             "context": "header()'s rule clears the title's descenders, on the oldest toolchain"

@@ -18,10 +18,11 @@
 #let unit(label, tone, lead, body, caps: true, breakable: auto, shape: auto) = {
   let pair = tones.at(tone)
   context {
-    let pairs = _on-tint-in(_presets(), paper-tint)
+    let presets = _presets()
+    let pairs = _on-tint-in(presets, paper-tint)
     _fit("unit", breakable, b => block(width: 100%, breakable: b,
           stroke: (left: _stroke(2.5pt, pair.at(0))), fill: _cal(paper-tint),
-          inset: (x: 8pt, y: 6.5pt), _set-inks(pairs)[
+          inset: (x: 8pt, y: 6.5pt), _on-tint(presets, paper-tint)[
       #let spacing = par.spacing
       #set par(spacing: _part-gap)
       #text(size: sz.fine, block(sticky: true,
@@ -46,10 +47,11 @@
   let pair = tones.at(tone)
   if boxed {
     context {
-      let pairs = _on-tint-in(_presets(), pair.at(1))
+      let presets = _presets()
+      let pairs = _on-tint-in(presets, pair.at(1))
       box(fill: _cal(pair.at(1)), stroke: _stroke(0.5pt, pair.at(0)),
         inset: (x: 4pt, y: 2pt), radius: 1pt,
-        text(size: sz.micro, weight: 700, fill: pair.at(0), _set-inks(pairs,
+        text(size: sz.micro, weight: 700, fill: pair.at(0), _on-tint(presets, pair.at(1),
           [#_shaped("chip", tone, shape, gap: 0.3em, pairs: pairs)#label])))
     }
   } else {
@@ -209,9 +211,8 @@
   let part(cells, before: 0, last: true) = {
     let (head, stripe) = (_cal(slate-tint), _cal(paper-tint))
     let presets = _presets()
-    let (on-head, on-stripe) = (_on-tint-in(presets, slate-tint), _on-tint-in(presets, paper-tint))
-    show table.cell: it => if it.y == 0 { _set-inks(on-head, it) }
-      else if calc.odd(it.y + before) { _set-inks(on-stripe, it) } else { it }
+    show table.cell: it => if it.y == 0 { _on-tint(presets, slate-tint, it) }
+      else if calc.odd(it.y + before) { _on-tint(presets, paper-tint, it) } else { it }
     table(
       columns: cols,
       stroke: _stroke(0.4pt, rule-hair),

@@ -289,6 +289,36 @@
   if found == none { colour } else { found.at(1) }
 }
 
+// Code typst highlights in its own theme, a raw that sets no `theme:`, is set in typst's colours,
+// none of them press's inks, so neither the calibration nor _on-tint-in reaches them. _theirs is
+// each colour that theme sets text in, as typst 0.14 and 0.15 give it; .github/highlight.sh fails
+// on a typst whose theme sets one it does not hold. _floored sets each of them whose contrast on
+// white is under `floor` darkened to it, its hue kept, as the calibration darkens press's inks. A
+// template holds all it sets to the calibration's ink, and a part on one of press's tints what it
+// sets there to the darker of that and 4.5:1 on the tint, its rule given each line of the code,
+// `lines: true`, so it is set inside the template's and wins. A raw given a theme of the
+// document's own keeps its colours, as a document's own text keeps any colour but press's.
+#let _theirs = ("#74747c", "#1d6c76", "#6b6b6f", "#198810", "#8b41b1", "#d73948", "#b60157",
+  "#4b69c6", "#16718d", "#301414").map(rgb)
+#let _floored(floor, body, lines: false) = {
+  let pairs = _theirs.filter(c => _contrast(c) < floor).map(c => (c, _darken-to(c, floor)))
+  if pairs.len() == 0 { return body }
+  let held(it) = pairs.fold(it, (it, (from, to)) => {
+    show text.where(fill: from): set text(fill: to)
+    it
+  })
+  show raw: it => if it.theme != auto { it } else if lines { show raw.line: held; it } else {
+    held(it)
+  }
+  body
+}
+
+// What a part sets on one of press's tints: press's inks as _on-tint-in pairs them, and code typst
+// highlights as _floored holds it there. Called in context, for the calibration's ink.
+#let _on-tint(presets, tint, body) = _set-inks(_on-tint-in(presets, tint), _floored(
+  calc.max(_calibration(_calibration-state.final()).ink, 4.5 * _contrast(_cal-in(presets, tint))),
+  body, lines: true))
+
 // A stroke of `width` in `colour`, as press's functions draw it: the colour set as _cal sets it,
 // at least as wide as the calibration's thinnest rule in the darkest of press's rule colours no
 // darker than it, or in rule-hair where it is paler than all of them. _stroke is called in
@@ -306,14 +336,16 @@
 // calibration for press's functions, and each of press's inks it darkens set in that ink as the
 // calibration darkens it. An ink is set where its text is, so a document's own text in one of
 // press's inks, `text(fill: ink-faint)`, is darkened with press's; so is what stands in such text
-// without being a text of its own, a curled quote or an equation.
+// without being a text of its own, a curled quote or an equation. Code typst highlights is held to
+// the calibration's ink, as _floored holds it.
 #let _calibrate(given, body) = {
   let presets = calibrated(given)
   let changed = _inks.pairs().filter(((name, own)) => presets.at(name) != own)
   [#_edges-mark(given)#_calibration-state.update(_calibration(given))]
   // typst's own footnote rule, black and 0.5pt, drawn as press draws a rule in that colour.
   set footnote.entry(separator: line(length: 30% + 0pt, stroke: _stroke-in(presets, 0.5pt, black)))
-  _set-inks(changed.map(((name, own)) => (own, presets.at(name))), body)
+  _set-inks(changed.map(((name, own)) => (own, presets.at(name))),
+    _floored(_calibration(given).ink, body))
 }
 
 // A template's rule for each paragraph: the one signature() keeps on its page is set in a block
@@ -416,11 +448,12 @@
 #let callout(body, tone: "note", label: none, size: sz.small, shape: auto, caps: true) = {
   let pair = tones.at(tone)
   context {
-    let pairs = _on-tint-in(_presets(), pair.at(1))
+    let presets = _presets()
+    let pairs = _on-tint-in(presets, pair.at(1))
     let mark = _shaped("callout", tone, shape, pairs: pairs)
     block(
       width: 100%, fill: _cal(pair.at(1)), stroke: (left: _stroke(3pt, pair.at(0))),
-      inset: (x: 10pt, y: 8pt), _set-inks(pairs)[
+      inset: (x: 10pt, y: 8pt), _on-tint(presets, pair.at(1))[
         #let spacing = par.spacing
         #set par(spacing: _part-gap)
         #if label != none [#text(size: sz.fine, block(sticky: true,
@@ -515,7 +548,7 @@
   _fit("code", breakable, b => block(
     width: 100%, fill: _cal(paper-tint), stroke: _stroke(0.6pt, rule-mid),
     inset: (x: 7pt, y: 6pt), radius: 1.5pt, breakable: b,
-    _set-inks(_on-tint-in(_presets(), paper-tint),
+    _on-tint(_presets(), paper-tint,
       { _in-code.update(true); _wraps(body); body; _in-code.update(false) }),
   ))
 }
