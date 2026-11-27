@@ -195,15 +195,18 @@
 // A colour darkened to the lightest shade whose contrast on white reaches `ratio`, by scaling its
 // light, each of its channels in linear light by one factor: the same colour in less light, its
 // hue kept, and never outside what a printer's sRGB holds. A colour that reaches `ratio` already
-// is returned as it is.
+// is returned as it is. It is given in the 8 bits a channel typst writes a colour in, each the
+// nearest, so its hue holds, and the factor taken down until the colour the PDF holds reaches
+// `ratio` too, where a channel rounded up would leave it short.
 #let _darken-to(colour, ratio) = {
   if _contrast(colour) >= ratio { return colour }
   let light = rgb(colour).components(alpha: false).map(c => _linear(c / 100%))
   let y = 0.2126 * light.at(0) + 0.7152 * light.at(1) + 0.0722 * light.at(2)
-  // A hair under the factor that meets `ratio` exactly, so rounding never leaves it short.
-  let k = 0.9999 * (1.05 / ratio - 0.05) / y
   let encode(v) = if v <= 0.0031308 { 12.92 * v } else { 1.055 * calc.pow(v, 1 / 2.4) - 0.055 }
-  rgb(..light.map(v => encode(k * v) * 100%))
+  let shade(k) = rgb(..light.map(v => int(calc.round(encode(k * v) * 255))))
+  let k = (1.05 / ratio - 0.05) / y
+  while _contrast(shade(k)) < ratio { k *= 0.999 }
+  shade(k)
 }
 
 // press's presets, set for a calibration, by name: each of press's inks darkened to the
@@ -240,6 +243,52 @@
 }
 #let _cal(colour) = _cal-in(_presets(), colour)
 
+// Text in each colour of `pairs`, a list of (colour, colour), set in the colour it is paired with,
+// wherever the text is, so a document's own text in one of press's inks, `text(fill: ink-faint)`,
+// is set as press's is; so is what stands in such text without being a text of its own, a curled
+// quote or an equation.
+#let _set-inks(pairs, body) = {
+  if pairs.len() == 0 { return body }
+  let shade(fill) = {
+    let found = pairs.find(((from, _)) => fill == from)
+    if found == none { fill } else { found.at(1) }
+  }
+  let in-shade(it) = context {
+    let fill = shade(text.fill)
+    if fill == text.fill { it } else { text(fill: fill, it) }
+  }
+  show smartquote: in-shade
+  show math.equation: in-shade
+  pairs.fold(body, (it, (from, to)) => { show text.where(fill: from): set text(fill: to); it })
+}
+
+// Each of press's inks as a part sets it on one of press's tints, a chip's, a callout's, a unit's,
+// a code block's or a sheet's: as the calibration sets it, and where that is under 4.5:1 on the
+// tint as the calibration sets it, the body floor tokens.typ gives, darkened from press's own, its
+// hue kept, until it reaches it. A calibration that darkens a tint so darkens what is set on it,
+// and there alone: the same ink on white stays as the calibration sets it. Given as _set-inks's
+// pairs, press's own colour and the calibration's each paired with the colour on the tint. With
+// press's own calibration they are ok and warn on bad-tint, 4.48:1 and 4.39:1, a document's own
+// text in them in a bad chip or callout; a tone's own colour on its tint needs none. _on gives one
+// colour as the pairs set it, for what a part draws on the tint that is not text.
+#let _on-tint-in(presets, tint) = {
+  let floor = 4.5 * _contrast(_cal-in(presets, tint))
+  let pairs = ()
+  for (name, own) in _inks {
+    let given = presets.at(name)
+    if _contrast(given) < floor {
+      let on = _darken-to(own, floor)
+      pairs.push((own, on))
+      if given != own { pairs.push((given, on)) }
+    }
+  }
+  pairs
+}
+#let _on(pairs, colour) = {
+  let found = pairs.find(((from, _)) => from == colour)
+  if found == none { colour } else { found.at(1) }
+}
+
 // A stroke of `width` in `colour`, as press's functions draw it: the colour set as _cal sets it,
 // at least as wide as the calibration's thinnest rule in the darkest of press's rule colours no
 // darker than it, or in rule-hair where it is paler than all of them. _stroke is called in
@@ -261,23 +310,10 @@
 #let _calibrate(given, body) = {
   let presets = calibrated(given)
   let changed = _inks.pairs().filter(((name, own)) => presets.at(name) != own)
-  let shade(fill) = {
-    let found = changed.find(((_, own)) => fill == own)
-    if found == none { fill } else { presets.at(found.at(0)) }
-  }
-  let in-shade(it) = context {
-    let fill = shade(text.fill)
-    if fill == text.fill { it } else { text(fill: fill, it) }
-  }
   [#_edges-mark(given)#_calibration-state.update(_calibration(given))]
   // typst's own footnote rule, black and 0.5pt, drawn as press draws a rule in that colour.
   set footnote.entry(separator: line(length: 30% + 0pt, stroke: _stroke-in(presets, 0.5pt, black)))
-  if changed.len() == 0 { body } else {
-    show smartquote: in-shade
-    show math.equation: in-shade
-    changed.fold(body,
-      (it, (name, own)) => { show text.where(fill: own): set text(fill: presets.at(name)); it })
-  }
+  _set-inks(changed.map(((name, own)) => (own, presets.at(name))), body)
 }
 
 // A template's rule for each paragraph: the one signature() keeps on its page is set in a block
@@ -361,13 +397,14 @@
 }
 
 // A state's shape and a space, set before a part's label in the tone's colour: the tone's own
-// shape where `shape` is auto, another of the four by name, or nothing where it is none.
-#let _shaped(part, tone, shape, gap: 0.35em) = {
+// shape where `shape` is auto, another of the four by name, or nothing where it is none. On a
+// tint, `pairs` are _on-tint-in's for it, so the shape takes its label's colour there.
+#let _shaped(part, tone, shape, gap: 0.35em, pairs: ()) = {
   let shape = if shape == auto { _tone-shapes.at(tone) } else { shape }
   assert(shape == none or shape in _tone-shapes.values(),
     message: part + "(shape:) expects \"circle\", \"triangle\", \"square\", \"diamond\" or "
       + "none; got " + repr(shape))
-  if shape != none [#_shape(shape, tones.at(tone).at(0))#h(gap)]
+  if shape != none [#_shape(shape, _on(pairs, tones.at(tone).at(0)))#h(gap)]
 }
 
 // Tinted callout with a weighted left edge. Its label is kept with the body under it, so a page
@@ -378,17 +415,20 @@
 // its label's case.
 #let callout(body, tone: "note", label: none, size: sz.small, shape: auto, caps: true) = {
   let pair = tones.at(tone)
-  let mark = _shaped("callout", tone, shape)
-  context block(
-    width: 100%, fill: _cal(pair.at(1)), stroke: (left: _stroke(3pt, pair.at(0))),
-    inset: (x: 10pt, y: 8pt),
-  )[
-    #let spacing = par.spacing
-    #set par(spacing: _part-gap)
-    #if label != none [#text(size: sz.fine, block(sticky: true,
-      [#mark#eyebrow(label, color: pair.at(0), caps: caps)])) #v(3pt)]
-    #text(size: size, _body(spacing, [#if label == none { mark }#body]))
-  ]
+  context {
+    let pairs = _on-tint-in(_presets(), pair.at(1))
+    let mark = _shaped("callout", tone, shape, pairs: pairs)
+    block(
+      width: 100%, fill: _cal(pair.at(1)), stroke: (left: _stroke(3pt, pair.at(0))),
+      inset: (x: 10pt, y: 8pt), _set-inks(pairs)[
+        #let spacing = par.spacing
+        #set par(spacing: _part-gap)
+        #if label != none [#text(size: sz.fine, block(sticky: true,
+          [#mark#eyebrow(label, color: pair.at(0), caps: caps)])) #v(3pt)]
+        #text(size: size, _body(spacing, [#if label == none { mark }#body]))
+      ],
+    )
+  }
 }
 
 // Bordered panel — for grids where a tint would shout. Its label is kept with the body, as a
@@ -475,7 +515,8 @@
   _fit("code", breakable, b => block(
     width: 100%, fill: _cal(paper-tint), stroke: _stroke(0.6pt, rule-mid),
     inset: (x: 7pt, y: 6pt), radius: 1.5pt, breakable: b,
-    { _in-code.update(true); _wraps(body); body; _in-code.update(false) },
+    _set-inks(_on-tint-in(_presets(), paper-tint),
+      { _in-code.update(true); _wraps(body); body; _in-code.update(false) }),
   ))
 }
 

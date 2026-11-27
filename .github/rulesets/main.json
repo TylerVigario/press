@@ -118,6 +118,9 @@
             "context": "Under press's own calibration, each tone's label clears 4.5:1 on its tint"
           },
           {
+            "context": "Text a part sets on a tint clears 4.5:1 on it, under any calibration"
+          },
+          {
             "context": "header()'s rule clears the title's descenders"
           },
           {
@@ -278,6 +281,9 @@
           },
           {
             "context": "Under press's own calibration, each tone's label clears 4.5:1 on its tint, on the oldest toolchain"
+          },
+          {
+            "context": "Text a part sets on a tint clears 4.5:1 on it, under any calibration, on the oldest toolchain"
           },
           {
             "context": "header()'s rule clears the title's descenders, on the oldest toolchain"

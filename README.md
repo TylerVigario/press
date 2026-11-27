@@ -614,7 +614,11 @@ A band no wider than 0.48in leaves the margins as they are, one narrower than pr
 audit pass ink nearer that edge, and an ink or a fill below press's lightest, or a rule thinner
 than its thinnest, leaves press's colours and lines as it draws them. press's functions take
 every preset from the calibration their template was given, and text the template sets in one of
-press's inks takes the darkened ink, a document's own `text(fill: ink-faint)` among it. For what
+press's inks takes the darkened ink, a document's own `text(fill: ink-faint)` among it. Text a
+part sets on one of press's tints, in a chip, a callout, a unit, a code block or a sheet's head
+and stripes, a document's own in it included, is darkened further where it would read under
+4.5:1 on the tint as the calibration sets it, its hue kept, so a fill that darkens the tint keeps
+it readable there; the same ink on white keeps the calibration's. For what
 a document draws itself, `calibrated(calibration)` hands back the presets set for a calibration,
 by name: `#let c = calibrated(calibration)`, then `rect(fill: c.paper-tint)`,
 `line(stroke: c.rule.rule-hair + rule-hair)` or `#set page(..c.card)`.
